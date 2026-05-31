@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.et_dashboard }} — StandardBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">{{ T.et_tools_title }}</h1>
+    <p class="text-gray-500 text-sm mt-1">{{ T.et_tools_subtitle }}</p>
+  </div>
+
+  <!-- Stats cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ T.et_docs_count }}</span>
+        <span class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </span>
+      </div>
+      <p class="text-2xl font-bold text-gray-900">{{ docs_count }}</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ T.et_audits_count }}</span>
+        <span class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
+          <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        </span>
+      </div>
+      <p class="text-2xl font-bold text-gray-900">{{ audits_count }}</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ T.et_clients_count }}</span>
+        <span class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
+          <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </span>
+      </div>
+      <p class="text-2xl font-bold text-gray-900">{{ clients_count }}</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ T.et_active_clients }}</span>
+        <span class="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
+          <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </span>
+      </div>
+      <p class="text-2xl font-bold text-gray-900">{{ active_clients }}</p>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+    <a href="{% url 'expert_doc_list' %}"
+       class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col items-center gap-2 text-center group">
+      <div class="w-10 h-10 rounded-xl bg-blue-50 group-hover:bg-blue-100 transition flex items-center justify-center">
+        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      </div>
+      <span class="text-xs font-medium text-gray-700">{{ T.et_doc_generator }}</span>
+    </a>
+
+    <a href="{% url 'audit_list' %}"
+       class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col items-center gap-2 text-center group">
+      <div class="w-10 h-10 rounded-xl bg-green-50 group-hover:bg-green-100 transition flex items-center justify-center">
+        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      </div>
+      <span class="text-xs font-medium text-gray-700">{{ T.et_audit_checklist }}</span>
+    </a>
+
+    <a href="{% url 'project_templates' %}"
+       class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col items-center gap-2 text-center group">
+      <div class="w-10 h-10 rounded-xl bg-purple-50 group-hover:bg-purple-100 transition flex items-center justify-center">
+        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+      </div>
+      <span class="text-xs font-medium text-gray-700">{{ T.et_proj_templates }}</span>
+    </a>
+
+    <a href="{% url 'crm_list' %}"
+       class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col items-center gap-2 text-center group">
+      <div class="w-10 h-10 rounded-xl bg-orange-50 group-hover:bg-orange-100 transition flex items-center justify-center">
+        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      </div>
+      <span class="text-xs font-medium text-gray-700">{{ T.et_crm }}</span>
+    </a>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- Upcoming follow-ups -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold text-gray-900">{{ T.et_upcoming_followups }}</h2>
+        <a href="{% url 'crm_list' %}" class="text-xs text-blue-600 hover:underline">{{ T.et_view }} →</a>
+      </div>
+      {% if upcoming_followups %}
+        <div class="space-y-3">
+          {% for client in upcoming_followups %}
+          <a href="{% url 'crm_detail' client.pk %}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
+            <div class="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
+              <span class="text-orange-700 font-bold text-sm">{{ client.company_name|slice:":1" }}</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-900 text-sm truncate">{{ client.company_name }}</p>
+              <p class="text-xs text-gray-500">{{ client.contact_person }}</p>
+            </div>
+            <span class="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded-lg whitespace-nowrap">
+              {{ client.next_followup|date:"d.m" }}
+            </span>
+          </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-sm text-gray-400 text-center py-6">{{ T.et_no_followups }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Recent docs -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold text-gray-900">{{ T.et_recent_docs }}</h2>
+        <a href="{% url 'expert_doc_list' %}" class="text-xs text-blue-600 hover:underline">{{ T.et_view }} →</a>
+      </div>
+      {% if recent_docs %}
+        <div class="space-y-3">
+          {% for doc in recent_docs %}
+          <a href="{% url 'expert_doc_detail' doc.pk %}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
+            <div class="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-900 text-sm truncate">{{ doc.title }}</p>
+              <p class="text-xs text-gray-500">{{ doc.created_at|date:"d.m.Y" }}</p>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-lg
+              {% if doc.status == 'approved' %}bg-green-100 text-green-700
+              {% elif doc.status == 'sent' %}bg-blue-100 text-blue-700
+              {% else %}bg-gray-100 text-gray-600{% endif %}">
+              {% if doc.status == 'approved' %}{{ T.et_doc_approved }}
+              {% elif doc.status == 'sent' %}{{ T.et_doc_sent }}
+              {% else %}{{ T.et_doc_draft }}{% endif %}
+            </span>
+          </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-sm text-gray-400 text-center py-6">{{ T.et_no_recent_docs }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

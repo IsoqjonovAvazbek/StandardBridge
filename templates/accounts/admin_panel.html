@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+{% block title %}Admin Panel — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto">
+
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Admin Panel</h1>
+        <p class="text-gray-500 mt-1">Platforma statistikasi va boshqaruv</p>
+    </div>
+
+    <!-- Asosiy statistika -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-2xl p-5 border border-gray-100">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-gray-500 text-sm">Tadbirkorlar</span>
+                <div class="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="text-3xl font-bold text-gray-900">{{ stats.entrepreneurs }}</div>
+            <div class="text-xs text-green-600 mt-1">+{{ stats.new_entrepreneurs }} bu hafta</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-gray-100">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-gray-500 text-sm">Mutaxassislar</span>
+                <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="text-3xl font-bold text-gray-900">{{ stats.experts }}</div>
+            <div class="text-xs text-blue-600 mt-1">{{ stats.verified_experts }} ta tasdiqlangan</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-gray-100">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-gray-500 text-sm">Jami tahlillar</span>
+                <div class="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="text-3xl font-bold text-gray-900">{{ stats.analyses }}</div>
+            <div class="text-xs text-purple-600 mt-1">{{ stats.completed_analyses }} ta yakunlangan</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-gray-100">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-gray-500 text-sm">Daromad (20%)</span>
+                <div class="w-9 h-9 bg-yellow-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="text-3xl font-bold text-gray-900">${{ stats.platform_revenue|floatformat:0 }}</div>
+            <div class="text-xs text-yellow-600 mt-1">${{ stats.total_volume|floatformat:0 }} jami hajm</div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+        <!-- Loyihalar holati -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+            <h2 class="font-bold text-gray-900 mb-4">Loyihalar holati</h2>
+            <div class="space-y-3">
+                {% for status_item in project_stats %}
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2.5 h-2.5 rounded-full {{ status_item.color }}"></div>
+                        <span class="text-sm text-gray-600">{{ status_item.label }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-20 bg-gray-100 rounded-full h-1.5">
+                            <div class="h-1.5 rounded-full {{ status_item.bar_color }}"
+                                style="width: {{ status_item.percent }}%"></div>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-900 w-6 text-right">{{ status_item.count }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Tasdiqlanmagan mutaxassislar -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="font-bold text-gray-900">Tasdiq kutayotganlar</h2>
+                <span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">
+                    {{ pending_experts|length }} ta
+                </span>
+            </div>
+            <div class="space-y-3">
+                {% for profile in pending_experts %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-white text-xs font-bold">{{ profile.user.first_name|first }}{{ profile.user.last_name|first }}</span>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-medium text-gray-900 text-sm truncate">{{ profile.user.get_full_name }}</p>
+                            <p class="text-gray-400 text-xs truncate">{{ profile.specializations|truncatechars:30 }}</p>
+                            {% if profile.cert_number %}
+                            <p class="text-xs text-blue-600 mt-0.5">📋 {{ profile.cert_number }} — {{ profile.issuing_body|truncatechars:20 }}</p>
+                            {% endif %}
+                            {% if profile.cert_expiry %}
+                            <p class="text-xs text-gray-400">Muddat: {{ profile.cert_expiry|date:"d.m.Y" }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <form method="post" action="{% url 'verify_expert_action' profile.pk %}" class="flex-shrink-0 ml-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="verify">
+                        <button type="submit"
+                            class="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition">
+                            Tasdiqlash
+                        </button>
+                    </form>
+                </div>
+                {% empty %}
+                <p class="text-gray-400 text-sm text-center py-4">Hammasi tasdiqlangan ✓</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- So'nggi to'lovlar -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+            <h2 class="font-bold text-gray-900 mb-4">So'nggi to'lovlar</h2>
+            <div class="space-y-3">
+                {% for payment in recent_payments %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                    <div class="min-w-0">
+                        <p class="font-medium text-gray-900 text-sm truncate">{{ payment.entrepreneur.company_name }}</p>
+                        <p class="text-gray-400 text-xs">{{ payment.created_at|date:"d.m.Y" }}</p>
+                    </div>
+                    <div class="text-right flex-shrink-0 ml-2">
+                        <p class="font-bold text-gray-900 text-sm">${{ payment.amount }}</p>
+                        <span class="text-xs {% if payment.status == 'released' %}text-green-600{% else %}text-yellow-600{% endif %}">
+                            {{ payment.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-400 text-sm text-center py-4">To'lovlar yo'q</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- So'nggi ro'yxatdan o'tganlar -->
+    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-6">
+        <div class="flex items-center justify-between p-5 border-b border-gray-100">
+            <h2 class="font-bold text-gray-900">So'nggi foydalanuvchilar</h2>
+            <a href="/admin/accounts/customuser/" class="text-sm text-blue-600 hover:underline">Barchasi →</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Ism</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Email</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Rol</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Ro'yxat sanasi</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for user in recent_users %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-5 py-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center flex-shrink-0">
+                                    <span class="text-white text-xs font-bold">{{ user.first_name|first }}{{ user.last_name|first }}</span>
+                                </div>
+                                <span class="font-medium text-gray-900">{{ user.get_full_name }}</span>
+                            </div>
+                        </td>
+                        <td class="px-5 py-3 text-gray-500">{{ user.email }}</td>
+                        <td class="px-5 py-3">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium
+                                {% if user.role == 'expert' %}bg-blue-100 text-blue-700
+                                {% else %}bg-green-100 text-green-700{% endif %}">
+                                {{ user.get_role_display }}
+                            </span>
+                        </td>
+                        <td class="px-5 py-3 text-gray-500">{{ user.created_at|date:"d.m.Y H:i" }}</td>
+                        <td class="px-5 py-3">
+                            <a href="/admin/accounts/customuser/{{ user.pk }}/change/"
+                                class="text-blue-600 hover:underline text-xs">Tahrirlash</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="px-5 py-8 text-center text-gray-400">Foydalanuvchilar yo'q</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Yechish so'rovlari va nizolar -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+        <!-- Pul yechish so'rovlari -->
+        <div class="bg-white rounded-2xl border border-orange-100 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="font-bold text-gray-900">💸 Pul yechish so'rovlari</h2>
+                <span class="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full font-medium">
+                    {{ pending_withdrawals|length }} ta
+                </span>
+            </div>
+            <div class="space-y-3">
+                {% for wr in pending_withdrawals %}
+                <div class="bg-orange-50 rounded-xl p-3">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <p class="font-semibold text-gray-900 text-sm">{{ wr.wallet.user.get_full_name }}</p>
+                            <p class="text-xs text-gray-500">Karta: *{{ wr.card_number|slice:"-4:" }} · {{ wr.card_holder }}</p>
+                            <p class="text-xs text-gray-400">{{ wr.created_at|date:"d.m.Y H:i" }}</p>
+                            {% if wr.note %}<p class="text-xs text-gray-600 mt-1">{{ wr.note }}</p>{% endif %}
+                        </div>
+                        <span class="text-lg font-bold text-orange-700">${{ wr.amount }}</span>
+                    </div>
+                    <form method="POST" action="{% url 'admin_process_withdrawal' wr.pk %}" class="flex gap-2">
+                        {% csrf_token %}
+                        <input type="text" name="admin_note" placeholder="Izoh (ixtiyoriy)"
+                            class="flex-1 px-2 py-1 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-400">
+                        <button type="submit" name="action" value="approve"
+                            class="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition">
+                            ✓ Tasdiqlash
+                        </button>
+                        <button type="submit" name="action" value="reject"
+                            class="text-xs bg-red-100 hover:bg-red-200 text-red-600 px-3 py-1.5 rounded-lg transition">
+                            ✕ Rad
+                        </button>
+                    </form>
+                </div>
+                {% empty %}
+                <p class="text-gray-400 text-sm text-center py-4">Kutayotgan so'rovlar yo'q ✓</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Ochiq nizolar -->
+        <div class="bg-white rounded-2xl border border-red-100 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="font-bold text-gray-900">⚠ Ochiq nizolar</h2>
+                <span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">
+                    {{ open_disputes|length }} ta
+                </span>
+            </div>
+            <div class="space-y-3">
+                {% for dispute in open_disputes %}
+                <div class="bg-red-50 rounded-xl p-3">
+                    <div class="mb-2">
+                        <p class="font-semibold text-gray-900 text-sm">Loyiha #{{ dispute.project_id }}</p>
+                        <p class="text-xs text-gray-500">{{ dispute.opened_by.get_full_name }} • {{ dispute.created_at|date:"d.m.Y" }}</p>
+                        <p class="text-xs text-red-700 mt-1">{{ dispute.reason|truncatechars:80 }}</p>
+                    </div>
+                    <form method="POST" action="{% url 'admin_resolve_dispute' dispute.pk %}" class="space-y-2">
+                        {% csrf_token %}
+                        <textarea name="decision" rows="2" required placeholder="Admin qarori..."
+                            class="w-full px-2 py-1 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-400 resize-none"></textarea>
+                        <div class="flex gap-2">
+                            <button type="submit" name="status" value="resolved"
+                                class="flex-1 text-xs bg-green-500 hover:bg-green-600 text-white py-1.5 rounded-lg transition">
+                                ✓ Hal qilindi
+                            </button>
+                            <button type="submit" name="status" value="closed"
+                                class="flex-1 text-xs bg-gray-400 hover:bg-gray-500 text-white py-1.5 rounded-lg transition">
+                                Yopish
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% empty %}
+                <p class="text-gray-400 text-sm text-center py-4">Ochiq nizolar yo'q ✓</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistika grafiklari -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+            <h2 class="font-bold text-gray-900 mb-4">Yangi foydalanuvchilar (6 oy)</h2>
+            <canvas id="usersChart" height="120"></canvas>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+            <h2 class="font-bold text-gray-900 mb-4">Oylik daromad (6 oy)</h2>
+            <canvas id="revenueChart" height="120"></canvas>
+        </div>
+    </div>
+
+    <!-- Tezkor havolalar -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <a href="/admin/accounts/expertprofile/?is_verified__exact=0"
+            class="bg-white border border-orange-200 rounded-2xl p-5 hover:bg-orange-50 transition text-center">
+            <div class="text-2xl font-bold text-orange-600 mb-1">{{ stats.unverified_experts }}</div>
+            <div class="text-sm text-gray-600">Tasdiqlanmagan experts</div>
+        </a>
+        <a href="/admin/experts/project/?status__exact=in_progress"
+            class="bg-white border border-blue-200 rounded-2xl p-5 hover:bg-blue-50 transition text-center">
+            <div class="text-2xl font-bold text-blue-600 mb-1">{{ stats.active_projects }}</div>
+            <div class="text-sm text-gray-600">Faol loyihalar</div>
+        </a>
+        <a href="/admin/experts/payment/?status__exact=held"
+            class="bg-white border border-yellow-200 rounded-2xl p-5 hover:bg-yellow-50 transition text-center">
+            <div class="text-2xl font-bold text-yellow-600 mb-1">${{ stats.held_amount|floatformat:0 }}</div>
+            <div class="text-sm text-gray-600">Escrow'da turgan pul</div>
+        </a>
+        <a href="/admin/"
+            class="gradient-bg rounded-2xl p-5 hover:opacity-90 transition text-center">
+            <div class="text-2xl font-bold text-white mb-1">→</div>
+            <div class="text-sm text-white">Django Admin</div>
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const labels = {{ chart_labels|safe }};
+const usersData = {{ chart_users|safe }};
+const revenueData = {{ chart_revenue|safe }};
+
+new Chart(document.getElementById('usersChart'), {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: "Foydalanuvchilar",
+            data: usersData,
+            borderColor: '#185FA5',
+            backgroundColor: 'rgba(24,95,165,0.08)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#185FA5',
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+});
+
+new Chart(document.getElementById('revenueChart'), {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: "Daromad ($)",
+            data: revenueData,
+            backgroundColor: 'rgba(55,138,221,0.7)',
+            borderRadius: 6,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+    }
+});
+</script>
+{% endblock %}

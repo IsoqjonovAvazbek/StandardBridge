@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.set_price_title }} — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <a href="{% url 'project_detail' project.pk %}" class="text-blue-600 hover:underline text-sm">← {{ T.my_projects_title }}</a>
+        <h1 class="text-3xl font-bold text-gray-900 mt-2">{{ T.set_price_title }}</h1>
+        <p class="text-gray-600 mt-1">{{ T.set_price_sub }}</p>
+    </div>
+
+    <!-- Tahlil ma'lumotlari -->
+    <div class="bg-white rounded-2xl p-6 border border-gray-100 mb-6">
+        <h2 class="font-bold text-gray-900 mb-4">{{ T.analysis_info }}</h2>
+        <div class="flex justify-between text-sm mb-2">
+            <span class="text-gray-500">{{ T.entrepreneur_lbl }}</span>
+            <span class="font-medium">{{ project.entrepreneur.get_full_name }}</span>
+        </div>
+        <div class="flex justify-between text-sm mb-2">
+            <span class="text-gray-500">{{ T.company_lbl }}</span>
+            <span class="font-medium">{{ project.entrepreneur.company_name }}</span>
+        </div>
+        <div class="flex justify-between text-sm mb-2">
+            <span class="text-gray-500">{{ T.standard_lbl }}</span>
+            <span class="font-medium">{{ project.analysis.local_standard.code }} → {{ project.analysis.target_standard.code }}</span>
+        </div>
+        <div class="flex justify-between text-sm mb-4">
+            <span class="text-gray-500">{{ T.gaps_count_lbl }}</span>
+            <span class="font-medium">{{ project.analysis.gaps.count }}</span>
+        </div>
+
+        {% if project.entrepreneur_message %}
+        <div class="bg-blue-50 rounded-xl p-4">
+            <p class="text-sm font-medium text-blue-800 mb-1">{{ T.entrepreneur_msg_lbl }}</p>
+            <p class="text-blue-700 text-sm">{{ project.entrepreneur_message }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Gaplar ro'yxati -->
+    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-6">
+        <div class="p-4 border-b border-gray-100">
+            <h2 class="font-bold text-gray-900">{{ T.found_gaps_list }}</h2>
+        </div>
+        <div class="divide-y divide-gray-100">
+            {% for gap in project.analysis.gaps.all %}
+            <div class="p-4 flex items-start justify-between">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="font-medium text-gray-900 text-sm">{{ gap.title }}</span>
+                        <span class="px-2 py-0.5 rounded-full text-xs font-medium
+                            {% if gap.priority == 'critical' %}bg-red-100 text-red-700
+                            {% elif gap.priority == 'high' %}bg-orange-100 text-orange-700
+                            {% elif gap.priority == 'medium' %}bg-yellow-100 text-yellow-700
+                            {% else %}bg-green-100 text-green-700{% endif %}">
+                            {{ gap.get_priority_display }}
+                        </span>
+                    </div>
+                    <p class="text-gray-500 text-xs">{{ gap.description|truncatechars:80 }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Narx belgilash formi -->
+    <div class="bg-white rounded-2xl p-6 border border-gray-100">
+        <h2 class="font-bold text-gray-900 mb-4">{{ T.price_and_time }}</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.price_usd }}</label>
+                    <input type="number" name="price" min="0" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                        placeholder="1500">
+                    <p class="text-gray-400 text-xs mt-1">{{ T.your_80pct }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.duration_days_lbl }}</label>
+                    <input type="number" name="days" min="1" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                        placeholder="90">
+                </div>
+            </div>
+
+            <!-- Hisob-kitob -->
+            <div class="bg-gray-50 rounded-xl p-4 mb-4" id="calculation">
+                <div class="flex justify-between text-sm mb-2">
+                    <span class="text-gray-500">{{ T.total_price_lbl }}</span>
+                    <span id="total-price" class="font-bold text-gray-900">$0</span>
+                </div>
+                <div class="flex justify-between text-sm mb-2">
+                    <span class="text-gray-500">{{ T.platform_20_lbl }}</span>
+                    <span id="platform-fee" class="text-gray-600">$0</span>
+                </div>
+                <div class="flex justify-between text-sm border-t border-gray-200 pt-2 mt-2">
+                    <span class="text-gray-700 font-medium">{{ T.your_80_lbl }}</span>
+                    <span id="your-amount" class="font-bold text-green-600">$0</span>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.msg_to_entrepreneur }}</label>
+                <textarea name="message" rows="3"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                    placeholder="..."></textarea>
+            </div>
+
+            <button type="submit"
+                class="w-full gradient-bg text-white py-4 rounded-xl font-bold text-lg hover:opacity-90 transition">
+                {{ T.send_price_btn }}
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.querySelector('input[name="price"]').addEventListener('input', function() {
+    var price = parseFloat(this.value) || 0;
+    var platform = price * 0.20;
+    var yours = price * 0.80;
+    document.getElementById('total-price').textContent = '$' + price.toFixed(0);
+    document.getElementById('platform-fee').textContent = '$' + platform.toFixed(0);
+    document.getElementById('your-amount').textContent = '$' + yours.toFixed(0);
+});
+</script>
+{% endblock %}

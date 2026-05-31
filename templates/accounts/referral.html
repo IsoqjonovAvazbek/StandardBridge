@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.referral_page_title }} — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-3xl mx-auto">
+
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">{{ T.referral_page_title }}</h1>
+        <p class="text-gray-500 mt-1">{{ T.referral_sub }}</p>
+    </div>
+
+    <!-- Referral card -->
+    <div class="gradient-bg rounded-2xl p-6 mb-6 text-white">
+        <p class="text-blue-100 text-sm mb-1">{{ T.your_ref_code }}</p>
+        <div class="flex items-center gap-3 mb-4">
+            <span class="text-4xl font-bold tracking-widest">{{ referral_code }}</span>
+            <button onclick="copyCode('{{ referral_code }}')"
+                class="bg-white/20 hover:bg-white/30 text-white text-sm px-3 py-1.5 rounded-lg transition">
+                📋 {{ T.copy_btn }}
+            </button>
+        </div>
+        <p class="text-blue-100 text-sm mb-2">{{ T.your_ref_link }}:</p>
+        <div class="flex items-center gap-2 bg-white/10 rounded-xl px-4 py-2.5">
+            <span class="text-sm text-white/90 truncate flex-1" id="referral-link">{{ referral_link }}</span>
+            <button onclick="copyLink('{{ referral_link }}')"
+                class="text-white text-sm bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg transition flex-shrink-0">
+                {{ T.copy_btn }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistika -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center">
+            <div class="text-3xl font-bold text-blue-600 mb-1">{{ total_referrals }}</div>
+            <div class="text-sm text-gray-500">{{ T.referrals_list }}</div>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center">
+            <div class="text-3xl font-bold text-green-600 mb-1">{{ referrals|length }}</div>
+            <div class="text-sm text-gray-500">{{ T.status_completed }}</div>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center">
+            <div class="text-3xl font-bold text-yellow-600 mb-1">🎁</div>
+            <div class="text-sm text-gray-500">Bonus</div>
+        </div>
+    </div>
+
+    <!-- Taklif qilinganlar ro'yxati -->
+    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div class="p-5 border-b border-gray-100">
+            <h2 class="font-bold text-gray-900">{{ T.referrals_list }}</h2>
+        </div>
+        {% if referrals %}
+        <div class="divide-y divide-gray-100">
+            {% for ref_user in referrals %}
+            <div class="flex items-center gap-3 p-4">
+                <div class="w-9 h-9 gradient-bg rounded-full flex items-center justify-center flex-shrink-0">
+                    <span class="text-white text-sm font-bold">{{ ref_user.first_name|first }}{{ ref_user.last_name|first }}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-medium text-gray-900 text-sm">{{ ref_user.get_full_name }}</p>
+                    <p class="text-gray-400 text-xs">
+                        {% if ref_user.role == 'expert' %}{{ T.login_expert }}{% else %}{{ T.login_entrepreneur }}{% endif %}
+                        · {{ ref_user.created_at|date:"d.m.Y" }}
+                    </p>
+                </div>
+                <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{{ T.done_badge }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-10 text-center text-gray-400">
+            <div class="text-4xl mb-3">👥</div>
+            <p class="text-sm">{{ T.no_referrals }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function copyCode(code) {
+    navigator.clipboard.writeText(code).then(() => {
+        alert('{{ T.copied_msg }} ' + code);
+    });
+}
+function copyLink(link) {
+    navigator.clipboard.writeText(link).then(() => {
+        alert('{{ T.copied_msg }}');
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.et_doc_generator }} — StandardBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">{{ T.et_doc_generator }}</h1>
+      <p class="text-sm text-gray-500 mt-1">{{ T.et_doc_sub }}</p>
+    </div>
+    <button onclick="document.getElementById('genModal').classList.remove('hidden')"
+            class="gradient-bg text-white px-5 py-2.5 rounded-xl font-medium text-sm shadow-sm hover:opacity-90 transition">
+      + {{ T.et_new_doc }}
+    </button>
+  </div>
+
+  <!-- Documents list -->
+  {% if documents %}
+  <div class="grid gap-4">
+    {% for doc in documents %}
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-xs font-medium px-2 py-0.5 rounded-lg
+            {% if doc.status == 'approved' %}bg-green-100 text-green-700
+            {% elif doc.status == 'sent' %}bg-blue-100 text-blue-700
+            {% else %}bg-gray-100 text-gray-600{% endif %}">
+            {% if doc.status == 'approved' %}{{ T.et_doc_approved }}
+            {% elif doc.status == 'sent' %}{{ T.et_doc_sent }}
+            {% else %}{{ T.et_doc_draft }}{% endif %}
+          </span>
+          {% if doc.template %}
+          <span class="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-lg">{{ doc.template.get_standard_display }}</span>
+          {% endif %}
+        </div>
+        <h3 class="font-semibold text-gray-900 truncate">{{ doc.title }}</h3>
+        <p class="text-xs text-gray-400 mt-1">{{ T.et_created_at }}: {{ doc.created_at|date:"d.m.Y H:i" }}
+          {% if doc.project %} · {{ doc.project.entrepreneur.company_name }}{% endif %}</p>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <a href="{% url 'expert_doc_detail' doc.pk %}"
+           class="text-sm px-4 py-2 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium transition">
+           {{ T.et_view }}
+        </a>
+        <a href="{% url 'edit_document' doc.pk %}"
+           class="text-sm px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium transition">
+           {{ T.et_edit_doc }}
+        </a>
+        <form method="post" action="{% url 'delete_expert_doc' doc.pk %}"
+              onsubmit="return confirm('Hujjatni o\'chirish?')">
+          {% csrf_token %}
+          <button type="submit"
+                  class="text-sm px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 font-medium transition">
+            {{ T.et_delete_doc }}
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-16 bg-white rounded-2xl border border-gray-100">
+    <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    <p class="text-gray-400 text-sm">{{ T.et_no_docs }}</p>
+    <button onclick="document.getElementById('genModal').classList.remove('hidden')"
+            class="mt-4 gradient-bg text-white px-5 py-2 rounded-xl text-sm font-medium">
+      + {{ T.et_new_doc }}
+    </button>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Generate Document Modal -->
+<div id="genModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
+    <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="font-bold text-gray-900">{{ T.et_new_doc }}</h3>
+      <button onclick="document.getElementById('genModal').classList.add('hidden')"
+              class="text-gray-400 hover:text-gray-600 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <form method="post" action="{% url 'generate_document' %}" id="genForm">
+      {% csrf_token %}
+      <div class="p-6 space-y-4">
+        <!-- Template -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ T.et_template_lbl }}</label>
+          <select name="template_id" required
+                  class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">{{ T.et_select_template }}</option>
+            {% for tpl in templates %}
+            <optgroup label="{{ tpl.get_standard_display }}">
+              <option value="{{ tpl.pk }}">{{ tpl.title }}</option>
+            </optgroup>
+            {% endfor %}
+          </select>
+        </div>
+        <!-- Project (optional) -->
+        {% if projects %}
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ T.et_project_lbl }}</label>
+          <select name="project_id"
+                  class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">{{ T.et_select_project }}</option>
+            {% for prj in projects %}
+            <option value="{{ prj.pk }}">{{ prj.entrepreneur.company_name }} — {{ prj.standard }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+        <!-- Company name -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ T.et_company_lbl }}</label>
+          <input type="text" name="company_name" placeholder="Kompaniya nomi..."
+                 class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <!-- Industry -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ T.et_industry_lbl }}</label>
+          <input type="text" name="industry" placeholder="Soha..."
+                 class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <!-- Language -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ T.doc_language_lbl }}</label>
+          <select name="language"
+                  class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="uz">{{ T.doc_lang_uz }}</option>
+            <option value="ru">{{ T.doc_lang_ru }}</option>
+            <option value="en">{{ T.doc_lang_en }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="px-6 pb-6 flex gap-3">
+        <button type="button" onclick="document.getElementById('genModal').classList.add('hidden')"
+                class="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+          {{ T.cancel }}
+        </button>
+        <button type="submit" id="genBtn"
+                class="flex-1 gradient-bg text-white py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition">
+          {{ T.et_generate_btn }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.getElementById('genForm').addEventListener('submit', function() {
+  var btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  btn.textContent = '{{ T.et_ai_generating }}';
+});
+</script>
+{% endblock %}

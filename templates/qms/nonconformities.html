@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.qms_nc_title }} — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Header -->
+    <div class="flex items-start justify-between flex-wrap gap-3 mb-6">
+        <div>
+            <a href="{% url 'qms_dashboard' %}" class="text-blue-600 hover:underline text-sm">← {{ T.qms_tool }}</a>
+            <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ T.qms_nc_title }}</h1>
+            <p class="text-gray-500 text-sm">{{ T.qms_nc_sub }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'export_nc_csv' %}"
+                class="bg-white border border-gray-200 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-semibold hover:border-green-400 hover:text-green-700 transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+                {{ T.qms_export_excel }}
+            </a>
+            <button onclick="document.getElementById('add-nc-modal').classList.remove('hidden')"
+                class="gradient-bg text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                {{ T.qms_add_nc }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Status filter -->
+    <div class="flex flex-wrap gap-2 mb-6">
+        <a href="{% url 'nonconformities' %}"
+           class="px-4 py-1.5 rounded-xl text-sm font-medium border transition
+           {% if not status_filter %}gradient-bg text-white border-transparent{% else %}bg-white text-gray-600 border-gray-200 hover:border-blue-300{% endif %}">
+            {{ T.qms_filter_all_status }}
+        </a>
+        <a href="?status=open"
+           class="px-4 py-1.5 rounded-xl text-sm font-medium border transition
+           {% if status_filter == 'open' %}bg-red-500 text-white border-red-500{% else %}bg-white text-gray-600 border-gray-200 hover:border-red-300{% endif %}">
+            {{ T.qms_nc_status_open }}
+        </a>
+        <a href="?status=in_progress"
+           class="px-4 py-1.5 rounded-xl text-sm font-medium border transition
+           {% if status_filter == 'in_progress' %}bg-orange-500 text-white border-orange-500{% else %}bg-white text-gray-600 border-gray-200 hover:border-orange-300{% endif %}">
+            {{ T.qms_nc_status_inprogress }}
+        </a>
+        <a href="?status=closed"
+           class="px-4 py-1.5 rounded-xl text-sm font-medium border transition
+           {% if status_filter == 'closed' %}bg-green-600 text-white border-green-600{% else %}bg-white text-gray-600 border-gray-200 hover:border-green-300{% endif %}">
+            {{ T.qms_nc_status_closed }}
+        </a>
+    </div>
+
+    <!-- NC list -->
+    {% if nonconformities %}
+    <div class="space-y-4">
+        {% for nc in nonconformities %}
+        <div class="bg-white rounded-2xl border overflow-hidden
+            {% if nc.severity == 'critical' %}border-red-200
+            {% elif nc.severity == 'major' %}border-orange-200
+            {% else %}border-gray-100{% endif %}">
+
+            <!-- NC header -->
+            <div class="p-5 flex items-start gap-4 flex-wrap">
+                <!-- Severity badge -->
+                <div class="shrink-0 mt-0.5">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold
+                        {% if nc.severity == 'critical' %}bg-red-100 text-red-700
+                        {% elif nc.severity == 'major' %}bg-orange-100 text-orange-700
+                        {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                        {% if nc.severity == 'critical' %}🚨{% elif nc.severity == 'major' %}⚠️{% else %}•{% endif %}
+                        {{ nc.get_severity_display }}
+                    </span>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <span class="text-xs font-mono bg-gray-100 text-gray-500 px-2 py-0.5 rounded">
+                            {% if nc.code %}{{ nc.code }}{% else %}NC-{{ nc.created_at.year }}-{{ nc.pk|stringformat:"03d" }}{% endif %}
+                        </span>
+                        {% if nc.is_overdue %}
+                        <span class="text-xs font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded animate-pulse">
+                            ⏰ {{ T.qms_overdue }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <h3 class="font-bold text-gray-900">{{ nc.title }}</h3>
+                    <p class="text-gray-600 text-sm mt-1">{{ nc.description }}</p>
+                    <div class="flex flex-wrap gap-4 mt-2 text-xs text-gray-400">
+                        <span>{{ T.qms_nc_created }}: {{ nc.created_at|date:"d.m.Y" }}</span>
+                        {% if nc.assigned_to %}<span>→ {{ nc.assigned_to }}</span>{% endif %}
+                        {% if nc.due_date %}<span>{{ T.qms_nc_due }}: {{ nc.due_date|date:"d.m.Y" }}</span>{% endif %}
+                        {% if nc.closed_at %}<span>{{ T.qms_nc_closed }}: {{ nc.closed_at|date:"d.m.Y" }}</span>{% endif %}
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold
+                        {% if nc.status == 'open' %}bg-red-100 text-red-700
+                        {% elif nc.status == 'in_progress' %}bg-orange-100 text-orange-700
+                        {% else %}bg-green-100 text-green-700{% endif %}">
+                        {{ nc.get_status_display }}
+                    </span>
+                    <button onclick="aiSuggest({{ nc.pk }})" id="ai-btn-{{ nc.pk }}"
+                        class="px-3 py-1 rounded-lg text-xs font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 transition flex items-center gap-1">
+                        ✨ {{ T.qms_ai_suggest }}
+                    </button>
+                    <button onclick="document.getElementById('update-nc-{{ nc.pk }}').classList.toggle('hidden')"
+                        class="px-3 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
+                        {{ T.qms_nc_update_btn }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI suggestion display -->
+            <div id="ai-box-{{ nc.pk }}" class="px-5 pb-4 {% if not nc.ai_suggestion %}hidden{% endif %}">
+                <div class="bg-purple-50 border border-purple-100 rounded-xl p-4">
+                    <p class="text-xs font-semibold text-purple-700 mb-1 flex items-center gap-1">✨ {{ T.qms_ai_suggest_title }}</p>
+                    <div id="ai-content-{{ nc.pk }}" class="text-sm text-gray-700 whitespace-pre-wrap">{{ nc.ai_suggestion }}</div>
+                </div>
+            </div>
+
+            <!-- Existing root cause / corrective action -->
+            {% if nc.root_cause or nc.corrective_action %}
+            <div class="px-5 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                {% if nc.root_cause %}
+                <div class="bg-gray-50 rounded-xl p-3">
+                    <p class="text-xs font-semibold text-gray-500 mb-1">{{ T.qms_nc_root_cause }}</p>
+                    <p class="text-gray-700">{{ nc.root_cause }}</p>
+                </div>
+                {% endif %}
+                {% if nc.corrective_action %}
+                <div class="bg-green-50 rounded-xl p-3">
+                    <p class="text-xs font-semibold text-gray-500 mb-1">{{ T.qms_nc_action }}</p>
+                    <p class="text-gray-700">{{ nc.corrective_action }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Inline update form (collapsed by default) -->
+            <div id="update-nc-{{ nc.pk }}" class="hidden border-t border-gray-100 px-5 py-4 bg-gray-50">
+                <form method="POST" action="{% url 'update_nonconformity' nc.pk %}">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">{{ T.status_lbl }}</label>
+                            <select name="status"
+                                class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-400">
+                                <option value="open" {% if nc.status == 'open' %}selected{% endif %}>{{ T.qms_nc_status_open }}</option>
+                                <option value="in_progress" {% if nc.status == 'in_progress' %}selected{% endif %}>{{ T.qms_nc_status_inprogress }}</option>
+                                <option value="closed" {% if nc.status == 'closed' %}selected{% endif %}>{{ T.qms_nc_status_closed }}</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">{{ T.qms_nc_root_cause }}</label>
+                            <input type="text" name="root_cause" value="{{ nc.root_cause }}"
+                                class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-400">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">{{ T.qms_nc_action }}</label>
+                        <textarea name="corrective_action" rows="2"
+                            class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-400 resize-none">{{ nc.corrective_action }}</textarea>
+                    </div>
+                    <button type="submit"
+                        class="gradient-bg text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:opacity-90 transition">
+                        {{ T.save }}
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-2xl border border-gray-100 p-16 text-center text-gray-400">
+        <svg class="w-12 h-12 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p>{{ T.qms_no_nc }}</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add NC modal -->
+<div id="add-nc-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(15,23,42,0.6);backdrop-filter:blur(4px)">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div class="gradient-bg px-6 py-4 rounded-t-2xl flex items-center justify-between sticky top-0">
+            <h2 class="text-white font-bold">{{ T.qms_add_nc }}</h2>
+            <button onclick="document.getElementById('add-nc-modal').classList.add('hidden')" class="text-white/70 hover:text-white text-xl leading-none">✕</button>
+        </div>
+        <form method="POST" action="{% url 'add_nonconformity' %}" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_nc_name_lbl }}</label>
+                <input type="text" name="title" required
+                    class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_nc_desc_lbl }}</label>
+                <textarea name="description" rows="3" required
+                    class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_nc_severity_lbl }}</label>
+                    <select name="severity"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                        <option value="minor">{{ T.qms_nc_severity_minor }}</option>
+                        <option value="major">{{ T.qms_nc_severity_major }}</option>
+                        <option value="critical">{{ T.qms_nc_severity_critical }}</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_nc_due_lbl }}</label>
+                    <input type="date" name="due_date"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_nc_assigned_lbl }}</label>
+                <input type="text" name="assigned_to" placeholder="{{ T.qms_nc_assigned_lbl }}..."
+                    class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+            <button type="submit"
+                class="w-full gradient-bg text-white py-2.5 rounded-xl font-semibold hover:opacity-90 transition">
+                {{ T.save }}
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function getCookie(name) {
+  const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  return v ? v.pop() : '';
+}
+function aiSuggest(pk) {
+  const btn = document.getElementById('ai-btn-' + pk);
+  const box = document.getElementById('ai-box-' + pk);
+  const content = document.getElementById('ai-content-' + pk);
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ {{ T.qms_ai_loading }}';
+  box.classList.remove('hidden');
+  content.textContent = '{{ T.qms_ai_loading }}';
+  fetch('/qms/nonconformities/' + pk + '/ai-suggest/', {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCookie('csrftoken')}
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.success) { content.textContent = d.suggestion; }
+    else { content.textContent = '{{ T.qms_ai_error }}: ' + (d.error || ''); }
+  })
+  .catch(e => { content.textContent = '{{ T.qms_ai_error }}'; })
+  .finally(() => { btn.disabled = false; btn.innerHTML = original; });
+}
+</script>
+{% endblock %}

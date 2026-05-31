@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.analysis_result }} — {{ analysis.target_standard.code }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8 print:py-0">
+
+    <!-- Toolbar (hidden in print) -->
+    <div class="flex justify-between items-center mb-6 print:hidden">
+        <a href="{% url 'analysis_detail' analysis.pk %}" class="text-blue-600 hover:underline text-sm">← {{ T.back_to_dashboard }}</a>
+        <button onclick="window.print()" class="gradient-bg text-white px-5 py-2 rounded-xl text-sm font-medium">
+            🖨 {{ T.analysis_export_pdf }}
+        </button>
+    </div>
+
+    <!-- Report header -->
+    <div class="border-b-2 border-gray-800 pb-4 mb-6">
+        <div class="flex items-start justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">{{ T.analysis_result }}</h1>
+                <p class="text-gray-600 mt-1">{{ analysis.local_standard.code }} → {{ analysis.target_standard.code }}</p>
+            </div>
+            <div class="text-right text-sm text-gray-500">
+                <p class="font-semibold text-gray-800">{{ company.company_name|default:company.username }}</p>
+                <p>{{ analysis.industry.name }}</p>
+                <p>{{ today|date:"d.m.Y" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key metrics -->
+    <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+        {% if readiness is not None %}
+        <div class="border border-gray-200 rounded-xl p-4">
+            <p class="text-3xl font-bold {% if readiness >= 70 %}text-green-600{% elif readiness >= 40 %}text-yellow-600{% else %}text-red-600{% endif %}">{{ readiness }}%</p>
+            <p class="text-xs text-gray-500 mt-1">{{ T.readiness_label }}</p>
+        </div>
+        {% endif %}
+        <div class="border border-gray-200 rounded-xl p-4">
+            <p class="text-3xl font-bold text-gray-900">{{ gaps|length }}</p>
+            <p class="text-xs text-gray-500 mt-1">{{ T.gaps_found }}</p>
+        </div>
+        {% if roadmap %}
+        <div class="border border-gray-200 rounded-xl p-4">
+            <p class="text-3xl font-bold text-gray-900">{{ roadmap.total_days }}</p>
+            <p class="text-xs text-gray-500 mt-1">{{ T.days }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if summary %}
+    <div class="mb-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-2">{{ T.summary_label }}</h2>
+        <p class="text-sm text-gray-700 leading-relaxed">{{ summary }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Gaps -->
+    <div class="mb-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-3">{{ T.identified_gaps }}</h2>
+        <table class="w-full text-sm border-collapse">
+            <thead>
+                <tr class="bg-gray-100 text-left">
+                    <th class="border border-gray-200 px-3 py-2">#</th>
+                    <th class="border border-gray-200 px-3 py-2">{{ T.gap_title_col }}</th>
+                    <th class="border border-gray-200 px-3 py-2">{{ T.priority_col }}</th>
+                    <th class="border border-gray-200 px-3 py-2">{{ T.days }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gap in gaps %}
+                <tr>
+                    <td class="border border-gray-200 px-3 py-2">{{ forloop.counter }}</td>
+                    <td class="border border-gray-200 px-3 py-2">
+                        <p class="font-semibold">{{ gap.title }}</p>
+                        <p class="text-gray-500 text-xs mt-1">{{ gap.description }}</p>
+                    </td>
+                    <td class="border border-gray-200 px-3 py-2">{{ gap.get_priority_display }}</td>
+                    <td class="border border-gray-200 px-3 py-2">{{ gap.estimated_days }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="border border-gray-200 px-3 py-4 text-center text-gray-400">—</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Roadmap -->
+    {% if steps %}
+    <div class="mb-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-3">{{ T.roadmap_title }}</h2>
+        <ol class="space-y-2">
+            {% for step in steps %}
+            <li class="border border-gray-200 rounded-lg p-3">
+                <p class="font-semibold text-sm">{{ step.order }}. {{ step.title }} <span class="text-gray-400 font-normal">({{ step.duration_days }} {{ T.days }})</span></p>
+                <p class="text-gray-600 text-xs mt-1">{{ step.description }}</p>
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+    {% endif %}
+
+    <!-- Cost -->
+    {% if cost_breakdown.consulting or cost_breakdown.certification_body %}
+    <div class="mb-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-2">{{ T.cost_label }}</h2>
+        <ul class="text-sm text-gray-700 space-y-1">
+            {% if cost_breakdown.consulting %}<li>💼 {{ T.cost_consulting }}: <b>${{ cost_breakdown.consulting }}</b></li>{% endif %}
+            {% if cost_breakdown.certification_body %}<li>🏛️ {{ T.cost_cert_body }}: <b>${{ cost_breakdown.certification_body }}</b></li>{% endif %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="border-t border-gray-200 pt-4 mt-8 text-xs text-gray-400">
+        <p>{{ T.disclaimer_note }}</p>
+        <p class="mt-1">StandardBridge — {{ today|date:"Y" }}</p>
+    </div>
+</div>
+
+<script>window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 400); });</script>
+{% endblock %}

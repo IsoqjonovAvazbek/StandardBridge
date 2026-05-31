@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.my_projects_title }} — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="p-8">
+    <div class="max-w-4xl mx-auto">
+
+        <!-- Kelishilayotgan -->
+        {% if status_filter == 'negotiating' %}
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">🤝 {{ T.negotiating_title }}</h1>
+        {% if negotiating %}
+        <div class="space-y-6">
+            {% for project in negotiating %}
+            <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                <div class="p-6 border-b border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="font-bold text-gray-900 text-lg">
+                                {{ project.analysis.local_standard.code }} → {{ project.analysis.target_standard.code }}
+                            </h2>
+                            <p class="text-gray-500 text-sm mt-1">
+                                {{ T.expert_lbl }} <span class="font-medium text-gray-700">{{ project.expert.get_full_name }}</span>
+                                • {{ project.created_at|date:"d.m.Y" }}
+                            </p>
+                        </div>
+                        <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-medium">
+                            {{ T.price_negotiating }}
+                        </span>
+                    </div>
+                </div>
+                <div class="p-6 bg-yellow-50">
+                    <h3 class="font-bold text-gray-900 mb-4">{{ T.expert_offer }}</h3>
+                    <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div class="bg-white rounded-xl p-4 text-center">
+                            <p class="text-2xl font-bold text-gray-900">${{ project.expert_price }}</p>
+                            <p class="text-gray-500 text-xs mt-1">{{ T.total_price }}</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 text-center">
+                            <p class="text-2xl font-bold text-gray-900">{{ project.expert_days }}</p>
+                            <p class="text-gray-500 text-xs mt-1">{{ T.days_word }}</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 text-center">
+                            <p class="text-2xl font-bold text-green-600">${{ project.expert_payment }}</p>
+                            <p class="text-gray-500 text-xs mt-1">{{ T.expert_gets_lbl }}</p>
+                        </div>
+                    </div>
+                    {% if project.expert_message %}
+                    <div class="bg-white rounded-xl p-4">
+                        <p class="text-xs text-gray-500 mb-1">{{ T.expert_lbl }}</p>
+                        <p class="text-gray-700 italic">"{{ project.expert_message }}"</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="p-6 border-t border-gray-100">
+                    <h3 class="font-bold text-gray-900 mb-3">{{ T.found_gaps_list }} ({{ project.analysis.gaps.count }})</h3>
+                    <div class="space-y-2">
+                        {% for gap in project.analysis.gaps.all %}
+                        <div class="flex items-center justify-between py-2 border-b border-gray-50">
+                            <span class="text-gray-700 text-sm">{{ gap.title }}</span>
+                            <span class="px-2 py-0.5 rounded-full text-xs font-medium
+                                {% if gap.priority == 'critical' %}bg-red-100 text-red-700
+                                {% elif gap.priority == 'high' %}bg-orange-100 text-orange-700
+                                {% elif gap.priority == 'medium' %}bg-yellow-100 text-yellow-700
+                                {% else %}bg-green-100 text-green-700{% endif %}">
+                                {{ gap.get_priority_display }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="p-6 border-t border-gray-100 flex gap-3">
+                    <form method="POST" action="{% url 'project_accept' project.pk %}" class="flex-1">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="w-full bg-green-500 text-white py-3 rounded-xl font-bold hover:bg-green-600 transition text-lg">
+                            ✓ {{ T.accept_btn }} — ${{ project.expert_price }}
+                        </button>
+                    </form>
+                    <a href="{% url 'project_detail' project.pk %}"
+                        class="border-2 border-gray-300 text-gray-600 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition">
+                        {{ T.details_btn }}
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-2xl p-12 border border-gray-100 text-center">
+            <p class="text-gray-400 text-lg">{{ T.no_negotiating }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Jarayondagi -->
+        {% elif status_filter == 'active' %}
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">⚡ {{ T.active_title }}</h1>
+        {% if active %}
+        <div class="space-y-6">
+            {% for project in active %}
+            <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                <div class="p-6 border-b border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="font-bold text-gray-900 text-lg">
+                                {{ project.analysis.local_standard.code }} → {{ project.analysis.target_standard.code }}
+                            </h2>
+                            <p class="text-gray-500 text-sm mt-1">
+                                {{ T.expert_lbl }} <span class="font-medium">{{ project.expert.get_full_name }}</span>
+                                • {{ project.started_at|date:"d.m.Y"|default:"—" }}
+                            </p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-sm font-medium
+                            {% if project.status == 'review' %}bg-purple-100 text-purple-700
+                            {% else %}bg-orange-100 text-orange-700{% endif %}">
+                            {{ project.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="p-6 border-b border-gray-100">
+                    <h3 class="font-bold text-gray-900 mb-4">{{ T.project_status_title }}</h3>
+                    <div class="flex items-center w-full">
+                        <div class="flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">{{ T.step_started }}</p>
+                        </div>
+                        <div class="flex-1 h-1 {% if project.status in 'in_progress,review,completed' %}bg-green-500{% else %}bg-gray-200{% endif %} mx-2"></div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center
+                                {% if project.status in 'in_progress,review,completed' %}bg-green-500{% else %}bg-gray-200{% endif %}">
+                                {% if project.status in 'in_progress,review,completed' %}
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                {% else %}
+                                <span class="text-gray-400 text-xs font-bold">2</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">{{ T.step_in_progress }}</p>
+                        </div>
+                        <div class="flex-1 h-1 {% if project.status in 'review,completed' %}bg-green-500{% else %}bg-gray-200{% endif %} mx-2"></div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center
+                                {% if project.status in 'review,completed' %}bg-green-500{% else %}bg-gray-200{% endif %}">
+                                {% if project.status in 'review,completed' %}
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                {% else %}
+                                <span class="text-gray-400 text-xs font-bold">3</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">{{ T.step_review }}</p>
+                        </div>
+                        <div class="flex-1 h-1 {% if project.status == 'completed' %}bg-green-500{% else %}bg-gray-200{% endif %} mx-2"></div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center
+                                {% if project.status == 'completed' %}bg-green-500{% else %}bg-gray-200{% endif %}">
+                                {% if project.status == 'completed' %}
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                {% else %}
+                                <span class="text-gray-400 text-xs font-bold">4</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">{{ T.step_ended }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Yangiliklar -->
+                <div class="p-6 border-b border-gray-100">
+                    <h3 class="font-bold text-gray-900 mb-3">{{ T.last_updates }}</h3>
+                    <div class="space-y-3">
+                        {% for update in project.updates.all|slice:":3" %}
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center
+                                {% if update.update_type == 'progress' %}bg-green-100{% else %}bg-gray-100{% endif %}">
+                                {% if update.update_type == 'progress' %}
+                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"/></svg>
+                                {% else %}
+                                <span class="text-gray-500 text-xs font-bold">{{ update.author.first_name|first }}</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <p class="text-gray-700 text-sm">{{ update.message }}</p>
+                                <p class="text-gray-400 text-xs mt-0.5">{{ update.author.get_full_name }} • {{ update.created_at|date:"d.m H:i" }}</p>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-gray-400 text-sm">{{ T.no_updates }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="p-6 flex gap-3">
+                    <a href="{% url 'project_detail' project.pk %}"
+                        class="flex-1 gradient-bg text-white py-3 rounded-xl font-semibold text-center hover:opacity-90 transition">
+                        {{ T.track_project }}
+                    </a>
+                    {% if project.status == 'review' %}
+                    <form method="POST" action="{% url 'payment_release' project.pk %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                            onclick="return confirm('{{ T.accept_btn }}?')"
+                            class="bg-green-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-600 transition">
+                            ✓ {{ T.accept_btn }}
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-2xl p-12 border border-gray-100 text-center">
+            <p class="text-gray-400 text-lg">{{ T.no_active }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Tugallangan -->
+        {% elif status_filter == 'completed' %}
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">✅ {{ T.completed_title }}</h1>
+        {% if completed %}
+        <div class="space-y-4">
+            {% for project in completed %}
+            <div class="bg-white rounded-2xl p-6 border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="font-bold text-gray-900">
+                            {{ project.analysis.local_standard.code }} → {{ project.analysis.target_standard.code }}
+                        </h2>
+                        <p class="text-gray-500 text-sm mt-1">
+                            {{ T.expert_lbl }} {{ project.expert.get_full_name }}
+                            • {{ project.completed_at|date:"d.m.Y"|default:"—" }}
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">{{ T.done_badge }}</span>
+                        <a href="{% url 'project_detail' project.pk %}"
+                            class="border border-gray-300 text-gray-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+                            {{ T.details_btn }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-2xl p-12 border border-gray-100 text-center">
+            <p class="text-gray-400 text-lg">{{ T.no_completed }}</p>
+        </div>
+        {% endif %}
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

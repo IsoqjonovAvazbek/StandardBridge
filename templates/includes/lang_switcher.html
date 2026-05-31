@@ -1,0 +1,20 @@
+{% comment %}Universal til switcher — hamma sahifada ishlatiladi{% endcomment %}
+<form method="post" action="{% url 'set_language' %}" class="flex items-center gap-1">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <button type="submit" name="lang" value="uz"
+        class="text-xs px-2.5 py-1 rounded-md font-medium transition
+        {% if current_lang == 'uz' %}gradient-bg text-white{% else %}text-gray-500 hover:bg-gray-100{% endif %}">
+        UZ
+    </button>
+    <button type="submit" name="lang" value="ru"
+        class="text-xs px-2.5 py-1 rounded-md font-medium transition
+        {% if current_lang == 'ru' %}gradient-bg text-white{% else %}text-gray-500 hover:bg-gray-100{% endif %}">
+        RU
+    </button>
+    <button type="submit" name="lang" value="en"
+        class="text-xs px-2.5 py-1 rounded-md font-medium transition
+        {% if current_lang == 'en' %}gradient-bg text-white{% else %}text-gray-500 hover:bg-gray-100{% endif %}">
+        EN
+    </button>
+</form>

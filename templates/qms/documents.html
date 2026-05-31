@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.qms_docs_title }} — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Header -->
+    <div class="flex items-start justify-between flex-wrap gap-3 mb-6">
+        <div>
+            <a href="{% url 'qms_dashboard' %}" class="text-blue-600 hover:underline text-sm">← {{ T.qms_tool }}</a>
+            <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ T.qms_docs_title }}</h1>
+            <p class="text-gray-500 text-sm">{{ T.qms_docs_sub }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="document.getElementById('ai-doc-modal').classList.remove('hidden')"
+                class="bg-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-purple-700 transition flex items-center gap-2">
+                ✨ {{ T.qms_ai_generate_doc }}
+            </button>
+            <button onclick="document.getElementById('upload-modal').classList.remove('hidden')"
+                class="gradient-bg text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+                {{ T.qms_upload_doc }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Type filter tabs -->
+    <div class="flex flex-wrap gap-2 mb-6">
+        <a href="{% url 'qms_documents' %}"
+           class="px-4 py-1.5 rounded-xl text-sm font-medium border transition
+           {% if not current_type %}gradient-bg text-white border-transparent{% else %}bg-white text-gray-600 border-gray-200 hover:border-blue-300{% endif %}">
+            {{ T.qms_filter_all }}
+        </a>
+        {% for val, label in doc_types %}
+        <a href="?type={{ val }}"
+           class="px-4 py-1.5 rounded-xl text-sm font-medium border transition
+           {% if current_type == val %}gradient-bg text-white border-transparent{% else %}bg-white text-gray-600 border-gray-200 hover:border-blue-300{% endif %}">
+            {{ label }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Document list -->
+    {% if documents %}
+    <div class="space-y-3">
+        {% for doc in documents %}
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4">
+            <!-- Icon -->
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0
+                {% if doc.doc_type == 'policy' %}bg-blue-100
+                {% elif doc.doc_type == 'procedure' %}bg-green-100
+                {% elif doc.doc_type == 'instruction' %}bg-yellow-100
+                {% elif doc.doc_type == 'record' %}bg-purple-100
+                {% else %}bg-red-100{% endif %}">
+                <svg class="w-6 h-6
+                    {% if doc.doc_type == 'policy' %}text-blue-600
+                    {% elif doc.doc_type == 'procedure' %}text-green-600
+                    {% elif doc.doc_type == 'instruction' %}text-yellow-600
+                    {% elif doc.doc_type == 'record' %}text-purple-600
+                    {% else %}text-red-600{% endif %}"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <p class="font-semibold text-gray-900">{{ doc.title }}</p>
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                        {{ T.qms_version_lbl }}{{ doc.version }}
+                    </span>
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
+                        {{ doc.get_doc_type_display }}
+                    </span>
+                </div>
+                <div class="flex items-center gap-3 mt-1 flex-wrap">
+                    <p class="text-xs text-gray-400">{{ doc.uploaded_at|date:"d.m.Y" }}</p>
+                    {% if doc.expiry_date %}
+                    <p class="text-xs {% if doc.is_expired %}text-red-600 font-bold{% elif doc.days_to_expiry <= 30 %}text-orange-500 font-semibold{% else %}text-gray-400{% endif %}">
+                        {{ T.qms_expires }}: {{ doc.expiry_date|date:"d.m.Y" }}
+                        {% if doc.is_expired %}· ⏰ {{ T.qms_expired }}{% elif doc.days_to_expiry <= 30 %}· {{ doc.days_to_expiry }} {{ T.qms_days_left }}{% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="{{ doc.file.url }}" target="_blank"
+                   class="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition">
+                    {{ T.qms_download }}
+                </a>
+                <button onclick="document.getElementById('ver-modal-{{ doc.pk }}').classList.remove('hidden')"
+                        class="px-3 py-1.5 rounded-lg text-xs font-medium bg-green-50 text-green-600 hover:bg-green-100 transition">
+                    ↑ {{ T.qms_new_version_btn }}
+                </button>
+                <button onclick="document.getElementById('hist-{{ doc.pk }}').classList.toggle('hidden')"
+                        class="px-3 py-1.5 rounded-lg text-xs font-medium bg-purple-50 text-purple-600 hover:bg-purple-100 transition">
+                    🕒 {{ T.qms_version_history }}
+                </button>
+                <form method="POST" action="{% url 'delete_document' doc.pk %}" onsubmit="return confirm('{{ T.qms_delete_doc }}?')">
+                    {% csrf_token %}
+                    <button type="submit"
+                        class="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-50 text-red-600 hover:bg-red-100 transition">
+                        {{ T.qms_delete_doc }}
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Version history (collapsed) -->
+        <div id="hist-{{ doc.pk }}" class="hidden border-t border-gray-100 px-5 py-4 bg-gray-50">
+            <p class="text-xs font-semibold text-gray-500 mb-3">🕒 {{ T.qms_version_history }}</p>
+            {% if doc.version_history.all %}
+            <div class="space-y-2">
+                {% for vh in doc.version_history.all %}
+                <div class="flex items-center gap-3 text-xs text-gray-600 bg-white rounded-lg px-3 py-2 border border-gray-100">
+                    <span class="font-mono font-bold text-purple-600">v{{ vh.version }}</span>
+                    <span class="text-gray-400">{{ vh.created_at|date:"d.m.Y H:i" }}</span>
+                    {% if vh.note %}<span class="text-gray-500 flex-1">{{ vh.note }}</span>{% endif %}
+                    <a href="{{ vh.file.url }}" target="_blank"
+                       class="text-blue-600 hover:underline ml-auto flex-shrink-0">{{ T.qms_download }}</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-xs text-gray-400">{{ T.qms_no_history }}</p>
+            {% endif %}
+        </div>
+
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-2xl border border-gray-100 p-16 text-center text-gray-400">
+        <svg class="w-12 h-12 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+        </svg>
+        <p>{{ T.qms_no_docs }}</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- New Version modals (one per doc) -->
+{% for doc in documents %}
+<div id="ver-modal-{{ doc.pk }}" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(15,23,42,0.6);backdrop-filter:blur(4px)">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="gradient-bg px-6 py-4 rounded-t-2xl flex items-center justify-between">
+            <div>
+                <h2 class="text-white font-bold">{{ T.qms_new_version_btn }}</h2>
+                <p class="text-white/70 text-sm">{{ doc.title }} ({{ T.qms_version_lbl }}{{ doc.version }})</p>
+            </div>
+            <button onclick="document.getElementById('ver-modal-{{ doc.pk }}').classList.add('hidden')"
+                    class="text-white/70 hover:text-white">✕</button>
+        </div>
+        <form method="POST" action="{% url 'update_document_version' doc.pk %}"
+              enctype="multipart/form-data" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_new_version_lbl }}</label>
+                <input type="text" name="version" required placeholder="2.0"
+                    class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_doc_file_lbl }}</label>
+                <input type="file" name="file" required
+                    class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_change_note_lbl }}</label>
+                <input type="text" name="note" placeholder="Nima o'zgardi?"
+                    class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+            <div class="flex gap-3">
+                <button type="button"
+                    onclick="document.getElementById('ver-modal-{{ doc.pk }}').classList.add('hidden')"
+                    class="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50">
+                    {{ T.cancel }}
+                </button>
+                <button type="submit"
+                    class="flex-1 gradient-bg text-white py-2.5 rounded-xl font-semibold hover:opacity-90 transition">
+                    {{ T.save }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Upload modal -->
+<div id="upload-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(15,23,42,0.6);backdrop-filter:blur(4px)">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="gradient-bg px-6 py-4 rounded-t-2xl flex items-center justify-between">
+            <h2 class="text-white font-bold">{{ T.qms_upload_doc }}</h2>
+            <button onclick="document.getElementById('upload-modal').classList.add('hidden')" class="text-white/70 hover:text-white">✕</button>
+        </div>
+        <form method="POST" action="{% url 'upload_document' %}" enctype="multipart/form-data" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_doc_title_lbl }}</label>
+                <input type="text" name="title" required
+                    class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_doc_type_lbl }}</label>
+                    <select name="doc_type" required
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                        {% for val, label in doc_types %}
+                        <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_doc_version_lbl }}</label>
+                    <input type="text" name="version" value="1.0"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_doc_expiry_lbl }}</label>
+                <input type="date" name="expiry_date"
+                    class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_doc_file_lbl }}</label>
+                <input type="file" name="file" required
+                    class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
+            </div>
+            <button type="submit"
+                class="w-full gradient-bg text-white py-2.5 rounded-xl font-semibold hover:opacity-90 transition">
+                {{ T.qms_upload_btn }}
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- AI generate modal -->
+<div id="ai-doc-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(15,23,42,0.6);backdrop-filter:blur(4px)">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="bg-purple-600 px-6 py-4 rounded-t-2xl flex items-center justify-between">
+            <h2 class="text-white font-bold">✨ {{ T.qms_ai_generate_doc }}</h2>
+            <button onclick="document.getElementById('ai-doc-modal').classList.add('hidden')" class="text-white/70 hover:text-white">✕</button>
+        </div>
+        <form method="POST" action="{% url 'qms_generate_policy' %}" class="p-6 space-y-4" id="ai-doc-form">
+            {% csrf_token %}
+            <p class="text-xs text-gray-500">{{ T.qms_ai_doc_hint }}</p>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_ai_topic_lbl }}</label>
+                <input type="text" name="topic" placeholder="{{ T.qms_ai_topic_ph }}"
+                    class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-400 outline-none">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_doc_type_lbl }}</label>
+                    <select name="doc_type"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-400 outline-none">
+                        {% for val, label in doc_types %}
+                        <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_ai_standard_lbl }}</label>
+                    <select name="standard"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-400 outline-none">
+                        <option value="ISO 9001">ISO 9001</option>
+                        <option value="ISO 22000">ISO 22000</option>
+                        <option value="ISO 14001">ISO 14001</option>
+                        <option value="ISO 45001">ISO 45001</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.doc_language_lbl }}</label>
+                <select name="language"
+                    class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-400 outline-none">
+                    <option value="uz">{{ T.doc_lang_uz }}</option>
+                    <option value="ru">{{ T.doc_lang_ru }}</option>
+                    <option value="en">{{ T.doc_lang_en }}</option>
+                </select>
+            </div>
+            <button type="submit" id="ai-doc-btn"
+                class="w-full bg-purple-600 text-white py-2.5 rounded-xl font-semibold hover:bg-purple-700 transition">
+                ✨ {{ T.qms_ai_generate_btn }}
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('ai-doc-form').addEventListener('submit', function() {
+  var b = document.getElementById('ai-doc-btn');
+  b.disabled = true;
+  b.textContent = '⏳ {{ T.qms_ai_loading }}';
+});
+</script>
+{% endblock %}

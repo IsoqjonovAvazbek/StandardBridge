@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.register }} — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="min-h-screen gradient-bg flex items-center justify-center py-12 px-4">
+    <div class="max-w-lg w-full">
+        <div class="text-center mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <a href="{% url 'landing' %}" class="inline-flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                        <span class="text-white font-bold">SB</span>
+                    </div>
+                    <span class="text-white font-bold text-xl">StandartBridge</span>
+                </a>
+                <form method="post" action="{% url 'set_language' %}" class="flex gap-1">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit" name="lang" value="uz" class="text-xs px-2 py-1 rounded font-medium {% if current_lang == 'uz' %}bg-white text-blue-700{% else %}text-white/70 hover:bg-white/10{% endif %}">UZ</button>
+                    <button type="submit" name="lang" value="ru" class="text-xs px-2 py-1 rounded font-medium {% if current_lang == 'ru' %}bg-white text-blue-700{% else %}text-white/70 hover:bg-white/10{% endif %}">RU</button>
+                    <button type="submit" name="lang" value="en" class="text-xs px-2 py-1 rounded font-medium {% if current_lang == 'en' %}bg-white text-blue-700{% else %}text-white/70 hover:bg-white/10{% endif %}">EN</button>
+                </form>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">{{ T.register_title }}</h1>
+            <p class="text-blue-200">{{ T.register_subtitle }}</p>
+        </div>
+
+        <div class="bg-white rounded-2xl p-8 shadow-2xl">
+
+            <!-- Rol tanlash -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-3">{{ T.login_role_label }}</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="role_select" value="entrepreneur"
+                            class="hidden" checked onchange="setRole('entrepreneur')">
+                        <div id="btn-entrepreneur"
+                            class="border-2 border-blue-600 bg-blue-50 rounded-xl p-4 text-center transition">
+                            <div class="text-2xl mb-1">🏭</div>
+                            <div class="font-semibold text-gray-900 text-sm">{{ T.login_entrepreneur }}</div>
+                            <div class="text-gray-500 text-xs">ISO sertifikat olmoqchiman</div>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="role_select" value="expert"
+                            class="hidden" onchange="setRole('expert')">
+                        <div id="btn-expert"
+                            class="border-2 border-gray-200 rounded-xl p-4 text-center transition">
+                            <div class="text-2xl mb-1">👨‍💼</div>
+                            <div class="font-semibold text-gray-900 text-sm">{{ T.login_expert }}</div>
+                            <div class="text-gray-500 text-xs">Mijozlarga yordam beraman</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <form method="POST" id="registerForm">
+                {% csrf_token %}
+                <input type="hidden" name="role" id="roleInput" value="entrepreneur">
+
+                <!-- Ism familiya -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.first_name }}</label>
+                        <input type="text" name="first_name" required value="{{ form_data.first_name }}"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
+                            placeholder="Sardor">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.last_name }}</label>
+                        <input type="text" name="last_name" required value="{{ form_data.last_name }}"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
+                            placeholder="Karimov">
+                    </div>
+                </div>
+
+                <!-- Tadbirkor maydonlari -->
+                <div id="entrepreneur-fields">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.company_name }}</label>
+                        <input type="text" name="company_name"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
+                            placeholder="Karimov Textile LLC">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Viloyat</label>
+                            <select name="region"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
+                                <option value="">Tanlang</option>
+                                <option value="Toshkent">Toshkent</option>
+                                <option value="Farg'ona">Farg'ona</option>
+                                <option value="Samarqand">Samarqand</option>
+                                <option value="Buxoro">Buxoro</option>
+                                <option value="Andijon">Andijon</option>
+                                <option value="Namangan">Namangan</option>
+                                <option value="Qashqadaryo">Qashqadaryo</option>
+                                <option value="Surxondaryo">Surxondaryo</option>
+                                <option value="Xorazm">Xorazm</option>
+                                <option value="Navoiy">Navoiy</option>
+                                <option value="Jizzax">Jizzax</option>
+                                <option value="Sirdaryo">Sirdaryo</option>
+                                <option value="Qoraqalpog'iston">Qoraqalpog'iston</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Soha</label>
+                            <select name="industry"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
+                                <option value="">Tanlang</option>
+                                <option value="To'qimachilik">To'qimachilik</option>
+                                <option value="Oziq-ovqat">Oziq-ovqat</option>
+                                <option value="Kimyo">Kimyo</option>
+                                <option value="Mashinasozlik">Mashinasozlik</option>
+                                <option value="Qurilish">Qurilish</option>
+                                <option value="Farmatsevtika">Farmatsevtika</option>
+                                <option value="Boshqa">Boshqa</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mutaxassis maydonlari -->
+                <div id="expert-fields" class="hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ixtisoslik</label>
+                        <input type="text" name="specializations"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
+                            placeholder="ISO9001 ISO22000 ISO14001">
+                        <p class="text-gray-400 text-xs mt-1">Bo'sh joy bilan ajrating</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Viloyat</label>
+                            <select name="expert_region"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
+                                <option value="">Tanlang</option>
+                                <option value="toshkent">Toshkent</option>
+                                <option value="fargona">Farg'ona</option>
+                                <option value="samarqand">Samarqand</option>
+                                <option value="buxoro">Buxoro</option>
+                                <option value="andijon">Andijon</option>
+                                <option value="namangan">Namangan</option>
+                                <option value="qashqadaryo">Qashqadaryo</option>
+                                <option value="surxondaryo">Surxondaryo</option>
+                                <option value="xorazm">Xorazm</option>
+                                <option value="navoiy">Navoiy</option>
+                                <option value="jizzax">Jizzax</option>
+                                <option value="sirdaryo">Sirdaryo</option>
+                                <option value="qoraqalpogiston">Qoraqalpog'iston</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tajriba (yil)</label>
+                            <input type="number" name="experience_years" min="0" max="50"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
+                                placeholder="5">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.phone }}</label>
+                        <input type="text" name="phone"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
+                            placeholder="+998901234567">
+                    </div>
+                </div>
+
+                <!-- Email, username, parol -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.email }}</label>
+                    <input type="email" name="email" required value="{{ form_data.email }}"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
+                        placeholder="sardor@company.uz">
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.username }}</label>
+                        <input type="text" name="username" required value="{{ form_data.username }}"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
+                            placeholder="sardor123">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.password }}</label>
+                        <input type="password" name="password" required minlength="8"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
+                            placeholder="••••••••">
+                        <p class="text-xs text-gray-400 mt-1">{{ T.password_hint }}</p>
+                    </div>
+                </div>
+
+                <!-- Parolni tasdiqlash -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.password_confirm }}</label>
+                    <input type="password" name="password2" required minlength="8"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
+                        placeholder="••••••••">
+                </div>
+
+                <!-- Referral kodi -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ T.referral_code_label }} <span class="text-gray-400 font-normal">{{ T.referral_code_optional }}</span>
+                    </label>
+                    <input type="text" name="referral_code"
+                        value="{% if request.GET.ref %}{{ request.GET.ref }}{% endif %}"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition uppercase"
+                        placeholder="AB12CD34" maxlength="12">
+                </div>
+
+                <button type="submit"
+                    class="w-full gradient-bg text-white py-3 rounded-xl font-semibold text-lg hover:opacity-90 transition">
+                    {{ T.register_btn }}
+                </button>
+            </form>
+
+            <p class="text-center text-gray-600 mt-6">
+                {{ T.register_have_account }}
+                <a href="{% url 'login' %}" class="text-blue-600 font-semibold hover:underline">{{ T.register_login_link }}</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+function setRole(role) {
+    document.getElementById('roleInput').value = role;
+
+    var btnE = document.getElementById('btn-entrepreneur');
+    var btnX = document.getElementById('btn-expert');
+    var fieldsE = document.getElementById('entrepreneur-fields');
+    var fieldsX = document.getElementById('expert-fields');
+
+    if (role === 'entrepreneur') {
+        btnE.className = 'border-2 border-blue-600 bg-blue-50 rounded-xl p-4 text-center transition';
+        btnX.className = 'border-2 border-gray-200 rounded-xl p-4 text-center transition';
+        fieldsE.classList.remove('hidden');
+        fieldsX.classList.add('hidden');
+    } else {
+        btnX.className = 'border-2 border-blue-600 bg-blue-50 rounded-xl p-4 text-center transition';
+        btnE.className = 'border-2 border-gray-200 rounded-xl p-4 text-center transition';
+        fieldsX.classList.remove('hidden');
+        fieldsE.classList.add('hidden');
+    }
+}
+</script>
+{% endblock %}

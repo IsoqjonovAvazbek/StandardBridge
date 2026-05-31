@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block title %}{{ doc.title }} — StandardBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-start gap-4 mb-6">
+    <div class="flex-1">
+      <div class="flex items-center gap-2 mb-2">
+        <a href="{% url 'expert_doc_list' %}" class="text-sm text-gray-400 hover:text-gray-600">{{ T.et_doc_list }}</a>
+        <span class="text-gray-300">›</span>
+        <span class="text-sm text-gray-600 truncate">{{ doc.title }}</span>
+      </div>
+      <h1 class="text-xl font-bold text-gray-900">{{ doc.title }}</h1>
+      <div class="flex flex-wrap items-center gap-2 mt-2">
+        <span class="text-xs px-2 py-1 rounded-lg font-medium
+          {% if doc.status == 'approved' %}bg-green-100 text-green-700
+          {% elif doc.status == 'sent' %}bg-blue-100 text-blue-700
+          {% else %}bg-gray-100 text-gray-600{% endif %}">
+          {% if doc.status == 'approved' %}{{ T.et_doc_approved }}
+          {% elif doc.status == 'sent' %}{{ T.et_doc_sent }}
+          {% else %}{{ T.et_doc_draft }}{% endif %}
+        </span>
+        {% if doc.template %}
+        <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-lg">{{ doc.template.get_standard_display }}</span>
+        <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-lg">{{ doc.template.get_doc_type_display }}</span>
+        {% endif %}
+        <span class="text-xs text-gray-400">{{ doc.created_at|date:"d.m.Y H:i" }}</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <a href="{% url 'edit_document' doc.pk %}"
+         class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
+        {{ T.et_edit_doc }}
+      </a>
+      <form method="post" action="{% url 'delete_expert_doc' doc.pk %}"
+            onsubmit="return confirm('Hujjatni o\'chirish?')">
+        {% csrf_token %}
+        <button type="submit"
+                class="border border-red-200 text-red-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-50 transition">
+          {{ T.et_delete_doc }}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm">
+    <!-- Toolbar -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <span class="text-sm font-medium text-gray-600">{{ T.et_doc_content }}</span>
+      <button onclick="copyContent()" class="text-xs text-blue-600 hover:underline">Nusxalash</button>
+    </div>
+    <!-- Document text (rendered) -->
+    <div id="docContent" class="px-8 py-6 doc-body text-gray-800 leading-relaxed"></div>
+    <!-- Raw markdown (hidden, used for copy + render source) -->
+    <textarea id="docRaw" class="hidden">{{ doc.content }}</textarea>
+  </div>
+
+  {% if doc.project %}
+  <div class="mt-4 text-sm text-gray-500 text-center">
+    Loyiha: <a href="{% url 'project_detail' doc.project.pk %}" class="text-blue-600 hover:underline">{{ doc.project.entrepreneur.company_name }}</a>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+  .doc-body h1 { font-size: 1.5rem; font-weight: 700; color: #111827; margin: 1.2rem 0 0.6rem; }
+  .doc-body h2 { font-size: 1.25rem; font-weight: 700; color: #111827; margin: 1.1rem 0 0.5rem; padding-bottom: .25rem; border-bottom: 1px solid #f3f4f6; }
+  .doc-body h3 { font-size: 1.05rem; font-weight: 600; color: #1f2937; margin: 1rem 0 0.4rem; }
+  .doc-body p  { margin: 0.5rem 0; }
+  .doc-body ul { list-style: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+  .doc-body ol { list-style: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
+  .doc-body li { margin: 0.2rem 0; }
+  .doc-body strong { font-weight: 700; color: #111827; }
+  .doc-body em { font-style: italic; }
+  .doc-body hr { border: 0; border-top: 1px solid #e5e7eb; margin: 1rem 0; }
+  .doc-body table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.875rem; }
+  .doc-body th, .doc-body td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; }
+  .doc-body th { background: #f9fafb; font-weight: 600; }
+</style>
+<script>
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function inlineMd(s) {
+  s = escapeHtml(s);
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
+  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+  return s;
+}
+function renderMarkdown(md) {
+  var lines = md.replace(/\r\n/g, '\n').split('\n');
+  var html = '', listType = null;
+  function closeList() { if (listType) { html += '</' + listType + '>'; listType = null; } }
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].replace(/\s+$/, '');
+    var t = line.trim();
+    if (t === '') { closeList(); continue; }
+    if (/^#{1,6}\s/.test(t)) {
+      closeList();
+      var level = t.match(/^#+/)[0].length;
+      html += '<h' + level + '>' + inlineMd(t.replace(/^#+\s*/, '')) + '</h' + level + '>';
+    } else if (/^([-*_])\1{2,}$/.test(t)) {
+      closeList(); html += '<hr>';
+    } else if (/^[-*]\s+/.test(t)) {
+      if (listType !== 'ul') { closeList(); listType = 'ul'; html += '<ul>'; }
+      html += '<li>' + inlineMd(t.replace(/^[-*]\s+/, '')) + '</li>';
+    } else if (/^\d+[.)]\s+/.test(t)) {
+      if (listType !== 'ol') { closeList(); listType = 'ol'; html += '<ol>'; }
+      html += '<li>' + inlineMd(t.replace(/^\d+[.)]\s+/, '')) + '</li>';
+    } else {
+      closeList();
+      html += '<p>' + inlineMd(t) + '</p>';
+    }
+  }
+  closeList();
+  return html;
+}
+(function() {
+  var raw = document.getElementById('docRaw').value;
+  document.getElementById('docContent').innerHTML = renderMarkdown(raw);
+})();
+function copyContent() {
+  var text = document.getElementById('docRaw').value;
+  navigator.clipboard.writeText(text).then(function() {
+    alert('Nusxalandi!');
+  });
+}
+</script>
+{% endblock %}

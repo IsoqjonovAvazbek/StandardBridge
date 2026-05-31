@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% block title %}Audit — {{ audit.company_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-start gap-4 mb-6">
+    <div class="flex-1">
+      <div class="flex items-center gap-2 mb-2 text-sm text-gray-400">
+        <a href="{% url 'audit_list' %}" class="hover:text-gray-600">{{ T.et_audit_list }}</a>
+        <span>›</span>
+        <span class="text-gray-600">{{ audit.company_name }}</span>
+      </div>
+      <h1 class="text-xl font-bold text-gray-900">{{ audit.company_name }}</h1>
+      <div class="flex flex-wrap items-center gap-2 mt-1">
+        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-lg font-medium">{{ audit.standard|upper }}</span>
+        <span class="text-xs text-gray-400">{{ audit.audit_date|date:"d.m.Y" }}</span>
+        {% if audit.is_completed %}
+        <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-lg font-medium">✓ {{ T.et_audit_completed_badge }}</span>
+        {% endif %}
+      </div>
+    </div>
+    <!-- Score ring -->
+    <div class="flex-shrink-0 text-center">
+      <div class="inline-flex flex-col items-center">
+        <div class="relative w-20 h-20">
+          <svg viewBox="0 0 36 36" class="w-20 h-20 -rotate-90">
+            <path class="text-gray-100" stroke="currentColor" stroke-width="3.5" fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            <path class="{% if score >= 70 %}text-green-500{% elif score >= 40 %}text-yellow-500{% else %}text-red-500{% endif %}"
+                  stroke="currentColor" stroke-width="3.5" fill="none"
+                  stroke-dasharray="{{ score }}, 100"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-lg font-bold text-gray-900">{{ score }}%</span>
+          </div>
+        </div>
+        <span class="text-xs text-gray-500 mt-1">{{ compliant }}/{{ total }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Items table -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-6">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h2 class="font-semibold text-gray-900">{{ T.et_audit_items }}</h2>
+    </div>
+    <div class="divide-y divide-gray-50">
+      {% for item in items %}
+      <div class="p-5 audit-item" data-item-id="{{ item.pk }}">
+        <div class="flex flex-col sm:flex-row sm:items-start gap-3">
+          <!-- Clause + Question -->
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs font-mono font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{{ item.clause }}</span>
+              <span class="status-badge text-xs px-2 py-0.5 rounded-lg font-medium
+                {% if item.status == 'compliant' %}bg-green-100 text-green-700
+                {% elif item.status == 'partial' %}bg-yellow-100 text-yellow-700
+                {% elif item.status == 'non_compliant' %}bg-red-100 text-red-700
+                {% else %}bg-gray-100 text-gray-500{% endif %}">
+                {% if item.status == 'compliant' %}{{ T.et_compliant }}
+                {% elif item.status == 'partial' %}{{ T.et_partial }}
+                {% elif item.status == 'non_compliant' %}{{ T.et_non_compliant }}
+                {% else %}{{ T.et_not_checked }}{% endif %}
+              </span>
+            </div>
+            <p class="text-sm text-gray-800">{{ item.question }}</p>
+          </div>
+          <!-- Controls -->
+          {% if not audit.is_completed %}
+          <div class="flex flex-col gap-2 sm:w-72 flex-shrink-0">
+            <div class="flex gap-1">
+              <button onclick="setStatus({{ item.pk }}, 'compliant')"
+                      class="status-btn flex-1 text-xs py-1.5 rounded-lg border transition font-medium
+                        {% if item.status == 'compliant' %}bg-green-500 text-white border-green-500{% else %}border-gray-200 text-gray-600 hover:bg-green-50{% endif %}"
+                      data-value="compliant">{{ T.et_compliant }}</button>
+              <button onclick="setStatus({{ item.pk }}, 'partial')"
+                      class="status-btn flex-1 text-xs py-1.5 rounded-lg border transition font-medium
+                        {% if item.status == 'partial' %}bg-yellow-500 text-white border-yellow-500{% else %}border-gray-200 text-gray-600 hover:bg-yellow-50{% endif %}"
+                      data-value="partial">{{ T.et_partial }}</button>
+              <button onclick="setStatus({{ item.pk }}, 'non_compliant')"
+                      class="status-btn flex-1 text-xs py-1.5 rounded-lg border transition font-medium
+                        {% if item.status == 'non_compliant' %}bg-red-500 text-white border-red-500{% else %}border-gray-200 text-gray-600 hover:bg-red-50{% endif %}"
+                      data-value="non_compliant">{{ T.et_non_compliant }}</button>
+            </div>
+            <input type="text" placeholder="{{ T.et_evidence }}" value="{{ item.evidence }}"
+                   class="evidence-input w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400">
+            <input type="text" placeholder="{{ T.et_finding }}" value="{{ item.finding }}"
+                   class="finding-input w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400">
+            <button onclick="saveItem({{ item.pk }}, this)"
+                    class="text-xs bg-gray-50 hover:bg-blue-50 text-blue-600 py-1.5 rounded-lg border border-gray-200 transition">
+              {{ T.et_save_item }}
+            </button>
+          </div>
+          {% else %}
+          <div class="sm:w-64 flex-shrink-0 text-xs text-gray-500 space-y-1">
+            {% if item.evidence %}<p><strong>{{ T.et_evidence }}:</strong> {{ item.evidence }}</p>{% endif %}
+            {% if item.finding %}<p><strong>{{ T.et_finding }}:</strong> {{ item.finding }}</p>{% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Complete button -->
+  {% if not audit.is_completed %}
+  <form method="post" action="{% url 'complete_audit' audit.pk %}"
+        onsubmit="return confirm('Auditni yakunlashni tasdiqlaysizmi?')">
+    {% csrf_token %}
+    <div class="flex gap-3">
+      <a href="{% url 'audit_list' %}"
+         class="flex-1 text-center border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+        {{ T.et_back }}
+      </a>
+      <button type="submit"
+              class="flex-1 gradient-bg text-white py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition">
+        ✓ {{ T.et_complete_audit }}
+      </button>
+    </div>
+  </form>
+  {% else %}
+  <a href="{% url 'audit_list' %}"
+     class="block text-center border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+    {{ T.et_back }}
+  </a>
+  {% endif %}
+</div>
+
+<script>
+const UPDATE_URL = "{% url 'update_audit_item' audit.pk %}";
+const CSRF = "{{ csrf_token }}";
+
+// Track current status per item
+const itemStatus = {};
+{% for item in items %}
+itemStatus[{{ item.pk }}] = '{{ item.status }}';
+{% endfor %}
+
+function setStatus(itemId, status) {
+  itemStatus[itemId] = status;
+  const row = document.querySelector(`.audit-item[data-item-id="${itemId}"]`);
+  if (!row) return;
+  const btns = row.querySelectorAll('.status-btn');
+  btns.forEach(btn => {
+    const val = btn.getAttribute('data-value');
+    btn.className = btn.className.replace(/bg-\w+-500 text-white border-\w+-500/, '').trim();
+    btn.classList.remove('bg-green-500','bg-yellow-500','bg-red-500','text-white','border-green-500','border-yellow-500','border-red-500');
+    if (val === status) {
+      if (status === 'compliant') btn.classList.add('bg-green-500','text-white','border-green-500');
+      else if (status === 'partial') btn.classList.add('bg-yellow-500','text-white','border-yellow-500');
+      else btn.classList.add('bg-red-500','text-white','border-red-500');
+    }
+  });
+}
+
+function saveItem(itemId, btn) {
+  const row = document.querySelector(`.audit-item[data-item-id="${itemId}"]`);
+  const evidence = row.querySelector('.evidence-input').value;
+  const finding = row.querySelector('.finding-input').value;
+  const status = itemStatus[itemId] || 'not_checked';
+
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  fetch(UPDATE_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
+    body: JSON.stringify({item_id: itemId, status, evidence, finding}),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      btn.textContent = '✓';
+      // Update score display
+      document.querySelectorAll('[data-score]').forEach(el => el.textContent = data.score + '%');
+    } else {
+      btn.textContent = '{{ T.et_save_item }}';
+    }
+    btn.disabled = false;
+  })
+  .catch(() => { btn.textContent = '{{ T.et_save_item }}'; btn.disabled = false; });
+}
+</script>
+{% endblock %}

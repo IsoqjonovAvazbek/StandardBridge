@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.et_apply_template }} — StandardBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <div class="flex items-center gap-2 mb-6 text-sm text-gray-400">
+    <a href="{% url 'project_templates' %}" class="hover:text-gray-600">{{ T.et_proj_templates }}</a>
+    <span>›</span>
+    <span class="text-gray-600">{{ T.et_apply_template }}</span>
+  </div>
+
+  <h1 class="text-xl font-bold text-gray-900 mb-2">{{ T.et_apply_template }}</h1>
+  <p class="text-sm text-gray-500 mb-6">
+    <strong>{{ template.title }}</strong> → <strong>{{ project.entrepreneur.company_name }}</strong>
+  </p>
+
+  <!-- Template preview -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+    <h2 class="font-semibold text-gray-900 mb-4">{{ T.et_template_steps }}</h2>
+    <div class="space-y-3">
+      {% for step in template.steps.all %}
+      <div class="flex items-start gap-3 p-3 rounded-xl bg-gray-50">
+        <span class="flex-shrink-0 w-7 h-7 rounded-full gradient-bg text-white text-xs flex items-center justify-center font-bold">
+          {{ step.order }}
+        </span>
+        <div class="flex-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-medium text-gray-800 text-sm">{{ step.title }}</span>
+            <span class="text-xs text-gray-400 bg-white border border-gray-200 px-2 py-0.5 rounded-lg">
+              {{ step.duration_days }} {{ T.et_step_days }}
+            </span>
+          </div>
+          <p class="text-xs text-gray-500 mt-0.5">{{ step.description }}</p>
+          {% if step.deliverable %}
+          <p class="text-xs text-blue-600 mt-1">📄 {{ step.deliverable }}</p>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between text-sm">
+      <span class="text-gray-500">Jami:</span>
+      <span class="font-semibold text-gray-900">{{ template.total_days }} {{ T.et_total_days }}</span>
+    </div>
+  </div>
+
+  <!-- Confirm form -->
+  <form method="post">
+    {% csrf_token %}
+    <div class="flex gap-3">
+      <a href="{% url 'project_templates' %}"
+         class="flex-1 text-center border border-gray-200 text-gray-600 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+        {{ T.cancel }}
+      </a>
+      <button type="submit"
+              class="flex-1 gradient-bg text-white py-3 rounded-xl text-sm font-medium hover:opacity-90 transition">
+        {{ T.et_apply_btn }}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.ai_analyzing }} — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="min-h-screen gradient-bg flex items-center justify-center">
+    <div class="text-center px-4">
+        <!-- Spinner -->
+        <div class="relative w-24 h-24 mx-auto mb-8">
+            <div class="absolute inset-0 border-4 border-white/20 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-transparent border-t-white rounded-full animate-spin"></div>
+            <div class="absolute inset-2 border-4 border-transparent border-t-blue-300 rounded-full animate-spin" style="animation-duration:1.5s"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+            </div>
+        </div>
+
+        <h1 class="text-3xl font-bold text-white mb-3">{{ T.ai_analyzing }}</h1>
+        <p class="text-blue-200 text-lg mb-2">{{ T.ai_time_hint }}</p>
+        <p class="text-blue-300 text-sm mb-10"></p>
+
+        <!-- Error / retry box -->
+        <div id="error-box" class="max-w-sm mx-auto bg-white rounded-2xl p-6 shadow-xl {% if not has_error %}hidden{% endif %}">
+            <div class="text-4xl mb-3">⚠️</div>
+            <h2 class="text-lg font-bold text-gray-900 mb-1">{{ T.analysis_error_title }}</h2>
+            <p class="text-sm text-gray-500 mb-5">{{ T.analysis_error_desc }}</p>
+            <form method="post" action="{% url 'analysis_retry' analysis.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="w-full gradient-bg text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">
+                    🔄 {{ T.analysis_retry_btn }}
+                </button>
+            </form>
+            <a href="{% url 'entrepreneur_dashboard' %}" class="block mt-3 text-sm text-gray-400 hover:text-gray-600">{{ T.back_to_dashboard }}</a>
+        </div>
+
+        <!-- Progress indikator -->
+        <div class="max-w-sm mx-auto space-y-3 text-left {% if has_error %}hidden{% endif %}" id="steps-list">
+            <div class="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-3" id="step-1">
+                <div class="w-5 h-5 rounded-full bg-green-400 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <span class="text-white text-sm">{{ T.progress_standards }}</span>
+            </div>
+            <div class="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-3" id="step-2">
+                <div class="w-5 h-5 rounded-full border-2 border-white/40 flex-shrink-0 step-pending"></div>
+                <span class="text-blue-200 text-sm">{{ T.found_gaps_title }}</span>
+            </div>
+            <div class="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-3" id="step-3">
+                <div class="w-5 h-5 rounded-full border-2 border-white/40 flex-shrink-0 step-pending"></div>
+                <span class="text-blue-200 text-sm">{{ T.roadmap_title }}</span>
+            </div>
+            <div class="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-3" id="step-4">
+                <div class="w-5 h-5 rounded-full border-2 border-white/40 flex-shrink-0 step-pending"></div>
+                <span class="text-blue-200 text-sm">{{ T.analysis_result_title }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const statusUrl = "{% url 'analysis_status' analysis.pk %}";
+const detailUrl = "{% url 'analysis_detail' analysis.pk %}";
+let stepIndex = 1;
+const stepTimings = [2000, 5000, 9000];
+
+function markStep(n) {
+    const step = document.getElementById('step-' + n);
+    if (!step) return;
+    const dot = step.querySelector('.step-pending');
+    if (dot) {
+        dot.classList.remove('step-pending', 'border-white/40');
+        dot.classList.add('bg-green-400');
+        dot.innerHTML = '<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>';
+    }
+    const label = step.querySelector('span');
+    if (label) label.classList.replace('text-blue-200', 'text-white');
+}
+
+stepTimings.forEach((t, i) => setTimeout(() => markStep(i + 2), t));
+
+function poll() {
+    fetch(statusUrl)
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'completed') {
+                markStep(3);
+                markStep(4);
+                setTimeout(() => window.location.href = detailUrl, 500);
+            } else if (data.has_error) {
+                document.getElementById('steps-list').classList.add('hidden');
+                document.getElementById('error-box').classList.remove('hidden');
+            } else {
+                setTimeout(poll, 2000);
+            }
+        })
+        .catch(() => setTimeout(poll, 3000));
+}
+
+setTimeout(poll, 3000);
+</script>
+{% endblock %}

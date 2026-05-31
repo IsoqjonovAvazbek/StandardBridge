@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.qms_checklist_title }} — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Header -->
+    <div class="mb-6 flex items-start justify-between gap-4 flex-wrap">
+        <div>
+            <a href="{% url 'qms_dashboard' %}" class="text-blue-600 hover:underline text-sm">← {{ T.qms_tool }}</a>
+            <h1 class="text-2xl font-bold text-gray-900 mt-2">{{ T.qms_checklist_title }}</h1>
+            <p class="text-gray-500 text-sm mt-1">{{ T.qms_checklist_sub }}</p>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <a href="{% url 'export_checklist_csv' %}?standard={{ current_standard }}"
+               class="inline-flex items-center gap-2 bg-white border border-gray-200 hover:border-green-400 hover:text-green-700 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+                {{ T.qms_export_excel }}
+            </a>
+            <a href="{% url 'checklist_print' %}?standard={{ current_standard }}"
+               target="_blank"
+               class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium transition">
+                {{ T.qms_print_report }}
+            </a>
+        </div>
+    </div>
+
+    <!-- Standard tabs -->
+    <div class="flex flex-wrap gap-2 mb-6">
+        {% for std_obj in standards %}
+        <a href="?standard={{ std_obj.code }}"
+           class="px-4 py-2 rounded-xl text-sm font-semibold transition border flex items-center gap-2
+           {% if std_obj.code == current_standard %}gradient-bg text-white border-transparent
+           {% else %}bg-white text-gray-600 border-gray-200 hover:border-blue-300{% endif %}">
+            {{ std_obj.label }}
+            <span class="text-xs font-normal
+                {% if std_obj.code == current_standard %}text-white/80{% else %}text-gray-400{% endif %}">
+                {{ std_obj.pct }}%
+            </span>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Per-standard progress bar -->
+    {% for std_obj in standards %}
+    {% if std_obj.code == current_standard %}
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm font-medium text-gray-700">
+                {{ std_obj.label }} — {{ T.qms_compliance }}
+            </p>
+            <p class="text-sm font-bold text-gray-900">{{ std_obj.pct }}%</p>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2.5 mb-1">
+            <div class="gradient-bg h-2.5 rounded-full transition-all" style="width:{{ std_obj.pct }}%"></div>
+        </div>
+        <p class="text-xs text-gray-400">
+            {{ std_obj.compliant }} {{ T.qms_of_word }} {{ std_obj.total }} {{ T.qms_items_checked }}
+        </p>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Checklist items -->
+    {% if items_with_response %}
+    <div class="space-y-3" id="checklist-list">
+        {% for row in items_with_response %}
+        {% with item=row.item resp=row.response %}
+        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden item-card"
+             data-item-id="{{ item.pk }}"
+             data-status="{% if resp %}{{ resp.status }}{% else %}not_checked{% endif %}">
+
+            <div class="p-5">
+                <div class="flex items-start gap-3">
+                    <!-- Status dot -->
+                    <div class="mt-1 w-3 h-3 rounded-full shrink-0 status-dot
+                        {% if resp %}
+                            {% if resp.status == 'compliant' %}bg-green-500
+                            {% elif resp.status == 'partial' %}bg-yellow-400
+                            {% elif resp.status == 'non_compliant' %}bg-red-500
+                            {% else %}bg-gray-300{% endif %}
+                        {% else %}bg-gray-300{% endif %}"></div>
+
+                    <div class="flex-1">
+                        <!-- Clause badge + Question -->
+                        <div class="flex items-start gap-2 flex-wrap mb-1">
+                            {% if item.clause %}
+                            <span class="shrink-0 mt-0.5 text-xs font-bold font-mono bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded">
+                                {{ item.clause }}
+                            </span>
+                            {% endif %}
+                            <p class="text-sm font-medium text-gray-900 leading-relaxed flex-1">
+                                {{ item.question }}
+                            </p>
+                        </div>
+                        {% if item.requirement %}
+                        <p class="text-xs text-blue-500 mt-0.5 ml-0">{{ item.requirement }}</p>
+                        {% endif %}
+
+                        <!-- Status buttons -->
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <button onclick="setStatus({{ item.pk }}, 'compliant', this)"
+                                class="status-btn px-3 py-1.5 rounded-lg text-xs font-semibold border transition
+                                {% if resp and resp.status == 'compliant' %}bg-green-500 text-white border-green-500
+                                {% else %}bg-white text-green-700 border-green-300 hover:bg-green-50{% endif %}"
+                                data-val="compliant">
+                                ✓ {{ T.qms_status_compliant }}
+                            </button>
+                            <button onclick="setStatus({{ item.pk }}, 'partial', this)"
+                                class="status-btn px-3 py-1.5 rounded-lg text-xs font-semibold border transition
+                                {% if resp and resp.status == 'partial' %}bg-yellow-400 text-white border-yellow-400
+                                {% else %}bg-white text-yellow-700 border-yellow-300 hover:bg-yellow-50{% endif %}"
+                                data-val="partial">
+                                ~ {{ T.qms_status_partial }}
+                            </button>
+                            <button onclick="setStatus({{ item.pk }}, 'non_compliant', this)"
+                                class="status-btn px-3 py-1.5 rounded-lg text-xs font-semibold border transition
+                                {% if resp and resp.status == 'non_compliant' %}bg-red-500 text-white border-red-500
+                                {% else %}bg-white text-red-700 border-red-300 hover:bg-red-50{% endif %}"
+                                data-val="non_compliant">
+                                ✗ {{ T.qms_status_non_compliant }}
+                            </button>
+                        </div>
+
+                        <!-- Evidence field (always visible) -->
+                        <div class="mt-3">
+                            <input type="text"
+                                   id="evidence-{{ item.pk }}"
+                                   value="{% if resp %}{{ resp.evidence_text }}{% endif %}"
+                                   placeholder="{{ T.qms_evidence_ph }}"
+                                   class="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg
+                                          focus:ring-2 focus:ring-blue-400 outline-none bg-blue-50/30
+                                          placeholder:text-gray-400"
+                                   onblur="saveEvidence({{ item.pk }})">
+                        </div>
+
+                        <!-- Note field (shown for partial / non-compliant) -->
+                        <div class="mt-2 note-area
+                            {% if not resp or resp.status == 'not_checked' or resp.status == 'compliant' %}hidden{% endif %}">
+                            <input type="text"
+                                   id="note-{{ item.pk }}"
+                                   value="{% if resp %}{{ resp.note }}{% endif %}"
+                                   placeholder="{{ T.qms_note_ph }}"
+                                   class="w-full px-3 py-1.5 text-xs border border-orange-200 rounded-lg
+                                          focus:ring-2 focus:ring-orange-400 outline-none bg-orange-50/30"
+                                   onblur="saveNote({{ item.pk }})">
+                        </div>
+                    </div>
+
+                    <!-- Saved flash -->
+                    <span class="saved-badge hidden text-xs text-green-600 font-medium shrink-0 mt-1">
+                        {{ T.qms_saved_ok }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
+        {{ T.qms_no_items }}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+const CSRF = '{{ csrf_token }}';
+const UPDATE_URL = '{% url "update_checklist" %}';
+
+const ACTIVE_CLS = {
+    compliant:     'bg-green-500 text-white border-green-500',
+    partial:       'bg-yellow-400 text-white border-yellow-400',
+    non_compliant: 'bg-red-500 text-white border-red-500',
+};
+const IDLE_CLS = {
+    compliant:     'bg-white text-green-700 border-green-300 hover:bg-green-50',
+    partial:       'bg-white text-yellow-700 border-yellow-300 hover:bg-yellow-50',
+    non_compliant: 'bg-white text-red-700 border-red-300 hover:bg-red-50',
+};
+const DOT_CLS = {
+    compliant:     'bg-green-500',
+    partial:       'bg-yellow-400',
+    non_compliant: 'bg-red-500',
+    not_checked:   'bg-gray-300',
+};
+
+function setStatus(itemId, newStatus, clickedBtn) {
+    const card = document.querySelector(`[data-item-id="${itemId}"]`);
+    const buttons = card.querySelectorAll('.status-btn');
+    const dot = card.querySelector('.status-dot');
+    const noteArea = card.querySelector('.note-area');
+    const savedBadge = card.querySelector('.saved-badge');
+    const noteInput = card.querySelector(`#note-${itemId}`);
+    const evidenceInput = card.querySelector(`#evidence-${itemId}`);
+
+    buttons.forEach(b => {
+        const v = b.dataset.val;
+        b.className = b.className
+            .replace(/bg-\S+\s*/g, '')
+            .replace(/text-white\s*/g, '')
+            .replace(/border-\w+-\d+\s*/g, '')
+            .replace(/hover:\S+\s*/g, '')
+            .trim();
+        b.className += ' ' + IDLE_CLS[v];
+    });
+    clickedBtn.className = clickedBtn.className
+        .replace(/bg-\S+\s*/g, '')
+        .replace(/text-white\s*/g, '')
+        .replace(/text-\w+-\d+\s*/g, '')
+        .replace(/border-\w+-\d+\s*/g, '')
+        .replace(/hover:\S+\s*/g, '')
+        .trim();
+    clickedBtn.className += ' ' + ACTIVE_CLS[newStatus];
+
+    Object.values(DOT_CLS).forEach(c => dot.classList.remove(c));
+    dot.classList.add(DOT_CLS[newStatus] || 'bg-gray-300');
+
+    if (newStatus === 'partial' || newStatus === 'non_compliant') {
+        noteArea.classList.remove('hidden');
+    } else {
+        noteArea.classList.add('hidden');
+    }
+
+    card.dataset.status = newStatus;
+    saveToServer(itemId, newStatus,
+        noteInput ? noteInput.value : '',
+        evidenceInput ? evidenceInput.value : '',
+        savedBadge);
+}
+
+function saveNote(itemId) {
+    const card = document.querySelector(`[data-item-id="${itemId}"]`);
+    const noteInput = card.querySelector(`#note-${itemId}`);
+    const evidenceInput = card.querySelector(`#evidence-${itemId}`);
+    const savedBadge = card.querySelector('.saved-badge');
+    saveToServer(itemId, card.dataset.status,
+        noteInput ? noteInput.value : '',
+        evidenceInput ? evidenceInput.value : '',
+        savedBadge);
+}
+
+function saveEvidence(itemId) {
+    const card = document.querySelector(`[data-item-id="${itemId}"]`);
+    const noteInput = card.querySelector(`#note-${itemId}`);
+    const evidenceInput = card.querySelector(`#evidence-${itemId}`);
+    const savedBadge = card.querySelector('.saved-badge');
+    saveToServer(itemId, card.dataset.status,
+        noteInput ? noteInput.value : '',
+        evidenceInput ? evidenceInput.value : '',
+        savedBadge);
+}
+
+function saveToServer(itemId, status, note, evidence, badge) {
+    fetch(UPDATE_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
+        body: JSON.stringify({item_id: itemId, status: status, note: note, evidence: evidence}),
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success && badge) {
+            badge.classList.remove('hidden');
+            setTimeout(() => badge.classList.add('hidden'), 1500);
+        }
+    });
+}
+</script>
+{% endblock %}

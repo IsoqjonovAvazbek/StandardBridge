@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.select_industry_title }} — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <a href="{% url 'entrepreneur_dashboard' %}" class="text-blue-600 hover:underline text-sm">← Dashboard</a>
+        <h1 class="text-3xl font-bold text-gray-900 mt-2">{{ T.select_industry_title }}</h1>
+        <p class="text-gray-600 mt-1">{{ T.select_industry_sub }}</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="flex items-center gap-3 mb-8">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center">
+                <span class="text-white text-sm font-bold">1</span>
+            </div>
+            <span class="text-sm font-medium text-blue-600">{{ T.progress_industry }}</span>
+        </div>
+        <div class="flex-1 h-0.5 bg-gray-200"></div>
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                <span class="text-gray-500 text-sm font-bold">2</span>
+            </div>
+            <span class="text-sm text-gray-400">{{ T.progress_standards }}</span>
+        </div>
+        <div class="flex-1 h-0.5 bg-gray-200"></div>
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                <span class="text-gray-500 text-sm font-bold">3</span>
+            </div>
+            <span class="text-sm text-gray-400">{{ T.progress_result }}</span>
+        </div>
+    </div>
+
+    <!-- Sohalar -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {% for industry in industries %}
+        <a href="{% url 'select_standards' industry.pk %}"
+            class="bg-white rounded-2xl p-6 border-2 border-gray-100 card-hover text-center group hover:border-blue-500 transition-all">
+            <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                {% if industry.icon == 'shirt' %}
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                {% elif industry.icon == 'apple' %}
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                {% elif industry.icon == 'flask' %}
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                </svg>
+                {% elif industry.icon == 'tool' %}
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                {% else %}
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                {% endif %}
+            </div>
+            <h3 class="font-bold text-gray-900 text-lg mb-1">{{ industry.name }}</h3>
+            <p class="text-gray-500 text-sm">{{ industry.description }}</p>
+            <div class="mt-4 text-blue-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                {{ T.select_btn }} →
+            </div>
+        </a>
+        {% empty %}
+        <div class="col-span-3 text-center py-12 text-gray-400">
+            {{ T.no_industries }}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

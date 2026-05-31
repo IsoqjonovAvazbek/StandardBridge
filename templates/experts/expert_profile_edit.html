@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.edit_profile_title }} — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <a href="{% url 'expert_profile' %}" class="text-blue-600 hover:underline text-sm">← {{ T.my_profile_title }}</a>
+        <h1 class="text-3xl font-bold text-gray-900 mt-2">{{ T.edit_profile_title }}</h1>
+        <p class="text-gray-600 mt-1">{{ T.edit_profile_sub }}</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Shaxsiy ma'lumotlar -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 mb-6">
+            <h2 class="font-bold text-gray-900 mb-4">{{ T.personal_info }}</h2>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.first_name }}</label>
+                    <input type="text" name="first_name" value="{{ request.user.first_name }}"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.last_name }}</label>
+                    <input type="text" name="last_name" value="{{ request.user.last_name }}"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.phone }}</label>
+                    <input type="text" name="phone" value="{{ profile.phone }}"
+                        placeholder="+998901234567"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.region_field }}</label>
+                    <select name="region"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="">{{ T.select_placeholder }}</option>
+                        <option value="toshkent" {% if profile.region == 'toshkent' %}selected{% endif %}>Toshkent</option>
+                        <option value="fargona" {% if profile.region == 'fargona' %}selected{% endif %}>Farg'ona</option>
+                        <option value="samarqand" {% if profile.region == 'samarqand' %}selected{% endif %}>Samarqand</option>
+                        <option value="buxoro" {% if profile.region == 'buxoro' %}selected{% endif %}>Buxoro</option>
+                        <option value="andijon" {% if profile.region == 'andijon' %}selected{% endif %}>Andijon</option>
+                        <option value="namangan" {% if profile.region == 'namangan' %}selected{% endif %}>Namangan</option>
+                        <option value="qashqadaryo" {% if profile.region == 'qashqadaryo' %}selected{% endif %}>Qashqadaryo</option>
+                        <option value="surxondaryo" {% if profile.region == 'surxondaryo' %}selected{% endif %}>Surxondaryo</option>
+                        <option value="xorazm" {% if profile.region == 'xorazm' %}selected{% endif %}>Xorazm</option>
+                        <option value="navoiy" {% if profile.region == 'navoiy' %}selected{% endif %}>Navoiy</option>
+                        <option value="jizzax" {% if profile.region == 'jizzax' %}selected{% endif %}>Jizzax</option>
+                        <option value="sirdaryo" {% if profile.region == 'sirdaryo' %}selected{% endif %}>Sirdaryo</option>
+                        <option value="qoraqalpogiston" {% if profile.region == 'qoraqalpogiston' %}selected{% endif %}>Qoraqalpog'iston</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional ma'lumotlar -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 mb-6">
+            <h2 class="font-bold text-gray-900 mb-4">{{ T.professional_info }}</h2>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.bio_lbl }}</label>
+                <textarea name="bio" rows="4"
+                    placeholder="..."
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none">{{ profile.bio }}</textarea>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.specs_lbl }}</label>
+                <input type="text" name="specializations" value="{{ profile.specializations }}"
+                    placeholder="ISO9001 ISO22000 ISO14001"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.certs_lbl }}</label>
+                <textarea name="certificates" rows="4"
+                    placeholder="ISO 9001 Lead Auditor..."
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none">{{ profile.certificates }}</textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.exp_years_field }}</label>
+                <input type="number" name="experience_years" value="{{ profile.experience_years }}" min="0" max="50"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+        </div>
+
+        <!-- Narx va muddat -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 mb-6">
+            <h2 class="font-bold text-gray-900 mb-4">{{ T.price_and_terms }}</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.project_price_lbl }} ($)</label>
+                    <input type="number" name="project_price" value="{{ profile.project_price }}" min="0"
+                        placeholder="500"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.est_duration_lbl }} ({{ T.days_word }})</label>
+                    <input type="number" name="completion_days" value="{{ profile.completion_days }}" min="0"
+                        placeholder="30"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+            </div>
+        </div>
+
+        <!-- Sertifikat ma'lumotlari (Tasdiqlash uchun) -->
+        <div class="bg-white rounded-2xl p-6 border border-amber-100 mb-6">
+            <h2 class="font-bold text-gray-900 mb-1">{{ T.credentials_section }}</h2>
+            <p class="text-xs text-amber-700 mb-4 bg-amber-50 rounded-lg px-3 py-2">
+                ⚠ Bu ma'lumotlar admin tomonidan tekshiriladi. To'g'ri va to'liq to'ldiring.
+            </p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.cert_number_lbl }}</label>
+                    <input type="text" name="cert_number" value="{{ profile.cert_number }}"
+                        placeholder="CB-2024-1234"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.issuing_body_lbl }}</label>
+                    <input type="text" name="issuing_body" value="{{ profile.issuing_body }}"
+                        placeholder="Bureau Veritas, TÜV SÜD..."
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.cert_expiry_lbl }}</label>
+                    <input type="date" name="cert_expiry"
+                        value="{% if profile.cert_expiry %}{{ profile.cert_expiry|date:'Y-m-d' }}{% endif %}"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+            </div>
+        </div>
+
+        <!-- Mavjudlik holati -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 mb-6">
+            <h2 class="font-bold text-gray-900 mb-4">{{ T.availability_title }}</h2>
+            <label class="flex items-center gap-4 cursor-pointer">
+                <div class="relative">
+                    <input type="checkbox" name="is_available" id="is_available"
+                        {% if profile.is_available %}checked{% endif %}
+                        class="sr-only peer">
+                    <div class="w-12 h-6 bg-gray-200 peer-checked:bg-blue-600 rounded-full transition-colors duration-200"></div>
+                    <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 peer-checked:translate-x-6"></div>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900">{{ T.available_lbl }}</p>
+                    <p class="text-gray-500 text-sm">{{ T.available_desc }}</p>
+                </div>
+            </label>
+        </div>
+
+        <!-- Saqlash -->
+        <div class="flex gap-4">
+            <button type="submit"
+                class="flex-1 gradient-bg text-white py-4 rounded-xl font-semibold text-lg hover:opacity-90 transition">
+                {{ T.save }}
+            </button>
+            <a href="{% url 'expert_profile' %}"
+                class="flex-1 border-2 border-gray-300 text-gray-700 py-4 rounded-xl font-semibold text-lg text-center hover:bg-gray-50 transition">
+                {{ T.cancel_btn }}
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

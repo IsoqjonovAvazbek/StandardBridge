@@ -1,0 +1,40 @@
+# --- Maxfiy / muhit ---
+.env
+*.env
+!.env.example
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+
+# --- Django ---
+db.sqlite3
+db.sqlite3-journal
+*.log
+local_settings.py
+
+# --- Media (foydalanuvchi yuklagan fayllar) ---
+media/
+
+# --- Statik (yig'ilgan) ---
+/staticfiles/
+/static_root/
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# --- Test / coverage ---
+.pytest_cache/
+.coverage
+htmlcov/

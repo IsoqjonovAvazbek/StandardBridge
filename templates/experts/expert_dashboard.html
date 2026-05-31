@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.dashboard }} — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="p-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">{{ T.welcome }}, {{ request.user.first_name }}! 👋</h1>
+        <p class="text-gray-600 mt-1">{{ T.expert_title }} dashboard</p>
+    </div>
+
+    <!-- Statistika -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-2xl p-6 border border-gray-100">
+            <p class="text-gray-500 text-sm mb-2">{{ T.total_projects }}</p>
+            <p class="text-4xl font-bold text-gray-900">{{ total }}</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-gray-100">
+            <p class="text-gray-500 text-sm mb-2">{{ T.active }}</p>
+            <p class="text-4xl font-bold text-orange-500">{{ in_progress }}</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-gray-100">
+            <p class="text-gray-500 text-sm mb-2">{{ T.completed }}</p>
+            <p class="text-4xl font-bold text-green-500">{{ completed }}</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-gray-100">
+            <p class="text-gray-500 text-sm mb-2">{{ T.earnings }}</p>
+            <p class="text-4xl font-bold text-blue-600">${{ earnings }}</p>
+        </div>
+    </div>
+
+    <!-- Yangi takliflar -->
+    {% if new_projects %}
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">🔔 {{ T.new_projects }}</h2>
+        <div class="space-y-4">
+            {% for project in new_projects %}
+            {% with hours_left=project.sla_hours_left %}
+            <div class="border rounded-2xl p-6
+                {% if project.sla_status == 'breached' %}bg-red-50 border-red-300
+                {% elif project.sla_status == 'warning' %}bg-yellow-50 border-yellow-300
+                {% else %}bg-blue-50 border-blue-200{% endif %}">
+
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-bold
+                                {% if project.sla_status == 'breached' %}text-red-900
+                                {% elif project.sla_status == 'warning' %}text-yellow-900
+                                {% else %}text-blue-900{% endif %}">
+                                {{ project.entrepreneur.company_name }}
+                            </h3>
+                            <!-- SLA status badge -->
+                            {% if project.sla_status == 'breached' %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-200 text-red-800">
+                                🚨 {{ T.sla_breached }}
+                            </span>
+                            {% elif project.sla_status == 'warning' %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-200 text-yellow-800">
+                                ⚠️ {{ T.sla_warning }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <p class="text-sm mt-1
+                            {% if project.sla_status == 'breached' %}text-red-700
+                            {% elif project.sla_status == 'warning' %}text-yellow-700
+                            {% else %}text-blue-700{% endif %}">
+                            {{ project.analysis.local_standard.code }} →
+                            {{ project.analysis.target_standard.code }}
+                            • {{ project.analysis.gaps.count }} gap
+                        </p>
+
+                        {% if project.entrepreneur_message %}
+                        <p class="text-sm mt-2 italic
+                            {% if project.sla_status == 'breached' %}text-red-600
+                            {% elif project.sla_status == 'warning' %}text-yellow-600
+                            {% else %}text-blue-600{% endif %}">
+                            "{{ project.entrepreneur_message|truncatechars:100 }}"
+                        </p>
+                        {% endif %}
+
+                        <!-- SLA countdown -->
+                        {% if project.sla_deadline %}
+                        <div class="mt-3 flex items-center gap-2">
+                            <svg class="w-4 h-4 {% if project.sla_status == 'breached' %}text-red-500{% elif project.sla_status == 'warning' %}text-yellow-600{% else %}text-blue-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="text-sm font-medium
+                                {% if project.sla_status == 'breached' %}text-red-700
+                                {% elif project.sla_status == 'warning' %}text-yellow-700
+                                {% else %}text-blue-700{% endif %}">
+                                {{ T.sla_time_left }}:
+                                <span class="font-bold countdown-timer"
+                                      data-deadline="{{ project.sla_deadline|date:'c' }}"
+                                      data-breached-text="{{ T.sla_breached }}"
+                                      data-hours-text="{{ T.sla_hours_left }}">
+                                    {% if hours_left and hours_left > 0 %}
+                                        {{ hours_left|floatformat:0 }} {{ T.sla_hours_left }}
+                                    {% else %}
+                                        {{ T.sla_breached }}
+                                    {% endif %}
+                                </span>
+                            </span>
+                            <span class="text-xs
+                                {% if project.sla_status == 'breached' %}text-red-500
+                                {% elif project.sla_status == 'warning' %}text-yellow-500
+                                {% else %}text-blue-400{% endif %}">
+                                — {{ T.sla_respond_hint }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <a href="{% url 'project_set_price' project.pk %}"
+                        class="shrink-0 gradient-bg text-white px-5 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
+                        {{ T.set_price }} →
+                    </a>
+                </div>
+            </div>
+            {% endwith %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Faol loyihalar -->
+    <div>
+        <h2 class="text-xl font-bold text-gray-900 mb-4">{{ T.active_projects_label }}</h2>
+        <div class="space-y-4">
+            {% for project in projects %}
+            {% if project.status == 'in_progress' or project.status == 'review' %}
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-gray-900">{{ project.entrepreneur.company_name }}</h3>
+                        <p class="text-gray-500 text-sm mt-1">
+                            {{ project.analysis.local_standard.code }} → {{ project.analysis.target_standard.code }}
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="text-right">
+                            <p class="font-bold text-gray-900">${{ project.expert_payment }}</p>
+                            <p class="text-gray-400 text-xs">{{ T.earnings }}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium
+                            {% if project.status == 'review' %}bg-purple-100 text-purple-700
+                            {% else %}bg-orange-100 text-orange-700{% endif %}">
+                            {{ project.get_status_display }}
+                        </span>
+                        <a href="{% url 'project_detail' project.pk %}"
+                            class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium">
+                            {{ T.details_btn }} →
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Live countdown script -->
+<script>
+(function () {
+    function updateCountdowns() {
+        document.querySelectorAll('.countdown-timer').forEach(function (el) {
+            var deadline = new Date(el.dataset.deadline);
+            var now = new Date();
+            var diffMs = deadline - now;
+
+            if (diffMs <= 0) {
+                el.textContent = el.dataset.breachedText;
+                el.classList.add('text-red-700');
+                return;
+            }
+
+            var totalMinutes = Math.floor(diffMs / 60000);
+            var hours = Math.floor(totalMinutes / 60);
+            var minutes = totalMinutes % 60;
+
+            if (hours > 0) {
+                el.textContent = hours + 'h ' + minutes + 'm ' + el.dataset.hoursText.replace(/\S+\s*$/, '').trim();
+            } else {
+                el.textContent = minutes + ' min';
+            }
+        });
+    }
+
+    updateCountdowns();
+    setInterval(updateCountdowns, 60000); // refresh every minute
+})();
+</script>
+{% endblock %}

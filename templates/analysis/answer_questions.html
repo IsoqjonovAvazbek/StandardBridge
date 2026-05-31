@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block title %}Savollar — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <a href="{% url 'select_standards' industry.pk %}" class="text-blue-600 hover:underline text-sm">← Standartlar</a>
+        <h1 class="text-3xl font-bold text-gray-900 mt-2">Korxonangiz holati</h1>
+        <p class="text-gray-600 mt-1">Har bir savolga halol javob bering — natija shuncha aniq bo'ladi</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="flex items-center gap-3 mb-8">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <span class="text-sm font-medium text-green-600">Soha</span>
+        </div>
+        <div class="flex-1 h-0.5 bg-green-500"></div>
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <span class="text-sm font-medium text-green-600">Standartlar</span>
+        </div>
+        <div class="flex-1 h-0.5 bg-blue-500"></div>
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center">
+                <span class="text-white text-sm font-bold">3</span>
+            </div>
+            <span class="text-sm font-medium text-blue-600">Holat</span>
+        </div>
+        <div class="flex-1 h-0.5 bg-gray-200"></div>
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                <span class="text-gray-500 text-sm font-bold">4</span>
+            </div>
+            <span class="text-sm text-gray-400">Natija</span>
+        </div>
+    </div>
+
+    <!-- Standart nomi -->
+    {% for std in target_standards %}
+    <div class="bg-blue-50 border border-blue-200 rounded-xl px-5 py-3 mb-6 flex items-center gap-3">
+        <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <div>
+            <span class="font-bold text-blue-900">{{ std.code }}</span>
+            <span class="text-blue-700 text-sm ml-2">— {{ std.name }}</span>
+        </div>
+    </div>
+    {% endfor %}
+
+    <form method="POST" id="questionsForm">
+        {% csrf_token %}
+
+        <!-- Korxona konteksti (AI tahlilini aniqroq qiladi) -->
+        <div class="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-6">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-lg">🏢</span>
+                <h2 class="text-lg font-bold text-gray-800">{{ T.ctx_title }}</h2>
+            </div>
+            <p class="text-sm text-gray-500 mb-4">{{ T.ctx_sub }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.ctx_employees }}</label>
+                    <input type="number" name="employee_count" min="1" placeholder="50"
+                           class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.ctx_export }}</label>
+                    <input type="text" name="export_markets" placeholder="{{ T.ctx_export_ph }}"
+                           class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.ctx_certs }}</label>
+                    <input type="text" name="existing_certs" placeholder="{{ T.ctx_certs_ph }}"
+                           class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.ctx_state }}</label>
+                    <textarea name="current_state" rows="2" placeholder="{{ T.ctx_state_ph }}"
+                              class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            {% for question in questions %}
+            <div class="bg-white rounded-2xl p-6 border border-gray-100" id="q-{{ question.pk }}">
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span class="text-gray-600 text-sm font-bold">{{ forloop.counter }}</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-900 mb-1">{{ question.text }}</p>
+                        {% if question.help_text %}
+                        <p class="text-gray-500 text-sm mb-4">{{ question.help_text }}</p>
+                        {% endif %}
+
+                        <!-- Javob tugmalari -->
+                        <div class="flex gap-3 mt-3">
+                            <label class="cursor-pointer flex-1">
+                                <input type="radio" name="question_{{ question.pk }}" value="yes" class="hidden peer" required>
+                                <div class="peer-checked:bg-green-500 peer-checked:text-white peer-checked:border-green-500 border-2 border-gray-200 rounded-xl py-3 text-center text-sm font-medium text-gray-600 hover:border-green-300 transition-all">
+                                    ✓ Ha
+                                </div>
+                            </label>
+                            {% if question.answer_type == 'yes_partial_no' %}
+                            <label class="cursor-pointer flex-1">
+                                <input type="radio" name="question_{{ question.pk }}" value="partial" class="hidden peer">
+                                <div class="peer-checked:bg-yellow-400 peer-checked:text-white peer-checked:border-yellow-400 border-2 border-gray-200 rounded-xl py-3 text-center text-sm font-medium text-gray-600 hover:border-yellow-300 transition-all">
+                                    ~ Qisman
+                                </div>
+                            </label>
+                            {% endif %}
+                            <label class="cursor-pointer flex-1">
+                                <input type="radio" name="question_{{ question.pk }}" value="no" class="hidden peer">
+                                <div class="peer-checked:bg-red-500 peer-checked:text-white peer-checked:border-red-500 border-2 border-gray-200 rounded-xl py-3 text-center text-sm font-medium text-gray-600 hover:border-red-300 transition-all">
+                                    ✗ Yo'q
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Progress counter -->
+        <div class="sticky bottom-4 mt-6">
+            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-lg flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Javob berildi</p>
+                    <p class="font-bold text-gray-900"><span id="answered">0</span> / {{ questions|length }}</p>
+                </div>
+                <button type="submit" id="submitBtn"
+                    class="gradient-bg text-white px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition flex items-center gap-2 disabled:opacity-50"
+                    disabled>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    AI tahlilni boshlash
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+const totalQuestions = {{ questions|length }};
+const submitBtn = document.getElementById('submitBtn');
+const answeredSpan = document.getElementById('answered');
+
+function updateProgress() {
+    const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+    const unique = new Set(
+        Array.from(document.querySelectorAll('input[type="radio"]:checked'))
+            .map(r => r.name)
+    ).size;
+    answeredSpan.textContent = unique;
+    if (unique >= totalQuestions) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50');
+    } else {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-50');
+    }
+}
+
+document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', updateProgress);
+});
+
+document.getElementById('questionsForm').addEventListener('submit', function() {
+    submitBtn.innerHTML = `
+        <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        AI tahlil qilmoqda...
+    `;
+    submitBtn.disabled = true;
+});
+</script>
+{% endblock %}

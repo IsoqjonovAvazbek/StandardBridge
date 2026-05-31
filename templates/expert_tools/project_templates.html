@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.et_proj_templates }} — StandardBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">{{ T.et_proj_templates }}</h1>
+    <p class="text-sm text-gray-500 mt-1">ISO sertifikatsiya loyihalari uchun tayyor rejalar</p>
+  </div>
+
+  {% if templates %}
+  <div class="grid lg:grid-cols-2 gap-6">
+    {% for tpl in templates %}
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <!-- Card header -->
+      <div class="gradient-bg p-6 text-white">
+        <div class="flex items-start justify-between">
+          <div>
+            <span class="text-xs bg-white/20 text-white px-2 py-0.5 rounded-lg font-medium">{{ tpl.get_standard_display }}</span>
+            <h3 class="text-lg font-bold mt-2">{{ tpl.title }}</h3>
+            <p class="text-sm text-white/80 mt-1">{{ tpl.description }}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 mt-4">
+          <div class="bg-white/20 rounded-xl px-3 py-2 text-center">
+            <p class="text-lg font-bold">{{ tpl.total_days }}</p>
+            <p class="text-xs text-white/70">{{ T.et_total_days }}</p>
+          </div>
+          <div class="bg-white/20 rounded-xl px-3 py-2 text-center">
+            <p class="text-lg font-bold">{{ tpl.steps.count }}</p>
+            <p class="text-xs text-white/70">{{ T.et_template_steps }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Steps -->
+      <div class="p-5">
+        <div class="space-y-2 mb-5">
+          {% for step in tpl.steps.all %}
+          <div class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 text-xs flex items-center justify-center font-bold mt-0.5">
+              {{ step.order }}
+            </span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-medium text-gray-800">{{ step.title }}</span>
+                <span class="text-xs text-gray-400 flex-shrink-0">{{ step.duration_days }} {{ T.et_step_days }}</span>
+              </div>
+              {% if step.deliverable %}
+              <p class="text-xs text-gray-400 mt-0.5">📄 {{ step.deliverable }}</p>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Apply to project -->
+        {% if projects %}
+        <form method="get" action="" id="applyForm-{{ tpl.pk }}">
+          <div class="flex gap-2">
+            <select name="project_id" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">{{ T.et_select_project }}</option>
+              {% for prj in projects %}
+              <option value="{{ prj.pk }}">{{ prj.entrepreneur.company_name }}</option>
+              {% endfor %}
+            </select>
+            <button type="button"
+                    onclick="applyTemplate({{ tpl.pk }}, this.closest('.flex').querySelector('select').value)"
+                    class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition flex-shrink-0">
+              {{ T.et_apply_btn }}
+            </button>
+          </div>
+        </form>
+        {% else %}
+        <p class="text-xs text-gray-400 text-center py-2">Faol loyihalar yo'q</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-16 bg-white rounded-2xl border border-gray-100">
+    <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+    <p class="text-gray-400 text-sm">{{ T.et_no_templates }}</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Apply confirm modal -->
+<div id="applyModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+    <h3 class="font-bold text-gray-900 mb-2">{{ T.et_apply_template }}</h3>
+    <p class="text-sm text-gray-500 mb-6" id="applyModalText">Shablonni loyihaga qo'llash?</p>
+    <form method="post" id="applyModalForm">
+      {% csrf_token %}
+      <div class="flex gap-3">
+        <button type="button" onclick="document.getElementById('applyModal').classList.add('hidden')"
+                class="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium">
+          {{ T.cancel }}
+        </button>
+        <button type="submit" class="flex-1 gradient-bg text-white py-2.5 rounded-xl text-sm font-medium">
+          {{ T.et_apply_btn }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function applyTemplate(tplPk, projectPk) {
+  if (!projectPk) { alert("{{ T.et_select_project }}"); return; }
+  const url = `/expert-tools/templates/${tplPk}/apply/${projectPk}/`;
+  document.getElementById('applyModalForm').action = url;
+  document.getElementById('applyModal').classList.remove('hidden');
+}
+</script>
+{% endblock %}

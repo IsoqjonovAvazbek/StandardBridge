@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.et_edit_doc }} — {{ doc.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Breadcrumb -->
+  <div class="flex items-center gap-2 mb-6 text-sm text-gray-400">
+    <a href="{% url 'expert_doc_list' %}" class="hover:text-gray-600">{{ T.et_doc_list }}</a>
+    <span>›</span>
+    <a href="{% url 'expert_doc_detail' doc.pk %}" class="hover:text-gray-600 truncate">{{ doc.title }}</a>
+    <span>›</span>
+    <span class="text-gray-600">{{ T.et_edit_doc }}</span>
+  </div>
+
+  <h1 class="text-xl font-bold text-gray-900 mb-6">{{ T.et_edit_doc }}: {{ doc.title }}</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
+
+      <!-- Status -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ T.et_doc_status }}</label>
+        <select name="status"
+                class="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="draft" {% if doc.status == 'draft' %}selected{% endif %}>{{ T.et_doc_draft }}</option>
+          <option value="sent" {% if doc.status == 'sent' %}selected{% endif %}>{{ T.et_doc_sent }}</option>
+          <option value="approved" {% if doc.status == 'approved' %}selected{% endif %}>{{ T.et_doc_approved }}</option>
+        </select>
+      </div>
+
+      <!-- Content -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ T.et_doc_content }}</label>
+        <textarea name="content" rows="28"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y">{{ doc.content }}</textarea>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <a href="{% url 'expert_doc_detail' doc.pk %}"
+           class="flex-1 text-center border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+          {{ T.cancel }}
+        </a>
+        <button type="submit"
+                class="flex-1 gradient-bg text-white py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition">
+          {{ T.et_save_doc }}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

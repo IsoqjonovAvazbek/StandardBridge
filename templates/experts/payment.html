@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block title %}To'lov — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <a href="{% url 'project_detail' project.pk %}" class="text-blue-600 hover:underline text-sm">← Loyiha</a>
+        <h1 class="text-3xl font-bold text-gray-900 mt-2">To'lov</h1>
+        <p class="text-gray-600 mt-1">Mutaxassis ish boshlagandan keyin pul unga o'tkaziladi</p>
+    </div>
+
+    {% if payment and payment.status == 'held' %}
+    <!-- To'lov amalga oshirilgan -->
+    <div class="bg-green-50 border border-green-200 rounded-2xl p-6 mb-6">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <div>
+                <h2 class="font-bold text-green-900">To'lov amalga oshirildi!</h2>
+                <p class="text-green-700 text-sm">Pul platformada saqlanmoqda — mutaxassis ishni tugatgach o'tkaziladi</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl p-4 mt-4">
+            <div class="flex justify-between text-sm mb-2">
+                <span class="text-gray-500">To'langan:</span>
+                <span class="font-bold text-gray-900">${{ payment.amount }}</span>
+            </div>
+            <div class="flex justify-between text-sm mb-2">
+                <span class="text-gray-500">Platforma (20%):</span>
+                <span class="text-gray-700">${{ payment.platform_fee }}</span>
+            </div>
+            <div class="flex justify-between text-sm mb-2">
+                <span class="text-gray-500">Mutaxassisga (80%):</span>
+                <span class="font-bold text-green-600">${{ payment.expert_amount }}</span>
+            </div>
+            <div class="flex justify-between text-sm mt-3 pt-3 border-t border-gray-100">
+                <span class="text-gray-500">Holat:</span>
+                <span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-medium">Ushlab turilgan</span>
+            </div>
+            <div class="flex justify-between text-sm mt-2">
+                <span class="text-gray-500">Tranzaksiya:</span>
+                <span class="text-gray-500 text-xs">{{ payment.payme_transaction_id }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loyihani yakunlash — faqat expert "review" holatga o'tkazganidan keyin ko'rinadi -->
+    {% if project.status == 'review' %}
+    <div class="bg-white rounded-2xl p-6 border border-gray-100">
+        <h3 class="font-bold text-gray-900 mb-2">Ish tugadimi?</h3>
+        <p class="text-gray-600 text-sm mb-4">Mutaxassis ishni tugatdi — tekshiring va tasdiqlang. Pul avtomatik o'tkaziladi.</p>
+        <form method="POST" action="{% url 'payment_release' project.pk %}">
+            {% csrf_token %}
+            <button type="submit"
+                onclick="return confirm('Ishni tasdiqlaysizmi? Pul mutaxassisga o\'tkaziladi.')"
+                class="w-full bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition">
+                ✓ Ishni qabul qildim — pul o'tkazilsin
+            </button>
+        </form>
+    </div>
+    {% elif project.status == 'in_progress' %}
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+        <p class="text-blue-800 text-sm">⏳ Mutaxassis hozir ish ustida ishlamoqda. U ishni tugatgach, tasdiqlash tugmasi paydo bo'ladi.</p>
+    </div>
+    {% endif %}
+
+    {% elif payment and payment.status == 'released' %}
+    <!-- Yakunlangan -->
+    <div class="bg-white rounded-2xl p-6 border border-gray-100 text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <h2 class="font-bold text-gray-900 text-xl mb-2">Loyiha yakunlandi!</h2>
+        <p class="text-gray-600 mb-4">${{ payment.expert_amount }} mutaxassisga o'tkazildi</p>
+        <div class="bg-gray-50 rounded-xl p-4 text-left">
+            <div class="flex justify-between text-sm mb-2">
+                <span class="text-gray-500">Jami to'langan:</span>
+                <span class="font-bold">${{ payment.amount }}</span>
+            </div>
+            <div class="flex justify-between text-sm mb-2">
+                <span class="text-gray-500">Mutaxassisga:</span>
+                <span class="font-bold text-green-600">${{ payment.expert_amount }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="text-gray-500">Platforma:</span>
+                <span class="text-gray-700">${{ payment.platform_fee }}</span>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- To'lov qilish -->
+    <div class="bg-white rounded-2xl p-6 border border-gray-100 mb-6">
+        <h2 class="font-bold text-gray-900 mb-4">Loyiha ma'lumotlari</h2>
+        <div class="space-y-3">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Standart:</span>
+                <span class="font-medium">{{ project.analysis.local_standard.code }} → {{ project.analysis.target_standard.code }}</span>
+            </div>
+            {% if project.expert %}
+            <div class="flex justify-between">
+                <span class="text-gray-500">Mutaxassis:</span>
+                <span class="font-medium">{{ project.expert.get_full_name }}</span>
+            </div>
+            {% endif %}
+            <div class="border-t border-gray-100 pt-3">
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Loyiha narxi:</span>
+                    <span class="text-2xl font-bold text-gray-900">${{ project.expert_price }}</span>
+                </div>
+                <div class="flex justify-between text-sm mt-2">
+                    <span class="text-gray-400">Platforma (20%):</span>
+                    <span class="text-gray-500">${{ project.platform_fee }}</span>
+                </div>
+                <div class="flex justify-between text-sm mt-1">
+                    <span class="text-gray-400">Mutaxassisga (80%):</span>
+                    <span class="text-gray-500">${{ project.expert_payment }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Escrow tushuntirish -->
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5 mb-6">
+        <h3 class="font-bold text-blue-900 mb-2">Escrow tizimi qanday ishlaydi?</h3>
+        <div class="space-y-2">
+            <div class="flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+                <p class="text-blue-800 text-sm">Siz to'lov qilasiz — pul platformada saqlanadi</p>
+            </div>
+            <div class="flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                <p class="text-blue-800 text-sm">Mutaxassis ish qiladi — siz kuzatasiz</p>
+            </div>
+            <div class="flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+                <p class="text-blue-800 text-sm">Ish tugagach — siz tasdiqlaysiz, pul mutaxassisga o'tadi</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- To'lov usulini tanlash -->
+    <div class="space-y-3">
+
+        {% if click_service_id %}
+        <!-- Click -->
+        <a href="https://my.click.uz/services/pay?service_id={{ click_service_id }}&merchant_id={{ click_merchant_id }}&amount={{ project.expert_price }}&transaction_param={{ project.pk }}&return_url={{ click_return_url }}{% url 'project_detail' project.pk %}"
+            class="w-full flex items-center justify-center gap-3 bg-[#00ADEF] hover:bg-[#009ed8] text-white py-4 rounded-xl font-bold text-lg transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+            </svg>
+            Click orqali — ${{ project.expert_price }}
+        </a>
+        {% endif %}
+
+        <!-- Mock (test rejim) -->
+        <form method="POST" action="{% url 'payment_confirm' project.pk %}">
+            {% csrf_token %}
+            <button type="submit"
+                class="w-full border-2 border-gray-300 text-gray-700 py-4 rounded-xl font-bold text-lg hover:bg-gray-50 transition flex items-center justify-center gap-3">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Test rejim (mock to'lov)
+            </button>
+        </form>
+
+        <p class="text-center text-gray-400 text-xs pt-1">
+            Click sozlanmagan bo'lsa test rejim ishlatiladi
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

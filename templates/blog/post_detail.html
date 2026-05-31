@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }} — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-4xl mx-auto">
+
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-sm text-gray-400 mb-6">
+        <a href="{% url 'blog_list' %}" class="hover:text-blue-600 transition">{{ T.back_to_blog }}</a>
+        {% if post.category %}
+        <span>/</span>
+        <a href="{% url 'blog_list' %}?category={{ post.category.slug }}" class="hover:text-blue-600 transition">{{ post.category.name }}</a>
+        {% endif %}
+        <span>/</span>
+        <span class="text-gray-600 truncate">{{ post.title|truncatechars:40 }}</span>
+    </div>
+
+    <article class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        {% if post.cover_image %}
+        <img src="{{ post.cover_image }}" alt="{{ post.title }}" class="w-full h-64 object-cover">
+        {% endif %}
+
+        <div class="p-8">
+            {% if post.category %}
+            <span class="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">{{ post.category.name }}</span>
+            {% endif %}
+
+            <h1 class="text-3xl font-bold text-gray-900 mt-4 mb-4 leading-tight">{{ post.title }}</h1>
+
+            <div class="flex items-center gap-4 text-sm text-gray-400 mb-8 pb-6 border-b border-gray-100">
+                {% if post.author %}
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 gradient-bg rounded-full flex items-center justify-center">
+                        <span class="text-white text-xs font-bold">{{ post.author.first_name|first }}</span>
+                    </div>
+                    <span>{{ post.author.get_full_name }}</span>
+                </div>
+                {% endif %}
+                <span>{{ post.created_at|date:"d F Y" }}</span>
+                <span>{{ post.read_time }} {{ T.min_read }}</span>
+                <span>{{ post.views_count }} {{ T.views_word }}</span>
+            </div>
+
+            <!-- Kontent -->
+            <div class="prose max-w-none text-gray-700 leading-relaxed space-y-4">
+                {{ post.content|linebreaks }}
+            </div>
+        </div>
+    </article>
+
+    <!-- Bog'liq maqolalar -->
+    {% if related %}
+    <div class="mt-10">
+        <h2 class="text-xl font-bold text-gray-900 mb-5">{{ T.blog }}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {% for r in related %}
+            <a href="{% url 'blog_detail' r.slug %}"
+                class="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition card-hover block">
+                <h3 class="font-semibold text-gray-900 text-sm line-clamp-2 mb-2">{{ r.title }}</h3>
+                <div class="flex items-center gap-2 text-xs text-gray-400">
+                    <span>{{ r.created_at|date:"d.m.Y" }}</span>
+                    <span>·</span>
+                    <span>{{ r.read_time }} {{ T.min_read }}</span>
+                </div>
+                <div class="mt-2 text-blue-600 text-xs font-medium">{{ T.read_more_btn }} →</div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

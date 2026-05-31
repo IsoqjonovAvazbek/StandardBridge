@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}{{ T.blog }} — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-6xl mx-auto">
+
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">{{ T.blog }}</h1>
+        <p class="text-gray-500 mt-1">{{ T.blog_subtitle }}</p>
+    </div>
+
+    <!-- Kategoriyalar -->
+    {% if categories %}
+    <div class="flex flex-wrap gap-2 mb-8">
+        <a href="{% url 'blog_list' %}"
+            class="px-4 py-1.5 rounded-full text-sm font-medium transition
+            {% if not selected_category %}gradient-bg text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+            {{ T.all_regions }}
+        </a>
+        {% for cat in categories %}
+        <a href="?category={{ cat.slug }}"
+            class="px-4 py-1.5 rounded-full text-sm font-medium transition
+            {% if selected_category == cat.slug %}gradient-bg text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+            {{ cat.name }}
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Maqolalar grid -->
+    {% if posts %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for post in posts %}
+        <a href="{% url 'blog_detail' post.slug %}"
+            class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md transition card-hover block">
+            {% if post.cover_image %}
+            <img src="{{ post.cover_image }}" alt="{{ post.title }}"
+                class="w-full h-44 object-cover">
+            {% else %}
+            <div class="w-full h-44 gradient-bg flex items-center justify-center">
+                <svg class="w-12 h-12 text-white opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+            </div>
+            {% endif %}
+            <div class="p-5">
+                {% if post.category %}
+                <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{{ post.category.name }}</span>
+                {% endif %}
+                <h2 class="font-bold text-gray-900 mt-2 mb-2 line-clamp-2">{{ post.title }}</h2>
+                {% if post.excerpt %}
+                <p class="text-gray-500 text-sm line-clamp-3">{{ post.excerpt }}</p>
+                {% endif %}
+                <div class="flex items-center gap-3 mt-4 text-xs text-gray-400">
+                    <span>{{ post.created_at|date:"d.m.Y" }}</span>
+                    <span>·</span>
+                    <span>{{ post.read_time }} {{ T.min_read }}</span>
+                    <span>·</span>
+                    <span>{{ post.views_count }} {{ T.views_word }}</span>
+                </div>
+                <div class="mt-3 text-blue-600 text-xs font-medium">{{ T.read_more_btn }} →</div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20">
+        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+        </div>
+        <h3 class="font-semibold text-gray-700 mb-1">{{ T.no_posts }}</h3>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
