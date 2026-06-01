@@ -160,6 +160,8 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] Railway Custom Start Command: migrate + collectstatic + seed_data + seed_questions + load_checklist + gunicorn (Procfile web: ham shu)
 - [x] seed_data management buyrug'i (analysis): 11 sanoat + 8 standart yuklaydi (idempotent get_or_create) — "Sohalar topilmadi" muammosi shu bilan hal bo'ldi (Postgres bo'sh edi)
 - [x] To'liq tizim testi: register (entrepreneur+expert, profil yaratiladi), soha/standart tanlash, dashboard/analysis/qms/expert-tools/admin-panel — hammasi 200/302 OK
+- [x] AI tahlil production'da ishladi (GROQ_API_KEY Railway Variables ga yangi kalit qo'yilgach — eski 401 Invalid API Key edi). Logging xatoni aniq ushladi
+- [x] seed_experts management buyrug'i (accounts): har viloyat uchun 1 ta demo tasdiqlangan expert (13 ta, user+ExpertProfile, is_verified=True, login: expert_<region>/demo12345, idempotent). Procfile web: ga qo'shildi. "Hali mutaxassis yo'q" muammosi hal bo'ldi
 - [x] 5-qadam: Deploy fayllari — Procfile (release: migrate + web: gunicorn core.wsgi --workers 3 --timeout 120), runtime.txt (python-3.12.7), requirements.txt ga gunicorn/whitenoise/dj-database-url/psycopg2-binary qo'shildi. settings.py: DATABASE_URL env bo'lsa Postgres (dj_database_url.parse, conn_max_age=600), bo'lmasa SQLite. .env.example + README ga deploy bo'limi. 36 test OK. (gunicorn faqat Linux/serverda ishlaydi, Windows lokalda emas)
 
 ## PENDING (bajarilmagan)
