@@ -164,6 +164,11 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] seed_experts management buyrug'i (accounts): har viloyat uchun 1 ta demo tasdiqlangan expert (13 ta, user+ExpertProfile, is_verified=True, login: expert_<region>/demo12345, idempotent). Procfile web: ga qo'shildi. "Hali mutaxassis yo'q" muammosi hal bo'ldi
 - [x] 5-qadam: Deploy fayllari — Procfile (release: migrate + web: gunicorn core.wsgi --workers 3 --timeout 120), runtime.txt (python-3.12.7), requirements.txt ga gunicorn/whitenoise/dj-database-url/psycopg2-binary qo'shildi. settings.py: DATABASE_URL env bo'lsa Postgres (dj_database_url.parse, conn_max_age=600), bo'lmasa SQLite. .env.example + README ga deploy bo'limi. 36 test OK. (gunicorn faqat Linux/serverda ishlaydi, Windows lokalda emas)
 
+### Login soddalashtirildi (rol tanlovsiz)
+- [x] Login'dan rol tanlash (Tadbirkor/Mutaxassis tugmalari) OLIB TASHLANDI — login.html va login_view. Tizim username/paroldan rolni o'zi aniqlaydi va dashboard view orqali to'g'ri sahifaga yo'naltiradi (entrepreneur→/analysis/, expert→/experts/dashboard/, admin→/admin-panel/)
+- [x] Registratsiyada rol tanlash QOLADI (Tadbirkor/Mutaxassis + mos maydonlar) — bu yerda foydalanuvchi kim ekanini belgilaydi
+- [x] accounts/tests.py: test_login_no_role_needed_redirects_by_role qo'shildi (10 test)
+
 ## PENDING (bajarilmagan)
 - [x] QMS tool — TO'LIQ bajarilgan (checklist ISO9001/22000/14001/45001, hujjatlar, NC, audit)
 - [x] Expert Tools — TO'LIQ bajarilgan (AI doc generator, audit checklist, project templates, CRM — /expert-tools/)

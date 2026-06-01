@@ -76,3 +76,16 @@ class LoginTests(TestCase):
             'username': 'loginuser', 'password': 'notri',
         })
         self.assertEqual(resp.status_code, 200)  # formaga qaytadi
+
+    def test_login_no_role_needed_redirects_by_role(self):
+        """Login'da rol tanlanmaydi — tizim rolga qarab yo'naltiradi."""
+        expert = CustomUser.objects.create_user(
+            username='exp_login', password='parol12345', role='expert',
+        )
+        # rol YUBORILMAYDI
+        resp = self.client.post(reverse('login'), {
+            'username': 'exp_login', 'password': 'parol12345',
+        }, follow=True)
+        self.assertEqual(resp.status_code, 200)
+        # expert dashboard'ga yetib borishi kerak
+        self.assertEqual(resp.request['PATH_INFO'], reverse('expert_dashboard'))
