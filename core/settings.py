@@ -80,12 +80,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+# Baza: DATABASE_URL env bo'lsa (production, masalan Postgres) — o'shani ishlatadi,
+# aks holda lokal SQLite. Hostingda DATABASE_URL ni o'rnating.
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+_database_url = os.environ.get('DATABASE_URL', '').strip()
+if _database_url:
+    import dj_database_url
+    DATABASES['default'] = dj_database_url.parse(_database_url, conn_max_age=600)
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

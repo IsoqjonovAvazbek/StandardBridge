@@ -92,6 +92,17 @@ nosniff, X-Frame-Options DENY. Statik fayllarni WhiteNoise uzatadi.
 
 Loglar: `logs/app.log` (hammasi) va `logs/error.log` (faqat xatolar).
 
+### Hostingga deploy (Railway / Render / Heroku-mos)
+
+Loyiha quyidagi fayllar bilan deploy-ga tayyor:
+- **Procfile** — `release` (migrate) + `web` (gunicorn)
+- **runtime.txt** — Python 3.12.7
+- **requirements.txt** — gunicorn, whitenoise, psycopg2 kiritilgan
+
+Hostingda environment variables o'rnating: `SECRET_KEY`, `DEBUG=False`,
+`ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `GROQ_API_KEY`, va Postgres uchun
+`DATABASE_URL` (bo'sh bo'lsa SQLite ishlatiladi).
+
 ## Muhim eslatmalar
 - `.env` hech qachon git'ga qo'shilmaydi (maxfiy kalitlar)
 - Loyiha xotirasi va to'liq feature ro'yxati: **CLAUDE.md**
