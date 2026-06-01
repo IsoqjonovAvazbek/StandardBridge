@@ -152,6 +152,16 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] 4-qadam: Custom error sahifalar — templates/404.html, 500.html, 403.html (mustaqil, base.html'siz, inline Tailwind — 500 da context processor ishlamasligi uchun). UZ/RU/EN matn, "Bosh sahifaga qaytish" tugma, brend gradient. DEBUG=False da test: 404 to'g'ri ishladi, hammasi standalone render OK
 - [x] 5-qadam: Deploy fayllari — Procfile (release: migrate + web: gunicorn core.wsgi --workers 3 --timeout 120), runtime.txt (python-3.12.7), requirements.txt ga gunicorn/whitenoise/dj-database-url/psycopg2-binary qo'shildi. settings.py: DATABASE_URL env bo'lsa Postgres (dj_database_url.parse, conn_max_age=600), bo'lmasa SQLite. .env.example + README ga deploy bo'limi. 36 test OK. (gunicorn faqat Linux/serverda ishlaydi, Windows lokalda emas)
 
+## Railway deploy (BAJARILDI — sayt online: standardbridge.up.railway.app)
+- [x] GitHub repo Railway ga ulandi, Postgres qo'shildi, DATABASE_URL=${{Postgres.DATABASE_URL}} web service ga bog'landi
+- [x] Env vars: SECRET_KEY (kuchli), DEBUG=False, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, GROQ_API_KEY, MISE_PYTHON_GITHUB_ATTESTATIONS=false (build fix)
+- [x] CSRF_TRUSTED_ORIGINS endi DEBUG dan qat'i nazar qo'llanadi + SECURE_PROXY_SSL_HEADER (proxy HTTPS)
+- [x] .gitattributes: Procfile/runtime/requirements eol=lf (Railway CRLF o'qiy olmaydi)
+- [x] Railway Custom Start Command: migrate + collectstatic + seed_data + seed_questions + load_checklist + gunicorn (Procfile web: ham shu)
+- [x] seed_data management buyrug'i (analysis): 11 sanoat + 8 standart yuklaydi (idempotent get_or_create) — "Sohalar topilmadi" muammosi shu bilan hal bo'ldi (Postgres bo'sh edi)
+- [x] To'liq tizim testi: register (entrepreneur+expert, profil yaratiladi), soha/standart tanlash, dashboard/analysis/qms/expert-tools/admin-panel — hammasi 200/302 OK
+- [x] 5-qadam: Deploy fayllari — Procfile (release: migrate + web: gunicorn core.wsgi --workers 3 --timeout 120), runtime.txt (python-3.12.7), requirements.txt ga gunicorn/whitenoise/dj-database-url/psycopg2-binary qo'shildi. settings.py: DATABASE_URL env bo'lsa Postgres (dj_database_url.parse, conn_max_age=600), bo'lmasa SQLite. .env.example + README ga deploy bo'limi. 36 test OK. (gunicorn faqat Linux/serverda ishlaydi, Windows lokalda emas)
+
 ## PENDING (bajarilmagan)
 - [x] QMS tool — TO'LIQ bajarilgan (checklist ISO9001/22000/14001/45001, hujjatlar, NC, audit)
 - [x] Expert Tools — TO'LIQ bajarilgan (AI doc generator, audit checklist, project templates, CRM — /expert-tools/)
