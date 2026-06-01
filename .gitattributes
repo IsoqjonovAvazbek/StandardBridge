@@ -1,0 +1,6 @@
+# Deploy va konfiguratsiya fayllari doim LF (Unix) bo'lishi shart —
+# Railway/Linux serverlar CRLF ni o'qiy olmaydi.
+Procfile text eol=lf
+runtime.txt text eol=lf
+*.sh text eol=lf
+requirements.txt text eol=lf
