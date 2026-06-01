@@ -18,6 +18,12 @@ if _hosts:
 else:
     ALLOWED_HOSTS = ['*'] if DEBUG else []
 
+# CSRF trusted origins — DEBUG holatidan qat'i nazar har doim qo'llanadi
+# (HTTPS proksisi orqasidagi hosting uchun zarur, masalan Railway/Render)
+_csrf_origins = os.environ.get('CSRF_TRUSTED_ORIGINS', '').strip()
+if _csrf_origins:
+    CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(',') if o.strip()]
+
 # Security hardening — only enforced when DEBUG is off (production)
 if not DEBUG:
     SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True').lower() in ('true', '1', 'yes')
@@ -28,9 +34,8 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
-    _csrf_origins = os.environ.get('CSRF_TRUSTED_ORIGINS', '').strip()
-    if _csrf_origins:
-        CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(',') if o.strip()]
+    # Railway/Render kabi reverse-proxy orqali kelgan HTTPS ni Django tan olishi uchun
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
