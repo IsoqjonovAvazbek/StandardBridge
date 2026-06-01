@@ -178,6 +178,13 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] experts/tests.py: ProjectLifecycleTests (7 test) — revision, dispute bloklash, complete guard, set_price guard. Jami 44 test OK
 - [x] request_revision_* tarjimalar (UZ/RU/EN)
 
+### Biznes-mantiq — 2-to'plam (status guard + roadmap vaqt)
+- [x] project_accept guard: faqat negotiating statusdagi loyihani qabul qilish mumkin (completed/in_progress ni qayta accept qilib bo'lmaydi)
+- [x] leave_review: rating int() ValueError fix + 1..5 oralig'iga cheklash (harf/chegaradan tashqari crash yo'q)
+- [x] edit_roadmap_step view + URL + modal: expert mavjud qadam nomi/tavsifi/vaqtini aniqlashtiradi (AI taxminini tuzatadi), roadmap.total_days qayta hisoblanadi, entrepreneur 404
+- [x] roadmap.html: "Vaqt va xarajat AI taxmini, mutaxassis aniqlashtiradi" izohi (roadmap_ai_estimate_note, UZ/RU/EN) — tadbirkor AI vaqtini aniq muddat deb o'ylamasligi uchun
+- [x] edit_step_* tarjimalar. 44 test OK
+
 ## PENDING (bajarilmagan)
 - [x] QMS tool — TO'LIQ bajarilgan (checklist ISO9001/22000/14001/45001, hujjatlar, NC, audit)
 - [x] Expert Tools — TO'LIQ bajarilgan (AI doc generator, audit checklist, project templates, CRM — /expert-tools/)

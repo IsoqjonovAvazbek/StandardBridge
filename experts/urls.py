@@ -29,4 +29,5 @@ urlpatterns = [
     # Roadmap step management (expert)
     path('projects/<int:pk>/add-step/', views.add_roadmap_step, name='add_roadmap_step'),
     path('projects/<int:pk>/step/<int:step_pk>/delete/', views.delete_roadmap_step, name='delete_roadmap_step'),
+    path('projects/<int:pk>/step/<int:step_pk>/edit/', views.edit_roadmap_step, name='edit_roadmap_step'),
 ]

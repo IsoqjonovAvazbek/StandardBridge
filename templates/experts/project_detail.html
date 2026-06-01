@@ -269,17 +269,26 @@
                                 {% endif %}
                             </div>
 
-                            <!-- Delete button for expert -->
+                            <!-- Edit / Delete buttons for expert -->
                             {% if request.user.is_expert and project.status == 'in_progress' and not step.is_completed %}
-                            <form method="POST" action="{% url 'delete_roadmap_step' project.pk step.pk %}"
-                                  onsubmit="return confirm('Qadamni o\'chirasizmi?')" class="flex-shrink-0">
-                                {% csrf_token %}
-                                <button type="submit" class="text-gray-300 hover:text-red-500 transition p-1" title="{{ T.delete_step_btn }}">
+                            <div class="flex items-center gap-1 flex-shrink-0">
+                                <button type="button" class="text-gray-300 hover:text-blue-500 transition p-1" title="{{ T.edit_step_btn }}"
+                                    onclick="openEditStep('{% url 'edit_roadmap_step' project.pk step.pk %}', this)"
+                                    data-title="{{ step.title|escapejs }}" data-desc="{{ step.description|escapejs }}" data-days="{{ step.duration_days }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </button>
-                            </form>
+                                <form method="POST" action="{% url 'delete_roadmap_step' project.pk step.pk %}"
+                                      onsubmit="return confirm('Qadamni o\'chirasizmi?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-gray-300 hover:text-red-500 transition p-1" title="{{ T.delete_step_btn }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
                             {% endif %}
                         </div>
                         {% empty %}
@@ -616,11 +625,62 @@
         </form>
     </div>
 </div>
+
+<!-- Edit Step Modal (expert only) -->
+<div id="edit-step-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(15,23,42,0.6);backdrop-filter:blur(4px)">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="gradient-bg px-6 py-4 rounded-t-2xl flex items-center justify-between">
+            <h2 class="text-white font-bold">{{ T.edit_step_title }}</h2>
+            <button onclick="document.getElementById('edit-step-modal').classList.add('hidden')"
+                    class="text-white/70 hover:text-white">✕</button>
+        </div>
+        <form method="POST" id="edit-step-form" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.step_title_lbl }}</label>
+                <input type="text" name="title" id="edit-step-title" required
+                    class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.step_desc_lbl }}</label>
+                <textarea name="description" id="edit-step-desc" rows="2"
+                    class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.step_days_lbl }}</label>
+                <input type="number" name="duration_days" id="edit-step-days" min="0"
+                    class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+            <div class="flex gap-3">
+                <button type="button"
+                    onclick="document.getElementById('edit-step-modal').classList.add('hidden')"
+                    class="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50">
+                    {{ T.cancel }}
+                </button>
+                <button type="submit"
+                    class="flex-1 gradient-bg text-white py-2.5 rounded-xl font-semibold hover:opacity-90 transition">
+                    {{ T.save }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endif %}
 {% endblock %}
 
 {% block extra_js %}
 <script>
+// ── Edit roadmap step (expert) ────────────────────────────────────────────
+function openEditStep(actionUrl, btn) {
+    const form = document.getElementById('edit-step-form');
+    form.action = actionUrl;
+    document.getElementById('edit-step-title').value = btn.dataset.title || '';
+    document.getElementById('edit-step-desc').value = btn.dataset.desc || '';
+    document.getElementById('edit-step-days').value = btn.dataset.days || '0';
+    document.getElementById('edit-step-modal').classList.remove('hidden');
+}
+
 // ── Roadmap step toggle (expert only) ─────────────────────────────────────
 function getCookie(name) {
     let v = null;

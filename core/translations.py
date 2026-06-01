@@ -498,6 +498,7 @@ TRANSLATIONS = {
         'completed_pct': 'bajarildi',
         'steps_word': 'qadam',
         'est_time_label': 'Taxminiy vaqt',
+        'roadmap_ai_estimate_note': "Vaqt va xarajat AI tomonidan taxminiy hisoblangan. Loyihani olgan mutaxassis ularni aniqlashtiradi.",
         'est_cost_label': 'Taxminiy xarajat',
         'step_done_badge': 'Bajarildi',
         'step_pending_badge': 'Kutilmoqda',
@@ -773,6 +774,8 @@ TRANSLATIONS = {
         'step_days_lbl': "Taxminiy muddat (kun)",
         'add_step_save_btn': "Qo'shish",
         'delete_step_btn': "O'chirish",
+        'edit_step_btn': "Tahrirlash",
+        'edit_step_title': "Qadamni tahrirlash",
 
         # === COMPANY SCOPE (for expert view) ===
         'company_scope_title': "Kompaniya ma'lumotlari",
@@ -1295,6 +1298,7 @@ TRANSLATIONS = {
         'completed_pct': 'выполнено',
         'steps_word': 'шагов',
         'est_time_label': 'Примерный срок',
+        'roadmap_ai_estimate_note': "Срок и стоимость рассчитаны AI примерно. Эксперт, взявший проект, уточнит их.",
         'est_cost_label': 'Примерная стоимость',
         'step_done_badge': 'Выполнено',
         'step_pending_badge': 'Ожидание',
@@ -1542,6 +1546,8 @@ TRANSLATIONS = {
         'step_days_lbl': "Примерный срок (дней)",
         'add_step_save_btn': "Добавить",
         'delete_step_btn': "Удалить",
+        'edit_step_btn': "Редактировать",
+        'edit_step_title': "Редактировать шаг",
 
         # === COMPANY SCOPE (for expert view) ===
         'company_scope_title': "Данные компании",
@@ -1823,6 +1829,7 @@ TRANSLATIONS = {
         'completed_pct': 'completed',
         'steps_word': 'steps',
         'est_time_label': 'Estimated time',
+        'roadmap_ai_estimate_note': "Time and cost are AI estimates. The expert who takes the project will refine them.",
         'est_cost_label': 'Estimated cost',
         'step_done_badge': 'Done',
         'step_pending_badge': 'Pending',
@@ -2339,6 +2346,8 @@ TRANSLATIONS = {
         'step_days_lbl': "Estimated duration (days)",
         'add_step_save_btn': "Add",
         'delete_step_btn': "Delete",
+        'edit_step_btn': "Edit",
+        'edit_step_title': "Edit step",
 
         # === COMPANY SCOPE (for expert view) ===
         'company_scope_title': "Company Information",

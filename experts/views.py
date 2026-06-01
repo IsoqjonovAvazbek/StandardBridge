@@ -317,6 +317,11 @@ def project_set_price(request, pk):
 def project_accept(request, pk):
     project = get_object_or_404(Project, pk=pk, entrepreneur=request.user)
 
+    # Guard: faqat narx belgilangan (negotiating) loyihani qabul qilish mumkin
+    if project.status != 'negotiating':
+        messages.error(request, 'Bu loyihani hozir qabul qilib bo\'lmaydi!')
+        return redirect('project_detail', pk=pk)
+
     if request.method == 'POST':
         project.status = 'accepted'
         project.save()
@@ -768,7 +773,11 @@ def leave_review(request, pk):
         return redirect('project_detail', pk=pk)
 
     if request.method == 'POST':
-        rating = int(request.POST.get('rating', 5))
+        try:
+            rating = int(request.POST.get('rating', 5))
+        except (ValueError, TypeError):
+            rating = 5
+        rating = max(1, min(5, rating))  # 1..5 oralig'ida
         comment = request.POST.get('comment', '')
 
         Review.objects.create(
@@ -1018,4 +1027,41 @@ def delete_roadmap_step(request, pk, step_pk):
     if request.method == 'POST':
         step.delete()
         messages.success(request, 'Qadam o\'chirildi!')
+    return redirect('project_detail', pk=pk)
+
+
+@login_required
+def edit_roadmap_step(request, pk, step_pk):
+    """Expert mavjud qadamning vaqti/nomi/tavsifini aniqlashtiradi (AI taxminini tuzatadi)."""
+    project = get_object_or_404(Project, pk=pk, expert=request.user)
+    if project.status not in ('in_progress', 'review'):
+        return redirect('project_detail', pk=pk)
+
+    from analysis.models import RoadmapStep, Roadmap
+    step = get_object_or_404(RoadmapStep, pk=step_pk, roadmap__analysis=project.analysis)
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
+        try:
+            duration_days = int(request.POST.get('duration_days', step.duration_days))
+        except (ValueError, TypeError):
+            duration_days = step.duration_days
+        if duration_days < 0:
+            duration_days = 0
+
+        if not title:
+            messages.error(request, 'Qadam nomini kiriting!')
+            return redirect('project_detail', pk=pk)
+
+        step.title = title
+        step.description = description
+        step.duration_days = duration_days
+        step.save()
+
+        # Roadmap umumiy vaqtini qayta hisoblash
+        roadmap = step.roadmap
+        roadmap.total_days = sum(s.duration_days for s in roadmap.steps.all())
+        roadmap.save(update_fields=['total_days'])
+
+        messages.success(request, 'Qadam yangilandi!')
     return redirect('project_detail', pk=pk)
