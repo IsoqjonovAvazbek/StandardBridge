@@ -64,6 +64,34 @@ python manage.py check_sla                # SLA muddatlari
 python manage.py check_document_expiry    # hujjat muddati eslatmasi
 ```
 
+## Production deploy
+
+Deploy qilishdan oldin `.env` ni production qiymatlari bilan to'ldiring:
+
+```bash
+DEBUG=False
+SECRET_KEY=<kuchli-tasodifiy-kalit>     # pastdagi buyruq bilan yarating
+ALLOWED_HOSTS=standartbridge.uz,www.standartbridge.uz
+CSRF_TRUSTED_ORIGINS=https://standartbridge.uz
+```
+
+Kuchli SECRET_KEY yaratish:
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+Deploy oldidan tekshiruv (xavfsizlik):
+```bash
+python manage.py check --deploy   # "no issues" bo'lishi kerak
+python manage.py collectstatic --noinput
+python manage.py migrate
+```
+
+`DEBUG=False` bo'lsa avtomatik yoqiladi: HTTPS redirect, secure cookies, HSTS,
+nosniff, X-Frame-Options DENY. Statik fayllarni WhiteNoise uzatadi.
+
+Loglar: `logs/app.log` (hammasi) va `logs/error.log` (faqat xatolar).
+
 ## Muhim eslatmalar
 - `.env` hech qachon git'ga qo'shilmaydi (maxfiy kalitlar)
 - Loyiha xotirasi va to'liq feature ro'yxati: **CLAUDE.md**

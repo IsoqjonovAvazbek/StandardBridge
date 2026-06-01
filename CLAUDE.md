@@ -138,6 +138,17 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] expert_tools/tests.py (3): audit_from_analysis (gaps→checklist, ISO22000→iso22000, critical birinchi, begona expert 404)
 - Ishga tushirish: `python manage.py test` (yoki bitta app: `python manage.py test accounts`)
 
+## Git + GitHub (professional workflow)
+- [x] git repo init + .gitignore (.env, venv, db.sqlite3, logs/, media/ himoyalangan)
+- [x] .env.example (kalitsiz namuna), README.md (ishga tushirish yo'riqnomasi), requirements.txt tuzatildi (UTF-16 → UTF-8, groq/dotenv qo'shildi)
+- [x] GitHub remote: https://github.com/Avazbek-1/StandardBridge (private), branch=main
+- Workflow: kod → `python manage.py test` → user brauzerda tekshiradi → user "push qil" deydi → push. Credential Windows Credential Manager da saqlangan
+- ⚠️ GROQ_API_KEY avval oshkor bo'lgan — console.groq.com da yangilash tavsiya etiladi
+
+## Production tayyorlash (universal, har hostingga mos)
+- [x] 1-qadam: LOGGING (core/settings.py — console + logs/app.log + logs/error.log, RotatingFileHandler 5MB). AI xato bloklari logger.exception bilan yoziladi (analysis/qms/expert_tools, logger=getLogger('standardbridge')). WhiteNoise middleware + CompressedManifestStaticFilesStorage (STORAGES). collectstatic OK (650 fayl)
+- [x] 2-qadam: check --deploy — DEBUG=False + kuchli SECRET_KEY bilan 0 ogohlantirish (settings xavfsizligi tayyor: HSTS/secure cookies/SSL redirect ishlaydi). README ga production deploy bo'limi (SECRET_KEY generatsiya, check --deploy, collectstatic, migrate). PROD uchun .env: DEBUG=False, kuchli SECRET_KEY, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS kerak
+
 ## PENDING (bajarilmagan)
 - [x] QMS tool — TO'LIQ bajarilgan (checklist ISO9001/22000/14001/45001, hujjatlar, NC, audit)
 - [x] Expert Tools — TO'LIQ bajarilgan (AI doc generator, audit checklist, project templates, CRM — /expert-tools/)
