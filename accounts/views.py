@@ -226,13 +226,17 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
 
         if user:
-            if role and user.role != role:
+            # Admin/staff har qanday rol tugmasi bilan kira oladi (rol tekshiruvidan ozod)
+            if not (user.is_admin() or user.is_staff) and role and user.role != role:
                 if role == 'entrepreneur':
                     messages.error(request, '❌ Bu hisob tadbirkor uchun emas! Mutaxassis sifatida kiring.')
                 else:
                     messages.error(request, '❌ Bu hisob mutaxassis uchun emas! Tadbirkor sifatida kiring.')
                 return render(request, 'accounts/login.html')
             login(request, user)
+            # Admin to'g'ridan-to'g'ri admin panelга
+            if user.is_admin() or user.is_staff:
+                return redirect('admin_panel')
             return redirect('dashboard')
         else:
             messages.error(request, 'Username yoki parol noto\'g\'ri!')
