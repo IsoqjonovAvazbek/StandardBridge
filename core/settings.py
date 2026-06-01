@@ -114,7 +114,8 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+# static/ papkasini faqat mavjud bo'lsa qo'shamiz (bo'sh papka git'da saqlanmaydi → W004 ogohlantirish)
+STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').exists() else []
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # WhiteNoise — production'da statik fayllarni samarali uzatadi (siqilgan + keshlangan)
