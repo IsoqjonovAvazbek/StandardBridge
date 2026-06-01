@@ -8,7 +8,10 @@ from experts.models import Project, Notification
 import json
 import os
 import threading
+import logging
 from groq import Groq
+
+logger = logging.getLogger('standardbridge')
 
 
 AI_LANG_INSTRUCTION = {
@@ -270,13 +273,14 @@ def _ai_background_task(analysis_id, local_ids, target_ids, industry_name, weak_
         Project.objects.filter(analysis=analysis, expert__isnull=True).delete()
 
     except Exception as e:
+        logger.exception('AI tahlil xatosi (analysis_id=%s): %s', analysis_id, e)
         try:
             analysis = GapAnalysis.objects.get(pk=analysis_id)
             analysis.status = 'pending'
             analysis.ai_result = {'error': str(e)}
             analysis.save()
         except Exception:
-            pass
+            logger.exception('AI xato holatini saqlashda xatolik (analysis_id=%s)', analysis_id)
     finally:
         django.db.close_old_connections()
 

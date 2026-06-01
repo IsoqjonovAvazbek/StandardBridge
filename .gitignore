@@ -18,6 +18,7 @@ ENV/
 db.sqlite3
 db.sqlite3-journal
 *.log
+logs/
 local_settings.py
 
 # --- Media (foydalanuvchi yuklagan fayllar) ---

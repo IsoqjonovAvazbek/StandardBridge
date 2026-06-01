@@ -12,6 +12,9 @@ from .models import (
 from experts.models import Project
 import os
 import json
+import logging
+
+logger = logging.getLogger('standardbridge')
 
 
 # ── access guard ─────────────────────────────────────────────────────────────
@@ -122,6 +125,7 @@ def generate_document(request):
         )
         content = response.choices[0].message.content.strip()
     except Exception as e:
+        logger.exception('AI hujjat generatsiya xatosi (template=%s): %s', template_id, e)
         content = f"[AI xatoligi: {e}]\n\n{template.template_content}"
 
     doc = GeneratedDocument.objects.create(

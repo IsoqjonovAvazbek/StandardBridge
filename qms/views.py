@@ -9,6 +9,9 @@ from .models import ChecklistItem, ChecklistResponse, QMSDocument, QMSDocumentVe
 import json
 import csv
 import os
+import logging
+
+logger = logging.getLogger('standardbridge')
 
 
 @login_required
@@ -385,6 +388,7 @@ def _qms_ai(prompt, max_tokens=900):
         )
         return resp.choices[0].message.content.strip(), None
     except Exception as e:
+        logger.exception('QMS AI xatosi: %s', e)
         return None, str(e)
 
 
