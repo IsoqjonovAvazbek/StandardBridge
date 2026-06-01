@@ -678,11 +678,24 @@ def expert_profile_edit(request):
         profile = ExpertProfile.objects.create(user=request.user)
 
     if request.method == 'POST':
+        def _safe_int(val, default=0):
+            try:
+                return max(0, int(val))
+            except (ValueError, TypeError):
+                return default
+
+        def _safe_decimal(val, default=Decimal('0')):
+            try:
+                d = Decimal(str(val).strip() or '0')
+                return d if d >= 0 else default
+            except (InvalidOperation, ValueError, TypeError):
+                return default
+
         profile.bio = request.POST.get('bio', '')
         profile.specializations = request.POST.get('specializations', '')
-        profile.experience_years = int(request.POST.get('experience_years', 0))
-        profile.project_price = request.POST.get('project_price', 0)
-        profile.completion_days = int(request.POST.get('completion_days', 0))
+        profile.experience_years = _safe_int(request.POST.get('experience_years', 0))
+        profile.project_price = _safe_decimal(request.POST.get('project_price', 0))
+        profile.completion_days = _safe_int(request.POST.get('completion_days', 0))
         profile.phone = request.POST.get('phone', '')
         profile.region = request.POST.get('region', '')
         profile.certificates = request.POST.get('certificates', '')

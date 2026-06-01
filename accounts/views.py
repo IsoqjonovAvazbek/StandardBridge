@@ -366,7 +366,10 @@ def entrepreneur_profile_view(request):
         user.save()
 
         profile.company_description = request.POST.get('company_description', '')
-        profile.employee_count = int(request.POST.get('employee_count', 0) or 0)
+        try:
+            profile.employee_count = max(0, int(request.POST.get('employee_count', 0) or 0))
+        except (ValueError, TypeError):
+            profile.employee_count = 0
         profile.annual_revenue = request.POST.get('annual_revenue', '')
         profile.export_experience = request.POST.get('export_experience') == 'on'
         profile.target_markets = request.POST.get('target_markets', '')
