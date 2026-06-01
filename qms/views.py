@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
+from django.conf import settings
 from django.core.files.base import ContentFile
 from datetime import timedelta
 from .models import ChecklistItem, ChecklistResponse, QMSDocument, QMSDocumentVersion, NonConformity, AuditSchedule
@@ -379,7 +380,7 @@ def _qms_ai(prompt, max_tokens=900):
     """Call Groq once and return text, or (None, error_message)."""
     try:
         from groq import Groq
-        client = Groq(api_key=os.environ.get('GROQ_API_KEY'))
+        client = Groq(api_key=os.environ.get('GROQ_API_KEY'), timeout=settings.AI_TIMEOUT, max_retries=1)
         resp = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],

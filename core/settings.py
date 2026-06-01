@@ -129,6 +129,9 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = f'StandartBridge <{os.environ.get("EMAIL_HOST_USER", "noreply@standartbridge.uz")}>'
 
+# AI (Groq) — javob kutish vaqti (soniya). Sekin javobda cheksiz kutmaslik uchun.
+AI_TIMEOUT = int(os.environ.get('AI_TIMEOUT', '45'))
+
 # Click payment
 CLICK_SERVICE_ID = os.environ.get('CLICK_SERVICE_ID', '')
 CLICK_MERCHANT_ID = os.environ.get('CLICK_MERCHANT_ID', '')

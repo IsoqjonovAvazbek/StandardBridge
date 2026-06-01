@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
+from django.conf import settings
 from datetime import timedelta
 from .models import (
     DocumentTemplate, GeneratedDocument,
@@ -107,7 +108,7 @@ def generate_document(request):
     # AI generation
     try:
         from groq import Groq
-        client = Groq(api_key=os.environ.get('GROQ_API_KEY'))
+        client = Groq(api_key=os.environ.get('GROQ_API_KEY'), timeout=settings.AI_TIMEOUT, max_retries=1)
         prompt = (
             f"Sen ISO standartlari bo'yicha mutaxassisson.\n"
             f"Quyidagi korxona uchun '{template.title}' hujjatini yoz. {lang_instruction}\n\n"

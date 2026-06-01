@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
+from django.conf import settings
 from .models import GapAnalysis, Standard, GapItem, Roadmap, RoadmapStep, Industry, Question, QuestionAnswer, DisclaimerAcceptance
 from experts.models import Project, Notification
 import json
@@ -42,7 +43,7 @@ def _extract_json(text):
 
 def get_ai_analysis(local_standards, target_standards, industry_name, weak_answers,
                     company_context='', readiness=None, language='uz'):
-    client = Groq(api_key=os.environ.get('GROQ_API_KEY'))
+    client = Groq(api_key=os.environ.get('GROQ_API_KEY'), timeout=settings.AI_TIMEOUT, max_retries=1)
 
     local_codes = ', '.join([s.code for s in local_standards])
     target_codes = ', '.join([s.code for s in target_standards])
