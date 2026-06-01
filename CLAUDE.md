@@ -149,6 +149,7 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] 1-qadam: LOGGING (core/settings.py — console + logs/app.log + logs/error.log, RotatingFileHandler 5MB). AI xato bloklari logger.exception bilan yoziladi (analysis/qms/expert_tools, logger=getLogger('standardbridge')). WhiteNoise middleware + CompressedManifestStaticFilesStorage (STORAGES). collectstatic OK (650 fayl)
 - [x] 2-qadam: check --deploy — DEBUG=False + kuchli SECRET_KEY bilan 0 ogohlantirish (settings xavfsizligi tayyor: HSTS/secure cookies/SSL redirect ishlaydi). README ga production deploy bo'limi (SECRET_KEY generatsiya, check --deploy, collectstatic, migrate). PROD uchun .env: DEBUG=False, kuchli SECRET_KEY, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS kerak
 - [x] 3-qadam: AI timeout — settings.AI_TIMEOUT (default 45s, .env dan sozlanadi). 3 ta Groq chaqiruvi (analysis/qms/expert_tools) endi Groq(timeout=settings.AI_TIMEOUT, max_retries=1) — sekin javobda cheksiz kutmaydi. .env.example ga AI_TIMEOUT qo'shildi
+- [x] 4-qadam: Custom error sahifalar — templates/404.html, 500.html, 403.html (mustaqil, base.html'siz, inline Tailwind — 500 da context processor ishlamasligi uchun). UZ/RU/EN matn, "Bosh sahifaga qaytish" tugma, brend gradient. DEBUG=False da test: 404 to'g'ri ishladi, hammasi standalone render OK
 
 ## PENDING (bajarilmagan)
 - [x] QMS tool — TO'LIQ bajarilgan (checklist ISO9001/22000/14001/45001, hujjatlar, NC, audit)
