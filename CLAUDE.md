@@ -185,6 +185,12 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] roadmap.html: "Vaqt va xarajat AI taxmini, mutaxassis aniqlashtiradi" izohi (roadmap_ai_estimate_note, UZ/RU/EN) — tadbirkor AI vaqtini aniq muddat deb o'ylamasligi uchun
 - [x] edit_step_* tarjimalar. 44 test OK
 
+### Ruxsat va input audit (3-to'plam)
+- [x] expert_profile_edit + entrepreneur profile: int/Decimal ValueError himoyasi (harf kiritilsa crash emas, 0 ga tushadi)
+- [x] Admin panel ruxsati tasdiqlandi (admin_panel/verify/withdrawal/dispute hammasi is_staff||is_admin tekshiradi). AdminPanelAccessTests (3 test): entrepreneur/expert 302, admin 200
+- [x] gaps_to_qms/audit_from_analysis ruxsati tasdiqlandi (entrepreneur=request.user / expert=request.user — begona 404, allaqachon test bor)
+- [x] Jami 47 test OK. Butun int/float input himoyalandi (price/days/rating/experience/employee_count)
+
 ## PENDING (bajarilmagan)
 - [x] QMS tool — TO'LIQ bajarilgan (checklist ISO9001/22000/14001/45001, hujjatlar, NC, audit)
 - [x] Expert Tools — TO'LIQ bajarilgan (AI doc generator, audit checklist, project templates, CRM — /expert-tools/)

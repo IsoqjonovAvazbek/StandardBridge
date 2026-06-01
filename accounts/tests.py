@@ -89,3 +89,27 @@ class LoginTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         # expert dashboard'ga yetib borishi kerak
         self.assertEqual(resp.request['PATH_INFO'], reverse('expert_dashboard'))
+
+
+class AdminPanelAccessTests(TestCase):
+    """Admin panel faqat admin/staff uchun ochiq bo'lishi kerak."""
+
+    def test_entrepreneur_blocked_from_admin_panel(self):
+        u = CustomUser.objects.create_user(username='ent_x', password='p', role='entrepreneur')
+        self.client.force_login(u)
+        resp = self.client.get(reverse('admin_panel'))
+        self.assertEqual(resp.status_code, 302)  # dashboard ga otadi
+
+    def test_expert_blocked_from_admin_panel(self):
+        u = CustomUser.objects.create_user(username='exp_x', password='p', role='expert')
+        self.client.force_login(u)
+        resp = self.client.get(reverse('admin_panel'))
+        self.assertEqual(resp.status_code, 302)
+
+    def test_admin_can_access(self):
+        u = CustomUser.objects.create_user(
+            username='adm_x', password='p', role='admin', is_staff=True, is_superuser=True,
+        )
+        self.client.force_login(u)
+        resp = self.client.get(reverse('admin_panel'))
+        self.assertEqual(resp.status_code, 200)
