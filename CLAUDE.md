@@ -169,6 +169,15 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] Registratsiyada rol tanlash QOLADI (Tadbirkor/Mutaxassis + mos maydonlar) — bu yerda foydalanuvchi kim ekanini belgilaydi
 - [x] accounts/tests.py: test_login_no_role_needed_redirects_by_role qo'shildi (10 test)
 
+### Biznes-mantiq xatolari tuzatildi (real test bilan topilgan)
+- [x] project_detail.html: dispute-modal + add-step-modal {% block content %} dan TASHQARIDA edi (render bo'lmasdi → tugmalar ishlamasdi). {% endblock %} modallardan keyinga ko'chirildi
+- [x] project_request_revision view + URL + modal: entrepreneur ishni qabul qilmay qayta ishlashga qaytaradi (review→in_progress, sabab majburiy, expertga notif). Avval faqat "Qabul qilish" bor edi — adolatsiz
+- [x] project_complete guard: roadmap bor + hech qadam bajarilmagan bo'lsa yakunlab bo'lmaydi (expert ish qilmasdan "yakunladim" deya olmaydi)
+- [x] payment_release guard: ochiq nizo (dispute open/in_review) bo'lsa pul bloklanadi (admin hal qilmaguncha)
+- [x] project_set_price guard: faqat pending/negotiating da narx belgilanadi (to'lovdan keyin o'zgartirib bo'lmaydi) + float/int ValueError tuzatildi (crash yo'q, price/days > 0 tekshiruvi)
+- [x] experts/tests.py: ProjectLifecycleTests (7 test) — revision, dispute bloklash, complete guard, set_price guard. Jami 44 test OK
+- [x] request_revision_* tarjimalar (UZ/RU/EN)
+
 ## PENDING (bajarilmagan)
 - [x] QMS tool — TO'LIQ bajarilgan (checklist ISO9001/22000/14001/45001, hujjatlar, NC, audit)
 - [x] Expert Tools — TO'LIQ bajarilgan (AI doc generator, audit checklist, project templates, CRM — /expert-tools/)

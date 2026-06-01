@@ -275,13 +275,27 @@ def project_step_toggle(request, pk, step_pk):
 def project_set_price(request, pk):
     project = get_object_or_404(Project, pk=pk, expert=request.user)
 
+    # Guard: narx faqat dastlabki bosqichlarda belgilanadi (to'lovdan keyin emas)
+    if project.status not in ('pending', 'negotiating'):
+        messages.error(request, 'Bu loyiha narxini endi o\'zgartirib bo\'lmaydi!')
+        return redirect('project_detail', pk=pk)
+
     if request.method == 'POST':
-        price = request.POST.get('price', 0)
-        days = request.POST.get('days', 0)
+        try:
+            price = float(request.POST.get('price', 0))
+            days = int(request.POST.get('days', 0))
+        except (ValueError, TypeError):
+            messages.error(request, 'Narx va kunlar to\'g\'ri raqam bo\'lishi kerak!')
+            return redirect('project_set_price', pk=pk)
+
+        if price <= 0 or days <= 0:
+            messages.error(request, 'Narx va muddat 0 dan katta bo\'lishi kerak!')
+            return redirect('project_set_price', pk=pk)
+
         message = request.POST.get('message', '')
 
-        project.expert_price = float(price)
-        project.expert_days = int(days)
+        project.expert_price = price
+        project.expert_days = days
         project.expert_message = message
         project.status = 'negotiating'
         project.save()
@@ -376,6 +390,17 @@ def project_complete(request, pk):
     project = get_object_or_404(Project, pk=pk, expert=request.user)
 
     if request.method == 'POST' and project.status == 'in_progress':
+        # Guard: agar roadmap bo'lsa, hech bo'lmasa bitta qadam bajarilgan bo'lsin
+        # (expert hech narsa qilmasdan "yakunladim" deya olmasligi uchun)
+        from analysis.models import Roadmap
+        try:
+            roadmap = project.analysis.roadmap
+            if roadmap.steps.exists() and not roadmap.steps.filter(is_completed=True).exists():
+                messages.error(request, 'Ishni yakunlashdan oldin kamida bitta bosqichni bajarilgan deb belgilang!')
+                return redirect('project_detail', pk=pk)
+        except Roadmap.DoesNotExist:
+            pass
+
         project.status = 'review'
         project.save()
 
@@ -393,6 +418,37 @@ def project_complete(request, pk):
         )
 
         messages.success(request, 'Ish yakunlandi! Mijoz qabul qilishi kutilmoqda.')
+
+    return redirect('project_detail', pk=pk)
+
+
+@login_required
+def project_request_revision(request, pk):
+    """Entrepreneur ishni qabul qilmay, qayta ishlashga qaytaradi (review -> in_progress)."""
+    project = get_object_or_404(Project, pk=pk, entrepreneur=request.user)
+
+    if request.method == 'POST' and project.status == 'review':
+        reason = request.POST.get('reason', '').strip()
+        if not reason:
+            messages.error(request, 'Qayta ishlash sababini kiriting!')
+            return redirect('project_detail', pk=pk)
+
+        project.status = 'in_progress'
+        project.save()
+
+        ProjectUpdate.objects.create(
+            project=project,
+            author=request.user,
+            message=f'Mijoz qayta ishlashni so\'radi: {reason}',
+            update_type='message',
+        )
+        if project.expert:
+            Notification.objects.create(
+                user=project.expert,
+                title='🔄 Qayta ishlash so\'raldi',
+                message=f'{request.user.get_full_name()} ishni qabul qilmadi: {reason[:100]}',
+            )
+        messages.info(request, 'Ish mutaxassisga qayta ishlash uchun qaytarildi.')
 
     return redirect('project_detail', pk=pk)
 
@@ -471,6 +527,11 @@ def payment_release(request, project_pk):
     # Guard: payment can only be released after expert marks work as review
     if project.status not in ('review', 'in_progress'):
         messages.warning(request, 'Loyiha hali yakunlanmagan!')
+        return redirect('project_detail', pk=project_pk)
+
+    # Guard: ochiq nizo bo'lsa pul muzlatiladi (admin hal qilmaguncha)
+    if project.disputes.filter(status__in=('open', 'in_review')).exists():
+        messages.warning(request, 'Bu loyiha bo\'yicha ochiq nizo bor — admin hal qilmaguncha to\'lov bloklangan.')
         return redirect('project_detail', pk=project_pk)
 
     try:

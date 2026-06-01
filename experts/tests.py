@@ -3,7 +3,8 @@ from decimal import Decimal
 from django.test import TestCase
 from django.urls import reverse
 from accounts.models import CustomUser
-from .models import Wallet, WithdrawalRequest
+from analysis.models import GapAnalysis, Standard, Industry, Roadmap, RoadmapStep
+from .models import Wallet, WithdrawalRequest, Project, Dispute, Payment
 
 
 class WalletWithdrawTests(TestCase):
@@ -93,3 +94,83 @@ class WithdrawalAdminTests(TestCase):
         self.wr.refresh_from_db()
         self.assertEqual(self.wallet.balance, Decimal('300000'))
         self.assertEqual(self.wr.status, 'approved')
+
+
+class ProjectLifecycleTests(TestCase):
+    """Loyiha biznes-mantiq qoidalari (revision, dispute, guard'lar)."""
+
+    def setUp(self):
+        self.ent = CustomUser.objects.create_user(username='ent', password='p', role='entrepreneur')
+        self.exp = CustomUser.objects.create_user(username='exp', password='p', role='expert')
+        ind = Industry.objects.create(name='Soha')
+        std = Standard.objects.create(code='ISO 9001', name='QMS', type='international')
+        self.analysis = GapAnalysis.objects.create(
+            entrepreneur=self.ent, industry=ind, local_standard=std,
+            target_standard=std, status='completed', ai_result={'s': 1},
+        )
+
+    def _project(self, status='in_progress'):
+        return Project.objects.create(
+            analysis=self.analysis, entrepreneur=self.ent, expert=self.exp, status=status,
+        )
+
+    def test_expert_cannot_complete_without_progress(self):
+        """Roadmap bor, hech qadam bajarilmagan — yakunlab bo'lmaydi."""
+        p = self._project()
+        rm = Roadmap.objects.create(analysis=self.analysis, total_days=10)
+        RoadmapStep.objects.create(roadmap=rm, title='Q1', order=1, duration_days=5)
+        self.client.force_login(self.exp)
+        self.client.post(reverse('project_complete', args=[p.pk]))
+        p.refresh_from_db()
+        self.assertEqual(p.status, 'in_progress')  # yakunlanmadi
+
+    def test_expert_can_complete_after_progress(self):
+        p = self._project()
+        rm = Roadmap.objects.create(analysis=self.analysis, total_days=10)
+        s = RoadmapStep.objects.create(roadmap=rm, title='Q1', order=1, duration_days=5, is_completed=True)
+        self.client.force_login(self.exp)
+        self.client.post(reverse('project_complete', args=[p.pk]))
+        p.refresh_from_db()
+        self.assertEqual(p.status, 'review')
+
+    def test_entrepreneur_request_revision(self):
+        """review -> in_progress qaytaradi (sabab bilan)."""
+        p = self._project('review')
+        self.client.force_login(self.ent)
+        self.client.post(reverse('project_request_revision', args=[p.pk]), {'reason': 'Hujjat yetishmaydi'})
+        p.refresh_from_db()
+        self.assertEqual(p.status, 'in_progress')
+
+    def test_revision_requires_reason(self):
+        p = self._project('review')
+        self.client.force_login(self.ent)
+        self.client.post(reverse('project_request_revision', args=[p.pk]), {'reason': ''})
+        p.refresh_from_db()
+        self.assertEqual(p.status, 'review')  # sababsiz — qaytmaydi
+
+    def test_open_dispute_blocks_payment_release(self):
+        """Ochiq nizo bo'lsa pul release bo'lmaydi."""
+        p = self._project('review')
+        Payment.objects.create(project=p, entrepreneur=self.ent, amount=Decimal('1000'), status='held')
+        Dispute.objects.create(project=p, opened_by=self.ent, reason='sifatsiz')
+        self.client.force_login(self.ent)
+        self.client.post(reverse('payment_release', args=[p.pk]))
+        p.refresh_from_db()
+        self.assertEqual(p.status, 'review')  # completed bo'lmadi
+
+    def test_cannot_change_price_after_payment(self):
+        """To'langan (in_progress) loyiha narxini o'zgartirib bo'lmaydi."""
+        p = self._project('in_progress')
+        self.client.force_login(self.exp)
+        self.client.post(reverse('project_set_price', args=[p.pk]), {'price': '500', 'days': '10'})
+        p.refresh_from_db()
+        self.assertEqual(p.status, 'in_progress')  # negotiating ga qaytmadi
+
+    def test_set_price_rejects_invalid_input(self):
+        """Harf/bo'sh narx crash bermaydi."""
+        p = self._project('pending')
+        self.client.force_login(self.exp)
+        resp = self.client.post(reverse('project_set_price', args=[p.pk]), {'price': 'abc', 'days': 'xyz'})
+        self.assertIn(resp.status_code, (200, 302))
+        p.refresh_from_db()
+        self.assertEqual(p.status, 'pending')  # o'zgarmadi
