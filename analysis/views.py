@@ -81,8 +81,9 @@ Quyidagi formatda JSON javob ber (boshqa hech narsa yozma, faqat JSON):
     "roadmap_steps": [
         {{
             "order": 1,
-            "title": "Qadam nomi",
-            "description": "Batafsil tavsif",
+            "title": "Qadam nomi (qisqa, aniq)",
+            "description": "Batafsil: 1) nima qilinadi (aniq harakatlar ro'yxati), 2) qaysi hujjatlar tayyorlanadi, 3) kutilgan natija. Kamida 3-4 jumla, amaliy.",
+            "deliverables": ["Tayyorlanadigan hujjat yoki natija 1", "natija 2"],
             "duration_days": 30
         }}
     ],
@@ -94,6 +95,8 @@ MUHIM QOIDALAR:
 - estimated_cost: kichik korxona uchun $500-2000, o'rta uchun $2000-5000
 - cost_breakdown: estimated_cost ni konsalting va sertifikatsiya organi to'lovlariga ajrat
 - priority faqat shu qiymatlardan: critical, high, medium, low
+- roadmap_steps: 5-8 ta aniq, amaliy bosqich bo'lsin. Har bir description BATAFSIL bo'lsin (nima qilinadi, qaysi hujjat, qanday natija) — quruq bir jumla emas
+- deliverables: har qadamda 1-3 ta aniq tayyorlanadigan hujjat/natija
 - Agar kamchilik 1 ta bo'lsa, total_days 30-60 oralig'ida bo'lsin
 - Agar kamchilik yo'q bo'lsa (hamma Ha desa), gaps bo'sh bo'lsin"""
 
@@ -262,11 +265,15 @@ def _ai_background_task(analysis_id, local_ids, target_ids, industry_name, weak_
                 estimated_days=gap_data.get('estimated_days', 0) or 0,
             )
         for i, step_data in enumerate(ai_result.get('roadmap_steps', []), start=1):
+            deliverables = step_data.get('deliverables', [])
+            if not isinstance(deliverables, list):
+                deliverables = []
             RoadmapStep.objects.create(
                 roadmap=roadmap,
                 order=step_data.get('order', i),
                 title=step_data.get('title', f'Qadam {i}')[:300],
                 description=step_data.get('description', ''),
+                deliverables=[str(d)[:300] for d in deliverables][:5],
                 duration_days=step_data.get('duration_days', 0) or 0,
             )
 

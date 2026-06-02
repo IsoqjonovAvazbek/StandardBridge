@@ -199,6 +199,13 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] Loyiha shablonlari: Procfile ga load_expert_templates qo'shildi (Postgres da bo'sh edi)
 - [x] price_note_per_project tarjimalar (UZ/RU/EN). 47 test OK
 
+### Tarjima + real-time + roadmap mukammallashtirish (autonom)
+- [x] Model choices tarjimasi: core/translations.py CHOICE_LABELS (status/severity/priority/audit_type/doc_type — UZ/RU/EN), get_choice_label, accounts/templatetags/labels.py {% label code %} tag. 14 ta template get_*_display -> {% label %} (RU/EN da o'zbekcha chiqmasdi)
+- [x] QMS checklist real-time foiz: update_checklist pct/compliant/total qaytaradi, JS progress bar + tab foizini refreshsiz yangilaydi (progress-pct/bar/compliant, tab-pct-<std>)
+- [x] Roadmap kun olib tashlandi (tadbirkor): roadmap.html da har qadam duration_days -> "Bosqich N" (kunni expert belgilaydi, AI taxmini chalkash edi). Umumiy est_time_label qoldi
+- [x] Roadmap batafsilroq: RoadmapStep.deliverables (JSONField), AI prompt 5-8 batafsil bosqich + deliverables so'raydi, roadmap.html + project_detail.html da "Tayyorlanadigan hujjatlar" bloki. migration 0005
+- [x] step_word/step_deliverables_lbl tarjimalar. 47 test OK
+
 ## PENDING (bajarilmagan)
 - [x] QMS tool — TO'LIQ bajarilgan (checklist ISO9001/22000/14001/45001, hujjatlar, NC, audit)
 - [x] Expert Tools — TO'LIQ bajarilgan (AI doc generator, audit checklist, project templates, CRM — /expert-tools/)

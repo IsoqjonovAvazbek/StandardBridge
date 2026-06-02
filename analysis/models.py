@@ -102,6 +102,7 @@ class RoadmapStep(models.Model):
     order = models.IntegerField(default=0)
     title = models.CharField(max_length=300)
     description = models.TextField()
+    deliverables = models.JSONField(default=list, blank=True, help_text='Tayyorlanadigan hujjat/natijalar ro\'yxati')
     duration_days = models.IntegerField(default=0)
     is_completed = models.BooleanField(default=False)
     completed_at = models.DateTimeField(null=True, blank=True)
