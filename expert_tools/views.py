@@ -191,6 +191,60 @@ ISO9001_QUESTIONS = [
     ("10.3", "Doimiy yaxshilash dalillari mavjud"),
 ]
 
+ISO22000_QUESTIONS = [
+    ("4.1", "Tashkilot va uning konteksti aniqlangan"),
+    ("5.1", "Oziq-ovqat xavfsizligi siyosati belgilangan"),
+    ("6.1", "FSMS xavflari baholangan"),
+    ("7.1.2", "Insoniy resurslar va malaka ta'minlangan"),
+    ("7.4", "Kommunikatsiya (ichki/tashqi) jarayoni bor"),
+    ("8.1", "Ishlab chiqarish rejalashtirilgan va nazorat ostida"),
+    ("8.2", "PRPs (dastlabki shartli dasturlar) joriy qilingan"),
+    ("8.3", "Kuzatuv tizimi va validatsiya bor"),
+    ("8.4", "Xavf tahlili o'tkazilgan"),
+    ("8.5", "HACCP rejasi mavjud va joriy qilingan"),
+    ("8.8", "Tekshirish rejasi bajarilmoqda"),
+    ("9.1", "Monitoring va o'lchash natijalari tahlil qilinadi"),
+    ("9.3", "Menejment sharhi o'tkaziladi"),
+    ("10.2", "Nomuvofiqliklar va tuzatuvchi choralar kuzatiladi"),
+]
+
+ISO14001_QUESTIONS = [
+    ("4.1", "Tashkilot konteksti va atrof-muhit jihatlari aniqlangan"),
+    ("5.1", "Rahbariyat EMS ga majburiyat olgan"),
+    ("5.2", "Atrof-muhit siyosati belgilangan va tarqatilgan"),
+    ("6.1.1", "Atrof-muhit jihatlari va ta'sirlari baholangan"),
+    ("6.1.3", "Qonuniy talablar aniqlangan va kuzatiladi"),
+    ("6.2", "Atrof-muhit maqsadlari o'lchanadigan"),
+    ("7.2", "Xodimlar atrof-muhit bo'yicha o'qitilgan"),
+    ("8.1", "Muhim jihatlar operatsion nazorat ostida"),
+    ("8.2", "Favqulodda vaziyatlar rejasi bor"),
+    ("9.1", "Monitoring va o'lchash amalga oshiriladi"),
+    ("9.2", "Ichki auditlar o'tkaziladi"),
+    ("10.2", "Nomuvofiqliklar va tuzatuvchi choralar kuzatiladi"),
+]
+
+ISO45001_QUESTIONS = [
+    ("4.1", "Tashkilot konteksti va OH&S risklari aniqlangan"),
+    ("5.1", "Rahbariyat xavfsizlik va sog'liqni saqlashga majburiyat olgan"),
+    ("5.2", "OH&S siyosati belgilangan"),
+    ("5.4", "Ishchilar ishtiroki ta'minlangan"),
+    ("6.1.1", "Xavflar va OH&S risklari baholangan"),
+    ("6.2", "OH&S maqsadlari belgilangan"),
+    ("7.2", "Xodimlar malakasi tasdiqlangan"),
+    ("8.1.1", "Xavfli jarayonlar operatsion nazorat ostida"),
+    ("8.2", "Favqulodda tayyorgarlik va javob berish rejasi bor"),
+    ("9.1.1", "Ishchi unumdorligi va sog'liq ko'rsatkichlari kuzatiladi"),
+    ("9.2", "Ichki auditlar o'tkaziladi"),
+    ("10.2", "Hodisalar, nomuvofiqliklar va tuzatuvchi choralar kuzatiladi"),
+]
+
+STANDARD_QUESTIONS_MAP = {
+    'iso9001': ISO9001_QUESTIONS,
+    'iso22000': ISO22000_QUESTIONS,
+    'iso14001': ISO14001_QUESTIONS,
+    'iso45001': ISO45001_QUESTIONS,
+}
+
 
 @expert_required
 def audit_list(request):
@@ -225,8 +279,8 @@ def new_audit(request):
         notes=request.POST.get('notes', ''),
     )
 
-    # Seed questions for the chosen standard
-    questions = ISO9001_QUESTIONS  # only ISO 9001 for now; extend as needed
+    # Seed questions based on chosen standard
+    questions = STANDARD_QUESTIONS_MAP.get(standard, ISO9001_QUESTIONS)
     for i, (clause, question) in enumerate(questions, start=1):
         AuditChecklistItem.objects.create(
             checklist=audit, clause=clause, question=question, order=i,
@@ -260,7 +314,10 @@ def update_audit_item(request, pk):
         except (json.JSONDecodeError, ValueError):
             return JsonResponse({'success': False}, status=400)
 
-        item = get_object_or_404(AuditChecklistItem, pk=data['item_id'], checklist=audit)
+        item_id = data.get('item_id')
+        if not item_id:
+            return JsonResponse({'success': False, 'error': 'item_id missing'}, status=400)
+        item = get_object_or_404(AuditChecklistItem, pk=item_id, checklist=audit)
         item.status = data.get('status', item.status)
         item.evidence = data.get('evidence', '').strip()
         item.finding = data.get('finding', '').strip()
@@ -351,7 +408,7 @@ def project_templates(request):
 
 @expert_required
 def apply_template(request, pk, project_pk):
-    template = get_object_or_404(ProjectTemplate, pk=pk)
+    template = get_object_or_404(ProjectTemplate, pk=pk, is_active=True)
     project = get_object_or_404(Project, pk=project_pk, expert=request.user)
 
     if request.method == 'POST':
@@ -416,6 +473,9 @@ def crm_add(request):
                 next_followup=request.POST.get('next_followup') or None,
                 notes=request.POST.get('notes', '').strip(),
             )
+            messages.success(request, 'Mijoz muvaffaqiyatli qo\'shildi!')
+        else:
+            messages.error(request, 'Korxona nomi va kontakt shaxsni kiriting!')
     return redirect('crm_list')
 
 

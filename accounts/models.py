@@ -25,7 +25,13 @@ class CustomUser(AbstractUser):
 
     def save(self, *args, **kwargs):
         if not self.referral_code:
-            self.referral_code = uuid.uuid4().hex[:8].upper()
+            for _ in range(10):
+                code = uuid.uuid4().hex[:8].upper()
+                if not CustomUser.objects.filter(referral_code=code).exists():
+                    self.referral_code = code
+                    break
+            else:
+                self.referral_code = uuid.uuid4().hex[:12].upper()
         super().save(*args, **kwargs)
     
     def is_entrepreneur(self):

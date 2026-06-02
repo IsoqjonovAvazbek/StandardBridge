@@ -39,7 +39,9 @@ def expert_dashboard(request):
 
     from django.db.models import Sum
     completed_qs = projects.filter(status='completed')
-    earnings = completed_qs.aggregate(s=Sum('expert_payment'))['s'] or 0
+    earnings = Payment.objects.filter(
+        project__in=completed_qs, status='released'
+    ).aggregate(s=Sum('expert_amount'))['s'] or 0
 
     context = {
         'projects': projects,
@@ -683,6 +685,10 @@ def payment_release(request, project_pk):
     # Guard: payment can only be released after expert submits work for review
     if project.status != 'review':
         messages.warning(request, 'Loyiha hali tekshiruvga topshirilmagan! Expert ishni yakunlab "Tekshiruvga topshirish" bosishi kerak.')
+        return redirect('project_detail', pk=project_pk)
+
+    if not project.expert:
+        messages.error(request, 'Mutaxassis hisobi topilmadi. Admin bilan bog\'laning.')
         return redirect('project_detail', pk=project_pk)
 
     # Guard: ochiq nizo bo'lsa pul muzlatiladi (admin hal qilmaguncha)

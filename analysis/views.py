@@ -112,6 +112,8 @@ MUHIM QOIDALAR:
 
 @login_required
 def entrepreneur_dashboard(request):
+    if request.user.is_expert():
+        return redirect('expert_dashboard')
     from experts.models import Project
 
     all_projects = Project.objects.filter(
@@ -163,6 +165,12 @@ def select_standards(request, industry_id):
         local_ids = request.POST.getlist('local_standards')
         target_ids = request.POST.getlist('target_standards')
 
+        # Validate: only IDs from the current industry are allowed
+        valid_local_pks = set(local_standards.values_list('pk', flat=True))
+        valid_target_pks = set(target_standards.values_list('pk', flat=True))
+        local_ids = [i for i in local_ids if i.isdigit() and int(i) in valid_local_pks]
+        target_ids = [i for i in target_ids if i.isdigit() and int(i) in valid_target_pks]
+
         if not local_ids or not target_ids:
             messages.error(request, 'Kamida bittadan standart tanlang!')
             return render(request, 'analysis/select_standards.html', {
@@ -197,11 +205,11 @@ def answer_questions(request, industry_id):
         return redirect('run_analysis', industry_id=industry_id)
 
     if request.method == 'POST':
-        request.session['question_answers'] = {}
-        for question in questions:
-            answer = request.POST.get(f'question_{question.pk}', 'no')
-            request.session['question_answers'][str(question.pk)] = answer
-        # Capture company context (improves AI analysis quality)
+        answers = {
+            str(question.pk): request.POST.get(f'question_{question.pk}', 'no')
+            for question in questions
+        }
+        request.session['question_answers'] = answers
         request.session['company_context'] = {
             'employee_count': request.POST.get('employee_count', '').strip(),
             'current_state': request.POST.get('current_state', '').strip(),

@@ -267,6 +267,17 @@
                         {% csrf_token %}
                         <textarea name="decision" rows="2" required placeholder="Admin qarori..."
                             class="w-full px-2 py-1 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-400 resize-none"></textarea>
+                        <div class="flex gap-2 text-xs">
+                            <label class="flex items-center gap-1 cursor-pointer">
+                                <input type="radio" name="favor" value="expert" class="accent-green-500"> Expert
+                            </label>
+                            <label class="flex items-center gap-1 cursor-pointer">
+                                <input type="radio" name="favor" value="entrepreneur" class="accent-blue-500"> Tadbirkor
+                            </label>
+                            <label class="flex items-center gap-1 cursor-pointer">
+                                <input type="radio" name="favor" value="none" checked> Pulsiz
+                            </label>
+                        </div>
                         <div class="flex gap-2">
                             <button type="submit" name="status" value="resolved"
                                 class="flex-1 text-xs bg-green-500 hover:bg-green-600 text-white py-1.5 rounded-lg transition">

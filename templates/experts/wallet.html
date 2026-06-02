@@ -41,10 +41,9 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">{{ T.withdraw_card_lbl }}</label>
-                            <input type="text" name="withdraw_card" maxlength="16"
-                                value="{{ wallet.card_number }}"
+                            <input type="text" name="withdraw_card" maxlength="19"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                                placeholder="8600123456789012">
+                                placeholder="8600123456789012" autocomplete="off">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">{{ T.withdraw_holder_lbl }}</label>

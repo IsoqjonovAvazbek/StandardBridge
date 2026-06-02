@@ -229,6 +229,7 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 
 ---
 
+---
 
 ## .env fayli
 ```

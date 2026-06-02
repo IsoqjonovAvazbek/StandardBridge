@@ -174,3 +174,150 @@ class ProjectLifecycleTests(TestCase):
         self.assertIn(resp.status_code, (200, 302))
         p.refresh_from_db()
         self.assertEqual(p.status, 'pending')  # o'zgarmadi
+
+
+class PaymentFlowTests(TestCase):
+    """To'lov oqimi: MOCK confirm, release, escrow mantiq."""
+
+    def setUp(self):
+        self.ent = CustomUser.objects.create_user(username='ent_p', password='p', role='entrepreneur')
+        self.exp = CustomUser.objects.create_user(username='exp_p', password='p', role='expert')
+        self.wallet = Wallet.objects.create(user=self.exp, balance=Decimal('0'))
+        ind = Industry.objects.create(name='Soha2')
+        std = Standard.objects.create(code='ISO 9001:2015', name='QMS2', type='international')
+        self.analysis = GapAnalysis.objects.create(
+            entrepreneur=self.ent, industry=ind, local_standard=std,
+            target_standard=std, status='completed', ai_result={'s': 1},
+        )
+
+    def _accepted_project(self):
+        p = Project.objects.create(
+            analysis=self.analysis, entrepreneur=self.ent, expert=self.exp,
+            status='accepted', expert_price=Decimal('1000'),
+        )
+        return p
+
+    def test_payment_confirm_mock_creates_payment_and_starts_project(self):
+        """MOCK to'lov payment yaratadi va loyihani in_progress qiladi."""
+        p = self._accepted_project()
+        self.client.force_login(self.ent)
+        resp = self.client.post(reverse('payment_confirm', args=[p.pk]))
+        self.assertEqual(resp.status_code, 302)
+        p.refresh_from_db()
+        self.assertEqual(p.status, 'in_progress')
+        payment = Payment.objects.get(project=p)
+        self.assertEqual(payment.status, 'held')
+        self.assertEqual(payment.amount, Decimal('1000'))
+
+    def test_payment_confirm_double_payment_blocked(self):
+        """Ikkinchi to'lov rad etiladi (held payment mavjud)."""
+        p = self._accepted_project()
+        Payment.objects.create(project=p, entrepreneur=self.ent, amount=Decimal('1000'), status='held')
+        p.status = 'in_progress'
+        p.save()
+        self.client.force_login(self.ent)
+        resp = self.client.post(reverse('payment_confirm', args=[p.pk]))
+        self.assertEqual(Payment.objects.filter(project=p).count(), 1)
+
+    def test_payment_release_happy_path(self):
+        """Review statusdagi loyiha uchun pul release bo'ladi, expert walletga tushadi."""
+        p = Project.objects.create(
+            analysis=self.analysis, entrepreneur=self.ent, expert=self.exp,
+            status='review', expert_price=Decimal('1000'),
+        )
+        payment = Payment.objects.create(
+            project=p, entrepreneur=self.ent, amount=Decimal('1000'), status='held'
+        )
+        self.client.force_login(self.ent)
+        resp = self.client.post(reverse('payment_release', args=[p.pk]))
+        self.assertEqual(resp.status_code, 302)
+        p.refresh_from_db()
+        payment.refresh_from_db()
+        self.assertEqual(p.status, 'completed')
+        self.assertEqual(payment.status, 'released')
+        self.wallet.refresh_from_db()
+        self.assertEqual(self.wallet.balance, payment.expert_amount)
+
+    def test_payment_release_blocked_before_review(self):
+        """in_progress loyihada pul chiqarib bo'lmaydi."""
+        p = Project.objects.create(
+            analysis=self.analysis, entrepreneur=self.ent, expert=self.exp,
+            status='in_progress', expert_price=Decimal('1000'),
+        )
+        Payment.objects.create(project=p, entrepreneur=self.ent, amount=Decimal('1000'), status='held')
+        self.client.force_login(self.ent)
+        self.client.post(reverse('payment_release', args=[p.pk]))
+        p.refresh_from_db()
+        self.assertNotEqual(p.status, 'completed')
+
+
+class DisputeResolutionTests(TestCase):
+    """Admin nizo hal qilish — pul oqimi."""
+
+    def setUp(self):
+        self.ent = CustomUser.objects.create_user(username='ent_d', password='p', role='entrepreneur')
+        self.exp = CustomUser.objects.create_user(username='exp_d', password='p', role='expert')
+        self.admin = CustomUser.objects.create_user(
+            username='adm_d', password='p', role='admin', is_staff=True,
+        )
+        self.wallet = Wallet.objects.create(user=self.exp, balance=Decimal('0'))
+        ind = Industry.objects.create(name='Soha3')
+        std = Standard.objects.create(code='ISO 14001', name='EMS', type='international')
+        self.analysis = GapAnalysis.objects.create(
+            entrepreneur=self.ent, industry=ind, local_standard=std,
+            target_standard=std, status='completed', ai_result={'s': 1},
+        )
+        self.project = Project.objects.create(
+            analysis=self.analysis, entrepreneur=self.ent, expert=self.exp,
+            status='in_progress', expert_price=Decimal('500'),
+        )
+        self.payment = Payment.objects.create(
+            project=self.project, entrepreneur=self.ent, amount=Decimal('500'), status='held',
+        )
+        self.dispute = Dispute.objects.create(
+            project=self.project, opened_by=self.ent, reason='Sifatsiz ish',
+        )
+
+    def test_resolve_favor_expert_releases_payment(self):
+        """Expert foydasiga hal qilinsa, pul expertga o'tadi."""
+        self.client.force_login(self.admin)
+        self.client.post(
+            reverse('admin_resolve_dispute', args=[self.dispute.pk]),
+            {'decision': 'Expert to\'g\'ri', 'status': 'resolved', 'favor': 'expert'},
+        )
+        self.wallet.refresh_from_db()
+        self.payment.refresh_from_db()
+        self.assertEqual(self.payment.status, 'released')
+        self.assertEqual(self.wallet.balance, self.payment.expert_amount)
+
+    def test_resolve_favor_entrepreneur_refunds_payment(self):
+        """Tadbirkor foydasiga hal qilinsa, payment refunded bo'ladi."""
+        self.client.force_login(self.admin)
+        self.client.post(
+            reverse('admin_resolve_dispute', args=[self.dispute.pk]),
+            {'decision': 'Tadbirkor to\'g\'ri', 'status': 'resolved', 'favor': 'entrepreneur'},
+        )
+        self.payment.refresh_from_db()
+        self.assertEqual(self.payment.status, 'refunded')
+
+    def test_resolve_no_favor_no_payment_change(self):
+        """Pulsiz hal qilinsa payment held qoladi."""
+        self.client.force_login(self.admin)
+        self.client.post(
+            reverse('admin_resolve_dispute', args=[self.dispute.pk]),
+            {'decision': 'Hal qilindi', 'status': 'resolved', 'favor': 'none'},
+        )
+        self.payment.refresh_from_db()
+        self.assertEqual(self.payment.status, 'held')
+
+    def test_double_resolve_blocked(self):
+        """Allaqachon hal qilingan nizo qayta hal qilinmaydi."""
+        self.dispute.status = 'resolved'
+        self.dispute.save()
+        self.client.force_login(self.admin)
+        resp = self.client.post(
+            reverse('admin_resolve_dispute', args=[self.dispute.pk]),
+            {'decision': 'qayta', 'status': 'resolved', 'favor': 'expert'},
+        )
+        self.payment.refresh_from_db()
+        self.assertEqual(self.payment.status, 'held')

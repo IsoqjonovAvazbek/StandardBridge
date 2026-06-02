@@ -3,6 +3,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
+from django.db import models
 from django_ratelimit.decorators import ratelimit
 from .models import CustomUser, ExpertProfile, EntrepreneurProfile
 from experts.emails import send_welcome_email, send_expert_verified
@@ -508,11 +509,50 @@ def admin_resolve_dispute(request, pk):
 
     decision = request.POST.get('decision', '').strip()
     new_status = request.POST.get('status', 'resolved')
+    # favor: 'expert' → pul expertga, 'entrepreneur' → pul qaytariladi, 'none' → moliyaviy harakat yo'q
+    favor = request.POST.get('favor', 'none')
 
-    dispute.admin_decision = decision
-    dispute.status = new_status
-    dispute.resolved_at = timezone.now()
-    dispute.save()
+    from experts.models import Payment, Wallet, WalletTransaction
+    from django.db import transaction as _tx
+
+    with _tx.atomic():
+        dispute.admin_decision = decision
+        dispute.status = new_status
+        dispute.resolved_at = timezone.now()
+        dispute.save()
+
+        project = dispute.project
+        try:
+            payment = Payment.objects.select_for_update().get(project=project)
+        except Payment.DoesNotExist:
+            payment = None
+
+        if payment and payment.status == 'held':
+            if favor == 'expert' and project.expert:
+                # Expert foydasiga: pul expertga o'tkaziladi
+                payment.status = 'released'
+                payment.released_at = timezone.now()
+                payment.save()
+                project.status = 'completed'
+                project.completed_at = timezone.now()
+                project.save()
+                wallet, _ = Wallet.objects.get_or_create(user=project.expert)
+                Wallet.objects.select_for_update().filter(pk=wallet.pk).update(
+                    balance=models.F('balance') + payment.expert_amount
+                )
+                WalletTransaction.objects.create(
+                    wallet=wallet,
+                    amount=payment.expert_amount,
+                    transaction_type='income',
+                    description=f'Loyiha #{project.pk} — nizo hal qilindi (expert foydasiga)',
+                    project=project,
+                )
+            elif favor == 'entrepreneur':
+                # Tadbirkor foydasiga: to'lov qaytarilgan deb belgilanadi
+                payment.status = 'refunded'
+                payment.save()
+                project.status = 'cancelled'
+                project.save()
 
     Notification.objects.create(
         user=dispute.opened_by,
