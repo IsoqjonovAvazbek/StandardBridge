@@ -16,8 +16,9 @@ def set_language_view(request):
         lang = 'uz'
     request.session['lang'] = lang
     next_url = request.POST.get('next', '')
-    # Faqat relative URL qabul qilinadi — open redirect oldini olish
-    if not next_url or not next_url.startswith('/'):
+    # Faqat xavfsiz relative URL: / bilan boshlansin, // yoki \ bo'lmasin
+    from django.utils.http import url_has_allowed_host_and_scheme
+    if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
         referer = request.META.get('HTTP_REFERER', '/')
         from urllib.parse import urlparse
         parsed = urlparse(referer)

@@ -2,6 +2,7 @@
 .env
 *.env
 !.env.example
+.fernet_dev_key
 
 # --- Python ---
 __pycache__/

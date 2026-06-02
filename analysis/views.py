@@ -130,7 +130,7 @@ def entrepreneur_dashboard(request):
     analyses = GapAnalysis.objects.filter(
         entrepreneur=request.user,
         status='completed'
-    ).order_by('-created_at')
+    ).prefetch_related('gaps').order_by('-created_at')
 
     pending_projects = all_projects.filter(status='pending')
     negotiating_projects = all_projects.filter(status='negotiating')

@@ -8,6 +8,8 @@ logger = logging.getLogger('standardbridge')
 
 def _send_sync(subject, message, to_email):
     """Haqiqiy SMTP yuborish (background threadda chaqiriladi)."""
+    from django.db import close_old_connections
+    close_old_connections()
     try:
         send_mail(
             subject=subject,

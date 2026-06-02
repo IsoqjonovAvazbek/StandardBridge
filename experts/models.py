@@ -205,8 +205,9 @@ class Payment(models.Model):
     released_at = models.DateTimeField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        self.platform_fee = self.amount * 20 / 100
-        self.expert_amount = self.amount * 80 / 100
+        from decimal import Decimal as _D
+        self.platform_fee = (self.amount * _D('0.20')).quantize(_D('0.01'))
+        self.expert_amount = self.amount - self.platform_fee
         super().save(*args, **kwargs)
 
     def __str__(self):

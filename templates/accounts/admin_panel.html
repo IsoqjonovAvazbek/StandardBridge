@@ -387,11 +387,14 @@
     </div>
 </div>
 
+{{ chart_labels|json_script:"chartLabels" }}
+{{ chart_users|json_script:"chartUsers" }}
+{{ chart_revenue|json_script:"chartRevenue" }}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-const labels = {{ chart_labels|safe }};
-const usersData = {{ chart_users|safe }};
-const revenueData = {{ chart_revenue|safe }};
+const labels = JSON.parse(document.getElementById('chartLabels').textContent);
+const usersData = JSON.parse(document.getElementById('chartUsers').textContent);
+const revenueData = JSON.parse(document.getElementById('chartRevenue').textContent);
 
 new Chart(document.getElementById('usersChart'), {
     type: 'line',

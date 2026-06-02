@@ -152,12 +152,19 @@ AI_TIMEOUT = int(os.environ.get('AI_TIMEOUT', '45'))
 _fernet_key = os.environ.get('FERNET_KEY', '').strip()
 if _fernet_key:
     FERNET_KEY = _fernet_key
-elif DEBUG:
-    from cryptography.fernet import Fernet as _Fernet
-    FERNET_KEY = _Fernet.generate_key().decode()
 else:
-    from django.core.exceptions import ImproperlyConfigured
-    raise ImproperlyConfigured('FERNET_KEY muhit o\'zgaruvchisi o\'rnatilmagan. Production uchun majburiy.')
+    if not DEBUG:
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured('FERNET_KEY muhit o\'zgaruvchisi o\'rnatilmagan. Production uchun majburiy.')
+    # DEBUG: barqaror kalit .env ga yozilmagan bo'lsa — faylga keshlab saqla
+    import base64
+    _key_file = BASE_DIR / '.fernet_dev_key'
+    if _key_file.exists():
+        FERNET_KEY = _key_file.read_text().strip()
+    else:
+        from cryptography.fernet import Fernet as _Fernet
+        FERNET_KEY = _Fernet.generate_key().decode()
+        _key_file.write_text(FERNET_KEY)
 
 # Click payment
 CLICK_SERVICE_ID = os.environ.get('CLICK_SERVICE_ID', '')

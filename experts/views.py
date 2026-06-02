@@ -29,8 +29,12 @@ def expert_dashboard(request):
     if not request.user.is_expert():
         return redirect('entrepreneur_dashboard')
 
-    projects = Project.objects.filter(expert=request.user).order_by('-created_at')
-    new_projects = Project.objects.filter(status='pending', expert=request.user)
+    projects = Project.objects.filter(expert=request.user).select_related(
+        'analysis__local_standard', 'analysis__target_standard', 'entrepreneur'
+    ).prefetch_related('analysis__gaps').order_by('-created_at')
+    new_projects = Project.objects.filter(status='pending', expert=request.user).select_related(
+        'analysis__local_standard', 'analysis__target_standard', 'entrepreneur'
+    ).prefetch_related('analysis__gaps').order_by('sla_deadline')
     notifications = Notification.objects.filter(user=request.user, is_read=False)[:5]
 
     try:
@@ -715,7 +719,10 @@ def payment_confirm(request, project_pk):
         payment.status = 'held'
         payment.paid_at = timezone.now()
         payment.payme_transaction_id = f'MOCK-{project.pk}-{timezone.now().timestamp():.0f}'
-        payment.save()
+        if payment.pk:
+            payment.save(update_fields=['status', 'paid_at', 'payme_transaction_id', 'amount', 'platform_fee', 'expert_amount'])
+        else:
+            payment.save()
 
         project.status = 'in_progress'
         project.started_at = timezone.now()
@@ -763,7 +770,7 @@ def payment_release(request, project_pk):
             if payment.status == 'held':
                 payment.status = 'released'
                 payment.released_at = timezone.now()
-                payment.save()
+                payment.save(update_fields=['status', 'released_at'])
 
                 project.status = 'completed'
                 project.completed_at = timezone.now()
@@ -1229,7 +1236,7 @@ def click_complete(request):
         payment.status = 'held'
         payment.paid_at = timezone.now()
         payment.payme_transaction_id = f'CLICK-{click_trans_id}'
-        payment.save()
+        payment.save(update_fields=['status', 'paid_at', 'payme_transaction_id'])
 
         project.status = 'in_progress'
         project.started_at = timezone.now()
