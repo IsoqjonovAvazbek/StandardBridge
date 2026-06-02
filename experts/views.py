@@ -518,16 +518,19 @@ def project_update(request, pk):
             )
 
         elif action == 'upload' and request.FILES.get('file'):
+            import os as _os
             uploaded_file = request.FILES['file']
-            allowed_types = ['application/pdf', 'application/msword',
+            allowed_types = {'application/pdf', 'application/msword',
                              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                              'application/vnd.ms-excel',
                              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                             'image/jpeg', 'image/png']
+                             'image/jpeg', 'image/png'}
+            allowed_exts = {'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.jpg', '.jpeg', '.png'}
             max_size = 10 * 1024 * 1024  # 10 MB
+            file_ext = _os.path.splitext(uploaded_file.name)[1].lower()
             if uploaded_file.size > max_size:
                 messages.error(request, 'Fayl hajmi 10 MB dan oshmasligi kerak!')
-            elif uploaded_file.content_type not in allowed_types:
+            elif uploaded_file.content_type not in allowed_types or file_ext not in allowed_exts:
                 messages.error(request, 'Ruxsat etilgan formatlar: PDF, Word, Excel, JPG, PNG')
             else:
                 Document.objects.create(
@@ -637,6 +640,15 @@ def project_request_revision(request, pk):
 
         project.status = 'in_progress'
         project.save()
+
+        # Roadmap qadamlarini reset — guard o'z maqsadini bajarmaydi aks holda
+        from analysis.models import RoadmapStep
+        try:
+            RoadmapStep.objects.filter(
+                roadmap=project.analysis.roadmap
+            ).update(is_completed=False, completed_at=None)
+        except Exception:
+            pass
 
         ProjectUpdate.objects.create(
             project=project,

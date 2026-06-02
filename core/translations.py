@@ -73,6 +73,9 @@ TRANSLATIONS = {
         'priority_critical': 'Kritik',
         'priority_high': 'Yuqori',
         'priority_medium': 'O\'rta',
+        'priority_low': 'Past',
+        'analysis_result': 'Tahlil natijalari',
+        'back_to_dashboard': 'Bosh sahifaga qaytish',
 
         # === LANDING HOW IT WORKS ===
         'how_badge': 'Jarayon',
@@ -885,6 +888,9 @@ TRANSLATIONS = {
         'priority_critical': 'Критично',
         'priority_high': 'Высокий',
         'priority_medium': 'Средний',
+        'priority_low': 'Низкий',
+        'analysis_result': 'Результаты анализа',
+        'back_to_dashboard': 'Вернуться на главную',
 
         # === LANDING HOW IT WORKS ===
         'how_badge': 'Процесс',
@@ -1660,6 +1666,9 @@ TRANSLATIONS = {
         'priority_critical': 'Critical',
         'priority_high': 'High',
         'priority_medium': 'Medium',
+        'priority_low': 'Low',
+        'analysis_result': 'Analysis Results',
+        'back_to_dashboard': 'Back to Dashboard',
 
         # === LANDING HOW IT WORKS ===
         'how_badge': 'Process',
