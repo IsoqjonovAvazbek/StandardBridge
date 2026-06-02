@@ -828,24 +828,39 @@ def wallet(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         if action == 'update_card':
+            import re as _re
             raw_card = request.POST.get('card_number', '').replace(' ', '').strip()
             card_holder = request.POST.get('card_holder', '').strip()
             card_expiry = request.POST.get('card_expiry', '').strip()
-            if not raw_card:
-                messages.error(request, 'Karta raqamini kiriting!')
-            elif len(raw_card) < 16:
-                messages.error(request, 'Karta raqami 16 ta raqamdan iborat bo\'lishi kerak!')
-            elif not raw_card.isdigit():
-                messages.error(request, 'Karta raqami faqat raqamlardan iborat bo\'lishi kerak!')
-            elif not card_holder:
-                messages.error(request, 'Karta egasining ismini kiriting!')
+            # Karta raqami bo'sh bo'lsa — faqat holder/expiry yangilansin
+            if raw_card:
+                if len(raw_card) < 16:
+                    messages.error(request, 'Karta raqami 16 ta raqamdan iborat bo\'lishi kerak!')
+                elif not raw_card.isdigit():
+                    messages.error(request, 'Karta raqami faqat raqamlardan iborat bo\'lishi kerak!')
+                elif not card_holder:
+                    messages.error(request, 'Karta egasining ismini kiriting!')
+                else:
+                    user_wallet.card_number = raw_card[-4:]
+                    user_wallet.card_holder = card_holder
+                    if card_expiry and not _re.match(r'^\d{2}/\d{2}$', card_expiry):
+                        messages.error(request, 'Amal qilish muddati MM/YY formatida bo\'lishi kerak!')
+                    else:
+                        user_wallet.card_expiry = card_expiry
+                        user_wallet.save()
+                        messages.success(request, 'Karta ma\'lumotlari saqlandi!')
+            elif card_holder or card_expiry:
+                if card_expiry and not _re.match(r'^\d{2}/\d{2}$', card_expiry):
+                    messages.error(request, 'Amal qilish muddati MM/YY formatida bo\'lishi kerak!')
+                else:
+                    if card_holder:
+                        user_wallet.card_holder = card_holder
+                    if card_expiry:
+                        user_wallet.card_expiry = card_expiry
+                    user_wallet.save()
+                    messages.success(request, 'Karta ma\'lumotlari saqlandi!')
             else:
-                # Bazada faqat oxirgi 4 raqam saqlanadi (to'liq raqam kerak emas)
-                user_wallet.card_number = raw_card[-4:]
-                user_wallet.card_holder = card_holder
-                user_wallet.card_expiry = card_expiry
-                user_wallet.save()
-                messages.success(request, 'Karta ma\'lumotlari saqlandi!')
+                messages.error(request, 'Karta raqamini kiriting!')
         elif action == 'withdraw':
             amount_str = request.POST.get('amount', '0')
             try:
@@ -984,8 +999,12 @@ def expert_detail(request, expert_pk):
     ).order_by('-created_at')
 
     if request.method == 'POST':
-        analysis_id = request.POST.get('analysis_id')
+        analysis_id = request.POST.get('analysis_id', '').strip()
         message = request.POST.get('message', '')
+
+        if not analysis_id:
+            messages.error(request, 'Tahlilni tanlang!')
+            return redirect('expert_detail', expert_pk=expert_pk)
 
         from analysis.models import GapAnalysis
         analysis = get_object_or_404(GapAnalysis, pk=analysis_id, entrepreneur=request.user)

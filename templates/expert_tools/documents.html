@@ -106,7 +106,7 @@
                   class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">{{ T.et_select_project }}</option>
             {% for prj in projects %}
-            <option value="{{ prj.pk }}">{{ prj.entrepreneur.company_name }} — {{ prj.standard }}</option>
+            <option value="{{ prj.pk }}">{{ prj.entrepreneur.company_name }} — {{ prj.analysis.target_standard.code }}</option>
             {% endfor %}
           </select>
         </div>

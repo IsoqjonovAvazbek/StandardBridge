@@ -127,7 +127,8 @@ def generate_document(request):
         content = response.choices[0].message.content.strip()
     except Exception as e:
         logger.exception('AI hujjat generatsiya xatosi (template=%s): %s', template_id, e)
-        content = f"[AI xatoligi: {e}]\n\n{template.template_content}"
+        content = template.template_content
+        messages.warning(request, 'AI vaqtincha ishlamadi — shablon matni ishlatildi. Keyinroq qayta urinib ko\'ring.')
 
     doc = GeneratedDocument.objects.create(
         expert=request.user,
@@ -149,9 +150,14 @@ def document_detail(request, pk):
 def edit_document(request, pk):
     doc = get_object_or_404(GeneratedDocument, pk=pk, expert=request.user)
     if request.method == 'POST':
-        doc.content = request.POST.get('content', doc.content)
+        content = request.POST.get('content', '').strip()
+        if not content:
+            messages.error(request, 'Hujjat matni bo\'sh bo\'lishi mumkin emas!')
+            return render(request, 'expert_tools/edit_document.html', {'doc': doc})
+        doc.content = content
         doc.status = request.POST.get('status', doc.status)
         doc.save()
+        messages.success(request, 'Hujjat saqlandi.')
         return redirect('expert_doc_detail', pk=pk)
     return render(request, 'expert_tools/edit_document.html', {'doc': doc})
 
@@ -270,12 +276,16 @@ def new_audit(request):
         company_name = project.entrepreneur.company_name or company_name
 
     standard = request.POST.get('standard', 'iso9001')
+    audit_date_raw = request.POST.get('audit_date', '').strip()
+    if not audit_date_raw:
+        messages.error(request, 'Audit sanasini kiriting!')
+        return redirect('audit_list')
     audit = AuditChecklist.objects.create(
         expert=request.user,
         project=project,
         company_name=company_name,
         standard=standard,
-        audit_date=request.POST.get('audit_date'),
+        audit_date=audit_date_raw,
         notes=request.POST.get('notes', ''),
     )
 
@@ -495,8 +505,9 @@ def crm_update(request, pk):
     if request.method == 'POST':
         client.status = request.POST.get('status', client.status)
         client.next_followup = request.POST.get('next_followup') or None
-        client.notes = request.POST.get('notes', client.notes).strip()
+        client.notes = (request.POST.get('notes') or client.notes or '').strip()
         client.save()
+        messages.success(request, 'Mijoz ma\'lumotlari yangilandi.')
     return redirect('crm_detail', pk=pk)
 
 

@@ -325,6 +325,7 @@ def update_nonconformity(request, pk):
         if nc.status == 'closed' and not nc.closed_at:
             nc.closed_at = timezone.now()
         nc.save()
+        messages.success(request, 'Nomuvofiqlik yangilandi.')
     return redirect('nonconformities')
 
 
@@ -378,6 +379,9 @@ def update_audit(request, pk):
         if new_status in valid_statuses:
             audit.status = new_status
             audit.save(update_fields=['status'])
+            messages.success(request, 'Audit holati yangilandi.')
+        else:
+            messages.error(request, 'Noto\'g\'ri holat tanlandi.')
     return redirect('audit_schedule')
 
 
