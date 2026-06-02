@@ -1,10 +1,13 @@
+import threading
+import logging
 from django.core.mail import send_mail
 from django.conf import settings
 
+logger = logging.getLogger('standardbridge')
 
-def _send(subject, message, to_email):
-    if not to_email or not settings.EMAIL_HOST_USER:
-        return
+
+def _send_sync(subject, message, to_email):
+    """Haqiqiy SMTP yuborish (background threadda chaqiriladi)."""
     try:
         send_mail(
             subject=subject,
@@ -13,8 +16,24 @@ def _send(subject, message, to_email):
             recipient_list=[to_email],
             fail_silently=True,
         )
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning('Email yuborilmadi (%s): %s', to_email, e)
+
+
+def _send(subject, message, to_email):
+    """Emailni FON threadda yuboradi — foydalanuvchi SMTP javobini kutmaydi.
+
+    Avval sinxron edi: Gmail SMTP sekin javob bersa sahifa 30-60s qotardi.
+    Endi so'rov darrov qaytadi, email orqada yuboriladi.
+    """
+    if not to_email or not settings.EMAIL_HOST_USER:
+        return
+    thread = threading.Thread(
+        target=_send_sync,
+        args=(subject, message, to_email),
+        daemon=True,
+    )
+    thread.start()
 
 
 def send_welcome_email(user):
