@@ -829,12 +829,23 @@ def wallet(request):
         action = request.POST.get('action')
         if action == 'update_card':
             raw_card = request.POST.get('card_number', '').replace(' ', '').strip()
-            # Bazada faqat oxirgi 4 raqam saqlanadi (to'liq raqam kerak emas)
-            user_wallet.card_number = raw_card[-4:] if len(raw_card) >= 4 else raw_card
-            user_wallet.card_holder = request.POST.get('card_holder', '')
-            user_wallet.card_expiry = request.POST.get('card_expiry', '')
-            user_wallet.save()
-            messages.success(request, 'Karta ma\'lumotlari saqlandi!')
+            card_holder = request.POST.get('card_holder', '').strip()
+            card_expiry = request.POST.get('card_expiry', '').strip()
+            if not raw_card:
+                messages.error(request, 'Karta raqamini kiriting!')
+            elif len(raw_card) < 16:
+                messages.error(request, 'Karta raqami 16 ta raqamdan iborat bo\'lishi kerak!')
+            elif not raw_card.isdigit():
+                messages.error(request, 'Karta raqami faqat raqamlardan iborat bo\'lishi kerak!')
+            elif not card_holder:
+                messages.error(request, 'Karta egasining ismini kiriting!')
+            else:
+                # Bazada faqat oxirgi 4 raqam saqlanadi (to'liq raqam kerak emas)
+                user_wallet.card_number = raw_card[-4:]
+                user_wallet.card_holder = card_holder
+                user_wallet.card_expiry = card_expiry
+                user_wallet.save()
+                messages.success(request, 'Karta ma\'lumotlari saqlandi!')
         elif action == 'withdraw':
             amount_str = request.POST.get('amount', '0')
             try:
