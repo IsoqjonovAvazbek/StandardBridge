@@ -243,9 +243,15 @@ Umumiy baho: **C+ / 60-70% production tayyor**
    - 4 ta URL + 6 ta template yaratildi (password_reset, done, confirm, complete, email, subject)
    - Login sahifasiga "Parolni unutdingizmi?" havola qo'shildi
 
-6. **Karta raqamlari ochiq saqlanmoqda (experts/models.py ~182)**
-   - `Wallet.card_number` — shifrsiz bazada
-   - `django-fernet-fields` bilan shifrlash yoki tokenizatsiya
+6. **[x] Karta raqamlari shifrlandi**
+   - `cryptography==48.0.0` qo'shildi
+   - `experts/crypto.py`: `encrypt_card`/`decrypt_card` (Fernet, `gAAAAA` prefix bilan eski ma'lumot aniqlash)
+   - `Wallet.card_number`: faqat oxirgi 4 raqam saqlanadi (to'liq raqam kerak emas)
+   - `WithdrawalRequest.card_number`: Fernet bilan shifrlangan (max_length=500), `.card_number_plain` property
+   - `FERNET_KEY` settings.py (DEBUG=True da random, production da .env dan majburiy)
+   - Migration 0006 yaratildi va qo'llanildi
+   - admin_panel.html: `wr.card_number_plain` (admin to'liq raqamni ko'radi)
+   - wallet.html: `req.card_number_plain|slice:"-4:"` (expert oxirgi 4ni ko'radi)
 
 ### 🟡 MUHIM — Tez orada hal qilish
 
@@ -256,16 +262,24 @@ Umumiy baho: **C+ / 60-70% production tayyor**
 8. **[x] Gunicorn timeout**
    - `start.sh`: `--timeout 120` → `--timeout 300`
 
-9. **Email bildirishnomalar to'liq emas (experts/emails.py)**
-   - Yo'q: Withdrawal tasdiqlash/rad, Dispute, QMS hujjat muddati
+9. **[x] Email bildirishnomalar to'ldirildi (experts/emails.py)**
+   - `send_withdrawal_approved`, `send_withdrawal_rejected` — admin tasdiqlash/rad etganda expertga
+   - `send_dispute_opened` — nizo ochilganda expertga
+   - `send_dispute_resolved` — nizo hal qilinganda ikki tomonga
+   - accounts/views.py: withdrawal va dispute viewlarda yangi funksiyalar chaqiriladi
+   - experts/views.py: `open_dispute`da `send_dispute_opened` chaqiriladi
 
-10. **`except Exception` juda keng (experts/views.py)**
-    - Xatolarni yashiradi, foydalanuvchiga ichki xabar chiqaradi
-    - Aniq exception turlari bilan almashtirish kerak
+10. **[x] `except Exception` aniqlashtirish**
+    - `experts/views.py:213`: `except Exception:` → `except AttributeError:`
+    - `experts/views.py` payment_release: `logger.exception(...)` qo'shildi
+    - `check_sla.py:162`: `except Exception as e: logger.warning(...)` qo'shildi
+    - AI calllar (analysis/qms/expert_tools): allaqachon `logger.exception` bor — saqlanadi
 
-11. **CSP headers yo'q (core/settings.py)**
-    - Content-Security-Policy konfiguratsiya qilinmagan
-    - XSS xavfi bor
+11. **[x] CSP headers**
+    - `core/middleware.py`: `ContentSecurityPolicyMiddleware`
+    - Tailwind CDN, Chart.js CDN, Google Fonts ruxsat etilgan
+    - `frame-ancestors 'none'`, `form-action 'self'` himoyasi
+    - settings.py MIDDLEWARE oxiriga qo'shildi
 
 12. **[x] Health check endpoint**
     - `/health/` → `{"status": "ok"}` JSON (core/urls.py)

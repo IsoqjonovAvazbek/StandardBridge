@@ -157,3 +157,95 @@ Hurmat bilan,
 StandartBridge jamoasi""",
         to_email=expert_user.email,
     )
+
+
+def send_withdrawal_approved(wr):
+    """Admin pul yechish so'rovini tasdiqlaganda expertga xabar."""
+    user = wr.wallet.user
+    from .crypto import decrypt_card
+    card_display = f'*{decrypt_card(wr.card_number)[-4:]}' if wr.card_number else '—'
+    _send(
+        subject=f"Pul yechish tasdiqlandi — StandartBridge",
+        message=f"""Assalomu alaykum, {user.get_full_name()}!
+
+${wr.amount} yechish so'rovingiz tasdiqlandi.
+
+Karta: {card_display}
+{f"Admin izohi: {wr.admin_note}" if wr.admin_note else ""}
+
+Mablag' 1-3 ish kuni ichida kartangizga o'tkaziladi.
+
+Hurmat bilan,
+StandartBridge jamoasi""",
+        to_email=user.email,
+    )
+
+
+def send_withdrawal_rejected(wr):
+    """Admin pul yechish so'rovini rad etganda expertga xabar."""
+    user = wr.wallet.user
+    _send(
+        subject=f"Pul yechish rad etildi — StandartBridge",
+        message=f"""Assalomu alaykum, {user.get_full_name()}!
+
+${wr.amount} yechish so'rovingiz rad etildi.
+
+Sabab: {wr.admin_note or "Ko'rsatilmadi"}
+
+${wr.amount} hamyoningizga qaytarildi.
+
+Hamyon: http://standartbridge.uz/experts/wallet/
+
+Hurmat bilan,
+StandartBridge jamoasi""",
+        to_email=user.email,
+    )
+
+
+def send_dispute_opened(dispute):
+    """Tadbirkor nizo ochganda expertga xabar."""
+    project = dispute.project
+    if not project.expert:
+        return
+    _send(
+        subject=f"Loyiha #{project.pk} bo'yicha nizo ochildi — StandartBridge",
+        message=f"""Assalomu alaykum, {project.expert.get_full_name()}!
+
+Tadbirkor {dispute.opened_by.get_full_name()} loyiha #{project.pk} bo'yicha nizo ochdi.
+
+Sabab: {dispute.reason[:300]}
+
+Administrator nizoni ko'rib chiqadi. Loyiha sahifasi:
+http://standartbridge.uz/experts/projects/{project.pk}/
+
+Hurmat bilan,
+StandartBridge jamoasi""",
+        to_email=project.expert.email,
+    )
+
+
+def send_dispute_resolved(dispute, decision):
+    """Admin nizoni hal qilganda ikki tomonga ham xabar."""
+    project = dispute.project
+    msg = f"""Assalomu alaykum!
+
+Loyiha #{project.pk} bo'yicha nizo hal qilindi.
+
+Admin qarori: {decision[:300]}
+
+Loyiha sahifasi:
+http://standartbridge.uz/experts/projects/{project.pk}/
+
+Hurmat bilan,
+StandartBridge jamoasi"""
+    _send(
+        subject=f"Nizo hal qilindi — Loyiha #{project.pk}",
+        message=msg,
+        to_email=dispute.opened_by.email,
+    )
+    if project.expert:
+        _send(
+            subject=f"Nizo hal qilindi — Loyiha #{project.pk}",
+            message=msg,
+            to_email=project.expert.email,
+        )

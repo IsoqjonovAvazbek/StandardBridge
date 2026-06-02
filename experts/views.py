@@ -8,7 +8,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 import hashlib
 import json
+import logging
 from decimal import Decimal, InvalidOperation
+
+logger = logging.getLogger('standardbridge')
 from .models import (
     Project, ProjectUpdate, Document, Notification, Payment,
     Wallet, WalletTransaction, Review, WithdrawalRequest, Dispute,
@@ -210,7 +213,7 @@ def project_detail(request, pk):
     entrepreneur_profile = None
     try:
         entrepreneur_profile = project.entrepreneur.entrepreneur_profile
-    except Exception:
+    except AttributeError:
         pass
 
     context = {
@@ -628,7 +631,8 @@ def payment_release(request, project_pk):
     except Payment.DoesNotExist:
         messages.error(request, 'To\'lov topilmadi.')
     except Exception as e:
-        messages.error(request, f'Xatolik: {str(e)}')
+        logger.exception('payment_release xatosi (project_pk=%s): %s', project_pk, e)
+        messages.error(request, 'Kutilmagan xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.')
 
     return redirect('project_detail', pk=project_pk)
 
@@ -646,7 +650,9 @@ def wallet(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         if action == 'update_card':
-            user_wallet.card_number = request.POST.get('card_number', '')
+            raw_card = request.POST.get('card_number', '').replace(' ', '').strip()
+            # Bazada faqat oxirgi 4 raqam saqlanadi (to'liq raqam kerak emas)
+            user_wallet.card_number = raw_card[-4:] if len(raw_card) >= 4 else raw_card
             user_wallet.card_holder = request.POST.get('card_holder', '')
             user_wallet.card_expiry = request.POST.get('card_expiry', '')
             user_wallet.save()
@@ -676,10 +682,11 @@ def wallet(request):
                     transaction_type='withdrawal',
                     description=f'Pul yechish so\'rovi — karta *{card_num[-4:]}',
                 )
+                from .crypto import encrypt_card
                 WithdrawalRequest.objects.create(
                     wallet=user_wallet,
                     amount=amount,
-                    card_number=card_num,
+                    card_number=encrypt_card(card_num),
                     card_holder=card_holder,
                     note=note,
                 )
@@ -1027,6 +1034,8 @@ def open_dispute(request, pk):
                 title='⚠️ Nizo ochildi!',
                 message=f'{request.user.get_full_name()} loyiha #{project.pk} bo\'yicha nizo ochdi. Admin ko\'rib chiqadi.',
             )
+            from .emails import send_dispute_opened
+            send_dispute_opened(dispute)
         # Notify admin (create a system notification for all admins)
         from accounts.models import CustomUser as CU
         for admin_user in CU.objects.filter(role='admin'):

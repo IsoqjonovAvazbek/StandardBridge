@@ -61,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.ContentSecurityPolicyMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -144,6 +145,19 @@ DEFAULT_FROM_EMAIL = f'StandartBridge <{os.environ.get("EMAIL_HOST_USER", "norep
 
 # AI (Groq) — javob kutish vaqti (soniya). Sekin javobda cheksiz kutmaslik uchun.
 AI_TIMEOUT = int(os.environ.get('AI_TIMEOUT', '45'))
+
+# Karta raqamlarini shifrlash uchun Fernet kalit
+# Production: FERNET_KEY=<base64 32-bayt kalit> .env ga yozing
+# Kalit generatsiya: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+_fernet_key = os.environ.get('FERNET_KEY', '').strip()
+if _fernet_key:
+    FERNET_KEY = _fernet_key
+elif DEBUG:
+    from cryptography.fernet import Fernet as _Fernet
+    FERNET_KEY = _Fernet.generate_key().decode()
+else:
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured('FERNET_KEY muhit o\'zgaruvchisi o\'rnatilmagan. Production uchun majburiy.')
 
 # Click payment
 CLICK_SERVICE_ID = os.environ.get('CLICK_SERVICE_ID', '')

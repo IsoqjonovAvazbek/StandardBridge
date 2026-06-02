@@ -198,7 +198,8 @@ class WithdrawalRequest(models.Model):
     ]
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='withdrawal_requests')
     amount = models.DecimalField(max_digits=12, decimal_places=2)
-    card_number = models.CharField(max_length=20)
+    # Fernet bilan shifrlangan karta raqami (max_length=500 — shifrlangan qiymat ~120 bayt)
+    card_number = models.CharField(max_length=500)
     card_holder = models.CharField(max_length=100, blank=True)
     note = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
@@ -208,6 +209,12 @@ class WithdrawalRequest(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+    @property
+    def card_number_plain(self):
+        """Shifrlangan karta raqamini ochiq ko'rinishda qaytaradi."""
+        from .crypto import decrypt_card
+        return decrypt_card(self.card_number)
 
     def __str__(self):
         return f"Chiqim ${self.amount} — {self.wallet.user.get_full_name()} ({self.status})"

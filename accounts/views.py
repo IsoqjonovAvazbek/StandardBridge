@@ -424,6 +424,7 @@ def admin_process_withdrawal(request, pk):
         return redirect('admin_panel')
 
     from experts.models import WithdrawalRequest, Notification
+    from experts.emails import send_withdrawal_approved, send_withdrawal_rejected
     from django.utils import timezone
 
     wr = get_object_or_404(WithdrawalRequest, pk=pk)
@@ -438,11 +439,11 @@ def admin_process_withdrawal(request, pk):
         Notification.objects.create(
             user=wr.wallet.user,
             title='Pul yechish tasdiqlandi!',
-            message=f'${wr.amount} kartangizga o\'tkazildi. *{wr.card_number[-4:]}',
+            message=f'${wr.amount} kartangizga o\'tkazildi. *{wr.card_number_plain[-4:]}',
         )
+        send_withdrawal_approved(wr)
         messages.success(request, f'${wr.amount} yechish so\'rovi tasdiqlandi!')
     elif action == 'reject':
-        # Refund the reserved amount back to wallet
         wallet = wr.wallet
         wallet.balance += wr.amount
         wallet.save()
@@ -455,6 +456,7 @@ def admin_process_withdrawal(request, pk):
             title='Pul yechish rad etildi',
             message=f'${wr.amount} hamyoningizga qaytarildi. Sabab: {admin_note or "Ko\'rsatilmadi"}',
         )
+        send_withdrawal_rejected(wr)
         messages.warning(request, f'Yechish so\'rovi rad etildi, ${wr.amount} qaytarildi.')
     return redirect('admin_panel')
 
@@ -468,6 +470,7 @@ def admin_resolve_dispute(request, pk):
         return redirect('admin_panel')
 
     from experts.models import Dispute, Notification
+    from experts.emails import send_dispute_resolved
     from django.utils import timezone
 
     dispute = get_object_or_404(Dispute, pk=pk)
@@ -479,7 +482,6 @@ def admin_resolve_dispute(request, pk):
     dispute.resolved_at = timezone.now()
     dispute.save()
 
-    # Notify both parties
     Notification.objects.create(
         user=dispute.opened_by,
         title='Nizo ko\'rib chiqildi!',
@@ -491,6 +493,7 @@ def admin_resolve_dispute(request, pk):
             title='Nizo ko\'rib chiqildi!',
             message=f'Loyiha #{dispute.project_id} bo\'yicha nizo hal qilindi.',
         )
+    send_dispute_resolved(dispute, decision)
     messages.success(request, f'Nizo #{pk} hal qilindi!')
     return redirect('admin_panel')
 

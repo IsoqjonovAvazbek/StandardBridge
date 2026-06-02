@@ -221,7 +221,7 @@
                     <div class="flex items-center justify-between mb-2">
                         <div>
                             <p class="font-semibold text-gray-900 text-sm">{{ wr.wallet.user.get_full_name }}</p>
-                            <p class="text-xs text-gray-500">Karta: *{{ wr.card_number|slice:"-4:" }} · {{ wr.card_holder }}</p>
+                            <p class="text-xs text-gray-500">Karta: {{ wr.card_number_plain }} · {{ wr.card_holder }}</p>
                             <p class="text-xs text-gray-400">{{ wr.created_at|date:"d.m.Y H:i" }}</p>
                             {% if wr.note %}<p class="text-xs text-gray-600 mt-1">{{ wr.note }}</p>{% endif %}
                         </div>

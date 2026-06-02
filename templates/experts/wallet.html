@@ -77,7 +77,7 @@
                     {% for req in withdrawal_requests %}
                     <div class="flex items-center justify-between text-xs py-2 border-b border-gray-50 last:border-0">
                         <div>
-                            <span class="font-mono text-gray-700">*{{ req.card_number|slice:"-4:" }}</span>
+                            <span class="font-mono text-gray-700">*{{ req.card_number_plain|slice:"-4:" }}</span>
                             <span class="text-gray-400 ml-2">{{ req.created_at|date:"d.m.Y" }}</span>
                         </div>
                         <div class="flex items-center gap-2">

@@ -159,5 +159,6 @@ class Command(BaseCommand):
                 recipient_list=[to],
                 fail_silently=True,
             )
-        except Exception:
-            pass
+        except Exception as e:
+            import logging
+            logging.getLogger('standardbridge').warning('SLA email yuborilmadi (%s): %s', to, e)
