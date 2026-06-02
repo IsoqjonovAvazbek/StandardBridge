@@ -339,6 +339,37 @@ def project_accept(request, pk):
 
 
 @login_required
+def project_messages(request, pk):
+    """AJAX: loyiha xabarlarini JSON qaytaradi (real-time chat polling uchun).
+
+    ?after=<id> berilsa, faqat o'sha id dan keyingi yangi xabarlar qaytadi.
+    """
+    if request.user.is_expert():
+        project = get_object_or_404(Project, pk=pk, expert=request.user)
+    else:
+        project = get_object_or_404(Project, pk=pk, entrepreneur=request.user)
+
+    updates = project.updates.all().order_by('id')
+    after = request.GET.get('after')
+    if after:
+        try:
+            updates = updates.filter(id__gt=int(after))
+        except (ValueError, TypeError):
+            pass
+
+    data = [{
+        'id': u.id,
+        'message': u.message,
+        'type': u.update_type,
+        'is_mine': u.author_id == request.user.id,
+        'author': u.author.get_full_name() or u.author.username,
+        'author_initial': (u.author.first_name or u.author.username or '?')[0],
+        'created_at': u.created_at.strftime('%d.%m %H:%M'),
+    } for u in updates]
+    return JsonResponse({'messages': data})
+
+
+@login_required
 def project_update(request, pk):
     if request.user.is_expert():
         project = get_object_or_404(Project, pk=pk, expert=request.user)
@@ -350,7 +381,7 @@ def project_update(request, pk):
         message_text = request.POST.get('message', '')
 
         if action == 'message' and message_text:
-            ProjectUpdate.objects.create(
+            upd = ProjectUpdate.objects.create(
                 project=project,
                 author=request.user,
                 message=message_text,
@@ -363,6 +394,9 @@ def project_update(request, pk):
                     title='Yangi xabar',
                     message=f'{request.user.get_full_name()}: {message_text[:100]}'
                 )
+            # AJAX so'rov bo'lsa — JSON qaytaramiz (sahifa qayta yuklanmaydi)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'id': upd.id})
 
         elif action == 'progress' and message_text:
             ProjectUpdate.objects.create(

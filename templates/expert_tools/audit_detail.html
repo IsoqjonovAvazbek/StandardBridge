@@ -28,16 +28,16 @@
           <svg viewBox="0 0 36 36" class="w-20 h-20 -rotate-90">
             <path class="text-gray-100" stroke="currentColor" stroke-width="3.5" fill="none"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-            <path class="{% if score >= 70 %}text-green-500{% elif score >= 40 %}text-yellow-500{% else %}text-red-500{% endif %}"
+            <path id="score-ring" class="{% if score >= 70 %}text-green-500{% elif score >= 40 %}text-yellow-500{% else %}text-red-500{% endif %}"
                   stroke="currentColor" stroke-width="3.5" fill="none"
                   stroke-dasharray="{{ score }}, 100"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
           </svg>
           <div class="absolute inset-0 flex items-center justify-center">
-            <span class="text-lg font-bold text-gray-900">{{ score }}%</span>
+            <span id="score-text" data-score class="text-lg font-bold text-gray-900">{{ score }}%</span>
           </div>
         </div>
-        <span class="text-xs text-gray-500 mt-1">{{ compliant }}/{{ total }}</span>
+        <span id="score-count" class="text-xs text-gray-500 mt-1">{{ compliant }}/{{ total }}</span>
       </div>
     </div>
   </div>
@@ -175,8 +175,20 @@ function saveItem(itemId, btn) {
   .then(data => {
     if (data.success) {
       btn.textContent = '✓';
-      // Update score display
-      document.querySelectorAll('[data-score]').forEach(el => el.textContent = data.score + '%');
+      // Foiz matni
+      const txt = document.getElementById('score-text');
+      if (txt) txt.textContent = data.score + '%';
+      // Halqa (stroke-dasharray) + rang
+      const ring = document.getElementById('score-ring');
+      if (ring) {
+        ring.setAttribute('stroke-dasharray', data.score + ', 100');
+        ring.classList.remove('text-green-500','text-yellow-500','text-red-500');
+        ring.classList.add(data.score >= 70 ? 'text-green-500' : (data.score >= 40 ? 'text-yellow-500' : 'text-red-500'));
+      }
+      // Hisob (compliant/total)
+      const cnt = document.getElementById('score-count');
+      if (cnt && data.total !== undefined) cnt.textContent = data.compliant + '/' + data.total;
+      setTimeout(() => { btn.textContent = '{{ T.et_save_item }}'; }, 1200);
     } else {
       btn.textContent = '{{ T.et_save_item }}';
     }

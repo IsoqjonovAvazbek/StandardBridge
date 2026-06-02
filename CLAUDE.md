@@ -191,6 +191,14 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] gaps_to_qms/audit_from_analysis ruxsati tasdiqlandi (entrepreneur=request.user / expert=request.user — begona 404, allaqachon test bor)
 - [x] Jami 47 test OK. Butun int/float input himoyalandi (price/days/rating/experience/employee_count)
 
+### Real foydalanuvchi UX xatolari (real test bilan, autonom)
+- [x] Sayt qotishi (tahlil yuborish/narx belgilash/to'lov): experts/emails.py _send endi background thread (Gmail SMTP sinxron edi -> 30-60s qotardi). Endi so'rov darrov javob beradi, email orqada ketadi
+- [x] Audit foizlari real vaqtda: audit_detail.html score-ring/score-text/score-count ID lar + update_audit_item compliant/total qaytaradi, JS halqa+foiz+hisobni refreshsiz yangilaydi
+- [x] Chat real vaqtda: project_messages JSON endpoint (?after=id), project_update AJAX (X-Requested-With) JSON qaytaradi, project_detail.html chat AJAX submit + 5s polling (sahifa qayta yuklanmaydi)
+- [x] Expert profil narx/vaqt: project_price_stat/duration_stat -> "boshlang'ich narx / o'rtacha muddat" + "har loyiha alohida kelishiladi" izohi (chalkashlik yo'q)
+- [x] Loyiha shablonlari: Procfile ga load_expert_templates qo'shildi (Postgres da bo'sh edi)
+- [x] price_note_per_project tarjimalar (UZ/RU/EN). 47 test OK
+
 ## PENDING (bajarilmagan)
 - [x] QMS tool — TO'LIQ bajarilgan (checklist ISO9001/22000/14001/45001, hujjatlar, NC, audit)
 - [x] Expert Tools — TO'LIQ bajarilgan (AI doc generator, audit checklist, project templates, CRM — /expert-tools/)

@@ -303,7 +303,9 @@
                     <div class="p-5 border-b border-gray-100">
                         <h2 class="font-bold text-gray-900">{{ T.process_section }}</h2>
                     </div>
-                    <div class="p-5 space-y-4 max-h-80 overflow-y-auto">
+                    <div class="p-5 space-y-4 max-h-80 overflow-y-auto" id="chat-messages"
+                         data-last-id="{% if updates %}{{ updates.last.id }}{% else %}0{% endif %}"
+                         data-me-id="{{ request.user.id }}">
                         {% for update in updates %}
                         <div class="flex gap-3 {% if update.author == request.user %}flex-row-reverse{% endif %}">
                             <div class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center
@@ -326,16 +328,16 @@
                             </div>
                         </div>
                         {% empty %}
-                        <p class="text-gray-400 text-sm text-center">{{ T.no_messages }}</p>
+                        <p class="text-gray-400 text-sm text-center" id="no-messages">{{ T.no_messages }}</p>
                         {% endfor %}
                     </div>
 
                     {% if project.status == 'in_progress' or project.status == 'review' %}
                     <div class="p-4 border-t border-gray-100 space-y-3">
-                        <form method="POST" action="{% url 'project_update' project.pk %}" class="flex gap-3">
+                        <form method="POST" action="{% url 'project_update' project.pk %}" class="flex gap-3" id="chat-form">
                             {% csrf_token %}
                             <input type="hidden" name="action" value="message">
-                            <input type="text" name="message" required
+                            <input type="text" name="message" required id="chat-input"
                                 class="flex-1 px-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                                 placeholder="{{ T.message_placeholder }}">
                             <button type="submit" class="gradient-bg text-white px-5 py-2 rounded-xl text-sm font-medium">
@@ -671,6 +673,72 @@
 
 {% block extra_js %}
 <script>
+// ── Real-time chat (AJAX yuborish + polling) ──────────────────────────────
+(function() {
+    const box = document.getElementById('chat-messages');
+    if (!box) return;
+    const meId = box.dataset.meId;
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-input');
+    const messagesUrl = "{% url 'project_messages' project.pk %}";
+
+    function chatCookie(name) {
+        const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return m ? m.pop() : '';
+    }
+
+    function escapeHtml(s) {
+        const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+    }
+
+    function appendMessage(m) {
+        const noMsg = document.getElementById('no-messages');
+        if (noMsg) noMsg.remove();
+        const mine = String(m.is_mine);
+        const wrap = document.createElement('div');
+        wrap.className = 'flex gap-3' + (m.is_mine ? ' flex-row-reverse' : '');
+        wrap.innerHTML =
+            '<div class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ' +
+            (m.type === 'progress' ? 'bg-green-100' : 'bg-gray-100') + '">' +
+            '<span class="text-gray-600 text-xs font-bold">' + escapeHtml(m.author_initial) + '</span></div>' +
+            '<div class="max-w-xs"><div class="' +
+            (m.is_mine ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900') +
+            ' rounded-2xl px-4 py-3 text-sm">' + escapeHtml(m.message) + '</div>' +
+            '<p class="text-gray-400 text-xs mt-1' + (m.is_mine ? ' text-right' : '') + '">' +
+            escapeHtml(m.author) + ' • ' + escapeHtml(m.created_at) + '</p></div>';
+        box.appendChild(wrap);
+        box.scrollTop = box.scrollHeight;
+        box.dataset.lastId = m.id;
+    }
+
+    function poll() {
+        fetch(messagesUrl + '?after=' + (box.dataset.lastId || 0))
+            .then(r => r.json())
+            .then(d => { (d.messages || []).forEach(appendMessage); })
+            .catch(() => {});
+    }
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const text = input.value.trim();
+            if (!text) return;
+            const fd = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': chatCookie('csrftoken')},
+                body: fd,
+            })
+            .then(r => r.json())
+            .then(() => { input.value = ''; poll(); })
+            .catch(() => { form.submit(); });  // AJAX ishlamasa — oddiy submit
+        });
+    }
+
+    box.scrollTop = box.scrollHeight;
+    setInterval(poll, 5000);  // har 5 soniyada yangi xabarlarni tekshiradi
+})();
+
 // ── Edit roadmap step (expert) ────────────────────────────────────────────
 function openEditStep(actionUrl, btn) {
     const form = document.getElementById('edit-step-form');

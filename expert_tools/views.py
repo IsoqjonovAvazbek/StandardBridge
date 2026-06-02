@@ -273,7 +273,10 @@ def update_audit_item(request, pk):
         audit.overall_score = score
         audit.save(update_fields=['overall_score'])
 
-        return JsonResponse({'success': True, 'score': score})
+        return JsonResponse({
+            'success': True, 'score': score,
+            'compliant': compliant, 'total': total,
+        })
     return JsonResponse({'success': False}, status=405)
 
 
