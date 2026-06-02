@@ -136,6 +136,8 @@ def project_list(request):
 
 @login_required
 def send_to_expert(request, expert_pk, analysis_pk):
+    if not request.user.is_entrepreneur():
+        return redirect('expert_dashboard')
     from analysis.models import GapAnalysis
     from accounts.models import CustomUser
 
@@ -257,6 +259,7 @@ def project_step_toggle(request, pk, step_pk):
     step = get_object_or_404(RoadmapStep, pk=step_pk, roadmap__analysis=project.analysis)
 
     if request.method == 'POST':
+        was_completed = step.is_completed
         step.is_completed = not step.is_completed
         step.completed_at = timezone.now() if step.is_completed else None
         step.save()
@@ -266,8 +269,8 @@ def project_step_toggle(request, pk, step_pk):
         completed = roadmap.steps.filter(is_completed=True).count()
         progress = int(completed / total * 100) if total > 0 else 0
 
-        # Notify entrepreneur when all steps are done
-        if completed == total and total > 0:
+        # Notify entrepreneur only when transitioning to all-complete (not on un-check)
+        if not was_completed and step.is_completed and completed == total and total > 0:
             Notification.objects.create(
                 user=project.entrepreneur,
                 title="Barcha bosqichlar bajarildi!",
@@ -361,6 +364,10 @@ def project_counter_offer(request, pk):
         messages.error(request, 'Qarshi taklif faqat kelishuv bosqichida yuboriladi!')
         return redirect('project_detail', pk=pk)
 
+    if project.counter_status == 'pending':
+        messages.warning(request, 'Oldingi qarshi taklifingiz hali ko\'rib chiqilmagan. Mutaxassis javobini kuting.')
+        return redirect('project_detail', pk=pk)
+
     if request.method == 'POST':
         try:
             counter_price = Decimal(str(request.POST.get('counter_price', '0')))
@@ -438,7 +445,7 @@ def project_messages(request, pk):
     else:
         project = get_object_or_404(Project, pk=pk, entrepreneur=request.user)
 
-    updates = project.updates.all().order_by('id')
+    updates = project.updates.select_related('author').order_by('id')
     after = request.GET.get('after')
     if after:
         try:
@@ -614,6 +621,11 @@ def payment_confirm(request, project_pk):
     if request.method != 'POST':
         return redirect('payment_page', project_pk=project_pk)
 
+    # MOCK to'lov faqat DEBUG rejimida yoki Click credentials yo'q bo'lganda ishlaydi
+    if not settings.DEBUG and settings.CLICK_SERVICE_ID:
+        messages.error(request, 'To\'lov Click.uz orqali amalga oshiriladi.')
+        return redirect('payment_page', project_pk=project_pk)
+
     project = get_object_or_404(Project, pk=project_pk, entrepreneur=request.user)
 
     # Guard: only allow payment when status is 'accepted'
@@ -621,33 +633,34 @@ def payment_confirm(request, project_pk):
         messages.warning(request, 'Loyiha to\'lov qilishga tayyor emas!')
         return redirect('project_detail', pk=project_pk)
 
-    # Guard: prevent double payment
-    existing_payment = Payment.objects.filter(project=project).first()
-    if existing_payment:
-        if existing_payment.status in ('held', 'released'):
-            messages.warning(request, 'Bu loyiha uchun to\'lov allaqachon amalga oshirilgan!')
-            return redirect('project_detail', pk=project_pk)
-        # Reuse existing pending payment record
-        payment = existing_payment
-        payment.amount = project.expert_price
-    else:
-        payment = Payment(
-            project=project,
-            entrepreneur=request.user,
-            amount=project.expert_price,
-        )
+    with transaction.atomic():
+        project = Project.objects.select_for_update().get(pk=project_pk)
+        # Guard: prevent double payment
+        existing_payment = Payment.objects.filter(project=project).first()
+        if existing_payment:
+            if existing_payment.status in ('held', 'released'):
+                messages.warning(request, 'Bu loyiha uchun to\'lov allaqachon amalga oshirilgan!')
+                return redirect('project_detail', pk=project_pk)
+            payment = existing_payment
+            payment.amount = project.expert_price
+        else:
+            payment = Payment(
+                project=project,
+                entrepreneur=request.user,
+                amount=project.expert_price,
+            )
 
-    payment.status = 'held'
-    payment.paid_at = timezone.now()
-    payment.payme_transaction_id = f'MOCK-{project.pk}-{timezone.now().timestamp():.0f}'
-    payment.save()
+        payment.status = 'held'
+        payment.paid_at = timezone.now()
+        payment.payme_transaction_id = f'MOCK-{project.pk}-{timezone.now().timestamp():.0f}'
+        payment.save()
 
-    project.status = 'in_progress'
-    project.started_at = timezone.now()
-    if project.expert_days and project.expert_days > 0:
-        from datetime import timedelta
-        project.work_deadline = timezone.now() + timedelta(days=project.expert_days)
-    project.save()
+        project.status = 'in_progress'
+        project.started_at = timezone.now()
+        if project.expert_days and project.expert_days > 0:
+            from datetime import timedelta
+            project.work_deadline = timezone.now() + timedelta(days=project.expert_days)
+        project.save()
 
     if project.expert:
         Notification.objects.create(
@@ -667,9 +680,9 @@ def payment_release(request, project_pk):
 
     project = get_object_or_404(Project, pk=project_pk, entrepreneur=request.user)
 
-    # Guard: payment can only be released after expert marks work as review
-    if project.status not in ('review', 'in_progress'):
-        messages.warning(request, 'Loyiha hali yakunlanmagan!')
+    # Guard: payment can only be released after expert submits work for review
+    if project.status != 'review':
+        messages.warning(request, 'Loyiha hali tekshiruvga topshirilmagan! Expert ishni yakunlab "Tekshiruvga topshirish" bosishi kerak.')
         return redirect('project_detail', pk=project_pk)
 
     # Guard: ochiq nizo bo'lsa pul muzlatiladi (admin hal qilmaguncha)
@@ -761,24 +774,28 @@ def wallet(request):
             elif not card_num:
                 messages.error(request, 'Karta raqamini kiriting!')
             else:
-                # Reserve the funds (deduct from balance immediately)
-                user_wallet.balance -= amount
-                user_wallet.save()
-                WalletTransaction.objects.create(
-                    wallet=user_wallet,
-                    amount=amount,
-                    transaction_type='withdrawal',
-                    description=f'Pul yechish so\'rovi — karta *{card_num[-4:]}',
-                )
                 from .crypto import encrypt_card
-                WithdrawalRequest.objects.create(
-                    wallet=user_wallet,
-                    amount=amount,
-                    card_number=encrypt_card(card_num),
-                    card_holder=card_holder,
-                    note=note,
-                )
-                messages.success(request, f'${amount:.2f} yechish so\'rovi yuborildi! 1-3 ish kuni ichida kartangizga o\'tkaziladi.')
+                with transaction.atomic():
+                    locked_wallet = Wallet.objects.select_for_update().get(pk=user_wallet.pk)
+                    if amount > locked_wallet.balance:
+                        messages.error(request, f'Balans yetarli emas! Mavjud: ${locked_wallet.balance}')
+                    else:
+                        locked_wallet.balance -= amount
+                        locked_wallet.save(update_fields=['balance'])
+                        WalletTransaction.objects.create(
+                            wallet=locked_wallet,
+                            amount=amount,
+                            transaction_type='withdrawal',
+                            description=f'Pul yechish so\'rovi — karta *{card_num[-4:]}',
+                        )
+                        WithdrawalRequest.objects.create(
+                            wallet=locked_wallet,
+                            amount=amount,
+                            card_number=encrypt_card(card_num),
+                            card_holder=card_holder,
+                            note=note,
+                        )
+                        messages.success(request, f'${amount:.2f} yechish so\'rovi yuborildi! 1-3 ish kuni ichida kartangizga o\'tkaziladi.')
 
     transactions = user_wallet.transactions.all()[:20]
     withdrawal_requests = user_wallet.withdrawal_requests.all()[:10]
@@ -944,15 +961,14 @@ def leave_review(request, pk):
         comment = request.POST.get('comment', '')
 
         from django.db.models import Avg
-        Review.objects.create(
-            project=project,
-            entrepreneur=request.user,
-            expert=project.expert,
-            rating=rating,
-            comment=comment,
-        )
-
         with transaction.atomic():
+            Review.objects.create(
+                project=project,
+                entrepreneur=request.user,
+                expert=project.expert,
+                rating=rating,
+                comment=comment,
+            )
             expert_profile = ExpertProfile.objects.select_for_update().get(user=project.expert)
             agg = Review.objects.filter(expert=project.expert).aggregate(avg=Avg('rating'))
             expert_profile.rating = agg['avg'] or 0
@@ -1010,7 +1026,7 @@ def click_prepare(request):
         return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
                              'merchant_prepare_id': None, 'error': -5, 'error_note': 'Payment not found'})
 
-    if float(amount) != float(payment.amount):
+    if Decimal(str(amount)) != payment.amount:
         return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
                              'merchant_prepare_id': None, 'error': -2, 'error_note': 'Incorrect amount'})
 
@@ -1060,23 +1076,38 @@ def click_complete(request):
                              'merchant_confirm_id': None, 'error': -6, 'error_note': 'Transaction not found'})
 
     if error < 0:
-        payment.status = 'refunded'
-        payment.save()
+        with transaction.atomic():
+            p = Payment.objects.select_for_update().get(pk=payment.pk)
+            if p.status not in ('held', 'released'):
+                p.status = 'refunded'
+                p.save(update_fields=['status'])
         return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
                              'merchant_confirm_id': payment.pk, 'error': 0, 'error_note': 'Cancelled'})
 
-    payment.status = 'held'
-    payment.paid_at = timezone.now()
-    payment.payme_transaction_id = f'CLICK-{click_trans_id}'
-    payment.save()
+    with transaction.atomic():
+        payment = Payment.objects.select_for_update().get(pk=payment.pk)
+        if payment.status == 'held':
+            # Already processed — idempotent response
+            return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
+                                 'merchant_confirm_id': payment.pk, 'error': 0, 'error_note': 'Success'})
 
-    project = payment.project
-    project.status = 'in_progress'
-    project.started_at = timezone.now()
-    if project.expert_days and project.expert_days > 0:
-        from datetime import timedelta
-        project.work_deadline = timezone.now() + timedelta(days=project.expert_days)
-    project.save()
+        project = Project.objects.select_for_update().get(pk=payment.project_id)
+        if project.status not in ('accepted',):
+            # Only transition from accepted; ignore duplicate webhooks for in_progress/completed
+            return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
+                                 'merchant_confirm_id': payment.pk, 'error': 0, 'error_note': 'Success'})
+
+        payment.status = 'held'
+        payment.paid_at = timezone.now()
+        payment.payme_transaction_id = f'CLICK-{click_trans_id}'
+        payment.save()
+
+        project.status = 'in_progress'
+        project.started_at = timezone.now()
+        if project.expert_days and project.expert_days > 0:
+            from datetime import timedelta
+            project.work_deadline = timezone.now() + timedelta(days=project.expert_days)
+        project.save()
 
     if project.expert:
         Notification.objects.create(
@@ -1102,8 +1133,8 @@ def open_dispute(request, pk):
     """Entrepreneur opens a dispute for a project in review or completed status."""
     project = get_object_or_404(Project, pk=pk, entrepreneur=request.user)
 
-    if project.status not in ('review', 'completed', 'in_progress'):
-        messages.error(request, 'Bu loyiha uchun nizo ochib bo\'lmaydi!')
+    if project.status not in ('review', 'in_progress'):
+        messages.error(request, 'Nizo faqat jarayondagi yoki tekshiruvdagi loyiha uchun ochiladi!')
         return redirect('project_detail', pk=pk)
 
     # Allow only one open dispute per project
@@ -1132,14 +1163,17 @@ def open_dispute(request, pk):
             )
             from .emails import send_dispute_opened
             send_dispute_opened(dispute)
-        # Notify admin (create a system notification for all admins)
+        # Notify all admins at once
         from accounts.models import CustomUser as CU
-        for admin_user in CU.objects.filter(role='admin'):
-            Notification.objects.create(
+        admin_users = list(CU.objects.filter(role='admin'))
+        Notification.objects.bulk_create([
+            Notification(
                 user=admin_user,
                 title=f'⚠️ Yangi nizo — Loyiha #{project.pk}',
                 message=f'{request.user.get_full_name()} nizo ochdi: {reason[:100]}',
             )
+            for admin_user in admin_users
+        ])
         messages.success(request, 'Nizo muvaffaqiyatli ochildi! Admin 1-2 ish kuni ichida ko\'rib chiqadi.')
     return redirect('project_detail', pk=pk)
 
@@ -1181,6 +1215,8 @@ def add_roadmap_step(request, pk):
             duration_days=duration_days,
             order=max_order + 1,
         )
+        roadmap.total_days = sum(s.duration_days for s in roadmap.steps.all())
+        roadmap.save(update_fields=['total_days'])
         messages.success(request, 'Yangi qadam qo\'shildi!')
     return redirect('project_detail', pk=pk)
 
@@ -1192,10 +1228,13 @@ def delete_roadmap_step(request, pk, step_pk):
     if project.status not in ('in_progress', 'review'):
         return redirect('project_detail', pk=pk)
 
-    from analysis.models import RoadmapStep
+    from analysis.models import RoadmapStep, Roadmap
     step = get_object_or_404(RoadmapStep, pk=step_pk, roadmap__analysis=project.analysis)
     if request.method == 'POST':
+        roadmap = step.roadmap
         step.delete()
+        roadmap.total_days = sum(s.duration_days for s in roadmap.steps.all())
+        roadmap.save(update_fields=['total_days'])
         messages.success(request, 'Qadam o\'chirildi!')
     return redirect('project_detail', pk=pk)
 

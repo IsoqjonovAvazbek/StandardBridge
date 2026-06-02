@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404
+from django.db.models import F
 from .models import BlogPost, Category
 
 
@@ -19,8 +20,8 @@ def post_list(request):
 
 def post_detail(request, slug):
     post = get_object_or_404(BlogPost, slug=slug, is_published=True)
-    post.views_count += 1
-    post.save(update_fields=['views_count'])
+    BlogPost.objects.filter(pk=post.pk).update(views_count=F('views_count') + 1)
+    post.refresh_from_db(fields=['views_count'])
 
     related = BlogPost.objects.filter(
         is_published=True, category=post.category

@@ -597,23 +597,26 @@ def gaps_to_qms(request, pk):
 
 @login_required
 def accept_disclaimer(request):
-    """AJAX-friendly endpoint: record disclaimer acceptance, then redirect back."""
-    if request.method == 'POST':
-        # Extract real IP (handles reverse proxies)
-        x_forwarded = request.META.get('HTTP_X_FORWARDED_FOR', '')
-        ip = x_forwarded.split(',')[0].strip() if x_forwarded else request.META.get('REMOTE_ADDR', '')
-
-        DisclaimerAcceptance.objects.get_or_create(
-            user=request.user,
-            version=DisclaimerAcceptance.CURRENT_VERSION,
-            defaults={'ip_address': ip},
-        )
-
-        next_url = request.POST.get('next', '')
-        # Safety: only allow relative URLs
-        if next_url and next_url.startswith('/'):
-            return redirect(next_url)
+    """Record disclaimer acceptance. Returns JSON for AJAX calls, redirect for regular forms."""
+    if request.method != 'POST':
         return redirect('entrepreneur_dashboard')
+
+    x_forwarded = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    ip = x_forwarded.split(',')[0].strip() if x_forwarded else request.META.get('REMOTE_ADDR', '')
+
+    DisclaimerAcceptance.objects.get_or_create(
+        user=request.user,
+        version=DisclaimerAcceptance.CURRENT_VERSION,
+        defaults={'ip_address': ip},
+    )
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        from django.http import JsonResponse as _JR
+        return _JR({'status': 'ok'})
+
+    next_url = request.POST.get('next', '')
+    if next_url and next_url.startswith('/'):
+        return redirect(next_url)
     return redirect('entrepreneur_dashboard')
 
 

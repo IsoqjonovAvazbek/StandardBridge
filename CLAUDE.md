@@ -227,6 +227,9 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
    - `payment_confirm` MOCK transaction yaratadi — production da ishlamaydi
    - Click.uz da biznes ro'yxatdan o'tish kerak (1-2 kun)
 
+---
+
+
 ## .env fayli
 ```
 GROQ_API_KEY=gsk_02O2Ulf...

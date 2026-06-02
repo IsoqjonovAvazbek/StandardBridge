@@ -202,7 +202,19 @@ def upload_document(request):
         version = request.POST.get('version', '1.0').strip() or '1.0'
         expiry_raw = request.POST.get('expiry_date', '').strip()
 
-        if title and doc_type and file:
+        allowed_types = {'application/pdf', 'application/msword',
+                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                         'application/vnd.ms-excel',
+                         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                         'image/jpeg', 'image/png'}
+        max_size = 10 * 1024 * 1024  # 10 MB
+        if not (title and doc_type and file):
+            messages.error(request, 'Sarlavha, hujjat turi va faylni kiriting!')
+        elif file.size > max_size:
+            messages.error(request, 'Fayl hajmi 10 MB dan oshmasligi kerak!')
+        elif file.content_type not in allowed_types:
+            messages.error(request, 'Faqat PDF, Word, Excel, JPG yoki PNG formatlar ruxsat etiladi!')
+        else:
             QMSDocument.objects.create(
                 company=request.user,
                 title=title,
@@ -212,16 +224,17 @@ def upload_document(request):
                 expiry_date=expiry_raw if expiry_raw else None,
             )
             messages.success(request, 'Hujjat muvaffaqiyatli yuklandi.')
-        else:
-            messages.error(request, 'Sarlavha, hujjat turi va faylni kiriting!')
     return redirect('qms_documents')
 
 
 @login_required
 def delete_document(request, pk):
+    if request.method != 'POST':
+        return redirect('qms_documents')
     doc = get_object_or_404(QMSDocument, pk=pk, company=request.user)
     doc.is_active = False
     doc.save(update_fields=['is_active'])
+    messages.success(request, 'Hujjat o\'chirildi.')
     return redirect('qms_documents')
 
 
@@ -304,7 +317,9 @@ def _next_nc_code(company):
 def update_nonconformity(request, pk):
     nc = get_object_or_404(NonConformity, pk=pk, company=request.user)
     if request.method == 'POST':
-        nc.status = request.POST.get('status', nc.status)
+        new_status = request.POST.get('status', nc.status)
+        valid_statuses = {c[0] for c in NonConformity.STATUS_CHOICES}
+        nc.status = new_status if new_status in valid_statuses else nc.status
         nc.root_cause = request.POST.get('root_cause', '').strip()
         nc.corrective_action = request.POST.get('corrective_action', '').strip()
         if nc.status == 'closed' and not nc.closed_at:

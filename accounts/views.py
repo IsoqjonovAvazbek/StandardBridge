@@ -1,12 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django_ratelimit.decorators import ratelimit
 from .models import CustomUser, ExpertProfile, EntrepreneurProfile
 from experts.emails import send_welcome_email, send_expert_verified
 
 
+@require_POST
 def set_language_view(request):
     lang = request.POST.get('lang', 'uz')
     if lang not in ('uz', 'ru', 'en'):
@@ -314,18 +316,20 @@ def admin_panel(request):
         'active_projects': projects.filter(status='in_progress').count(),
     }
 
-    # Oxirgi 6 oy uchun oylik statistika
+    # Oxirgi 6 oy uchun oylik statistika — aggregate ile (N+1 yo'q)
     from datetime import timedelta
     import json as _json
+    from django.db.models import Sum, Count
+    from django.db.models.functions import TruncMonth
     months_data = []
     for i in range(5, -1, -1):
-        month_start = (timezone.now() - timedelta(days=30 * i)).replace(day=1, hour=0, minute=0, second=0)
-        month_end = (month_start + timedelta(days=32)).replace(day=1)
+        month_start = (timezone.now() - timedelta(days=30 * i)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        month_end = (month_start + timedelta(days=32)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         month_label = month_start.strftime('%b %Y')
         new_users = CustomUser.objects.filter(created_at__gte=month_start, created_at__lt=month_end).count()
-        month_revenue = sum(
-            p.platform_fee for p in payments.filter(status='released', released_at__gte=month_start, released_at__lt=month_end)
-        )
+        month_revenue = payments.filter(
+            status='released', released_at__gte=month_start, released_at__lt=month_end
+        ).aggregate(s=Sum('platform_fee'))['s'] or 0
         months_data.append({'label': month_label, 'users': new_users, 'revenue': float(month_revenue)})
 
     from experts.models import WithdrawalRequest, Dispute
@@ -460,13 +464,20 @@ def admin_process_withdrawal(request, pk):
         send_withdrawal_approved(wr)
         messages.success(request, f'${wr.amount} yechish so\'rovi tasdiqlandi!')
     elif action == 'reject':
-        wallet = wr.wallet
-        wallet.balance += wr.amount
-        wallet.save()
-        wr.status = 'rejected'
-        wr.admin_note = admin_note
-        wr.processed_at = timezone.now()
-        wr.save()
+        from django.db import transaction as _tx
+        from experts.models import Wallet as _Wallet
+        with _tx.atomic():
+            wr_locked = WithdrawalRequest.objects.select_for_update().get(pk=wr.pk)
+            if wr_locked.status != 'pending':
+                messages.warning(request, 'Bu so\'rov allaqachon ko\'rib chiqilgan!')
+                return redirect('admin_panel')
+            wallet = _Wallet.objects.select_for_update().get(pk=wr_locked.wallet_id)
+            wallet.balance += wr_locked.amount
+            wallet.save(update_fields=['balance'])
+            wr_locked.status = 'rejected'
+            wr_locked.admin_note = admin_note
+            wr_locked.processed_at = timezone.now()
+            wr_locked.save()
         Notification.objects.create(
             user=wr.wallet.user,
             title='Pul yechish rad etildi',
