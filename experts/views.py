@@ -559,6 +559,7 @@ def project_complete(request, pk):
             pass
 
         project.status = 'review'
+        project.review_at = timezone.now()
         project.save()
 
         ProjectUpdate.objects.create(
@@ -594,6 +595,7 @@ def project_decline(request, pk):
             user=project.entrepreneur,
             title='Mutaxassis loyihani rad etdi',
             message=f'{request.user.get_full_name()} loyihangizni qabul qilmadi. Boshqa mutaxassis tanlang.',
+            link=reverse('entrepreneur_dashboard'),
         )
         messages.info(request, 'Loyiha rad etildi.')
         return redirect('expert_dashboard')

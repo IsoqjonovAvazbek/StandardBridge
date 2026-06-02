@@ -176,6 +176,70 @@ class ProjectLifecycleTests(TestCase):
         self.assertEqual(p.status, 'pending')  # o'zgarmadi
 
 
+class DeclineAndCancelTests(TestCase):
+    """project_decline va project_cancel guard'lari."""
+
+    def setUp(self):
+        self.ent = CustomUser.objects.create_user(username='ent_dc', password='p', role='entrepreneur')
+        self.exp = CustomUser.objects.create_user(username='exp_dc', password='p', role='expert')
+        ind = Industry.objects.create(name='SohaDC')
+        std = Standard.objects.create(code='ISO-DC', name='Test', type='international')
+        self.analysis = GapAnalysis.objects.create(
+            entrepreneur=self.ent, industry=ind, local_standard=std,
+            target_standard=std, status='completed', ai_result={'s': 1},
+        )
+
+    def test_expert_can_decline_pending(self):
+        """Expert pending loyihani rad eta oladi."""
+        p = Project.objects.create(
+            analysis=self.analysis, entrepreneur=self.ent, expert=self.exp, status='pending'
+        )
+        self.client.force_login(self.exp)
+        self.client.post(reverse('project_decline', args=[p.pk]))
+        p.refresh_from_db()
+        self.assertEqual(p.status, 'cancelled')
+
+    def test_expert_cannot_decline_non_pending(self):
+        """in_progress loyihani rad etib bo'lmaydi."""
+        p = Project.objects.create(
+            analysis=self.analysis, entrepreneur=self.ent, expert=self.exp, status='in_progress'
+        )
+        self.client.force_login(self.exp)
+        self.client.post(reverse('project_decline', args=[p.pk]))
+        p.refresh_from_db()
+        self.assertNotEqual(p.status, 'cancelled')
+
+    def test_entrepreneur_can_cancel_pending(self):
+        """Tadbirkor pending loyihani bekor qila oladi."""
+        p = Project.objects.create(
+            analysis=self.analysis, entrepreneur=self.ent, expert=self.exp, status='pending'
+        )
+        self.client.force_login(self.ent)
+        self.client.post(reverse('project_cancel', args=[p.pk]))
+        p.refresh_from_db()
+        self.assertEqual(p.status, 'cancelled')
+
+    def test_entrepreneur_can_cancel_negotiating(self):
+        """Tadbirkor negotiating loyihani bekor qila oladi."""
+        p = Project.objects.create(
+            analysis=self.analysis, entrepreneur=self.ent, expert=self.exp, status='negotiating'
+        )
+        self.client.force_login(self.ent)
+        self.client.post(reverse('project_cancel', args=[p.pk]))
+        p.refresh_from_db()
+        self.assertEqual(p.status, 'cancelled')
+
+    def test_entrepreneur_cannot_cancel_in_progress(self):
+        """To'lov amalga oshgandan keyin bekor qilib bo'lmaydi."""
+        p = Project.objects.create(
+            analysis=self.analysis, entrepreneur=self.ent, expert=self.exp, status='in_progress'
+        )
+        self.client.force_login(self.ent)
+        self.client.post(reverse('project_cancel', args=[p.pk]))
+        p.refresh_from_db()
+        self.assertNotEqual(p.status, 'cancelled')
+
+
 class PaymentFlowTests(TestCase):
     """To'lov oqimi: MOCK confirm, release, escrow mantiq."""
 

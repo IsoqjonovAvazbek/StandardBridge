@@ -126,20 +126,25 @@ class Command(BaseCommand):
             if target != 'all' and target != standard_code:
                 continue
 
-            ChecklistItem.objects.filter(standard=standard_code).delete()
+            created_count = 0
             for i, (question, requirement) in enumerate(items, start=1):
-                ChecklistItem.objects.create(
+                _, created = ChecklistItem.objects.get_or_create(
                     standard=standard_code,
                     question=question,
-                    requirement=requirement,
-                    order=i,
+                    defaults={
+                        'requirement': requirement,
+                        'order': i,
+                    },
                 )
+                if created:
+                    created_count += 1
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"  {standard_code.upper()}: {len(items)} ta savol yuklandi"
+                    f"  {standard_code.upper()}: {created_count} ta yangi savol qo'shildi "
+                    f"({len(items) - created_count} ta allaqachon bor)"
                 )
             )
-            total_created += len(items)
+            total_created += created_count
 
         self.stdout.write(
             self.style.SUCCESS(f"\nJami {total_created} ta checklist item yaratildi.")

@@ -25,16 +25,16 @@ INDUSTRIES = [
     ('Neft va gaz', '🛢️', 11),
 ]
 
-# (code, type, industry_name)
+# (code, name, type, industry_name)
 STANDARDS = [
-    ('UzDST ISO 9001', 'local', "To'qimachilik"),
-    ('ISO 9001', 'international', "To'qimachilik"),
-    ('UzDST ISO 22000', 'local', 'Oziq-ovqat'),
-    ('ISO 22000', 'international', 'Oziq-ovqat'),
-    ('GOST 12.0.001', 'local', 'Mashinasozlik'),
-    ('ISO 45001', 'international', 'Mashinasozlik'),
-    ('UzDST ISO 14001', 'local', 'Kimyo'),
-    ('ISO 14001', 'international', 'Kimyo'),
+    ('UzDST ISO 9001', 'Sifat menejmenti tizimi (UzDST)', 'local', "To'qimachilik"),
+    ('ISO 9001', 'Sifat menejmenti tizimi', 'international', "To'qimachilik"),
+    ('UzDST ISO 22000', 'Oziq-ovqat xavfsizligi (UzDST)', 'local', 'Oziq-ovqat'),
+    ('ISO 22000', 'Oziq-ovqat xavfsizligi menejmenti', 'international', 'Oziq-ovqat'),
+    ('GOST 12.0.001', 'Mehnat xavfsizligi (GOST)', 'local', 'Mashinasozlik'),
+    ('ISO 45001', 'Mehnat xavfsizligi va salomatligi', 'international', 'Mashinasozlik'),
+    ('UzDST ISO 14001', 'Atrof-muhit menejmenti (UzDST)', 'local', 'Kimyo'),
+    ('ISO 14001', 'Atrof-muhit menejmenti tizimi', 'international', 'Kimyo'),
 ]
 
 
@@ -52,12 +52,15 @@ class Command(BaseCommand):
                 ind_count += 1
 
         std_count = 0
-        for code, type_, industry_name in STANDARDS:
+        for code, name, type_, industry_name in STANDARDS:
             industry = Industry.objects.filter(name=industry_name).first()
             obj, created = Standard.objects.get_or_create(
                 code=code,
-                defaults={'type': type_, 'industry': industry, 'is_active': True},
+                defaults={'name': name, 'type': type_, 'industry': industry, 'is_active': True},
             )
+            if not created and not obj.name:
+                obj.name = name
+                obj.save(update_fields=['name'])
             if created:
                 std_count += 1
 

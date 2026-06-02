@@ -432,9 +432,12 @@ def verify_expert_action(request, pk):
         profile = get_object_or_404(ExpertProfile, pk=pk)
         action = request.POST.get('action', 'verify')
         if action == 'verify':
+            if profile.is_verified:
+                messages.info(request, f'{profile.user.get_full_name()} allaqachon tasdiqlangan.')
+                return redirect('admin_panel')
             profile.is_verified = True
             profile.verified_at = timezone.now()
-            profile.save()
+            profile.save(update_fields=['is_verified', 'verified_at'])
             send_expert_verified(profile.user)
             messages.success(request, f'{profile.user.get_full_name()} tasdiqlandi!')
         else:

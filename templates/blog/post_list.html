@@ -73,5 +73,47 @@
         <h3 class="font-semibold text-gray-700 mb-1">{{ T.no_posts }}</h3>
     </div>
     {% endif %}
+
+    <!-- Paginatsiya -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex items-center justify-center gap-2 mt-10">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_q %}&q={{ search_q }}{% endif %}"
+            class="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm transition">
+            ← Oldingi
+        </a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <span class="px-4 py-2 rounded-xl gradient-bg text-white text-sm font-medium">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a href="?page={{ num }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_q %}&q={{ search_q }}{% endif %}"
+            class="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm transition">
+            {{ num }}
+        </a>
+        {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_q %}&q={{ search_q }}{% endif %}"
+            class="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm transition">
+            Keyingi →
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Qidiruv -->
+    <form method="get" action="" class="mt-6 flex gap-2 max-w-sm mx-auto">
+        {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+        <input type="text" name="q" value="{{ search_q }}"
+            placeholder="Qidirish..."
+            class="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button type="submit"
+            class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90">
+            Qidirish
+        </button>
+    </form>
 </div>
 {% endblock %}

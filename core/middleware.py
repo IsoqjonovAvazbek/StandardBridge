@@ -13,7 +13,7 @@ class ContentSecurityPolicyMiddleware:
             "script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net 'unsafe-inline'",
             "style-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com 'unsafe-inline'",
             "font-src 'self' https://fonts.gstatic.com data:",
-            "img-src 'self' data: blob:",
+            "img-src 'self' data: blob: https:",
             "connect-src 'self'",
             "frame-ancestors 'none'",
             "base-uri 'self'",

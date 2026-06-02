@@ -167,8 +167,9 @@ class Command(BaseCommand):
         ).select_related('entrepreneur', 'expert')
 
         for project in review_stale:
-            # Only notify if in review for more than 2 days
-            if project.updated_at and (now - project.updated_at).days >= 2:
+            # review_at maydoni bor bo'lsa shu bo'yicha, yo'q bo'lsa updated_at fallback
+            review_ts = project.review_at or project.updated_at
+            if review_ts and (now - review_ts).days >= 2:
                 notif_title = f'Ishni qabul qilmadingiz — Loyiha #{project.pk}'
                 already = Notification.objects.filter(
                     user=project.entrepreneur, title=notif_title
@@ -178,7 +179,7 @@ class Command(BaseCommand):
                         user=project.entrepreneur,
                         title=notif_title,
                         message=(
-                            f'Mutaxassis ishni {project.updated_at.strftime("%d.%m.%Y")} da '
+                            f'Mutaxassis ishni {review_ts.strftime("%d.%m.%Y")} da '
                             f'tekshiruvga topshirdi. Ishni ko\'rib chiqing va qabul qiling yoki '
                             f'qayta ishlashni so\'rang.'
                         ),
