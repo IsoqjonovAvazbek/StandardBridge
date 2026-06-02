@@ -2387,3 +2387,67 @@ TRANSLATIONS = {
 
 def get_translation(lang_code):
     return TRANSLATIONS.get(lang_code, TRANSLATIONS['uz'])
+
+
+# ── Model choices tarjimasi (get_*_display o'rniga) ──────────────────────────
+# Modellardagi choices qattiq o'zbekcha. Bu dict ularni RU/EN ga tarjima qiladi.
+CHOICE_LABELS = {
+    'uz': {
+        # Loyiha statusi (experts.Project)
+        'pending': 'Kutilmoqda', 'negotiating': 'Kelishilmoqda', 'accepted': 'Qabul qilingan',
+        'in_progress': 'Jarayonda', 'review': "Ko'rib chiqilmoqda", 'completed': 'Yakunlangan',
+        'cancelled': 'Bekor qilingan',
+        # To'lov statusi (experts.Payment)
+        'held': 'Escrowda', 'released': "O'tkazilgan", 'refunded': 'Qaytarilgan',
+        # Gap prioriteti (analysis.GapItem)
+        'critical': 'Kritik', 'high': 'Yuqori', 'medium': "O'rta", 'low': 'Past',
+        # NC severity (qms.NonConformity)
+        'minor': 'Kichik', 'major': 'Katta',
+        # NC statusi
+        'open': 'Ochiq', 'closed': 'Yopilgan',
+        # Audit turi (qms.AuditSchedule)
+        'internal': 'Ichki audit', 'external': 'Tashqi audit',
+        'certification': 'Sertifikatsiya auditi', 'surveillance': 'Nazorat auditi',
+        # Audit statusi
+        'planned': 'Rejalashtirilgan',
+        # Hujjat turi (qms.QMSDocument)
+        'policy': 'Siyosat', 'procedure': 'Protsedura', 'instruction': "Ko'rsatma",
+        'record': 'Yozuv', 'certificate': 'Sertifikat',
+    },
+    'ru': {
+        'pending': 'Ожидается', 'negotiating': 'Согласование', 'accepted': 'Принято',
+        'in_progress': 'В процессе', 'review': 'На проверке', 'completed': 'Завершено',
+        'cancelled': 'Отменено',
+        'held': 'В эскроу', 'released': 'Переведено', 'refunded': 'Возвращено',
+        'critical': 'Критический', 'high': 'Высокий', 'medium': 'Средний', 'low': 'Низкий',
+        'minor': 'Малое', 'major': 'Большое',
+        'open': 'Открыто', 'closed': 'Закрыто',
+        'internal': 'Внутренний аудит', 'external': 'Внешний аудит',
+        'certification': 'Сертификационный аудит', 'surveillance': 'Надзорный аудит',
+        'planned': 'Запланировано',
+        'policy': 'Политика', 'procedure': 'Процедура', 'instruction': 'Инструкция',
+        'record': 'Запись', 'certificate': 'Сертификат',
+    },
+    'en': {
+        'pending': 'Pending', 'negotiating': 'Negotiating', 'accepted': 'Accepted',
+        'in_progress': 'In progress', 'review': 'In review', 'completed': 'Completed',
+        'cancelled': 'Cancelled',
+        'held': 'In escrow', 'released': 'Released', 'refunded': 'Refunded',
+        'critical': 'Critical', 'high': 'High', 'medium': 'Medium', 'low': 'Low',
+        'minor': 'Minor', 'major': 'Major',
+        'open': 'Open', 'closed': 'Closed',
+        'internal': 'Internal audit', 'external': 'External audit',
+        'certification': 'Certification audit', 'surveillance': 'Surveillance audit',
+        'planned': 'Planned',
+        'policy': 'Policy', 'procedure': 'Procedure', 'instruction': 'Instruction',
+        'record': 'Record', 'certificate': 'Certificate',
+    },
+}
+
+
+def get_choice_label(code, lang_code='uz'):
+    """Bitta choice kodini (masalan 'critical') tanlangan tilga tarjima qiladi."""
+    if not code:
+        return ''
+    table = CHOICE_LABELS.get(lang_code, CHOICE_LABELS['uz'])
+    return table.get(code, code)

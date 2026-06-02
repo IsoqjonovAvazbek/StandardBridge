@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load labels %}
 {% block title %}{{ T.analysis_result }} — {{ analysis.target_standard.code }}{% endblock %}
 
 {% block content %}
@@ -74,7 +75,7 @@
                         <p class="font-semibold">{{ gap.title }}</p>
                         <p class="text-gray-500 text-xs mt-1">{{ gap.description }}</p>
                     </td>
-                    <td class="border border-gray-200 px-3 py-2">{{ gap.get_priority_display }}</td>
+                    <td class="border border-gray-200 px-3 py-2">{% label gap.priority %}</td>
                     <td class="border border-gray-200 px-3 py-2">{{ gap.estimated_days }}</td>
                 </tr>
                 {% empty %}

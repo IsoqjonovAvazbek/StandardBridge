@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load labels %}
 {% block title %}{{ T.dashboard }} — StandartBridge{% endblock %}
 
 {% block content %}
@@ -145,7 +146,7 @@
                         <span class="px-3 py-1 rounded-full text-xs font-medium
                             {% if project.status == 'review' %}bg-purple-100 text-purple-700
                             {% else %}bg-orange-100 text-orange-700{% endif %}">
-                            {{ project.get_status_display }}
+                            {% label project.status %}
                         </span>
                         <a href="{% url 'project_detail' project.pk %}"
                             class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium">

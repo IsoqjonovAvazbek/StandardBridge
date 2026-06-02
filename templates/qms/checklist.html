@@ -34,7 +34,8 @@
            {% else %}bg-white text-gray-600 border-gray-200 hover:border-blue-300{% endif %}">
             {{ std_obj.label }}
             <span class="text-xs font-normal
-                {% if std_obj.code == current_standard %}text-white/80{% else %}text-gray-400{% endif %}">
+                {% if std_obj.code == current_standard %}text-white/80{% else %}text-gray-400{% endif %}"
+                id="tab-pct-{{ std_obj.code }}">
                 {{ std_obj.pct }}%
             </span>
         </a>
@@ -49,13 +50,13 @@
             <p class="text-sm font-medium text-gray-700">
                 {{ std_obj.label }} — {{ T.qms_compliance }}
             </p>
-            <p class="text-sm font-bold text-gray-900">{{ std_obj.pct }}%</p>
+            <p class="text-sm font-bold text-gray-900" id="progress-pct">{{ std_obj.pct }}%</p>
         </div>
         <div class="w-full bg-gray-100 rounded-full h-2.5 mb-1">
-            <div class="gradient-bg h-2.5 rounded-full transition-all" style="width:{{ std_obj.pct }}%"></div>
+            <div class="gradient-bg h-2.5 rounded-full transition-all" id="progress-bar" style="width:{{ std_obj.pct }}%"></div>
         </div>
         <p class="text-xs text-gray-400">
-            {{ std_obj.compliant }} {{ T.qms_of_word }} {{ std_obj.total }} {{ T.qms_items_checked }}
+            <span id="progress-compliant">{{ std_obj.compliant }}</span> {{ T.qms_of_word }} {{ std_obj.total }} {{ T.qms_items_checked }}
         </p>
     </div>
     {% endif %}
@@ -262,6 +263,18 @@ function saveToServer(itemId, status, note, evidence, badge) {
         if (data.success && badge) {
             badge.classList.remove('hidden');
             setTimeout(() => badge.classList.add('hidden'), 1500);
+        }
+        if (data.success && data.pct !== undefined) {
+            // Progress bar + foiz (real-time)
+            const pctEl = document.getElementById('progress-pct');
+            const barEl = document.getElementById('progress-bar');
+            const cmpEl = document.getElementById('progress-compliant');
+            if (pctEl) pctEl.textContent = data.pct + '%';
+            if (barEl) barEl.style.width = data.pct + '%';
+            if (cmpEl) cmpEl.textContent = data.compliant;
+            // Yuqoridagi standart tab foizi
+            const tab = document.getElementById('tab-pct-' + data.standard);
+            if (tab) tab.textContent = data.pct + '%';
         }
     });
 }

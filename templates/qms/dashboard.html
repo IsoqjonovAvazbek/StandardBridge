@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load labels %}
 {% block title %}{{ T.qms_tool }} — StandartBridge{% endblock %}
 
 {% block content %}
@@ -75,7 +76,7 @@
             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">{{ T.qms_audit_card }}</p>
             {% if next_audit %}
             <p class="text-2xl font-bold text-gray-900 mb-1">{{ next_audit.planned_date|date:"d.m.Y" }}</p>
-            <p class="text-sm text-gray-600 mb-1">{{ next_audit.get_audit_type_display }}</p>
+            <p class="text-sm text-gray-600 mb-1">{% label next_audit.audit_type %}</p>
             <p class="text-xs text-blue-600 font-medium mb-3">{{ next_audit.standard }}</p>
             {% else %}
             <p class="text-gray-400 text-sm mb-4">{{ T.qms_no_audit }}</p>
@@ -148,7 +149,7 @@
                         {% if nc.status == 'open' %}bg-red-100 text-red-700
                         {% elif nc.status == 'in_progress' %}bg-orange-100 text-orange-700
                         {% else %}bg-green-100 text-green-700{% endif %}">
-                        {{ nc.get_status_display }}
+                        {% label nc.status %}
                     </span>
                 </div>
                 {% empty %}

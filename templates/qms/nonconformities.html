@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load labels %}
 {% block title %}{{ T.qms_nc_title }} — StandartBridge{% endblock %}
 
 {% block content %}
@@ -67,7 +68,7 @@
                         {% elif nc.severity == 'major' %}bg-orange-100 text-orange-700
                         {% else %}bg-yellow-100 text-yellow-700{% endif %}">
                         {% if nc.severity == 'critical' %}🚨{% elif nc.severity == 'major' %}⚠️{% else %}•{% endif %}
-                        {{ nc.get_severity_display }}
+                        {% label nc.severity %}
                     </span>
                 </div>
 
@@ -97,7 +98,7 @@
                         {% if nc.status == 'open' %}bg-red-100 text-red-700
                         {% elif nc.status == 'in_progress' %}bg-orange-100 text-orange-700
                         {% else %}bg-green-100 text-green-700{% endif %}">
-                        {{ nc.get_status_display }}
+                        {% label nc.status %}
                     </span>
                     <button onclick="aiSuggest({{ nc.pk }})" id="ai-btn-{{ nc.pk }}"
                         class="px-3 py-1 rounded-lg text-xs font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 transition flex items-center gap-1">

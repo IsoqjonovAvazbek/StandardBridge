@@ -156,7 +156,25 @@ def update_checklist(request):
             response.evidence_text = evidence
             response.save()
 
-        return JsonResponse({'success': True})
+        # Shu standart bo'yicha foizni qayta hisoblaymiz (real-time progress uchun)
+        std_code = item.standard
+        total = ChecklistItem.objects.filter(standard=std_code, is_active=True).count()
+        compliant = ChecklistResponse.objects.filter(
+            company=request.user, item__standard=std_code, status='compliant'
+        ).count()
+        checked = ChecklistResponse.objects.filter(
+            company=request.user, item__standard=std_code,
+        ).exclude(status='not_checked').count()
+        pct = int(compliant / total * 100) if total else 0
+
+        return JsonResponse({
+            'success': True,
+            'standard': std_code,
+            'pct': pct,
+            'compliant': compliant,
+            'checked': checked,
+            'total': total,
+        })
     return JsonResponse({'success': False}, status=405)
 
 

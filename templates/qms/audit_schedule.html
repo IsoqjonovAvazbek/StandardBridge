@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load labels %}
 {% block title %}{{ T.qms_audit_title }} — StandartBridge{% endblock %}
 
 {% block content %}
@@ -42,7 +43,7 @@
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap mb-1">
-                        <h3 class="font-bold text-gray-900">{{ audit.get_audit_type_display }}</h3>
+                        <h3 class="font-bold text-gray-900">{% label audit.audit_type %}</h3>
                         <span class="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-semibold">{{ audit.standard }}</span>
                     </div>
                     {% if audit.auditor_name %}
@@ -71,7 +72,7 @@
                         {% elif audit.status == 'in_progress' %}bg-orange-100 text-orange-700
                         {% elif audit.status == 'completed' %}bg-green-100 text-green-700
                         {% else %}bg-gray-100 text-gray-500{% endif %}">
-                        {{ audit.get_status_display }}
+                        {% label audit.status %}
                     </span>
                     {% if audit.status != 'completed' and audit.status != 'cancelled' %}
                     <form method="POST" action="{% url 'update_audit' audit.pk %}" class="flex gap-1">

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load labels %}
 {% block title %}{{ T.qms_docs_title }} — StandartBridge{% endblock %}
 
 {% block content %}
@@ -73,7 +74,7 @@
                         {{ T.qms_version_lbl }}{{ doc.version }}
                     </span>
                     <span class="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
-                        {{ doc.get_doc_type_display }}
+                        {% label doc.doc_type %}
                     </span>
                 </div>
                 <div class="flex items-center gap-3 mt-1 flex-wrap">

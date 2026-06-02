@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load labels %}
 {% block title %}{{ doc.title }} — StandardBridge{% endblock %}
 
 {% block content %}
@@ -24,7 +25,7 @@
         </span>
         {% if doc.template %}
         <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-lg">{{ doc.template.get_standard_display }}</span>
-        <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-lg">{{ doc.template.get_doc_type_display }}</span>
+        <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-lg">{% label doc.template.doc_type %}</span>
         {% endif %}
         <span class="text-xs text-gray-400">{{ doc.created_at|date:"d.m.Y H:i" }}</span>
       </div>

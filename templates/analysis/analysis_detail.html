@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load labels %}
 {% block title %}{{ T.analysis_result_title }} — StandartBridge{% endblock %}
 
 {% block content %}
@@ -178,7 +179,7 @@
                                 {% elif gap.priority == 'high' %}bg-orange-100 text-orange-700
                                 {% elif gap.priority == 'medium' %}bg-yellow-100 text-yellow-700
                                 {% else %}bg-green-100 text-green-700{% endif %}">
-                                {{ gap.get_priority_display }}
+                                {% label gap.priority %}
                             </span>
                         </div>
                         <p class="text-gray-600 text-sm {% if gap.is_resolved %}line-through text-gray-400{% endif %}">{{ gap.description }}</p>

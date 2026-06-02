@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load labels %}
 {% block title %}Admin Panel — StandartBridge{% endblock %}
 
 {% block content %}
@@ -142,7 +143,7 @@
                     <div class="text-right flex-shrink-0 ml-2">
                         <p class="font-bold text-gray-900 text-sm">${{ payment.amount }}</p>
                         <span class="text-xs {% if payment.status == 'released' %}text-green-600{% else %}text-yellow-600{% endif %}">
-                            {{ payment.get_status_display }}
+                            {% label payment.status %}
                         </span>
                     </div>
                 </div>
