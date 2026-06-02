@@ -656,12 +656,25 @@ def payment_page(request, project_pk):
         payment = project.payment
     except Payment.DoesNotExist:
         payment = None
+
+    # Click uchun Payment oldindan yaratilishi kerak (merchant_trans_id = payment.pk)
+    if project.status == 'accepted' and not payment and settings.CLICK_SERVICE_ID:
+        payment = Payment.objects.create(
+            project=project,
+            entrepreneur=request.user,
+            amount=project.expert_price,
+            status='pending',
+        )
+
+    click_return_url = request.build_absolute_uri(
+        reverse('project_detail', args=[project.pk])
+    )
     return render(request, 'experts/payment.html', {
         'project': project,
         'payment': payment,
         'click_service_id': settings.CLICK_SERVICE_ID,
         'click_merchant_id': settings.CLICK_MERCHANT_ID,
-        'click_return_url': settings.CLICK_RETURN_URL,
+        'click_return_url': click_return_url,
     })
 
 
@@ -781,9 +794,12 @@ def payment_release(request, project_pk):
                     )
                     send_project_completed_to_entrepreneur(project, payment)
 
-                # F-12: Referral bonus — taklif qiluvchiga platform_fee ning 10%
+                # F-12: Referral bonus — faqat birinchi loyihada
                 referrer = project.entrepreneur.referred_by
-                if referrer:
+                is_first = not Project.objects.filter(
+                    entrepreneur=project.entrepreneur, status='completed'
+                ).exclude(pk=project.pk).exists()
+                if referrer and is_first:
                     from decimal import Decimal as _D
                     bonus = (payment.platform_fee * _D('0.10')).quantize(_D('0.01'))
                     if bonus > 0:
@@ -833,34 +849,32 @@ def wallet(request):
             card_holder = request.POST.get('card_holder', '').strip()
             card_expiry = request.POST.get('card_expiry', '').strip()
             # Karta raqami bo'sh bo'lsa — faqat holder/expiry yangilansin
+            # Validatsiyalar — hammasi oldin, o'zgartirish keyin
+            errors = []
             if raw_card:
                 if len(raw_card) < 16:
-                    messages.error(request, 'Karta raqami 16 ta raqamdan iborat bo\'lishi kerak!')
+                    errors.append('Karta raqami 16 ta raqamdan iborat bo\'lishi kerak!')
                 elif not raw_card.isdigit():
-                    messages.error(request, 'Karta raqami faqat raqamlardan iborat bo\'lishi kerak!')
+                    errors.append('Karta raqami faqat raqamlardan iborat bo\'lishi kerak!')
                 elif not card_holder:
-                    messages.error(request, 'Karta egasining ismini kiriting!')
-                else:
-                    user_wallet.card_number = raw_card[-4:]
-                    user_wallet.card_holder = card_holder
-                    if card_expiry and not _re.match(r'^\d{2}/\d{2}$', card_expiry):
-                        messages.error(request, 'Amal qilish muddati MM/YY formatida bo\'lishi kerak!')
-                    else:
-                        user_wallet.card_expiry = card_expiry
-                        user_wallet.save()
-                        messages.success(request, 'Karta ma\'lumotlari saqlandi!')
-            elif card_holder or card_expiry:
-                if card_expiry and not _re.match(r'^\d{2}/\d{2}$', card_expiry):
-                    messages.error(request, 'Amal qilish muddati MM/YY formatida bo\'lishi kerak!')
-                else:
-                    if card_holder:
-                        user_wallet.card_holder = card_holder
-                    if card_expiry:
-                        user_wallet.card_expiry = card_expiry
-                    user_wallet.save()
-                    messages.success(request, 'Karta ma\'lumotlari saqlandi!')
+                    errors.append('Karta egasining ismini kiriting!')
+            elif not card_holder and not card_expiry:
+                errors.append('Karta raqamini kiriting!')
+            if card_expiry and not _re.match(r'^\d{2}/\d{2}$', card_expiry):
+                errors.append('Amal qilish muddati MM/YY formatida bo\'lishi kerak!')
+
+            if errors:
+                for e in errors:
+                    messages.error(request, e)
             else:
-                messages.error(request, 'Karta raqamini kiriting!')
+                if raw_card:
+                    user_wallet.card_number = raw_card[-4:]
+                if card_holder:
+                    user_wallet.card_holder = card_holder
+                if card_expiry:
+                    user_wallet.card_expiry = card_expiry
+                user_wallet.save()
+                messages.success(request, 'Karta ma\'lumotlari saqlandi!')
         elif action == 'withdraw':
             amount_str = request.POST.get('amount', '0')
             try:
@@ -1117,6 +1131,10 @@ def click_prepare(request):
     sign_time = data.get('sign_time')
     sign_string = data.get('sign_string')
 
+    if str(service_id) != str(settings.CLICK_SERVICE_ID):
+        return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
+                             'merchant_prepare_id': None, 'error': -1, 'error_note': 'Invalid service'})
+
     expected_sign = _click_sign(
         click_trans_id, service_id,
         settings.CLICK_SECRET_KEY,
@@ -1165,6 +1183,10 @@ def click_complete(request):
     sign_time = data.get('sign_time')
     sign_string = data.get('sign_string')
     error = int(data.get('error', 0))
+
+    if str(service_id) != str(settings.CLICK_SERVICE_ID):
+        return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
+                             'merchant_confirm_id': None, 'error': -1, 'error_note': 'Invalid service'})
 
     expected_sign = _click_sign(
         click_trans_id, service_id,

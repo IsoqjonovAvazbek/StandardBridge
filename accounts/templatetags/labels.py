@@ -1,9 +1,9 @@
-"""Template filtri: model choices kodlarini joriy tilga tarjima qiladi.
+"""Model choices kodlarini joriy tilga tarjima qiluvchi simple_tag.
 
 Ishlatish:
     {% load labels %}
-    {{ nc.severity|label }}        — joriy til (request session) bo'yicha
-    {{ project.status|label }}
+    {% label nc.severity %}        — joriy til (request session) bo'yicha
+    {% label project.status %}
 """
 from django import template
 from core.translations import get_choice_label

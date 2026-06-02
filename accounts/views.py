@@ -549,9 +549,9 @@ def admin_resolve_dispute(request, pk):
                 project.completed_at = timezone.now()
                 project.save()
                 wallet, _ = Wallet.objects.get_or_create(user=project.expert)
-                Wallet.objects.select_for_update().filter(pk=wallet.pk).update(
-                    balance=models.F('balance') + payment.expert_amount
-                )
+                wallet = Wallet.objects.select_for_update().get(pk=wallet.pk)
+                wallet.balance += payment.expert_amount
+                wallet.save(update_fields=['balance'])
                 WalletTransaction.objects.create(
                     wallet=wallet,
                     amount=payment.expert_amount,
