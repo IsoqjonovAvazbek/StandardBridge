@@ -58,9 +58,21 @@ class ExpertProfile(models.Model):
         ('qoraqalpogiston', 'Qoraqalpog\'iston'),
     ]
 
+    STANDARD_CHOICES = [
+        ('iso9001',    'ISO 9001'),
+        ('iso14001',   'ISO 14001'),
+        ('iso45001',   'ISO 45001'),
+        ('iso22000',   'ISO 22000'),
+        ('ce_marking', 'CE Marking'),
+        ('gost_r',     'GOST R'),
+        ('uzdst',      'UzDST'),
+    ]
+
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='expert_profile')
     bio = models.TextField(blank=True)
     specializations = models.CharField(max_length=500, blank=True)
+    # Standartlashtirilgan teglar — filter va qidiruvda ishlatiladi
+    standard_tags = models.JSONField(default=list, blank=True)
     experience_years = models.IntegerField(default=0)
     rating = models.FloatField(default=0.0)
     total_projects = models.IntegerField(default=0)

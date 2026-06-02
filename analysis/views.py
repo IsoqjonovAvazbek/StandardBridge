@@ -477,6 +477,19 @@ def analysis_detail(request, pk):
     gaps_total = len(gaps)
     resolved_pct = int(resolved_count / gaps_total * 100) if gaps_total else 0
 
+    # Standart kodini expert filter uchun aniqlash (ISO 9001 → iso9001)
+    standard_code_map = {
+        'iso 9001': 'iso9001', 'iso9001': 'iso9001',
+        'iso 14001': 'iso14001', 'iso14001': 'iso14001',
+        'iso 45001': 'iso45001', 'iso45001': 'iso45001',
+        'iso 22000': 'iso22000', 'iso22000': 'iso22000',
+        'ce marking': 'ce_marking', 'ce': 'ce_marking',
+        'gost r': 'gost_r', 'gost': 'gost_r',
+        'uzdst': 'uzdst',
+    }
+    std_name = (analysis.target_standard.code if analysis.target_standard else '').lower().strip()
+    expert_standard_filter = standard_code_map.get(std_name, '')
+
     context = {
         'analysis': analysis,
         'gaps': gaps,
@@ -492,6 +505,7 @@ def analysis_detail(request, pk):
         'resolved_count': resolved_count,
         'gaps_total': gaps_total,
         'resolved_pct': resolved_pct,
+        'expert_standard_filter': expert_standard_filter,
     }
     return render(request, 'analysis/analysis_detail.html', context)
 

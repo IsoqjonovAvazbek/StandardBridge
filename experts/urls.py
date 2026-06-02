@@ -25,6 +25,9 @@ urlpatterns = [
     # Click webhook endpoints
     path('click/prepare/', views.click_prepare, name='click_prepare'),
     path('click/complete/', views.click_complete, name='click_complete'),
+    # Counter-offer
+    path('projects/<int:pk>/counter/', views.project_counter_offer, name='project_counter_offer'),
+    path('projects/<int:pk>/counter/respond/', views.project_respond_counter, name='project_respond_counter'),
     # Dispute
     path('projects/<int:pk>/dispute/', views.open_dispute, name='open_dispute'),
     # Roadmap step management (expert)

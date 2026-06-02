@@ -42,6 +42,20 @@ class Project(models.Model):
     sla_deadline = models.DateTimeField(null=True, blank=True)
     sla_status = models.CharField(max_length=20, choices=SLA_STATUS_CHOICES, default='on_time')
 
+    # Ish bajarish muddati (to'lovdan keyin expert_days ga qarab hisoblanadi)
+    work_deadline = models.DateTimeField(null=True, blank=True)
+
+    # Qarshi taklif (entrepreneur → expert)
+    COUNTER_STATUS_CHOICES = [
+        ('none',     'Yo\'q'),
+        ('pending',  'Kutilmoqda'),
+        ('accepted', 'Qabul qilindi'),
+        ('rejected', 'Rad etildi'),
+    ]
+    counter_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    counter_message = models.TextField(blank=True)
+    counter_status = models.CharField(max_length=20, choices=COUNTER_STATUS_CHOICES, default='none')
+
     def save(self, *args, **kwargs):
         if self.expert_price:
             self.platform_fee = self.expert_price * 20 / 100
@@ -77,6 +91,28 @@ class Project(models.Model):
             self.sla_status = 'warning'
         else:
             self.sla_status = 'on_time'
+
+    @property
+    def work_days_left(self):
+        """Ish bajarish muddatigacha qolgan kunlar (manfiy = kechikkan)."""
+        if not self.work_deadline:
+            return None
+        delta = self.work_deadline - timezone.now()
+        return int(delta.total_seconds() / 86400)
+
+    @property
+    def work_sla_status(self):
+        """on_time / warning (≤2 kun) / overdue."""
+        if not self.work_deadline or self.status not in ('in_progress', 'review'):
+            return None
+        days = self.work_days_left
+        if days is None:
+            return None
+        if days < 0:
+            return 'overdue'
+        if days <= 2:
+            return 'warning'
+        return 'on_time'
 
     def __str__(self):
         return f"Loyiha #{self.pk} — {self.entrepreneur}"

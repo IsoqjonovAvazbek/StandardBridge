@@ -106,6 +106,18 @@
                     </select>
                 </div>
 
+                <!-- Standart -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Standart</label>
+                    <select name="standard"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="">Barcha standartlar</option>
+                        {% for code, label in standard_choices %}
+                        <option value="{{ code }}" {% if standard == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <!-- Min reyting -->
                 <div>
                     <label class="block text-xs font-medium text-gray-500 mb-1">{{ T.min_rating_filter }}</label>

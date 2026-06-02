@@ -210,9 +210,10 @@
             class="flex-1 gradient-bg text-white py-4 rounded-xl font-semibold text-center hover:opacity-90 transition">
             {{ T.view_roadmap_btn }}
         </a>
-        <a href="{% url 'project_list' %}"
+        <a href="{% url 'project_list' %}{% if expert_standard_filter %}?standard={{ expert_standard_filter }}{% endif %}"
             class="flex-1 border-2 border-blue-600 text-blue-600 py-4 rounded-xl font-semibold text-center hover:bg-blue-50 transition">
             {{ T.find_expert_btn }}
+            {% if expert_standard_filter %}<span class="block text-xs font-normal opacity-70 mt-0.5">{{ analysis.target_standard.code }} bo'yicha filtrlangan</span>{% endif %}
         </a>
     </div>
 

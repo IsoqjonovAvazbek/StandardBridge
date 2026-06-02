@@ -71,6 +71,7 @@ def project_list(request):
 
     region = request.GET.get('region', '')
     search = request.GET.get('search', '')
+    standard = request.GET.get('standard', '')
     min_rating = request.GET.get('min_rating', '')
     max_price = request.GET.get('max_price', '')
     sort_by = request.GET.get('sort', 'rating')
@@ -81,6 +82,8 @@ def project_list(request):
 
     if region:
         experts = experts.filter(region=region)
+    if standard:
+        experts = experts.filter(standard_tags__contains=standard)
     if search:
         experts = experts.filter(specializations__icontains=search)
     if min_rating:
@@ -111,11 +114,14 @@ def project_list(request):
         ('projects', 'Loyihalar'),
     ]
 
+    from accounts.models import ExpertProfile as EP
     return render(request, 'experts/project_list.html', {
         'experts': experts,
         'region_choices': region_choices,
         'selected_region': region,
         'search': search,
+        'standard': standard,
+        'standard_choices': EP.STANDARD_CHOICES,
         'min_rating': min_rating,
         'max_price': max_price,
         'sort_by': sort_by,
@@ -343,6 +349,77 @@ def project_accept(request, pk):
 
 
 @login_required
+def project_counter_offer(request, pk):
+    """Tadbirkor narxga qarshi taklif yuboradi."""
+    project = get_object_or_404(Project, pk=pk, entrepreneur=request.user)
+
+    if project.status != 'negotiating':
+        messages.error(request, 'Qarshi taklif faqat kelishuv bosqichida yuboriladi!')
+        return redirect('project_detail', pk=pk)
+
+    if request.method == 'POST':
+        try:
+            counter_price = Decimal(str(request.POST.get('counter_price', '0')))
+        except (InvalidOperation, ValueError):
+            messages.error(request, 'Narxni to\'g\'ri kiriting!')
+            return redirect('project_detail', pk=pk)
+
+        if counter_price <= 0:
+            messages.error(request, 'Narx 0 dan katta bo\'lishi kerak!')
+            return redirect('project_detail', pk=pk)
+
+        if counter_price >= project.expert_price:
+            messages.warning(request, 'Qarshi taklif mutaxassis narxidan past bo\'lishi kerak!')
+            return redirect('project_detail', pk=pk)
+
+        project.counter_price = counter_price
+        project.counter_message = request.POST.get('counter_message', '').strip()
+        project.counter_status = 'pending'
+        project.save()
+
+        Notification.objects.create(
+            user=project.expert,
+            title='Tadbirkor qarshi taklif yubordi!',
+            message=f'{request.user.get_full_name()} loyiha #{project.pk} uchun ${counter_price} taklif qildi.'
+        )
+        messages.success(request, f'Qarshi taklif yuborildi: ${counter_price}. Mutaxassis javobini kuting.')
+    return redirect('project_detail', pk=pk)
+
+
+@login_required
+def project_respond_counter(request, pk):
+    """Expert qarshi taklifni qabul qiladi yoki rad etadi."""
+    project = get_object_or_404(Project, pk=pk, expert=request.user)
+
+    if project.counter_status != 'pending':
+        messages.error(request, 'Aktiv qarshi taklif yo\'q!')
+        return redirect('project_detail', pk=pk)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'accept':
+            project.expert_price = project.counter_price
+            project.counter_status = 'accepted'
+            project.save()
+            Notification.objects.create(
+                user=project.entrepreneur,
+                title='Mutaxassis qarshi taklifni qabul qildi!',
+                message=f'${project.counter_price} narxda kelishildi. To\'lov sahifasiga o\'ting.'
+            )
+            messages.success(request, f'Qarshi taklif qabul qilindi — yangi narx: ${project.counter_price}')
+        elif action == 'reject':
+            project.counter_status = 'rejected'
+            project.save()
+            Notification.objects.create(
+                user=project.entrepreneur,
+                title='Mutaxassis qarshi taklifni rad etdi',
+                message=f'Loyiha #{project.pk} bo\'yicha asl narx (${project.expert_price}) saqlanadi.'
+            )
+            messages.info(request, 'Qarshi taklif rad etildi. Asl narx saqlanadi.')
+    return redirect('project_detail', pk=pk)
+
+
+@login_required
 def project_messages(request, pk):
     """AJAX: loyiha xabarlarini JSON qaytaradi (real-time chat polling uchun).
 
@@ -559,6 +636,9 @@ def payment_confirm(request, project_pk):
 
     project.status = 'in_progress'
     project.started_at = timezone.now()
+    if project.expert_days and project.expert_days > 0:
+        from datetime import timedelta
+        project.work_deadline = timezone.now() + timedelta(days=project.expert_days)
     project.save()
 
     if project.expert:
@@ -763,6 +843,9 @@ def expert_profile_edit(request):
         profile.issuing_body = request.POST.get('issuing_body', '').strip()
         cert_expiry_raw = request.POST.get('cert_expiry', '').strip()
         profile.cert_expiry = cert_expiry_raw if cert_expiry_raw else None
+        # Standart teglari (checkbox ro'yxati)
+        valid_codes = {c[0] for c in ExpertProfile.STANDARD_CHOICES}
+        profile.standard_tags = [t for t in request.POST.getlist('standard_tags') if t in valid_codes]
         profile.save()
         request.user.first_name = request.POST.get('first_name', '')
         request.user.last_name = request.POST.get('last_name', '')

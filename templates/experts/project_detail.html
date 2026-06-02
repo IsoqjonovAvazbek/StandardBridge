@@ -62,16 +62,81 @@
                     </div>
                     {% endif %}
 
+                    <!-- Ish bajarish muddati (in_progress yoki review) -->
+                    {% if project.work_deadline and project.status in 'in_progress,review' %}
+                    <div class="mb-4 px-4 py-3 rounded-xl border
+                        {% if project.work_sla_status == 'overdue' %}bg-red-50 border-red-200
+                        {% elif project.work_sla_status == 'warning' %}bg-orange-50 border-orange-200
+                        {% else %}bg-green-50 border-green-200{% endif %}">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium
+                                {% if project.work_sla_status == 'overdue' %}text-red-700
+                                {% elif project.work_sla_status == 'warning' %}text-orange-700
+                                {% else %}text-green-700{% endif %}">
+                                {% if project.work_sla_status == 'overdue' %}
+                                    Muddat o'tdi!
+                                {% elif project.work_sla_status == 'warning' %}
+                                    Muddat yaqinlashmoqda
+                                {% else %}
+                                    Ish muddati
+                                {% endif %}
+                            </span>
+                            <span class="font-bold text-sm
+                                {% if project.work_sla_status == 'overdue' %}text-red-700
+                                {% elif project.work_sla_status == 'warning' %}text-orange-700
+                                {% else %}text-green-700{% endif %}">
+                                {% if project.work_days_left < 0 %}
+                                    {{ project.work_days_left|stringformat:"d"|slice:"1:" }} kun kechikkan
+                                {% else %}
+                                    {{ project.work_days_left }} kun qoldi
+                                {% endif %}
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-0.5">{{ project.work_deadline|date:"d.m.Y" }} gacha</p>
+                    </div>
+                    {% endif %}
+
                     <!-- Tadbirkor tugmalari -->
                     {% if request.user == project.entrepreneur %}
                         {% if project.status == 'negotiating' %}
-                        <form method="POST" action="{% url 'project_accept' project.pk %}" class="mt-4">
+
+                        <!-- Joriy taklif -->
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-3">
+                            <p class="text-sm text-yellow-800 font-medium mb-1">Mutaxassis taklifi:</p>
+                            <p class="text-lg font-bold text-gray-900">${{ project.expert_price }} · {{ project.expert_days }} kun</p>
+                        </div>
+
+                        <!-- Qarshi taklif holati -->
+                        {% if project.counter_status == 'pending' %}
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-3">
+                            <p class="text-sm text-blue-800">Qarshi taklifingiz (${{ project.counter_price }}) javob kutmoqda...</p>
+                        </div>
+                        {% elif project.counter_status == 'rejected' %}
+                        <div class="bg-red-50 border border-red-200 rounded-xl p-3 mb-3">
+                            <p class="text-sm text-red-700">Qarshi taklifingiz (${{ project.counter_price }}) rad etildi. Asl narx: ${{ project.expert_price }}</p>
+                        </div>
+                        {% elif project.counter_status == 'accepted' %}
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-3 mb-3">
+                            <p class="text-sm text-green-700">Kelishildi! Yangi narx: ${{ project.expert_price }}</p>
+                        </div>
+                        {% endif %}
+
+                        <form method="POST" action="{% url 'project_accept' project.pk %}">
                             {% csrf_token %}
                             <button type="submit"
                                 class="w-full bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition">
                                 ✓ {{ T.accept_btn }} — ${{ project.expert_price }}
                             </button>
                         </form>
+
+                        <!-- Qarshi taklif yuborish -->
+                        {% if project.counter_status != 'pending' %}
+                        <button type="button" onclick="document.getElementById('counter-modal').classList.remove('hidden')"
+                            class="w-full mt-2 border border-blue-300 text-blue-600 py-2.5 rounded-xl font-medium hover:bg-blue-50 transition text-sm">
+                            Qarshi taklif yuborish
+                        </button>
+                        {% endif %}
+
                         {% elif project.status == 'accepted' %}
                         <a href="{% url 'payment_page' project.pk %}"
                             class="block w-full gradient-bg text-white py-3 rounded-xl font-semibold text-center mt-4 hover:opacity-90 transition">
@@ -96,6 +161,30 @@
 
                     <!-- Mutaxassis tugmalari -->
                     {% if request.user == project.expert %}
+                        <!-- Qarshi taklif javob berish -->
+                        {% if project.status == 'negotiating' and project.counter_status == 'pending' %}
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-3 mt-4">
+                            <p class="text-sm font-semibold text-blue-800 mb-1">Tadbirkor qarshi taklif yubordi:</p>
+                            <p class="text-xl font-bold text-gray-900">${{ project.counter_price }}</p>
+                            {% if project.counter_message %}<p class="text-sm text-gray-600 mt-1">{{ project.counter_message }}</p>{% endif %}
+                            <div class="flex gap-2 mt-3">
+                                <form method="POST" action="{% url 'project_respond_counter' project.pk %}" class="flex-1">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="accept">
+                                    <button type="submit" class="w-full bg-green-500 text-white py-2 rounded-xl font-semibold text-sm hover:bg-green-600 transition">
+                                        ✓ Qabul qilish
+                                    </button>
+                                </form>
+                                <form method="POST" action="{% url 'project_respond_counter' project.pk %}" class="flex-1">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="w-full border border-red-300 text-red-600 py-2 rounded-xl font-semibold text-sm hover:bg-red-50 transition">
+                                        ✗ Rad etish
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
                         {% if project.status == 'in_progress' %}
                         <form method="POST" action="{% url 'project_complete' project.pk %}" class="mt-4">
                             {% csrf_token %}
@@ -519,6 +608,43 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Counter-offer Modal -->
+<div id="counter-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(15,23,42,0.6);backdrop-filter:blur(4px)">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="bg-blue-600 px-6 py-4 rounded-t-2xl flex items-center justify-between">
+            <h2 class="text-white font-bold">Qarshi taklif yuborish</h2>
+            <button onclick="document.getElementById('counter-modal').classList.add('hidden')"
+                class="text-white/70 hover:text-white text-xl">✕</button>
+        </div>
+        <form method="POST" action="{% url 'project_counter_offer' project.pk %}" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <p class="text-sm text-gray-500 mb-3">Mutaxassis narxi: <strong>${{ project.expert_price }}</strong> · {{ project.expert_days }} kun</p>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Taklif narxingiz ($)</label>
+                <input type="number" name="counter_price" min="1" step="0.01" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="Masalan: 400">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Izoh (ixtiyoriy)</label>
+                <textarea name="counter_message" rows="3"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                    placeholder="Nima uchun bu narxni taklif qilayotganingizni tushuntiring..."></textarea>
+            </div>
+            <div class="flex gap-3">
+                <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
+                    Yuborish
+                </button>
+                <button type="button" onclick="document.getElementById('counter-modal').classList.add('hidden')"
+                    class="flex-1 border border-gray-300 text-gray-600 py-3 rounded-xl font-semibold hover:bg-gray-50 transition">
+                    Bekor
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
