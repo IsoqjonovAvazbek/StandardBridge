@@ -164,8 +164,8 @@ StandartBridge jamoasi""",
 def send_withdrawal_approved(wr):
     """Admin pul yechish so'rovini tasdiqlaganda expertga xabar."""
     user = wr.wallet.user
-    from .crypto import decrypt_card
-    card_display = f'*{decrypt_card(wr.card_number)[-4:]}' if wr.card_number else '—'
+    plain = wr.card_number_plain
+    card_display = f'*{plain[-4:]}' if plain and plain.isdigit() and len(plain) >= 4 else '—'
     _send(
         subject=f"Pul yechish tasdiqlandi — StandartBridge",
         message=f"""Assalomu alaykum, {user.get_full_name()}!

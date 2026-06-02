@@ -439,7 +439,9 @@ LANG_INSTRUCTION = {
 
 @login_required
 def ai_nc_suggestion(request, pk):
-    """AJAX: AI suggests root cause + corrective action for a non-conformity."""
+    """AJAX POST: AI suggests root cause + corrective action for a non-conformity."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
     nc = get_object_or_404(NonConformity, pk=pk, company=request.user)
     lang = request.session.get('lang', 'uz')
     prompt = (
@@ -483,8 +485,8 @@ def qms_generate_policy(request):
         "Markdown formatida, professional va tayyor hujjat ber."
     )
     text, err = _qms_ai(prompt, max_tokens=2000)
-    if err:
-        messages.error(request, f'AI xatoligi: {err}')
+    if err or not text or not text.strip():
+        messages.error(request, f'AI hujjat yarata olmadi. Qayta urinib ko\'ring.')
         return redirect('qms_documents')
 
     title = f'{title_topic} — {standard}'

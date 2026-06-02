@@ -21,10 +21,12 @@ logger = logging.getLogger('standardbridge')
 # ── access guard ─────────────────────────────────────────────────────────────
 
 def expert_required(view_func):
-    """Decorator: allows only authenticated users with role='expert'."""
+    """Decorator: allows authenticated experts (and admins for support)."""
     def wrapper(request, *args, **kwargs):
-        if not request.user.is_authenticated or request.user.role != 'expert':
+        if not request.user.is_authenticated:
             return redirect('login')
+        if not request.user.is_expert() and not request.user.is_admin():
+            return redirect('entrepreneur_dashboard')
         return view_func(request, *args, **kwargs)
     wrapper.__name__ = view_func.__name__
     return wrapper
@@ -505,7 +507,7 @@ def crm_update(request, pk):
     if request.method == 'POST':
         client.status = request.POST.get('status', client.status)
         client.next_followup = request.POST.get('next_followup') or None
-        client.notes = (request.POST.get('notes') or client.notes or '').strip()
+        client.notes = request.POST.get('notes', client.notes or '').strip()
         client.save()
         messages.success(request, 'Mijoz ma\'lumotlari yangilandi.')
     return redirect('crm_detail', pk=pk)

@@ -94,11 +94,26 @@ function inlineMd(s) {
 }
 function renderMarkdown(md) {
   var lines = md.replace(/\r\n/g, '\n').split('\n');
-  var html = '', listType = null;
+  var html = '', listType = null, tableRows = [];
   function closeList() { if (listType) { html += '</' + listType + '>'; listType = null; } }
+  function flushTable() {
+    if (!tableRows.length) return;
+    html += '<table>';
+    tableRows.forEach(function(row, idx) {
+      var cells = row.replace(/^\||\|$/g, '').split('|');
+      var tag = idx === 0 ? 'th' : 'td';
+      html += '<tr>' + cells.map(function(c){ return '<'+tag+'>'+inlineMd(c.trim())+'</'+tag+'>'; }).join('') + '</tr>';
+    });
+    html += '</table>';
+    tableRows = [];
+  }
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i].replace(/\s+$/, '');
     var t = line.trim();
+    if (/^\|.*\|/.test(t)) {
+      if (/^[|\s:|-]+$/.test(t)) { /* separator row — skip */ continue; }
+      closeList(); tableRows.push(t); continue;
+    } else { flushTable(); }
     if (t === '') { closeList(); continue; }
     if (/^#{1,6}\s/.test(t)) {
       closeList();
@@ -117,7 +132,7 @@ function renderMarkdown(md) {
       html += '<p>' + inlineMd(t) + '</p>';
     }
   }
-  closeList();
+  flushTable(); closeList();
   return html;
 }
 (function() {
