@@ -18,4 +18,4 @@ python manage.py seed_experts
 python manage.py create_admin
 
 echo "==> Gunicorn ishga tushmoqda..."
-exec gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 120
+exec gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 300

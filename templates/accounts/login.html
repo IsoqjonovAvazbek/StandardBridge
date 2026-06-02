@@ -60,7 +60,10 @@
                 </div>
             </form>
 
-            <p class="text-center text-gray-600 mt-6">
+            <div class="text-center mt-4">
+                <a href="{% url 'password_reset' %}" class="text-sm text-gray-500 hover:text-blue-600 hover:underline">Parolni unutdingizmi?</a>
+            </div>
+            <p class="text-center text-gray-600 mt-4">
                 {{ T.login_no_account }}
                 <a href="{% url 'register' %}" class="text-blue-600 font-semibold hover:underline">{{ T.login_register_link }}</a>
             </p>

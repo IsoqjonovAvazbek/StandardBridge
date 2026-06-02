@@ -213,6 +213,88 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [ ] Payme integratsiya (Click bor, Payme yo'q)
 - [ ] Ko'p tillar uchun email shablonlar
 
+---
+
+## AUDIT NATIJLARI (2026-06-02 — Senior dev tekshiruvi)
+Umumiy baho: **C+ / 60-70% production tayyor**
+
+### 🔴 KRITIK — Birinchi hal qilish kerak
+
+1. **Sirlar oshkor (GROQ_API_KEY + SECRET_KEY)**
+   - `.env` fayli Git tarixida bo'lishi mumkin
+   - console.groq.com dan yangi GROQ_API_KEY olish kerak
+   - Yangi SECRET_KEY: `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`
+   - `git rm --cached .env` — tarixdan o'chirish
+
+2. **To'lov integratsiyasi yarim (experts/views.py)**
+   - Click.uz webhook kodi bor, lekin CLICK_SERVICE_ID/MERCHANT_ID/SECRET_KEY bo'sh
+   - `payment_confirm` view MOCK transaction yaratadi (`MOCK-{pk}-...`) — production da ishlamaydi
+   - Click.uz da biznes ro'yxatdan o'tish + real credentials kerak
+
+3. **[x] Ikkilangan to'lov xavfi — race condition (experts/views.py)**
+   - `payment_release` view: `select_for_update()` + `transaction.atomic()` qo'shildi
+   - `Payment.DoesNotExist` aniq exception bilan almashtirildi
+
+4. **[x] Rate limiting**
+   - `django-ratelimit==4.1.0` requirements.txt ga qo'shildi
+   - `login_view` ga `@ratelimit(key='ip', rate='5/m', method='POST', block=True)` qo'shildi
+
+5. **[x] Parol tiklash sahifasi**
+   - 4 ta URL + 6 ta template yaratildi (password_reset, done, confirm, complete, email, subject)
+   - Login sahifasiga "Parolni unutdingizmi?" havola qo'shildi
+
+6. **Karta raqamlari ochiq saqlanmoqda (experts/models.py ~182)**
+   - `Wallet.card_number` — shifrsiz bazada
+   - `django-fernet-fields` bilan shifrlash yoki tokenizatsiya
+
+### 🟡 MUHIM — Tez orada hal qilish
+
+7. **[x] Fayl yuklashda validatsiya (experts/views.py)**
+   - Max 10MB + ruxsat etilgan formatlar: PDF, DOCX, XLS, JPG, PNG
+   - Xato bo'lsa `messages.error` bilan foydalanuvchiga xabar
+
+8. **[x] Gunicorn timeout**
+   - `start.sh`: `--timeout 120` → `--timeout 300`
+
+9. **Email bildirishnomalar to'liq emas (experts/emails.py)**
+   - Yo'q: Withdrawal tasdiqlash/rad, Dispute, QMS hujjat muddati
+
+10. **`except Exception` juda keng (experts/views.py)**
+    - Xatolarni yashiradi, foydalanuvchiga ichki xabar chiqaradi
+    - Aniq exception turlari bilan almashtirish kerak
+
+11. **CSP headers yo'q (core/settings.py)**
+    - Content-Security-Policy konfiguratsiya qilinmagan
+    - XSS xavfi bor
+
+12. **[x] Health check endpoint**
+    - `/health/` → `{"status": "ok"}` JSON (core/urls.py)
+
+### 🟢 YAXSHI QILINGAN
+
+- Gap analiz AI — mustahkam Groq integratsiya
+- Ko'p til tizimi — UZ/RU/EN to'liq (200+ kalit)
+- Escrow to'lov modeli — to'g'ri logika
+- QMS tool — keng qamrovli
+- Admin panel — statistika, boshqaruv
+- Ma'lumotlar bazasi — normalangan, to'g'ri munosabatlar
+- UI/UX — Tailwind CSS, responsive, hamburger menu
+- Background threading — AI va email uchun
+- 47+ test — asosiy funksiyalar qoplangan
+- Railway deploy — to'liq sozlangan
+- Logging — rotating file handlers
+
+### Bajarilishi kerak bo'lgan tartib
+1. Sirlarni yangilash (GROQ + SECRET_KEY) — 30 daqiqa (foydalanuvchi bajaradi)
+2. [x] Race condition tuzatish (payment_release) — `select_for_update()` + `transaction.atomic()`, `Payment.DoesNotExist` aniq exception
+3. [x] Rate limiting qo'shish — `django-ratelimit==4.1.0`, login uchun `5/m` IP limit (`@ratelimit` decorator)
+4. [x] Parol tiklash — Django built-in `PasswordResetView`, 4 ta URL + 6 ta template (password_reset*.html)
+5. [x] Fayl validatsiya — 10MB limit + PDF/Word/Excel/JPG/PNG ruxsat (project_update upload)
+6. [x] Gunicorn timeout — 120 → 300 (start.sh)
+7. [x] Health check — `/health/` endpoint (core/urls.py)
+8. Click.uz real integratsiya — 1-2 kun (biznes ro'yxat kerak)
+9. Payme integratsiya — 2-3 kun
+
 ## .env fayli
 ```
 GROQ_API_KEY=gsk_02O2Ulf...

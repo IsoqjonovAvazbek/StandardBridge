@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
 import hashlib
 import json
 from decimal import Decimal, InvalidOperation
@@ -412,14 +413,26 @@ def project_update(request, pk):
             )
 
         elif action == 'upload' and request.FILES.get('file'):
-            Document.objects.create(
-                project=project,
-                uploaded_by=request.user,
-                title=request.POST.get('title', 'Hujjat'),
-                doc_type=request.POST.get('doc_type', 'filled'),
-                file=request.FILES['file']
-            )
-            messages.success(request, 'Hujjat yuklandi!')
+            uploaded_file = request.FILES['file']
+            allowed_types = ['application/pdf', 'application/msword',
+                             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                             'application/vnd.ms-excel',
+                             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                             'image/jpeg', 'image/png']
+            max_size = 10 * 1024 * 1024  # 10 MB
+            if uploaded_file.size > max_size:
+                messages.error(request, 'Fayl hajmi 10 MB dan oshmasligi kerak!')
+            elif uploaded_file.content_type not in allowed_types:
+                messages.error(request, 'Ruxsat etilgan formatlar: PDF, Word, Excel, JPG, PNG')
+            else:
+                Document.objects.create(
+                    project=project,
+                    uploaded_by=request.user,
+                    title=request.POST.get('title', 'Hujjat'),
+                    doc_type=request.POST.get('doc_type', 'filled'),
+                    file=uploaded_file
+                )
+                messages.success(request, 'Hujjat yuklandi!')
 
     return redirect('project_detail', pk=pk)
 
@@ -574,41 +587,46 @@ def payment_release(request, project_pk):
         return redirect('project_detail', pk=project_pk)
 
     try:
-        payment = project.payment
-        if payment.status == 'held':
-            payment.status = 'released'
-            payment.released_at = timezone.now()
-            payment.save()
+        with transaction.atomic():
+            payment = Payment.objects.select_for_update().get(project=project)
+            if payment.status == 'held':
+                payment.status = 'released'
+                payment.released_at = timezone.now()
+                payment.save()
 
-            project.status = 'completed'
-            project.completed_at = timezone.now()
-            project.save()
+                project.status = 'completed'
+                project.completed_at = timezone.now()
+                project.save()
 
-            try:
-                wallet = project.expert.wallet
-            except Wallet.DoesNotExist:
-                wallet = Wallet.objects.create(user=project.expert)
+                try:
+                    wallet = Wallet.objects.select_for_update().get(user=project.expert)
+                except Wallet.DoesNotExist:
+                    wallet = Wallet.objects.create(user=project.expert)
 
-            wallet.balance += payment.expert_amount
-            wallet.save()
+                wallet.balance += payment.expert_amount
+                wallet.save()
 
-            WalletTransaction.objects.create(
-                wallet=wallet,
-                amount=payment.expert_amount,
-                transaction_type='income',
-                description=f'Loyiha #{project.pk} uchun to\'lov',
-                project=project
-            )
-
-            if project.expert:
-                Notification.objects.create(
-                    user=project.expert,
-                    title='Pul hamyoningizga tushdi!',
-                    message=f'${payment.expert_amount} hamyoningizga o\'tkazildi.'
+                WalletTransaction.objects.create(
+                    wallet=wallet,
+                    amount=payment.expert_amount,
+                    transaction_type='income',
+                    description=f'Loyiha #{project.pk} uchun to\'lov',
+                    project=project
                 )
-                send_project_completed_to_entrepreneur(project, payment)
 
-            messages.success(request, f'Loyiha yakunlandi! ${payment.expert_amount} mutaxassisga o\'tkazildi.')
+                if project.expert:
+                    Notification.objects.create(
+                        user=project.expert,
+                        title='Pul hamyoningizga tushdi!',
+                        message=f'${payment.expert_amount} hamyoningizga o\'tkazildi.'
+                    )
+                    send_project_completed_to_entrepreneur(project, payment)
+
+                messages.success(request, f'Loyiha yakunlandi! ${payment.expert_amount} mutaxassisga o\'tkazildi.')
+            else:
+                messages.warning(request, 'To\'lov allaqachon amalga oshirilgan.')
+    except Payment.DoesNotExist:
+        messages.error(request, 'To\'lov topilmadi.')
     except Exception as e:
         messages.error(request, f'Xatolik: {str(e)}')
 
