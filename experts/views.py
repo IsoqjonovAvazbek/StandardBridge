@@ -37,6 +37,10 @@ def expert_dashboard(request):
     except Wallet.DoesNotExist:
         wallet = Wallet.objects.create(user=request.user)
 
+    from django.db.models import Sum
+    completed_qs = projects.filter(status='completed')
+    earnings = completed_qs.aggregate(s=Sum('expert_payment'))['s'] or 0
+
     context = {
         'projects': projects,
         'new_projects': new_projects,
@@ -44,8 +48,8 @@ def expert_dashboard(request):
         'wallet': wallet,
         'total': projects.count(),
         'in_progress': projects.filter(status='in_progress').count(),
-        'completed': projects.filter(status='completed').count(),
-        'earnings': sum(p.expert_payment for p in projects.filter(status='completed')),
+        'completed': completed_qs.count(),
+        'earnings': earnings,
     }
     return render(request, 'experts/expert_dashboard.html', context)
 
@@ -292,9 +296,9 @@ def project_set_price(request, pk):
 
     if request.method == 'POST':
         try:
-            price = float(request.POST.get('price', 0))
+            price = Decimal(str(request.POST.get('price', '0')))
             days = int(request.POST.get('days', 0))
-        except (ValueError, TypeError):
+        except (InvalidOperation, ValueError, TypeError):
             messages.error(request, 'Narx va kunlar to\'g\'ri raqam bo\'lishi kerak!')
             return redirect('project_set_price', pk=pk)
 
@@ -398,22 +402,26 @@ def project_respond_counter(request, pk):
     if request.method == 'POST':
         action = request.POST.get('action')
         if action == 'accept':
+            # Tadbirkor o'zi taklif qilgan narx — ikki tomon kelishdi, to'lovga o'tamiz
             project.expert_price = project.counter_price
             project.counter_status = 'accepted'
+            project.status = 'accepted'
             project.save()
+            from django.urls import reverse
+            payment_url = reverse('payment_page', kwargs={'project_pk': project.pk})
             Notification.objects.create(
                 user=project.entrepreneur,
                 title='Mutaxassis qarshi taklifni qabul qildi!',
-                message=f'${project.counter_price} narxda kelishildi. To\'lov sahifasiga o\'ting.'
+                message=f'${project.counter_price} narxda kelishildi. To\'lov sahifasiga o\'ting: {payment_url}',
             )
-            messages.success(request, f'Qarshi taklif qabul qilindi — yangi narx: ${project.counter_price}')
+            messages.success(request, f'Qarshi taklif qabul qilindi — yangi narx: ${project.counter_price}. Tadbirkor to\'lov qilishini kuting.')
         elif action == 'reject':
             project.counter_status = 'rejected'
             project.save()
             Notification.objects.create(
                 user=project.entrepreneur,
                 title='Mutaxassis qarshi taklifni rad etdi',
-                message=f'Loyiha #{project.pk} bo\'yicha asl narx (${project.expert_price}) saqlanadi.'
+                message=f'Loyiha #{project.pk} bo\'yicha asl narx (${project.expert_price}) saqlanadi.',
             )
             messages.info(request, 'Qarshi taklif rad etildi. Asl narx saqlanadi.')
     return redirect('project_detail', pk=pk)
@@ -935,6 +943,7 @@ def leave_review(request, pk):
         rating = max(1, min(5, rating))  # 1..5 oralig'ida
         comment = request.POST.get('comment', '')
 
+        from django.db.models import Avg
         Review.objects.create(
             project=project,
             entrepreneur=request.user,
@@ -943,13 +952,14 @@ def leave_review(request, pk):
             comment=comment,
         )
 
-        expert_profile = project.expert.expert_profile
-        all_reviews = Review.objects.filter(expert=project.expert)
-        expert_profile.rating = sum(r.rating for r in all_reviews) / all_reviews.count()
-        expert_profile.total_projects = Project.objects.filter(
-            expert=project.expert, status='completed'
-        ).count()
-        expert_profile.save()
+        with transaction.atomic():
+            expert_profile = ExpertProfile.objects.select_for_update().get(user=project.expert)
+            agg = Review.objects.filter(expert=project.expert).aggregate(avg=Avg('rating'))
+            expert_profile.rating = agg['avg'] or 0
+            expert_profile.total_projects = Project.objects.filter(
+                expert=project.expert, status='completed'
+            ).count()
+            expert_profile.save(update_fields=['rating', 'total_projects'])
 
         Notification.objects.create(
             user=project.expert,
@@ -1063,6 +1073,9 @@ def click_complete(request):
     project = payment.project
     project.status = 'in_progress'
     project.started_at = timezone.now()
+    if project.expert_days and project.expert_days > 0:
+        from datetime import timedelta
+        project.work_deadline = timezone.now() + timedelta(days=project.expert_days)
     project.save()
 
     if project.expert:

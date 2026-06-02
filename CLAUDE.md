@@ -207,107 +207,25 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] step_word/step_deliverables_lbl tarjimalar. 47 test OK
 
 ## PENDING (bajarilmagan)
-- [x] QMS tool — TO'LIQ bajarilgan (checklist ISO9001/22000/14001/45001, hujjatlar, NC, audit)
-- [x] Expert Tools — TO'LIQ bajarilgan (AI doc generator, audit checklist, project templates, CRM — /expert-tools/)
 - [ ] Auditor mobile checklist tool
 - [ ] Payme integratsiya (Click bor, Payme yo'q)
 - [ ] Ko'p tillar uchun email shablonlar
 
 ---
 
-## AUDIT NATIJLARI (2026-06-02 — Senior dev tekshiruvi)
-Umumiy baho: **C+ / 60-70% production tayyor**
+## HALI BAJARILMAGAN (PENDING)
 
-### 🔴 KRITIK — Birinchi hal qilish kerak
+### 🔴 KRITIK
 
-1. **Sirlar oshkor (GROQ_API_KEY + SECRET_KEY)**
-   - `.env` fayli Git tarixida bo'lishi mumkin
-   - console.groq.com dan yangi GROQ_API_KEY olish kerak
+1. **Sirlar yangilash (foydalanuvchi bajaradi)**
+   - console.groq.com dan yangi GROQ_API_KEY olish
    - Yangi SECRET_KEY: `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`
    - `git rm --cached .env` — tarixdan o'chirish
 
-2. **To'lov integratsiyasi yarim (experts/views.py)**
-   - Click.uz webhook kodi bor, lekin CLICK_SERVICE_ID/MERCHANT_ID/SECRET_KEY bo'sh
-   - `payment_confirm` view MOCK transaction yaratadi (`MOCK-{pk}-...`) — production da ishlamaydi
-   - Click.uz da biznes ro'yxatdan o'tish + real credentials kerak
-
-3. **[x] Ikkilangan to'lov xavfi — race condition (experts/views.py)**
-   - `payment_release` view: `select_for_update()` + `transaction.atomic()` qo'shildi
-   - `Payment.DoesNotExist` aniq exception bilan almashtirildi
-
-4. **[x] Rate limiting**
-   - `django-ratelimit==4.1.0` requirements.txt ga qo'shildi
-   - `login_view` ga `@ratelimit(key='ip', rate='5/m', method='POST', block=True)` qo'shildi
-
-5. **[x] Parol tiklash sahifasi**
-   - 4 ta URL + 6 ta template yaratildi (password_reset, done, confirm, complete, email, subject)
-   - Login sahifasiga "Parolni unutdingizmi?" havola qo'shildi
-
-6. **[x] Karta raqamlari shifrlandi**
-   - `cryptography==48.0.0` qo'shildi
-   - `experts/crypto.py`: `encrypt_card`/`decrypt_card` (Fernet, `gAAAAA` prefix bilan eski ma'lumot aniqlash)
-   - `Wallet.card_number`: faqat oxirgi 4 raqam saqlanadi (to'liq raqam kerak emas)
-   - `WithdrawalRequest.card_number`: Fernet bilan shifrlangan (max_length=500), `.card_number_plain` property
-   - `FERNET_KEY` settings.py (DEBUG=True da random, production da .env dan majburiy)
-   - Migration 0006 yaratildi va qo'llanildi
-   - admin_panel.html: `wr.card_number_plain` (admin to'liq raqamni ko'radi)
-   - wallet.html: `req.card_number_plain|slice:"-4:"` (expert oxirgi 4ni ko'radi)
-
-### 🟡 MUHIM — Tez orada hal qilish
-
-7. **[x] Fayl yuklashda validatsiya (experts/views.py)**
-   - Max 10MB + ruxsat etilgan formatlar: PDF, DOCX, XLS, JPG, PNG
-   - Xato bo'lsa `messages.error` bilan foydalanuvchiga xabar
-
-8. **[x] Gunicorn timeout**
-   - `start.sh`: `--timeout 120` → `--timeout 300`
-
-9. **[x] Email bildirishnomalar to'ldirildi (experts/emails.py)**
-   - `send_withdrawal_approved`, `send_withdrawal_rejected` — admin tasdiqlash/rad etganda expertga
-   - `send_dispute_opened` — nizo ochilganda expertga
-   - `send_dispute_resolved` — nizo hal qilinganda ikki tomonga
-   - accounts/views.py: withdrawal va dispute viewlarda yangi funksiyalar chaqiriladi
-   - experts/views.py: `open_dispute`da `send_dispute_opened` chaqiriladi
-
-10. **[x] `except Exception` aniqlashtirish**
-    - `experts/views.py:213`: `except Exception:` → `except AttributeError:`
-    - `experts/views.py` payment_release: `logger.exception(...)` qo'shildi
-    - `check_sla.py:162`: `except Exception as e: logger.warning(...)` qo'shildi
-    - AI calllar (analysis/qms/expert_tools): allaqachon `logger.exception` bor — saqlanadi
-
-11. **[x] CSP headers**
-    - `core/middleware.py`: `ContentSecurityPolicyMiddleware`
-    - Tailwind CDN, Chart.js CDN, Google Fonts ruxsat etilgan
-    - `frame-ancestors 'none'`, `form-action 'self'` himoyasi
-    - settings.py MIDDLEWARE oxiriga qo'shildi
-
-12. **[x] Health check endpoint**
-    - `/health/` → `{"status": "ok"}` JSON (core/urls.py)
-
-### 🟢 YAXSHI QILINGAN
-
-- Gap analiz AI — mustahkam Groq integratsiya
-- Ko'p til tizimi — UZ/RU/EN to'liq (200+ kalit)
-- Escrow to'lov modeli — to'g'ri logika
-- QMS tool — keng qamrovli
-- Admin panel — statistika, boshqaruv
-- Ma'lumotlar bazasi — normalangan, to'g'ri munosabatlar
-- UI/UX — Tailwind CSS, responsive, hamburger menu
-- Background threading — AI va email uchun
-- 47+ test — asosiy funksiyalar qoplangan
-- Railway deploy — to'liq sozlangan
-- Logging — rotating file handlers
-
-### Bajarilishi kerak bo'lgan tartib
-1. Sirlarni yangilash (GROQ + SECRET_KEY) — 30 daqiqa (foydalanuvchi bajaradi)
-2. [x] Race condition tuzatish (payment_release) — `select_for_update()` + `transaction.atomic()`, `Payment.DoesNotExist` aniq exception
-3. [x] Rate limiting qo'shish — `django-ratelimit==4.1.0`, login uchun `5/m` IP limit (`@ratelimit` decorator)
-4. [x] Parol tiklash — Django built-in `PasswordResetView`, 4 ta URL + 6 ta template (password_reset*.html)
-5. [x] Fayl validatsiya — 10MB limit + PDF/Word/Excel/JPG/PNG ruxsat (project_update upload)
-6. [x] Gunicorn timeout — 120 → 300 (start.sh)
-7. [x] Health check — `/health/` endpoint (core/urls.py)
-8. Click.uz real integratsiya — 1-2 kun (biznes ro'yxat kerak)
-9. Payme integratsiya — 2-3 kun
+2. **Click.uz real integratsiya**
+   - CLICK_SERVICE_ID/MERCHANT_ID/SECRET_KEY hali bo'sh
+   - `payment_confirm` MOCK transaction yaratadi — production da ishlamaydi
+   - Click.uz da biznes ro'yxatdan o'tish kerak (1-2 kun)
 
 ## .env fayli
 ```

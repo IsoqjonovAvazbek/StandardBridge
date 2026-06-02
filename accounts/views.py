@@ -12,7 +12,13 @@ def set_language_view(request):
     if lang not in ('uz', 'ru', 'en'):
         lang = 'uz'
     request.session['lang'] = lang
-    next_url = request.POST.get('next', request.META.get('HTTP_REFERER', '/'))
+    next_url = request.POST.get('next', '')
+    # Faqat relative URL qabul qilinadi — open redirect oldini olish
+    if not next_url or not next_url.startswith('/'):
+        referer = request.META.get('HTTP_REFERER', '/')
+        from urllib.parse import urlparse
+        parsed = urlparse(referer)
+        next_url = parsed.path or '/'
     return redirect(next_url)
 
 
@@ -160,12 +166,15 @@ def register_view(request):
             return render(request, 'accounts/register.html', {'form_data': form_data})
 
         # --- Validation ---
+        import re as _re
         if not first_name or not last_name:
             return fail('Ism va familiyani kiriting!')
         if not username:
             return fail('Foydalanuvchi nomini kiriting!')
         if not email:
             return fail('Email manzilni kiriting!')
+        if not _re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email):
+            return fail('Email manzil noto\'g\'ri formatda!')
         if role not in ('entrepreneur', 'expert'):
             return fail('Rolni tanlang (tadbirkor yoki mutaxassis)!')
         if not password:
@@ -238,7 +247,8 @@ def login_view(request):
 
 
 def logout_view(request):
-    logout(request)
+    if request.method == 'POST':
+        logout(request)
     return redirect('landing')
 
 
@@ -263,10 +273,11 @@ def admin_panel(request):
     experts = CustomUser.objects.filter(role='expert')
     expert_profiles = ExpertProfile.objects.all()
 
+    from django.db.models import Sum
     payments = Payment.objects.all()
-    total_volume = sum(p.amount for p in payments.filter(status__in=['held', 'released']))
-    platform_revenue = sum(p.platform_fee for p in payments.filter(status='released'))
-    held_amount = sum(p.amount for p in payments.filter(status='held'))
+    total_volume = payments.filter(status__in=['held', 'released']).aggregate(s=Sum('amount'))['s'] or 0
+    platform_revenue = payments.filter(status='released').aggregate(s=Sum('platform_fee'))['s'] or 0
+    held_amount = payments.filter(status='held').aggregate(s=Sum('amount'))['s'] or 0
 
     projects = Project.objects.all()
     total_projects = projects.count()
@@ -274,6 +285,7 @@ def admin_panel(request):
     project_statuses = [
         ('pending',     'Taklif yuborildi',    'bg-gray-400',   'bg-gray-400'),
         ('negotiating', 'Kelishilmoqda',        'bg-yellow-400', 'bg-yellow-400'),
+        ('accepted',    'To\'lov kutilmoqda',   'bg-orange-400', 'bg-orange-400'),
         ('in_progress', 'Jarayonda',            'bg-blue-400',   'bg-blue-400'),
         ('review',      'Tekshiruvda',          'bg-purple-400', 'bg-purple-400'),
         ('completed',   'Yakunlandi',           'bg-green-400',  'bg-green-400'),
@@ -431,6 +443,10 @@ def admin_process_withdrawal(request, pk):
     action = request.POST.get('action')
     admin_note = request.POST.get('admin_note', '').strip()
 
+    if wr.status != 'pending':
+        messages.warning(request, 'Bu so\'rov allaqachon ko\'rib chiqilgan!')
+        return redirect('admin_panel')
+
     if action == 'approve':
         wr.status = 'approved'
         wr.admin_note = admin_note
@@ -474,6 +490,11 @@ def admin_resolve_dispute(request, pk):
     from django.utils import timezone
 
     dispute = get_object_or_404(Dispute, pk=pk)
+
+    if dispute.status in ('resolved', 'closed'):
+        messages.warning(request, 'Bu nizo allaqachon hal qilingan!')
+        return redirect('admin_panel')
+
     decision = request.POST.get('decision', '').strip()
     new_status = request.POST.get('status', 'resolved')
 

@@ -59,6 +59,7 @@ class GapAnalysis(models.Model):
     target_standard = models.ForeignKey(Standard, on_delete=models.SET_NULL, null=True, related_name='target_analyses')
     industry = models.ForeignKey(Industry, on_delete=models.SET_NULL, null=True, blank=True, related_name='analyses')
     company_info = models.TextField(blank=True)
+    language = models.CharField(max_length=5, default='uz')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     ai_result = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

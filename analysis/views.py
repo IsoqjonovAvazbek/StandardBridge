@@ -325,6 +325,7 @@ def run_analysis(request, industry_id):
         target_standard=target_standards.first(),
         industry=industry,
         company_info=company_context,
+        language=language,
         status='in_progress',
     )
 
@@ -378,7 +379,7 @@ def _relaunch_analysis(analysis):
     local_ids = [analysis.local_standard_id] if analysis.local_standard_id else []
     target_ids = [analysis.target_standard_id] if analysis.target_standard_id else []
     industry_name = analysis.industry.name if analysis.industry else 'Umumiy'
-    language = 'uz'
+    language = analysis.language or 'uz'
 
     analysis.status = 'in_progress'
     analysis.ai_result = None
