@@ -134,6 +134,59 @@ class Command(BaseCommand):
                         ),
                     )
 
+        # ── F-5: in_progress loyihalarda work_deadline o'tdi ────────────────
+        from datetime import timedelta
+        overdue_work = Project.objects.filter(
+            status='in_progress',
+            work_deadline__isnull=False,
+            work_deadline__lt=now,
+        ).select_related('entrepreneur', 'expert')
+
+        for project in overdue_work:
+            notif_title = f'Ish muddati o\'tdi — Loyiha #{project.pk}'
+            already = Notification.objects.filter(
+                user=project.entrepreneur, title=notif_title
+            ).exists()
+            if not already:
+                self._notify(
+                    user=project.entrepreneur,
+                    title=notif_title,
+                    message=(
+                        f'Loyiha #{project.pk} uchun ish muddati '
+                        f'({project.work_deadline.strftime("%d.%m.%Y")}) o\'tib ketdi. '
+                        f'Mutaxassis bilan bog\'laning yoki nizo oching.'
+                    ),
+                )
+                self.stdout.write(
+                    self.style.WARNING(f'  [WORK OVERDUE] Loyiha #{project.pk}')
+                )
+
+        # ── F-7: review statusda > 2 kun tadbirkorga eslatma ────────────────
+        review_stale = Project.objects.filter(
+            status='review',
+        ).select_related('entrepreneur', 'expert')
+
+        for project in review_stale:
+            # Only notify if in review for more than 2 days
+            if project.updated_at and (now - project.updated_at).days >= 2:
+                notif_title = f'Ishni qabul qilmadingiz — Loyiha #{project.pk}'
+                already = Notification.objects.filter(
+                    user=project.entrepreneur, title=notif_title
+                ).exists()
+                if not already:
+                    self._notify(
+                        user=project.entrepreneur,
+                        title=notif_title,
+                        message=(
+                            f'Mutaxassis ishni {project.updated_at.strftime("%d.%m.%Y")} da '
+                            f'tekshiruvga topshirdi. Ishni ko\'rib chiqing va qabul qiling yoki '
+                            f'qayta ishlashni so\'rang.'
+                        ),
+                    )
+                    self.stdout.write(
+                        self.style.WARNING(f'  [REVIEW STALE] Loyiha #{project.pk}')
+                    )
+
         self.stdout.write(
             self.style.SUCCESS(
                 f'\ncheck_sla tugadi: {checked} tekshirildi, '

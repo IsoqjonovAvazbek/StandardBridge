@@ -132,14 +132,23 @@ def entrepreneur_dashboard(request):
         status='completed'
     ).order_by('-created_at')
 
+    pending_projects = all_projects.filter(status='pending')
     negotiating_projects = all_projects.filter(status='negotiating')
     active_projects = all_projects.filter(status__in=['accepted', 'in_progress', 'review'])
     completed_projects = all_projects.filter(status='completed')
 
+    # F-8: AI xato yoki pending tahlillarni ko'rsatish
+    pending_analyses = GapAnalysis.objects.filter(
+        entrepreneur=request.user,
+        status__in=['pending', 'in_progress'],
+    ).order_by('-created_at')
+
     context = {
         'analyses': analyses,
+        'pending_analyses': pending_analyses,
         'project_analysis_ids': project_analysis_ids,
         'total': analyses.count(),
+        'pending_projects': pending_projects,
         'negotiating_projects': negotiating_projects,
         'active_projects': active_projects,
         'completed_projects': completed_projects,
@@ -295,6 +304,14 @@ def _ai_background_task(analysis_id, local_ids, target_ids, industry_name, weak_
             analysis.status = 'pending'
             analysis.ai_result = {'error': str(e)}
             analysis.save()
+            # F-8: AI xato bo'lganda foydalanuvchiga notification
+            from experts.models import Notification
+            Notification.objects.create(
+                user=analysis.entrepreneur,
+                title='AI tahlil xatosi',
+                message=f'Tahlil #{analysis.pk} ishlov berishda xatolik yuz berdi. Sahifaga kirib qayta urining.',
+                link=f'/analysis/{analysis.pk}/processing/',
+            )
         except Exception:
             logger.exception('AI xato holatini saqlashda xatolik (analysis_id=%s)', analysis_id)
     finally:

@@ -112,10 +112,20 @@
                         {% endif %}
                     </div>
 
-                    <a href="{% url 'project_set_price' project.pk %}"
-                        class="shrink-0 gradient-bg text-white px-5 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
-                        {{ T.set_price }} →
-                    </a>
+                    <div class="flex gap-2 shrink-0">
+                        <a href="{% url 'project_set_price' project.pk %}"
+                            class="gradient-bg text-white px-5 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
+                            {{ T.set_price }} →
+                        </a>
+                        <form method="post" action="{% url 'project_decline' project.pk %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                onclick="return confirm('Loyihani rad etasizmi?')"
+                                class="bg-gray-100 text-gray-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-50 hover:text-red-600 transition">
+                                Rad etish
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
             {% endwith %}

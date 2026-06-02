@@ -29,6 +29,57 @@
         </div>
     </div>
 
+    <!-- F-8: AI ishlov beryapti yoki xato -->
+    {% if pending_analyses %}
+    <div class="mb-6">
+        {% for a in pending_analyses %}
+        <div class="bg-yellow-50 border border-yellow-200 rounded-2xl px-5 py-3 flex items-center justify-between mb-2">
+            <div class="flex items-center gap-3">
+                {% if a.ai_result and a.ai_result.error %}
+                <span class="w-2 h-2 rounded-full bg-red-500 flex-shrink-0"></span>
+                <span class="text-sm text-red-700 font-medium">Tahlil #{{ a.pk }} — AI xatosi</span>
+                {% else %}
+                <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse flex-shrink-0"></span>
+                <span class="text-sm text-yellow-700 font-medium">Tahlil #{{ a.pk }} — AI ishlov beryapti…</span>
+                {% endif %}
+            </div>
+            <a href="{% url 'analysis_processing' a.pk %}"
+               class="text-xs text-yellow-700 underline hover:text-yellow-900">Kuzatish →</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- F-3: Narx belgilanishini kutayotgan loyihalar -->
+    {% if pending_projects %}
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">⏳ Narx belgilanishini kutmoqda</h2>
+        <div class="space-y-3">
+            {% for project in pending_projects %}
+            <div class="bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 flex items-center justify-between">
+                <div>
+                    <p class="font-medium text-gray-900 text-sm">
+                        {{ project.analysis.local_standard.code }} → {{ project.analysis.target_standard.code }}
+                    </p>
+                    <p class="text-gray-500 text-xs mt-0.5">
+                        Mutaxassis: {% if project.expert %}{{ project.expert.get_full_name }}{% else %}—{% endif %}
+                    </p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs text-gray-400">{{ project.created_at|date:"d.m.Y" }}</span>
+                    <a href="{% url 'project_detail' project.pk %}" class="text-xs text-blue-600 hover:underline">Ko'rish</a>
+                    <form method="post" action="{% url 'project_cancel' project.pk %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" onclick="return confirm('Loyihani bekor qilasizmi?')"
+                            class="text-xs text-red-500 hover:text-red-700">Bekor qilish</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Kelishilayotgan -->
     {% if negotiating_projects %}
     <div class="mb-8">

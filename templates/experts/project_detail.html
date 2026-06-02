@@ -137,6 +137,18 @@
                         </button>
                         {% endif %}
 
+                        <!-- F-2: Tadbirkor loyihani bekor qilishi -->
+                        {% if request.user == project.entrepreneur %}
+                        <form method="POST" action="{% url 'project_cancel' project.pk %}" class="mt-2">
+                            {% csrf_token %}
+                            <button type="submit"
+                                onclick="return confirm('Loyihani bekor qilasizmi? Bu harakat qaytarib bo\'lmaydi.')"
+                                class="w-full text-xs text-gray-400 hover:text-red-500 py-1.5 transition">
+                                Loyihani bekor qilish
+                            </button>
+                        </form>
+                        {% endif %}
+
                         {% elif project.status == 'accepted' %}
                         <a href="{% url 'payment_page' project.pk %}"
                             class="block w-full gradient-bg text-white py-3 rounded-xl font-semibold text-center mt-4 hover:opacity-90 transition">

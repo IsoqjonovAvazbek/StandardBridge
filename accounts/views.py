@@ -333,9 +333,18 @@ def admin_panel(request):
         ).aggregate(s=Sum('platform_fee'))['s'] or 0
         months_data.append({'label': month_label, 'users': new_users, 'revenue': float(month_revenue)})
 
-    from experts.models import WithdrawalRequest, Dispute
+    from experts.models import WithdrawalRequest, Dispute, Project as ExpertProject
     pending_withdrawals = WithdrawalRequest.objects.filter(status='pending').select_related('wallet__user')[:10]
     open_disputes = Dispute.objects.filter(status__in=('open', 'in_review')).select_related('project', 'opened_by')[:10]
+    # F-10: tarixiy nizolar
+    resolved_disputes = Dispute.objects.filter(status__in=('resolved', 'closed')).select_related('project', 'opened_by').order_by('-resolved_at')[:10]
+    # F-10: tarixiy withdrawal'lar
+    processed_withdrawals = WithdrawalRequest.objects.exclude(status='pending').select_related('wallet__user').order_by('-processed_at')[:10]
+    # F-11: expert o'chirilgan faol loyihalar
+    orphaned_projects = ExpertProject.objects.filter(
+        expert__isnull=True,
+        status__in=('pending', 'negotiating', 'accepted', 'in_progress', 'review'),
+    ).select_related('entrepreneur', 'analysis__local_standard', 'analysis__target_standard')
 
     return render(request, 'accounts/admin_panel.html', {
         'stats': stats,
@@ -348,6 +357,9 @@ def admin_panel(request):
         'chart_revenue': _json.dumps([m['revenue'] for m in months_data]),
         'pending_withdrawals': pending_withdrawals,
         'open_disputes': open_disputes,
+        'resolved_disputes': resolved_disputes,
+        'processed_withdrawals': processed_withdrawals,
+        'orphaned_projects': orphaned_projects,
     })
 
 

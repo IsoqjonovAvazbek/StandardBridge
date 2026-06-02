@@ -10,8 +10,13 @@
 
     <div class="max-w-3xl space-y-4">
         {% for notif in notifications %}
-        <div class="bg-white rounded-2xl p-6 border border-gray-100 card-hover
+        {% if notif.link %}
+        <a href="{{ notif.link }}" class="block bg-white rounded-2xl p-6 border border-gray-100 card-hover
+            {% if not notif.is_read %}border-l-4 border-l-blue-500{% endif %} hover:shadow-md transition">
+        {% else %}
+        <div class="bg-white rounded-2xl p-6 border border-gray-100
             {% if not notif.is_read %}border-l-4 border-l-blue-500{% endif %}">
+        {% endif %}
             <div class="flex items-start gap-4">
                 <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0
                     {% if notif.is_read %}bg-gray-100{% else %}bg-blue-100{% endif %}">
@@ -23,13 +28,16 @@
                 </div>
                 <div class="flex-1">
                     <div class="flex justify-between items-start">
-                        <h3 class="font-bold text-gray-900">{{ notif.title }}</h3>
-                        <span class="text-gray-400 text-xs ml-4 flex-shrink-0">{{ notif.created_at|date:"d.m.Y H:i" }}</span>
+                        <h3 class="font-bold {% if notif.is_read %}text-gray-700{% else %}text-gray-900{% endif %}">{{ notif.title }}</h3>
+                        <div class="flex items-center gap-2 ml-4 flex-shrink-0">
+                            {% if notif.link %}<span class="text-blue-400 text-xs">→</span>{% endif %}
+                            <span class="text-gray-400 text-xs">{{ notif.created_at|date:"d.m.Y H:i" }}</span>
+                        </div>
                     </div>
                     <p class="text-gray-600 text-sm mt-1">{{ notif.message }}</p>
                 </div>
             </div>
-        </div>
+        {% if notif.link %}</a>{% else %}</div>{% endif %}
         {% empty %}
         <div class="bg-white rounded-2xl p-12 border border-gray-100 text-center">
             <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

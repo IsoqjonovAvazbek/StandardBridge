@@ -297,6 +297,59 @@
         </div>
     </div>
 
+    <!-- F-11: Expert o'chirilgan faol loyihalar -->
+    {% if orphaned_projects %}
+    <div class="bg-red-50 border border-red-200 rounded-2xl p-5 mb-6">
+        <h2 class="font-bold text-red-800 mb-3">⚠️ Mutaxassisi yo'q faol loyihalar ({{ orphaned_projects|length }} ta)</h2>
+        <div class="space-y-2">
+            {% for p in orphaned_projects %}
+            <div class="flex items-center justify-between bg-white rounded-xl px-4 py-2 text-sm">
+                <span class="text-gray-700">Loyiha #{{ p.pk }} — {{ p.entrepreneur.get_full_name }} — <b>{{ p.status }}</b></span>
+                <a href="{% url 'project_detail' p.pk %}" class="text-red-600 hover:underline text-xs">Ko'rish</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- F-10: Hal qilingan nizolar tarixi -->
+    {% if resolved_disputes %}
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
+        <h2 class="font-bold text-gray-900 mb-3">Hal qilingan nizolar (oxirgi {{ resolved_disputes|length }} ta)</h2>
+        <div class="space-y-2">
+            {% for d in resolved_disputes %}
+            <div class="flex items-center justify-between text-sm border-b border-gray-50 py-2 last:border-0">
+                <div>
+                    <span class="font-medium text-gray-800">Loyiha #{{ d.project_id }}</span>
+                    <span class="text-gray-500 ml-2">{{ d.opened_by.get_full_name }}</span>
+                    {% if d.admin_decision %}<span class="text-gray-400 ml-2 text-xs italic">— {{ d.admin_decision|truncatechars:60 }}</span>{% endif %}
+                </div>
+                <span class="text-xs text-gray-400">{{ d.resolved_at|date:"d.m.Y" }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- F-10: Qayta ishlangan withdrawal'lar tarixi -->
+    {% if processed_withdrawals %}
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
+        <h2 class="font-bold text-gray-900 mb-3">Qayta ishlangan pul yechish so'rovlari (oxirgi {{ processed_withdrawals|length }} ta)</h2>
+        <div class="space-y-2">
+            {% for wr in processed_withdrawals %}
+            <div class="flex items-center justify-between text-sm border-b border-gray-50 py-2 last:border-0">
+                <div>
+                    <span class="font-medium text-gray-800">{{ wr.wallet.user.get_full_name }}</span>
+                    <span class="ml-2 font-mono text-gray-600">${{ wr.amount }}</span>
+                    <span class="ml-2 px-2 py-0.5 rounded text-xs {% if wr.status == 'approved' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">{{ wr.status }}</span>
+                </div>
+                <span class="text-xs text-gray-400">{{ wr.processed_at|date:"d.m.Y" }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Statistika grafiklari -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div class="bg-white rounded-2xl border border-gray-100 p-6">

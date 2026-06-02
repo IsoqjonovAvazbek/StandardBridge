@@ -6,6 +6,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
+from django.urls import reverse
 import hashlib
 import json
 import logging
@@ -170,7 +171,8 @@ def send_to_expert(request, expert_pk, analysis_pk):
         Notification.objects.create(
             user=expert_user,
             title='Yangi tahlil keldi!',
-            message=f'{request.user.get_full_name()} sizga tahlil yubordi. Narx belgilang.'
+            message=f'{request.user.get_full_name()} sizga tahlil yubordi. Narx belgilang.',
+            link=reverse('project_detail', args=[project.pk]),
         )
         send_project_to_expert(project)
 
@@ -322,7 +324,8 @@ def project_set_price(request, pk):
         Notification.objects.create(
             user=project.entrepreneur,
             title='Mutaxassis narx belgiladi!',
-            message=f'{request.user.get_full_name()} narx belgiladi: ${price}, {days} kun.'
+            message=f'{request.user.get_full_name()} narx belgiladi: ${price}, {days} kun.',
+            link=reverse('project_detail', args=[project.pk]),
         )
         send_price_set_to_entrepreneur(project)
 
@@ -348,7 +351,8 @@ def project_accept(request, pk):
         Notification.objects.create(
             user=project.expert,
             title='Mijoz narxni qabul qildi!',
-            message=f'{request.user.get_full_name()} narxni qabul qildi. To\'lov kutilmoqda.'
+            message=f'{request.user.get_full_name()} narxni qabul qildi. To\'lov kutilmoqda.',
+            link=reverse('project_detail', args=[project.pk]),
         )
 
         messages.success(request, 'Narx qabul qilindi! To\'lov sahifasiga o\'ting.')
@@ -563,11 +567,54 @@ def project_complete(request, pk):
         Notification.objects.create(
             user=project.entrepreneur,
             title='Ish yakunlandi!',
-            message=f'{request.user.get_full_name()} ishni tugatdi. Tekshirib qabul qiling.'
+            message=f'{request.user.get_full_name()} ishni tugatdi. Tekshirib qabul qiling.',
+            link=reverse('project_detail', args=[project.pk]),
         )
 
         messages.success(request, 'Ish yakunlandi! Mijoz qabul qilishi kutilmoqda.')
 
+    return redirect('project_detail', pk=pk)
+
+
+@login_required
+def project_decline(request, pk):
+    """Expert loyihani rad etadi — faqat pending statusda."""
+    project = get_object_or_404(Project, pk=pk, expert=request.user)
+    if project.status != 'pending':
+        messages.error(request, 'Bu loyihani rad etib bo\'lmaydi!')
+        return redirect('project_detail', pk=pk)
+    if request.method == 'POST':
+        project.status = 'cancelled'
+        project.save()
+        Notification.objects.create(
+            user=project.entrepreneur,
+            title='Mutaxassis loyihani rad etdi',
+            message=f'{request.user.get_full_name()} loyihangizni qabul qilmadi. Boshqa mutaxassis tanlang.',
+        )
+        messages.info(request, 'Loyiha rad etildi.')
+        return redirect('expert_dashboard')
+    return redirect('project_detail', pk=pk)
+
+
+@login_required
+def project_cancel(request, pk):
+    """Tadbirkor loyihani bekor qiladi — faqat pending/negotiating statusda."""
+    project = get_object_or_404(Project, pk=pk, entrepreneur=request.user)
+    if project.status not in ('pending', 'negotiating'):
+        messages.error(request, 'Bu loyihani bekor qilib bo\'lmaydi — to\'lov amalga oshgan yoki ish boshlangan!')
+        return redirect('project_detail', pk=pk)
+    if request.method == 'POST':
+        project.status = 'cancelled'
+        project.save()
+        if project.expert:
+            Notification.objects.create(
+                user=project.expert,
+                title='Tadbirkor loyihani bekor qildi',
+                message=f'{project.entrepreneur.get_full_name()} loyihani bekor qildi.',
+                link=reverse('expert_dashboard'),
+            )
+        messages.info(request, 'Loyiha bekor qilindi.')
+        return redirect('entrepreneur_dashboard')
     return redirect('project_detail', pk=pk)
 
 
@@ -668,7 +715,8 @@ def payment_confirm(request, project_pk):
         Notification.objects.create(
             user=project.expert,
             title='💰 To\'lov amalga oshirildi!',
-            message=f'{request.user.get_full_name()} loyiha #{project.pk} uchun ${payment.amount} to\'lov qildi. Ish boshlashingiz mumkin!'
+            message=f'{request.user.get_full_name()} loyiha #{project.pk} uchun ${payment.amount} to\'lov qildi. Ish boshlashingiz mumkin!',
+            link=reverse('project_detail', args=[project.pk]),
         )
         send_payment_confirmed_to_expert(project, payment)
 
@@ -728,9 +776,32 @@ def payment_release(request, project_pk):
                     Notification.objects.create(
                         user=project.expert,
                         title='Pul hamyoningizga tushdi!',
-                        message=f'${payment.expert_amount} hamyoningizga o\'tkazildi.'
+                        message=f'${payment.expert_amount} hamyoningizga o\'tkazildi.',
+                        link=reverse('wallet'),
                     )
                     send_project_completed_to_entrepreneur(project, payment)
+
+                # F-12: Referral bonus — taklif qiluvchiga platform_fee ning 10%
+                referrer = project.entrepreneur.referred_by
+                if referrer:
+                    from decimal import Decimal as _D
+                    bonus = (payment.platform_fee * _D('0.10')).quantize(_D('0.01'))
+                    if bonus > 0:
+                        ref_wallet, _ = Wallet.objects.get_or_create(user=referrer)
+                        Wallet.objects.select_for_update().filter(pk=ref_wallet.pk).update(
+                            balance=ref_wallet.balance + bonus
+                        )
+                        WalletTransaction.objects.create(
+                            wallet=ref_wallet,
+                            amount=bonus,
+                            transaction_type='income',
+                            description=f'Referral bonus — {project.entrepreneur.get_full_name()} birinchi loyiha',
+                        )
+                        Notification.objects.create(
+                            user=referrer,
+                            title='Referral bonus!',
+                            message=f'Taklif qilganingiz {project.entrepreneur.get_full_name()} birinchi loyihasini yakunladi. ${bonus} bonus hamyoningizga tushdi!',
+                        )
 
                 messages.success(request, f'Loyiha yakunlandi! ${payment.expert_amount} mutaxassisga o\'tkazildi.')
             else:
@@ -1166,6 +1237,7 @@ def open_dispute(request, pk):
                 user=project.expert,
                 title='⚠️ Nizo ochildi!',
                 message=f'{request.user.get_full_name()} loyiha #{project.pk} bo\'yicha nizo ochdi. Admin ko\'rib chiqadi.',
+                link=reverse('project_detail', args=[project.pk]),
             )
             from .emails import send_dispute_opened
             send_dispute_opened(dispute)
@@ -1177,6 +1249,7 @@ def open_dispute(request, pk):
                 user=admin_user,
                 title=f'⚠️ Yangi nizo — Loyiha #{project.pk}',
                 message=f'{request.user.get_full_name()} nizo ochdi: {reason[:100]}',
+                link=reverse('admin_panel'),
             )
             for admin_user in admin_users
         ])
