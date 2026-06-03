@@ -14,10 +14,14 @@ def health_check(request):
 @login_required
 def protected_media(request, path):
     """Media fayllarni faqat login qilgan foydalanuvchilarga berish."""
-    file_path = os.path.join(settings.MEDIA_ROOT, path)
-    if not os.path.exists(file_path):
+    base = os.path.realpath(settings.MEDIA_ROOT)
+    full = os.path.realpath(os.path.join(base, path))
+    # Path traversal himoyasi: MEDIA_ROOT ichida ekanini tekshir
+    if not full.startswith(base + os.sep) and full != base:
         raise Http404
-    return FileResponse(open(file_path, 'rb'))
+    if not os.path.isfile(full):
+        raise Http404
+    return FileResponse(open(full, 'rb'))
 
 
 urlpatterns = [

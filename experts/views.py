@@ -824,10 +824,12 @@ def payment_release(request, project_pk):
                     from decimal import Decimal as _D
                     bonus = (payment.platform_fee * _D('0.10')).quantize(_D('0.01'))
                     if bonus > 0:
+                        from django.db.models import F as _F
                         ref_wallet, _ = Wallet.objects.get_or_create(user=referrer)
-                        Wallet.objects.select_for_update().filter(pk=ref_wallet.pk).update(
-                            balance=ref_wallet.balance + bonus
+                        Wallet.objects.filter(pk=ref_wallet.pk).update(
+                            balance=_F('balance') + bonus
                         )
+                        ref_wallet.refresh_from_db(fields=['balance'])
                         WalletTransaction.objects.create(
                             wallet=ref_wallet,
                             amount=bonus,

@@ -39,6 +39,15 @@ SPECIALIZATIONS = [
     'ISO 9001, ISO 45001',
 ]
 
+# standard_tags — qidiruv filtri uchun (ExpertProfile.standard_tags JSONField)
+STANDARD_TAGS = [
+    ['iso9001', 'iso22000'],
+    ['iso14001', 'iso45001'],
+    ['iso9001', 'iso14001'],
+    ['iso22000'],
+    ['iso9001', 'iso45001'],
+]
+
 
 class Command(BaseCommand):
     help = 'Har viloyat uchun bitta demo tasdiqlangan mutaxassis yaratadi'
@@ -64,6 +73,7 @@ class Command(BaseCommand):
                 user=user,
                 bio=f'{region_name} viloyatida {5 + i % 8} yillik tajribaga ega ISO sertifikatsiya mutaxassisi.',
                 specializations=SPECIALIZATIONS[i % len(SPECIALIZATIONS)],
+                standard_tags=STANDARD_TAGS[i % len(STANDARD_TAGS)],
                 experience_years=5 + i % 8,
                 rating=Decimal('4.5') + Decimal('0.1') * (i % 5),
                 total_projects=10 + i * 3,

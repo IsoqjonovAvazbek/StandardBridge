@@ -705,7 +705,9 @@ def entrepreneur_projects(request):
 
     all_projects = Project.objects.filter(
         entrepreneur=request.user
-    ).order_by('-created_at')
+    ).select_related(
+        'analysis__local_standard', 'analysis__target_standard', 'expert'
+    ).prefetch_related('analysis__gaps', 'updates').order_by('-created_at')
 
     negotiating = all_projects.filter(status='negotiating')
     active = all_projects.filter(status__in=['accepted', 'in_progress', 'review'])
