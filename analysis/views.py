@@ -22,6 +22,28 @@ AI_LANG_INSTRUCTION = {
 }
 
 
+def _sanitize_ai_description(text):
+    """AI hallucination filteri.
+
+    Quyidagi holatlarni tozalaydi:
+    - Bo'sh yoki juda qisqa (<25 belgi)
+    - URL yoki email — AI ixtiro qilgan ehtimol
+    - Telefon raqami — ishonchsiz
+    - Juda uzun (>450 belgi) — qisqartiradi
+    """
+    import re
+    if not text or len(text.strip()) < 15:
+        return ''
+    text = text.strip()
+    if re.search(r'https?://|www\.', text, re.IGNORECASE):
+        return ''
+    if re.search(r'[\w.+-]+@[\w-]+\.\w{2,}', text):
+        return ''
+    if re.search(r'\+\d{7,}|\b\d{9,}\b', text):
+        return ''
+    return text[:450] if len(text) > 450 else text
+
+
 def _extract_json(text):
     """Robustly pull a JSON object out of an AI response (handles ``` fences and prose)."""
     import re
@@ -132,42 +154,39 @@ def get_ai_analysis(local_standards, target_standards, industry_name,
   ]"""
             roadmap_rule = "- roadmap_steps: 4-7 ta aniq bosqich"
 
-        prompt = f"""Sen sertifikatlash bo'yicha maslahatchi. Korxona quyidagi savollarga "Yo'q" yoki "Qisman" javob berdi.
-Bu savollar {target_codes} standartidan — rasmiy baza.
+        prompt = f"""Sen {target_codes} standarti bo'yicha sertifikatlash mutaxassisisisan.
+Korxona quyidagi talablarga javob bermagan. Har bir gap uchun FAQAT standart talabi asosida izoh yoz.
 
-Soha: {industry_name}
-Mahalliy standart: {local_codes}
-Maqsad: {target_codes}
+Soha: {industry_name} | Standart: {target_codes}
 {readiness_block}{context_block}
-{std_context}
 
-ANIQLANGAN GAP'LAR (bazadan, o'zgartirilmaydi):
+ANIQLANGAN GAP'LAR:
 {gaps_for_ai}
 
 {lang_rule}
 
-HAR BIR GAP UCHUN qisqa, amaliy izoh yoz (2-3 jumla).
+QATTIQ CHEKLASHLAR (buzma):
+1. Har bir description: 2-3 jumla, faqat standart talabi haqida
+2. URL, email, telefon, kompaniya nomi YOZMA
+3. Aniq narx, muddatni (3 oy, 2 yil) da'vo qilma
+4. Yangi gap ixtiro qilma — faqat yuqoridagi ro'yxatga izoh
+5. "Mutaxassis bilan maslahatlashing" — oxirgi jumlada yozishing MUMKIN
 
-JSON (boshqa hech narsa yozma):
+JSON (faqat bu, boshqa hech narsa):
 {{
   "gap_descriptions": [
     {{
       "index": 1,
-      "description": "Nima uchun muhim va qanday tuzatish — 2-3 jumla, amaliy",
-      "estimated_days": 21
+      "description": "Standart talabi nimani talab qiladi va bu talabni qondirish uchun nima qilish kerak — 2-3 jumla"
     }}
   ],
-  "total_days": 90,
-  "estimated_cost": 2000,
-  "cost_breakdown": {{"consulting": 1500, "certification_body": 500}}{roadmap_json_block},
-  "summary": "Umumiy holat 2-3 jumlada"
+  "summary": "Umumiy holat — 2 jumla, da'vosiz"
 }}
 
 QOIDALAR:
-- gap_descriptions soni aniqlangan gaplar soniga teng ({len(structured_gaps)} ta)
-- estimated_cost: kichik korxona $500-2000, o'rta $2000-5000
-- {roadmap_rule}
-- O'zing yangi gap ixtiro qilma — faqat yuqoridagi ro'yxatga izoh yoz"""
+- gap_descriptions soni: {len(structured_gaps)} ta (aniqlangan gaplar soni)
+- estimated_cost, total_days, roadmap_steps YOZMA — bular alohida hisoblanadi
+- {roadmap_rule}"""
 
     else:
         # Gap yo'q — korxona yaxshi holatda
@@ -229,9 +248,11 @@ JSON:
             ai_item = desc_map.get(i, {})
             estimated_days = ai_item.get('estimated_days', 14 if gap['answer'] == 'Qisman' else 21)
             total_days_calc += estimated_days
+            raw_desc = ai_item.get('description', '')
             final_gaps.append({
                 'title': gap['title'],           # ← DB'dan, o'zgarmas
-                'description': ai_item.get('description', ''),
+                'description': _sanitize_ai_description(raw_desc),
+                'clause': gap.get('clause', ''), # ← DB'dan, standart bo'limi
                 'priority': gap['priority'],     # ← DB'dan hisoblangan
                 'estimated_days': estimated_days,
             })
@@ -486,6 +507,7 @@ def _ai_background_task(analysis_id, local_ids, target_ids, industry_name, weak_
                 analysis=analysis,
                 title=gap_data.get('title', 'Nomsiz gap')[:300],
                 description=gap_data.get('description', ''),
+                clause=gap_data.get('clause', '')[:100],
                 priority=priority,
                 estimated_days=gap_data.get('estimated_days', 0) or 0,
             )

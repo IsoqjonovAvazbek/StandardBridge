@@ -97,6 +97,7 @@ class GapItem(models.Model):
     analysis = models.ForeignKey(GapAnalysis, on_delete=models.CASCADE, related_name='gaps')
     title = models.CharField(max_length=300)
     description = models.TextField()
+    clause = models.CharField(max_length=100, blank=True)
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
     is_resolved = models.BooleanField(default=False)
     estimated_days = models.IntegerField(default=0)
