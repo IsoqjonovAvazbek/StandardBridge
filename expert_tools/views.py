@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
 from django.conf import settings
+from django_ratelimit.decorators import ratelimit
 from datetime import timedelta
 from .models import (
     DocumentTemplate, GeneratedDocument,
@@ -77,8 +78,12 @@ def document_list(request):
 
 
 @expert_required
+@ratelimit(key='user', rate='5/m', method='POST', block=False)
 def generate_document(request):
     if request.method != 'POST':
+        return redirect('expert_doc_list')
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Juda ko\'p so\'rov. Biroz kuting.')
         return redirect('expert_doc_list')
 
     template_id = request.POST.get('template_id')

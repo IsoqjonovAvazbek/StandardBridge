@@ -154,6 +154,14 @@ def register_view(request):
         phone = request.POST.get('phone', '').strip()
         region = request.POST.get('region', '').strip()
         industry = request.POST.get('industry', '').strip()
+        # Expert-specific fields
+        specializations = request.POST.get('specializations', '').strip()
+        expert_region = request.POST.get('expert_region', '').strip()
+        experience_years_raw = request.POST.get('experience_years', '0').strip()
+        try:
+            experience_years = max(0, min(50, int(experience_years_raw)))
+        except (ValueError, TypeError):
+            experience_years = 0
 
         referral_code = request.POST.get('referral_code', '').strip().upper()
 
@@ -216,7 +224,13 @@ def register_view(request):
         )
 
         if role == 'expert':
-            ExpertProfile.objects.create(user=user)
+            ExpertProfile.objects.create(
+                user=user,
+                specializations=specializations,
+                region=expert_region or region,
+                experience_years=experience_years,
+                phone=phone,
+            )
         else:
             EntrepreneurProfile.objects.create(user=user)
 
@@ -228,8 +242,16 @@ def register_view(request):
     return render(request, 'accounts/register.html')
 
 
-@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def login_view(request):
+    from django_ratelimit.exceptions import Ratelimited
+    from django_ratelimit.decorators import is_ratelimited
+    if request.method == 'POST':
+        limited = is_ratelimited(request, group='login', key='ip', rate='5/m', method='POST', increment=True)
+        if limited:
+            return render(request, 'accounts/login.html', {
+                'error': 'Juda ko\'p urinish. 1 daqiqadan keyin qayta urining.',
+                'ratelimited': True,
+            })
     if request.user.is_authenticated:
         return redirect('dashboard')
 

@@ -676,13 +676,18 @@ def payment_page(request, project_pk):
         payment = None
 
     # Click uchun Payment oldindan yaratilishi kerak (merchant_trans_id = payment.pk)
-    if project.status == 'accepted' and not payment and settings.CLICK_SERVICE_ID:
-        payment = Payment.objects.create(
-            project=project,
-            entrepreneur=request.user,
-            amount=project.expert_price,
-            status='pending',
-        )
+    if project.status == 'accepted' and settings.CLICK_SERVICE_ID:
+        if not payment:
+            payment = Payment.objects.create(
+                project=project,
+                entrepreneur=request.user,
+                amount=project.expert_price,
+                status='pending',
+            )
+        elif payment.status == 'pending' and payment.amount != project.expert_price:
+            # Narx o'zgargan bo'lsa (counter-offer) yangilash
+            payment.amount = project.expert_price
+            payment.save(update_fields=['amount', 'platform_fee', 'expert_amount'])
 
     click_return_url = request.build_absolute_uri(
         reverse('project_detail', args=[project.pk])
@@ -883,8 +888,19 @@ def wallet(request):
                     errors.append('Karta egasining ismini kiriting!')
             elif not card_holder and not card_expiry:
                 errors.append('Karta raqamini kiriting!')
-            if card_expiry and not _re.match(r'^\d{2}/\d{2}$', card_expiry):
-                errors.append('Amal qilish muddati MM/YY formatida bo\'lishi kerak!')
+            if card_expiry:
+                if not _re.match(r'^\d{2}/\d{2}$', card_expiry):
+                    errors.append('Amal qilish muddati MM/YY formatida bo\'lishi kerak!')
+                else:
+                    from datetime import date as _date
+                    try:
+                        exp_month, exp_year = int(card_expiry[:2]), int(card_expiry[3:]) + 2000
+                        if not (1 <= exp_month <= 12):
+                            errors.append('Oy 01-12 oralig\'ida bo\'lishi kerak!')
+                        elif _date(exp_year, exp_month, 1) < _date.today().replace(day=1):
+                            errors.append('Kartaning amal qilish muddati o\'tib ketgan!')
+                    except ValueError:
+                        errors.append('Amal qilish muddati noto\'g\'ri!')
 
             if errors:
                 for e in errors:
@@ -901,7 +917,7 @@ def wallet(request):
         elif action == 'withdraw':
             amount_str = request.POST.get('amount', '0')
             try:
-                amount = Decimal(str(amount_str))
+                amount = Decimal(str(amount_str)).quantize(Decimal('0.01'))
             except (InvalidOperation, ValueError):
                 amount = Decimal('0')
             card_num = request.POST.get('withdraw_card', '').strip()
@@ -1364,7 +1380,7 @@ def add_roadmap_step(request, pk):
         max_order = roadmap.steps.count()
         RoadmapStep.objects.create(
             roadmap=roadmap,
-            title=title,
+            title=title[:200],
             description=description,
             duration_days=duration_days,
             order=max_order + 1,

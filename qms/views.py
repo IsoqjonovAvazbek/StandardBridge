@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.core.files.base import ContentFile
 from datetime import timedelta
+from django_ratelimit.decorators import ratelimit
 from .models import ChecklistItem, ChecklistResponse, QMSDocument, QMSDocumentVersion, NonConformity, AuditSchedule
 import json
 import csv
@@ -217,7 +218,7 @@ def upload_document(request):
         else:
             QMSDocument.objects.create(
                 company=request.user,
-                title=title,
+                title=title[:300],
                 doc_type=doc_type,
                 file=file,
                 version=version,
@@ -291,7 +292,7 @@ def add_nonconformity(request):
             NonConformity.objects.create(
                 company=request.user,
                 code=_next_nc_code(request.user),
-                title=title,
+                title=title[:300],
                 description=description,
                 severity=severity,
                 assigned_to=assigned_to,
@@ -395,6 +396,13 @@ def add_audit(request):
         notes = request.POST.get('notes', '').strip()
 
         if audit_type and standard and planned_date:
+            from datetime import date as _date, datetime as _dt
+            try:
+                pd = _dt.strptime(planned_date, '%Y-%m-%d').date()
+                if pd < _date.today():
+                    messages.warning(request, 'Audit sanasi o\'tib ketgan. Kelajak sanasini kiriting.')
+            except ValueError:
+                pass
             AuditSchedule.objects.create(
                 company=request.user,
                 audit_type=audit_type,
@@ -438,10 +446,13 @@ LANG_INSTRUCTION = {
 
 
 @login_required
+@ratelimit(key='user', rate='10/m', method='POST', block=False)
 def ai_nc_suggestion(request, pk):
     """AJAX POST: AI suggests root cause + corrective action for a non-conformity."""
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+    if getattr(request, 'limited', False):
+        return JsonResponse({'success': False, 'error': 'Juda ko\'p so\'rov. Biroz kuting.'}, status=429)
     nc = get_object_or_404(NonConformity, pk=pk, company=request.user)
     lang = request.session.get('lang', 'uz')
     prompt = (
@@ -463,9 +474,13 @@ def ai_nc_suggestion(request, pk):
 
 
 @login_required
+@ratelimit(key='user', rate='5/m', method='POST', block=False)
 def qms_generate_policy(request):
     """AI generates an ISO policy/procedure and stores it as a QMS document."""
     if request.method != 'POST':
+        return redirect('qms_documents')
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Juda ko\'p so\'rov. Biroz kuting.')
         return redirect('qms_documents')
     standard = request.POST.get('standard', '').strip() or 'ISO 9001'
     doc_type = request.POST.get('doc_type', 'policy')

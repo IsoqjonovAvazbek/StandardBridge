@@ -82,7 +82,11 @@ function markStep(n) {
 
 stepTimings.forEach((t, i) => setTimeout(() => markStep(i + 2), t));
 
+var pollCount = 0;
+var MAX_POLLS = 90; // 90 * 2s = 3 daqiqa maksimum
+
 function poll() {
+    pollCount++;
     fetch(statusUrl)
         .then(r => r.json())
         .then(data => {
@@ -91,6 +95,10 @@ function poll() {
                 markStep(4);
                 setTimeout(() => window.location.href = detailUrl, 500);
             } else if (data.has_error) {
+                document.getElementById('steps-list').classList.add('hidden');
+                document.getElementById('error-box').classList.remove('hidden');
+            } else if (pollCount >= MAX_POLLS) {
+                // 3 daqiqa o'tdi, hali ham in_progress — server restart bo'lgan bo'lishi mumkin
                 document.getElementById('steps-list').classList.add('hidden');
                 document.getElementById('error-box').classList.remove('hidden');
             } else {
