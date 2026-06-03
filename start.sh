@@ -10,14 +10,14 @@ echo "==> Statik fayllar..."
 python manage.py collectstatic --noinput
 
 echo "==> Boshlang'ich ma'lumotlar (idempotent)..."
-python manage.py seed_data
-python manage.py seed_standards
-python manage.py seed_questions
-python manage.py load_checklist
-python manage.py load_expert_templates
-python manage.py seed_experts
-python manage.py seed_roadmap_steps
-python manage.py create_admin
+python manage.py seed_data || echo "seed_data xato (o'tkazib yuborildi)"
+python manage.py seed_standards || echo "seed_standards xato (o'tkazib yuborildi)"
+python manage.py seed_questions || echo "seed_questions xato (o'tkazib yuborildi)"
+python manage.py load_checklist || echo "load_checklist xato (o'tkazib yuborildi)"
+python manage.py load_expert_templates || echo "load_expert_templates xato (o'tkazib yuborildi)"
+python manage.py seed_experts || echo "seed_experts xato (o'tkazib yuborildi)"
+python manage.py seed_roadmap_steps || echo "seed_roadmap_steps xato (o'tkazib yuborildi)"
+python manage.py create_admin || echo "create_admin xato (o'tkazib yuborildi)"
 
 echo "==> Gunicorn ishga tushmoqda..."
 exec gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 300
