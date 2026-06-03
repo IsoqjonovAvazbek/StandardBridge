@@ -45,24 +45,56 @@ def get_ai_analysis(local_standards, target_standards, industry_name, weak_answe
                     company_context='', readiness=None, language='uz'):
     client = Groq(api_key=os.environ.get('GROQ_API_KEY'), timeout=settings.AI_TIMEOUT, max_retries=1)
 
-    local_codes = ', '.join([s.code for s in local_standards])
-    target_codes = ', '.join([s.code for s in target_standards])
+    # ── Bazadan standart ma'lumotlarini olish ──────────────────────────────────
+    def std_block(standards, label):
+        lines = [f"=== {label} ==="]
+        for s in standards:
+            lines.append(f"Kod: {s.code}")
+            lines.append(f"Rasmiy nom: {s.name}")
+            if s.description:
+                lines.append(f"Tavsif: {s.description[:400]}")
+            lines.append("")
+        return "\n".join(lines)
+
+    local_block = std_block(local_standards, "MAHALLIY STANDARTLAR (bazadan)")
+    target_block = std_block(target_standards, "MAQSADLI STANDARTLAR (bazadan)")
+
+    # ── Bazadagi talablar (savollar = standart clauses) ──────────────────────
+    from analysis.models import Question
+    db_questions = Question.objects.filter(
+        standard__in=target_standards, is_active=True
+    ).select_related('standard').values('text', 'clause', 'standard__code')[:30]
+
+    if db_questions:
+        clauses_lines = ["=== STANDART TALABLARI (rasmiy baza) ==="]
+        for q in db_questions:
+            clause = q['clause'] or ''
+            clauses_lines.append(f"[{q['standard__code']}] {clause}: {q['text']}")
+        clauses_block = "\n".join(clauses_lines)
+    else:
+        clauses_block = ""
 
     weak_text = '\n'.join([f"- {q}: {a}" for q, a in weak_answers]) if weak_answers else "Aniqlanmadi"
     lang_rule = AI_LANG_INSTRUCTION.get(language, AI_LANG_INSTRUCTION['uz'])
     context_block = f"\nKorxona ma'lumotlari:\n{company_context}\n" if company_context else ""
     readiness_block = f"\nKorxonaning hozirgi tayyorlik darajasi: {readiness}%\n" if readiness is not None else ""
 
-    prompt = f"""Sen standartlar bo'yicha mutaxassisson.
+    prompt = f"""Sen standartlar bo'yicha mutaxassisson. Quyida rasmiy baza ma'lumotlari berilgan.
+
+QOIDA: Faqat quyidagi rasmiy bazadan olingan ma'lumotlarga asoslan.
+O'zingdan standart talablari to'qib chiqarma. Baza — birlamchi manba.
+
+{local_block}
+{target_block}
+{clauses_block}
 
 Soha: {industry_name}
-Hozirgi standartlar: {local_codes}
-Maqsadli standartlar: {target_codes}
 {context_block}{readiness_block}
 Korxonada aniqlangan kamchiliklar (faqat "Yo'q" va "Qisman" javoblar):
 {weak_text}
 
-MUHIM: Faqat yuqoridagi kamchiliklar va korxona ma'lumotlariga asoslanib gap tahlil qil. Tavsiyalarni korxona hajmi va holatiga moslab ber.
+MUHIM: Yuqoridagi rasmiy baza ma'lumotlari va aniqlanган kamchiliklarga asoslanib gap tahlil qil.
+Faqat bazadagi talablardan kelib chiqqan gaplar ko'rsat. Tavsiyalarni korxona hajmiga moslab ber.
 {lang_rule}
 
 Quyidagi formatda JSON javob ber (boshqa hech narsa yozma, faqat JSON):
