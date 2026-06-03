@@ -41,105 +41,180 @@ def _extract_json(text):
     raise ValueError('AI javobidan JSON ajratib bo\'lmadi')
 
 
-def get_ai_analysis(local_standards, target_standards, industry_name, weak_answers,
+def get_ai_analysis(local_standards, target_standards, industry_name,
+                    weak_answers, db_weak_questions=None,
                     company_context='', readiness=None, language='uz'):
-    client = Groq(api_key=os.environ.get('GROQ_API_KEY'), timeout=settings.AI_TIMEOUT, max_retries=1)
+    """Gap tahlil qiladi.
 
-    # ── Bazadan standart ma'lumotlarini olish ──────────────────────────────────
-    def std_block(standards, label):
-        lines = [f"=== {label} ==="]
-        for s in standards:
-            lines.append(f"Kod: {s.code}")
-            lines.append(f"Rasmiy nom: {s.name}")
-            if s.description:
-                lines.append(f"Tavsif: {s.description[:400]}")
-            lines.append("")
-        return "\n".join(lines)
+    Arxitektura — aniqlik uchun:
+    - GAP NOMI: DB'dan (Question.text) — AI ixtiro qilmaydi
+    - GAP PRIORITET: javob va clause bo'yicha hisoblangan
+    - AI ROLI: har gap uchun 2-3 jumla izoh + roadmap qadamlari
+    """
+    from decimal import Decimal
 
-    local_block = std_block(local_standards, "MAHALLIY STANDARTLAR (bazadan)")
-    target_block = std_block(target_standards, "MAQSADLI STANDARTLAR (bazadan)")
+    # ── 1. GAP'LARNI BAZADAN QURISH ──────────────────────────────────────────
+    # Agar db_weak_questions bo'lsa (yangi oqim), gaplarni bazadan quramiz
+    if db_weak_questions:
+        def _priority_from_clause(clause, answer):
+            """Clause va javob bo'yicha prioritet."""
+            clause_lower = (clause or '').lower()
+            if answer == 'no':
+                # Rahbariyat, siyosat, qonuniy talablar → critical
+                if any(k in clause_lower for k in ['policy', 'leadership', 'legal', 'management', '5.1', '5.2', '6.1']):
+                    return 'critical'
+                return 'high'
+            else:  # partial
+                if any(k in clause_lower for k in ['audit', 'review', 'monitoring']):
+                    return 'medium'
+                return 'medium'
 
-    # ── Bazadagi talablar (savollar = standart clauses) ──────────────────────
-    from analysis.models import Question
-    db_questions = Question.objects.filter(
-        standard__in=target_standards, is_active=True
-    ).select_related('standard').values('text', 'clause', 'standard__code')[:30]
-
-    if db_questions:
-        clauses_lines = ["=== STANDART TALABLARI (rasmiy baza) ==="]
-        for q in db_questions:
-            clause = q['clause'] or ''
-            clauses_lines.append(f"[{q['standard__code']}] {clause}: {q['text']}")
-        clauses_block = "\n".join(clauses_lines)
+        structured_gaps = []
+        for question, answer in db_weak_questions:
+            priority = _priority_from_clause(question.help_text, answer)
+            structured_gaps.append({
+                'title': question.text,           # DB'dan — o'zgarmas
+                'clause': question.help_text or '',
+                'standard': question.standard.code if question.standard else '',
+                'answer': 'Yo\'q' if answer == 'no' else 'Qisman',
+                'priority': priority,
+            })
     else:
-        clauses_block = ""
+        structured_gaps = []
 
-    weak_text = '\n'.join([f"- {q}: {a}" for q, a in weak_answers]) if weak_answers else "Aniqlanmadi"
     lang_rule = AI_LANG_INSTRUCTION.get(language, AI_LANG_INSTRUCTION['uz'])
-    context_block = f"\nKorxona ma'lumotlari:\n{company_context}\n" if company_context else ""
-    readiness_block = f"\nKorxonaning hozirgi tayyorlik darajasi: {readiness}%\n" if readiness is not None else ""
+    context_block = f"Korxona ma'lumotlari:\n{company_context}\n" if company_context else ""
+    readiness_block = f"Korxonaning hozirgi tayyorlik darajasi: {readiness}%\n" if readiness is not None else ""
 
-    prompt = f"""Sen standartlar bo'yicha mutaxassisson. Quyida rasmiy baza ma'lumotlari berilgan.
+    local_codes = ', '.join([s.code for s in local_standards])
+    target_codes = ', '.join([s.code for s in target_standards])
 
-QOIDA: Faqat quyidagi rasmiy bazadan olingan ma'lumotlarga asoslan.
-O'zingdan standart talablari to'qib chiqarma. Baza — birlamchi manba.
+    # Standart tavsiflarini bazadan olish
+    target_descs = []
+    for s in target_standards:
+        if s.description:
+            target_descs.append(f"- {s.code}: {s.description[:300]}")
+    std_context = "\n".join(target_descs) if target_descs else ""
 
-{local_block}
-{target_block}
-{clauses_block}
+    # ── 2. AI PROMPTI — FAQAT IZOH VA ROADMAP ────────────────────────────────
+    if structured_gaps:
+        gaps_for_ai = "\n".join([
+            f"{i+1}. [{g['standard']}] {g['clause']}\n   Savol: {g['title']}\n   Javob: {g['answer']}"
+            for i, g in enumerate(structured_gaps)
+        ])
+
+        prompt = f"""Sen sertifikatlash bo'yicha maslahatchi. Korxona quyidagi savollarga "Yo'q" yoki "Qisman" javob berdi.
+Bu savollar {target_codes} standartidan — rasmiy baza.
 
 Soha: {industry_name}
-{context_block}{readiness_block}
-Korxonada aniqlangan kamchiliklar (faqat "Yo'q" va "Qisman" javoblar):
-{weak_text}
+Mahalliy standart: {local_codes}
+Maqsad: {target_codes}
+{readiness_block}{context_block}
+{std_context}
 
-MUHIM: Yuqoridagi rasmiy baza ma'lumotlari va aniqlanган kamchiliklarga asoslanib gap tahlil qil.
-Faqat bazadagi talablardan kelib chiqqan gaplar ko'rsat. Tavsiyalarni korxona hajmiga moslab ber.
+ANIQLANGAN GAP'LAR (bazadan, o'zgartirilmaydi):
+{gaps_for_ai}
+
 {lang_rule}
 
-Quyidagi formatda JSON javob ber (boshqa hech narsa yozma, faqat JSON):
+HAR BIR GAP UCHUN qisqa, amaliy izoh yoz (2-3 jumla). Keyin umumiy roadmap qadamlarini ber.
+
+JSON (boshqa hech narsa yozma):
 {{
-    "gaps": [
-        {{
-            "title": "Gap nomi",
-            "description": "Batafsil tavsif",
-            "priority": "critical",
-            "estimated_days": 30
-        }}
-    ],
-    "total_days": 180,
-    "estimated_cost": 3000,
-    "cost_breakdown": {{"consulting": 2000, "certification_body": 1000}},
-    "roadmap_steps": [
-        {{
-            "order": 1,
-            "title": "Qadam nomi (qisqa, aniq)",
-            "description": "Batafsil: 1) nima qilinadi (aniq harakatlar ro'yxati), 2) qaysi hujjatlar tayyorlanadi, 3) kutilgan natija. Kamida 3-4 jumla, amaliy.",
-            "deliverables": ["Tayyorlanadigan hujjat yoki natija 1", "natija 2"],
-            "duration_days": 30
-        }}
-    ],
-    "summary": "Umumiy tavsif"
+  "gap_descriptions": [
+    {{
+      "index": 1,
+      "description": "Nima uchun muhim va qanday tuzatish — 2-3 jumla, amaliy",
+      "estimated_days": 21
+    }}
+  ],
+  "total_days": 90,
+  "estimated_cost": 2000,
+  "cost_breakdown": {{"consulting": 1500, "certification_body": 500}},
+  "roadmap_steps": [
+    {{
+      "order": 1,
+      "title": "Qadam nomi",
+      "description": "Nima qilinadi, qaysi hujjat, natija",
+      "deliverables": ["Hujjat 1", "Hujjat 2"],
+      "duration_days": 14
+    }}
+  ],
+  "summary": "Umumiy holat 2-3 jumlada"
 }}
 
-MUHIM QOIDALAR:
-- total_days: har bir gap uchun estimated_days larni qo'sh
-- estimated_cost: kichik korxona uchun $500-2000, o'rta uchun $2000-5000
-- cost_breakdown: estimated_cost ni konsalting va sertifikatsiya organi to'lovlariga ajrat
-- priority faqat shu qiymatlardan: critical, high, medium, low
-- roadmap_steps: 5-8 ta aniq, amaliy bosqich bo'lsin. Har bir description BATAFSIL bo'lsin (nima qilinadi, qaysi hujjat, qanday natija) — quruq bir jumla emas
-- deliverables: har qadamda 1-3 ta aniq tayyorlanadigan hujjat/natija
-- Agar kamchilik 1 ta bo'lsa, total_days 30-60 oralig'ida bo'lsin
-- Agar kamchilik yo'q bo'lsa (hamma Ha desa), gaps bo'sh bo'lsin"""
+QOIDALAR:
+- gap_descriptions soni aniqlangan gaplar soniga teng ({len(structured_gaps)} ta)
+- estimated_cost: kichik korxona $500-2000, o'rta $2000-5000
+- roadmap_steps: 4-7 ta aniq bosqich
+- O'zing yangi gap ixtiro qilma — faqat yuqoridagi ro'yxatga izoh yoz"""
 
+    else:
+        # Gap yo'q — korxona yaxshi holatda
+        weak_text = '\n'.join([f"- {q}: {a}" for q, a in weak_answers]) if weak_answers else "Barcha savollarga ijobiy javob berildi"
+        prompt = f"""Sen sertifikatlash bo'yicha maslahatchi.
+
+Soha: {industry_name}, Maqsad: {target_codes}
+{readiness_block}{context_block}
+Holat: {weak_text}
+
+{lang_rule}
+
+JSON:
+{{
+  "gap_descriptions": [],
+  "total_days": 30,
+  "estimated_cost": 1000,
+  "cost_breakdown": {{"consulting": 700, "certification_body": 300}},
+  "roadmap_steps": [
+    {{
+      "order": 1,
+      "title": "Hujjatlarni tekshirish",
+      "description": "Mavjud hujjatlarni standart talablariga muvofiqligini tekshirish",
+      "deliverables": ["Tekshiruv hisoboti"],
+      "duration_days": 14
+    }}
+  ],
+  "summary": "Korxona yaxshi holatda. Audit tayyor."
+}}"""
+
+    # ── 3. GROQ CHAQIRUVI ─────────────────────────────────────────────────────
+    client = Groq(api_key=os.environ.get('GROQ_API_KEY'), timeout=settings.AI_TIMEOUT, max_retries=1)
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
-        temperature=0.3,
+        temperature=0.2,  # Kamroq ijodkorlik = kamroq hallucination
         max_tokens=2000,
     )
+    ai_data = _extract_json(response.choices[0].message.content)
 
-    return _extract_json(response.choices[0].message.content)
+    # ── 4. GAP NOMLARINI BAZADAN OLIB, AI IZOHINI QO'SHISH ───────────────────
+    if structured_gaps:
+        desc_map = {}
+        for item in ai_data.get('gap_descriptions', []):
+            idx = item.get('index', 0)
+            if 1 <= idx <= len(structured_gaps):
+                desc_map[idx] = item
+
+        final_gaps = []
+        total_days_calc = 0
+        for i, gap in enumerate(structured_gaps, start=1):
+            ai_item = desc_map.get(i, {})
+            estimated_days = ai_item.get('estimated_days', 14 if gap['answer'] == 'Qisman' else 21)
+            total_days_calc += estimated_days
+            final_gaps.append({
+                'title': gap['title'],           # ← DB'dan, o'zgarmas
+                'description': ai_item.get('description', ''),
+                'priority': gap['priority'],     # ← DB'dan hisoblangan
+                'estimated_days': estimated_days,
+            })
+
+        ai_data['gaps'] = final_gaps
+        ai_data['total_days'] = ai_data.get('total_days') or total_days_calc
+    else:
+        ai_data['gaps'] = []
+
+    return ai_data
 
 
 @login_required
@@ -304,8 +379,15 @@ def _compute_readiness(question_answers):
 
 
 def _ai_background_task(analysis_id, local_ids, target_ids, industry_name, weak_answers,
-                        company_context='', readiness=None, language='uz'):
-    """AI tahlilni background threadda bajaradi."""
+                        company_context='', readiness=None, language='uz',
+                        weak_question_ids=None):
+    """AI tahlilni background threadda bajaradi.
+
+    Arxitektura:
+    - Gap nomlari → DB'dan (Question.text) — hech qachon AI to'qimaydi
+    - Gap prioritet → javob turiga qarab (no=yuqori, partial=o'rta)
+    - AI roli → faqat qisqa izoh va roadmap yozish
+    """
     import django
     django.db.close_old_connections()
     try:
@@ -313,8 +395,19 @@ def _ai_background_task(analysis_id, local_ids, target_ids, industry_name, weak_
         local_standards = Standard.objects.filter(pk__in=local_ids)
         target_standards = Standard.objects.filter(pk__in=target_ids)
 
+        # Zaif savollarga mos Question obyektlarini bazadan olamiz
+        db_weak_questions = []
+        if weak_question_ids:
+            for q_id, answer in weak_question_ids:
+                try:
+                    q = Question.objects.select_related('standard').get(pk=q_id)
+                    db_weak_questions.append((q, answer))
+                except Question.DoesNotExist:
+                    pass
+
         ai_result = get_ai_analysis(
-            local_standards, target_standards, industry_name, weak_answers,
+            local_standards, target_standards, industry_name,
+            weak_answers, db_weak_questions,
             company_context=company_context, readiness=readiness, language=language,
         )
 
@@ -389,12 +482,15 @@ def run_analysis(request, industry_id):
     local_standards = Standard.objects.filter(pk__in=local_ids)
     target_standards = Standard.objects.filter(pk__in=target_ids)
 
+    # Zaif javoblarni Question ID bilan birga saqlaymiz (baza birlamchi manba uchun)
     weak_answers = []
+    weak_question_ids = []
     for q_id, answer in question_answers.items():
         if answer in ['no', 'partial']:
             try:
                 question = Question.objects.get(pk=int(q_id))
                 weak_answers.append((question.text, 'Yo\'q' if answer == 'no' else 'Qisman'))
+                weak_question_ids.append((int(q_id), answer))
             except Question.DoesNotExist:
                 pass
 
@@ -426,8 +522,8 @@ def run_analysis(request, industry_id):
 
     thread = threading.Thread(
         target=_ai_background_task,
-        args=(analysis.pk, list(local_ids), list(target_ids), industry.name, weak_answers,
-              company_context, readiness, language),
+        args=(analysis.pk, list(local_ids), list(target_ids), industry.name,
+              weak_answers, company_context, readiness, language, weak_question_ids),
         daemon=True,
     )
     thread.start()
