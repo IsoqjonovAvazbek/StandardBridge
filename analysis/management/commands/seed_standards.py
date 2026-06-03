@@ -98,12 +98,12 @@ ISO_STANDARDS = [
         "ISO 50001:2018",
         "Energy management systems — Requirements with guidance for use",
         "2018",
-        "Ko'p soha (universal)",
+        "Elektrotexnika",
         "Energiya menejmenti tizimiga qo'yiladigan talablar. Energiya sarfini "
         "tizimli ravishda kamaytirish, energiya samaradorligini oshirish va "
         "issiqxona gazlari emissiyasini qisqartirish maqsadida. "
         "Birinchi nashr: 2011-yil; ikkinchi nashr: 2018-yil (kichik korxonalarga moslashtirilgan). "
-        "PDCA tsikliga asoslangan.",
+        "PDCA tsikliga asoslangan. Sanoat korxonalari, kommunal xizmatlar uchun.",
     ),
     (
         "ISO 13485:2016",
@@ -120,7 +120,7 @@ ISO_STANDARDS = [
         "ISO 31000:2018",
         "Risk management — Guidelines",
         "2018",
-        "Ko'p soha (universal)",
+        "Neft va gaz",
         "Risk menejmenti bo'yicha ko'rsatmalar. 2009-yilda birinchi marta nashr etilgan, "
         "2018-yilda qayta ko'rib chiqilgan (8 ta tamoyilga qisqartirilgan). "
         "82 mamlakatda milliy standart sifatida qabul qilingan. "
@@ -130,7 +130,7 @@ ISO_STANDARDS = [
         "ISO 22301:2019",
         "Security and resilience — Business continuity management systems — Requirements",
         "2019",
-        "Ko'p soha (universal)",
+        "Axborot texnologiyalari",
         "Biznes uzluksizligi menejmenti tizimiga qo'yiladigan talablar. "
         "Tashkilotlarga falokatlar, texnogen hodisalar va boshqa inqirozlarda "
         "faoliyatni davom ettirish imkonini beradi. "
@@ -140,7 +140,7 @@ ISO_STANDARDS = [
         "ISO 26000:2010",
         "Guidance on social responsibility",
         "2010",
-        "Ko'p soha (universal)",
+        "Qishloq xo'jaligi",
         "Ijtimoiy mas'uliyat bo'yicha ko'rsatmalar. 2010-yildan beri o'zgarmagan. "
         "Sertifikatlash uchun emas — tatbiq etish uchun. "
         "7 ta asosiy mavzu: tashkiliy boshqaruv, inson huquqlari, mehnat amaliyoti, "
@@ -150,7 +150,7 @@ ISO_STANDARDS = [
         "ISO 37001:2016",
         "Anti-bribery management systems — Requirements with guidance for use",
         "2016",
-        "Ko'p soha (universal)",
+        "Neft va gaz",
         "Korrupsiyaga qarshi menejmenti tizimiga qo'yiladigan talablar. "
         "2016-yil 15-oktabrda birinchi marta nashr etilgan. "
         "Tashkilotlarga pora berish va olishning oldini olish, "
@@ -172,7 +172,7 @@ ISO_STANDARDS = [
         "ISO/IEC 17025:2017",
         "General requirements for the competence of testing and calibration laboratories",
         "2017",
-        "Ko'p soha (universal)",
+        "Kimyo",
         "Sinov va kalibrlash laboratoriyalari kompetentligiga umumiy talablar. "
         "1999-yilda birinchi marta nashr etilgan; 2005 va 2017-yillarda yangilangan. "
         "Akkreditatsiya organlari (masalan ILAC a'zolari) tomonidan tatbiq etiladi. "
@@ -192,7 +192,7 @@ ISO_STANDARDS = [
         "ISO 28000:2022",
         "Security and resilience — Security management systems — Requirements",
         "2022",
-        "Ko'p soha (universal)",
+        "Mashinasozlik",
         "Ta'minot zanjiri xavfsizligi menejmenti tizimiga qo'yiladigan talablar. "
         "2007-yilda birinchi marta nashr etilgan; 2022-yilda kengaytirilgan "
         "(faqat ta'minot zanjiri emas, umumiy xavfsizlik). "
@@ -251,7 +251,7 @@ UZDST_STANDARDS = [
         "O'z DSt ISO 50001:2018",
         "Energiya menejmenti tizimlari — Talablar va qo'llash bo'yicha ko'rsatmalar",
         "2018",
-        "Ko'p soha (universal)",
+        "Elektrotexnika",
         "ISO 50001:2018 ning O'zbekiston milliy versiyasi. "
         "O'zbekistonda energiya tejamkorligi dasturlari doirasida qo'llaniladi. "
         "Yirik sanoat korxonalari va kommunal xizmatlar uchun. "
@@ -270,7 +270,7 @@ UZDST_STANDARDS = [
         "O'z DSt 687:2021",
         "Iste'mol tovarlarining sifatini baholash — Umumiy talablar",
         "2021",
-        "Ko'p soha (universal)",
+        "To'qimachilik",
         "O'zbekistonda iste'mol tovarlarining sifatini baholashga qo'yiladigan umumiy talablar. "
         "Mahalliy ishlab chiqaruvchilar uchun sifat nazoratining asosi. "
         "Iste'molchilarni himoya qilish qonunchiligi bilan bog'liq. "
@@ -300,7 +300,7 @@ UZDST_STANDARDS = [
         "O'z DSt ISO 17100:2016",
         "Tarjima xizmatlari — Tarjima xizmatlariga qo'yiladigan talablar",
         "2016",
-        "Ko'p soha (universal)",
+        "Axborot texnologiyalari",
         "Tarjima xizmatlarining sifatiga qo'yiladigan talablar. "
         "O'zbekistonda ko'p tillilik (o'zbek, rus, ingliz) kontekstida muhim. "
         "Hukumat va tijorat hujjatlar tarjimasida qo'llaniladi.",
@@ -329,7 +329,7 @@ UZDST_STANDARDS = [
         "O'z DSt ISO 22483:2020",
         "Turizm va tegishli xizmatlar — Mehmonxonalar — Xizmat ko'rsatish sifati talablari",
         "2020",
-        "Ko'p soha (universal)",
+        "Qishloq xo'jaligi",
         "Mehmonxona xizmatlarining sifatiga qo'yiladigan talablar. "
         "O'zbekistonda turizm sanoatining rivojlanishi bilan dolzarblashgan. "
         "ISO 22483:2020 asosida qabul qilingan. "
@@ -339,7 +339,7 @@ UZDST_STANDARDS = [
         "O'z DSt EN ISO 80000-1:2015",
         "Miqdorlar va birliklar — 1-qism: Umumiy qoidalar",
         "2015",
-        "Ko'p soha (universal)",
+        "Kimyo",
         "O'lchov birliklari va miqdorlar belgiolanishiga umumiy qoidalar. "
         "O'zbekistonda metrologiya tizimining asosi. "
         "Barcha texnik hujjatlar va ilmiy ishlar uchun majburiy. "
@@ -349,7 +349,7 @@ UZDST_STANDARDS = [
         "O'z DSt ISO/IEC 17021-1:2015",
         "Muvofiqlikni baholash — Menejmenti tizimlarini audit qilish va sertifikatlash organlari uchun talablar",
         "2015",
-        "Ko'p soha (universal)",
+        "Mashinasozlik",
         "Sertifikatlash organlari faoliyatiga qo'yiladigan talablar. "
         "O'zbekistonda sertifikatlash organlarining akkreditatsiyasi uchun asos. "
         "O'zAkk (O'zbekiston akkreditatsiya tizimi) tomonidan qo'llaniladi. "
@@ -397,7 +397,7 @@ GOST_STANDARDS = [
         "GOST 12.1.003-2014",
         "Система стандартов безопасности труда — Шум — Общие требования безопасности (Shovqin — Xavfsizlikka umumiy talablar)",
         "2014",
-        "Ko'p soha (universal)",
+        "Mashinasozlik",
         "Ishlab chiqarishdagi shovqin darajasiga qo'yiladigan xavfsizlik talablari. "
         "Sanoat korxonalarida shovqin normalarini belgilaydi. "
         "O'zbekiston mehnat xavfsizligi nazoratida qo'llaniladi. "
@@ -445,7 +445,7 @@ GOST_STANDARDS = [
         "GOST 7.1-2003",
         "Система стандартов по информации, библиотечному и издательскому делу — Библиографическая запись",
         "2003",
-        "Ko'p soha (universal)",
+        "Axborot texnologiyalari",
         "Bibliografik yozuv standarti. Kitoblar, maqolalar va boshqa nashrlar uchun. "
         "O'zbekiston kutubxona va nashriyot sohasida qo'llaniladi. "
         "SIBID tizimining asosi.",
@@ -454,7 +454,7 @@ GOST_STANDARDS = [
         "GOST 8.417-2002",
         "Государственная система обеспечения единства измерений — Единицы величин",
         "2002",
-        "Ko'p soha (universal)",
+        "Kimyo",
         "O'lchov birliklari davlat tizimi — kattaliklarning birliklari. "
         "SI tizimiga asoslangan CIS davlatlari uchun metrologiya standarti. "
         "O'zbekistonda Metrologiya qonunchiligi bilan bog'liq. "
@@ -483,7 +483,7 @@ GOST_STANDARDS = [
         "GOST R 56020-2014",
         "Бережливое производство — Основные положения и словарь (Tejamkor ishlab chiqarish — Asosiy qoidalar va lug'at)",
         "2014",
-        "Ko'p soha (universal)",
+        "Mashinasozlik",
         "Lean Production (Tejamkor ishlab chiqarish) — asosiy qoidalar va terminologiya. "
         "Toyota ishlab chiqarish tizimi (TPS) tamoyillariga asoslangan. "
         "Rossiya sanoatida keng joriy etilmoqda; O'zbekiston korxonalarida qo'llanila boshlandi. "
@@ -565,7 +565,7 @@ class Command(BaseCommand):
                     created += 1
                     self.stdout.write(f'  ✓ {code}')
                 else:
-                    # Mavjud bo'lsa ham ma'lumotni yangilash
+                    # Mavjud bo'lsa ham barcha ma'lumotni yangilash
                     changed = False
                     if obj.name != name:
                         obj.name = name
@@ -575,6 +575,9 @@ class Command(BaseCommand):
                         changed = True
                     if obj.version != version:
                         obj.version = version
+                        changed = True
+                    if obj.industry_id != industry.pk:
+                        obj.industry = industry
                         changed = True
                     if changed:
                         obj.save()
