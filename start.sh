@@ -11,6 +11,7 @@ python manage.py collectstatic --noinput
 
 echo "==> Boshlang'ich ma'lumotlar (idempotent)..."
 python manage.py seed_data
+python manage.py seed_standards
 python manage.py seed_questions
 python manage.py load_checklist
 python manage.py load_expert_templates
