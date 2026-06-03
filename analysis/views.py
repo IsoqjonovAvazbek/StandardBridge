@@ -293,6 +293,18 @@ def entrepreneur_dashboard(request):
         status__in=['pending', 'in_progress'],
     ).order_by('-created_at')
 
+    # Readiness trend grafigi uchun (oxirgi 6 ta completed tahlil, eskidan yangi tartibda)
+    trend_analyses = list(analyses.order_by('created_at')[:6])
+    readiness_trend = []
+    for a in trend_analyses:
+        answers_map = {str(ans.question_id): ans.answer for ans in a.answers.all()}
+        r = _compute_readiness(answers_map)
+        readiness_trend.append({
+            'label': f"{a.target_standard.code if a.target_standard else '#'+str(a.pk)} ({a.created_at.strftime('%d.%m')})",
+            'value': r if r is not None else 0,
+        })
+
+    import json
     context = {
         'analyses': analyses,
         'pending_analyses': pending_analyses,
@@ -302,6 +314,8 @@ def entrepreneur_dashboard(request):
         'negotiating_projects': negotiating_projects,
         'active_projects': active_projects,
         'completed_projects': completed_projects,
+        'readiness_trend_json': json.dumps(readiness_trend),
+        'show_trend': len(readiness_trend) >= 2,
     }
     return render(request, 'analysis/entrepreneur_dashboard.html', context)
 @login_required
@@ -491,6 +505,13 @@ def _ai_background_task(analysis_id, local_ids, target_ids, industry_name, weak_
         # Remove any orphaned expert-less projects for this analysis
         Project.objects.filter(analysis=analysis, expert__isnull=True).delete()
 
+        # Tahlil tayyor — tadbirkorga email yuborish
+        try:
+            from experts.emails import send_analysis_ready_email
+            send_analysis_ready_email(analysis)
+        except Exception:
+            pass  # Email xatosi asosiy jarayonni to'xtatmasin
+
     except Exception as e:
         logger.exception('AI tahlil xatosi (analysis_id=%s): %s', analysis_id, e)
         try:
@@ -658,9 +679,17 @@ def analysis_detail(request, pk):
     answers = analysis.answers.select_related('question').all()
 
     from accounts.models import ExpertProfile
-    experts = ExpertProfile.objects.filter(
-        is_available=True, is_verified=True
-    ).select_related('user')
+    # Standartga mos top-3 ekspert (specializations ichida standart kodi bor)
+    std_code = (analysis.target_standard.code if analysis.target_standard else '').strip()
+    matched_experts = ExpertProfile.objects.filter(
+        is_available=True, is_verified=True,
+        specializations__icontains=std_code.split()[0] if std_code else 'ISO',
+    ).select_related('user').order_by('-rating')[:3]
+    # Agar mos ekspert kam bo'lsa, rating bo'yicha to'ldiramiz
+    if matched_experts.count() < 3:
+        matched_experts = ExpertProfile.objects.filter(
+            is_available=True, is_verified=True,
+        ).select_related('user').order_by('-rating')[:3]
 
     # Check if user has accepted the current disclaimer version
     needs_disclaimer = not DisclaimerAcceptance.objects.filter(
@@ -700,6 +729,19 @@ def analysis_detail(request, pk):
     gaps_total = len(gaps)
     resolved_pct = int(resolved_count / gaps_total * 100) if gaps_total else 0
 
+    # Gap prioritetiga qarab narx va muddat taxmini
+    cost_per_gap = {'critical': 400, 'high': 250, 'medium': 150, 'low': 80}
+    days_per_gap  = {'critical': 30,  'high': 21,  'medium': 14,  'low': 7}
+    smart_cost = sum(cost_per_gap.get(g.priority, 150) for g in gaps)
+    smart_days = sum(days_per_gap.get(g.priority, 14) for g in gaps)
+    # Boshlang'ich xarajat (consulting + sertifikatsiya organi)
+    smart_cost_min = int(smart_cost * 0.8)
+    smart_cost_max = int(smart_cost * 1.3)
+
+    # Sertifikatlash sanasi taxmini
+    from datetime import date, timedelta
+    cert_date = (date.today() + timedelta(days=smart_days)).strftime('%d.%m.%Y') if smart_days else None
+
     # Standart kodini expert filter uchun aniqlash (ISO 9001 → iso9001)
     standard_code_map = {
         'iso 9001': 'iso9001', 'iso9001': 'iso9001',
@@ -717,7 +759,7 @@ def analysis_detail(request, pk):
         'analysis': analysis,
         'gaps': gaps,
         'answers': answers,
-        'experts': experts,
+        'experts': matched_experts,
         'summary': analysis.ai_result.get('summary', '') if analysis.ai_result else '',
         'needs_disclaimer': needs_disclaimer,
         'readiness': readiness,
@@ -729,6 +771,11 @@ def analysis_detail(request, pk):
         'gaps_total': gaps_total,
         'resolved_pct': resolved_pct,
         'expert_standard_filter': expert_standard_filter,
+        'matched_experts': matched_experts,
+        'smart_cost_min': smart_cost_min,
+        'smart_cost_max': smart_cost_max,
+        'smart_days': smart_days,
+        'cert_date': cert_date,
     }
     return render(request, 'analysis/analysis_detail.html', context)
 

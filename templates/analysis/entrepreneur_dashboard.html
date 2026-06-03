@@ -50,6 +50,15 @@
     </div>
     {% endif %}
 
+    <!-- Readiness trend grafigi -->
+    {% if show_trend %}
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 mb-8">
+        <h2 class="font-bold text-gray-900 mb-1">📈 Tayyorlik o'sishi</h2>
+        <p class="text-sm text-gray-500 mb-4">Tahlillar bo'yicha tayyorlik foizining dinamikasi</p>
+        <canvas id="readinessTrendChart" height="100"></canvas>
+    </div>
+    {% endif %}
+
     <!-- F-3: Narx belgilanishini kutayotgan loyihalar -->
     {% if pending_projects %}
     <div class="mb-8">
@@ -287,4 +296,41 @@
     </div>
     {% endif %}
 </div>
+
+{% if show_trend %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+    var raw = {{ readiness_trend_json|safe }};
+    var labels = raw.map(function(d){ return d.label; });
+    var values = raw.map(function(d){ return d.value; });
+    var ctx = document.getElementById('readinessTrendChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Tayyorlik %',
+                data: values,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59,130,246,0.08)',
+                borderWidth: 2,
+                pointBackgroundColor: '#3b82f6',
+                pointRadius: 5,
+                tension: 0.3,
+                fill: true,
+            }]
+        },
+        options: {
+            scales: {
+                y: { min: 0, max: 100, ticks: { callback: function(v){ return v+'%'; } } }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+})();
+</script>
+{% endblock %}
+{% endif %}
 {% endblock %}

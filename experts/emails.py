@@ -226,6 +226,36 @@ StandartBridge jamoasi""",
     )
 
 
+def send_analysis_ready_email(analysis):
+    """Gap-tahlil tayyor bo'lganda tadbirkorga email."""
+    user = analysis.entrepreneur
+    gap_count = analysis.gaps.count()
+    std = analysis.target_standard.code if analysis.target_standard else '—'
+    readiness_line = ''
+    if analysis.ai_result:
+        total_days = analysis.ai_result.get('total_days', 0)
+        if total_days:
+            readiness_line = f"\nTaxminiy tayyorgarlik muddati: {total_days} kun"
+    _send(
+        subject=f"Gap-tahlil tayyor — {std} | StandartBridge",
+        message=f"""Assalomu alaykum, {user.get_full_name()}!
+
+{std} standarti bo'yicha gap-tahlilingiz tayyor.
+
+Natijalar:
+- Aniqlangan gaplar: {gap_count} ta{readiness_line}
+
+To'liq hisobot va yo'l-xaritani ko'rish uchun:
+http://standartbridge.up.railway.app/analysis/{analysis.pk}/
+
+Keyingi qadam — mos mutaxassis topib, loyiha boshlash.
+
+Hurmat bilan,
+StandartBridge jamoasi""",
+        to_email=user.email,
+    )
+
+
 def send_dispute_resolved(dispute, decision):
     """Admin nizoni hal qilganda ikki tomonga ham xabar."""
     project = dispute.project
