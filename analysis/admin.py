@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Standard, GapAnalysis, GapItem, Roadmap, RoadmapStep, Industry, Question, QuestionAnswer
+from .models import Standard, GapAnalysis, GapItem, Roadmap, RoadmapStep, Industry, Question, QuestionAnswer, StandardRoadmapStep
 
 
 @admin.register(Industry)
@@ -51,3 +51,12 @@ class RoadmapAdmin(admin.ModelAdmin):
 class RoadmapStepAdmin(admin.ModelAdmin):
     list_display = ['title', 'roadmap', 'order', 'duration_days', 'is_completed']
     list_filter = ['is_completed']
+
+
+@admin.register(StandardRoadmapStep)
+class StandardRoadmapStepAdmin(admin.ModelAdmin):
+    list_display = ['standard', 'order', 'title', 'duration_days', 'is_active']
+    list_filter = ['standard', 'is_active']
+    list_editable = ['order', 'duration_days', 'is_active']
+    search_fields = ['title', 'description']
+    ordering = ['standard', 'order']

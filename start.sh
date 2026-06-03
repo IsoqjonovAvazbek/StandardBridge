@@ -16,6 +16,7 @@ python manage.py seed_questions
 python manage.py load_checklist
 python manage.py load_expert_templates
 python manage.py seed_experts
+python manage.py seed_roadmap_steps
 python manage.py create_admin
 
 echo "==> Gunicorn ishga tushmoqda..."

@@ -96,12 +96,41 @@ def get_ai_analysis(local_standards, target_standards, industry_name,
             target_descs.append(f"- {s.code}: {s.description[:300]}")
     std_context = "\n".join(target_descs) if target_descs else ""
 
-    # ── 2. AI PROMPTI — FAQAT IZOH VA ROADMAP ────────────────────────────────
+    # ── 2. ROADMAP QADAMLARINI BAZADAN OLISH (promptdan oldin) ───────────────
+    from analysis.models import StandardRoadmapStep
+    db_roadmap_steps = []
+    for std in target_standards:
+        steps = StandardRoadmapStep.objects.filter(
+            standard=std, is_active=True
+        ).order_by('order')
+        if steps.exists():
+            db_roadmap_steps = list(steps)
+            break
+
+    has_db_roadmap = len(db_roadmap_steps) > 0
+
+    # ── 3. AI PROMPTI — FAQAT IZOH VA SUMMARY ────────────────────────────────
     if structured_gaps:
         gaps_for_ai = "\n".join([
             f"{i+1}. [{g['standard']}] {g['clause']}\n   Savol: {g['title']}\n   Javob: {g['answer']}"
             for i, g in enumerate(structured_gaps)
         ])
+
+        if has_db_roadmap:
+            roadmap_json_block = ""
+            roadmap_rule = "- roadmap_steps ni YOZMA — bazadan keladi, sen tegma"
+        else:
+            roadmap_json_block = """,
+  "roadmap_steps": [
+    {{
+      "order": 1,
+      "title": "Qadam nomi",
+      "description": "Nima qilinadi, qaysi hujjat, natija",
+      "deliverables": ["Hujjat 1", "Hujjat 2"],
+      "duration_days": 14
+    }}
+  ]"""
+            roadmap_rule = "- roadmap_steps: 4-7 ta aniq bosqich"
 
         prompt = f"""Sen sertifikatlash bo'yicha maslahatchi. Korxona quyidagi savollarga "Yo'q" yoki "Qisman" javob berdi.
 Bu savollar {target_codes} standartidan — rasmiy baza.
@@ -117,7 +146,7 @@ ANIQLANGAN GAP'LAR (bazadan, o'zgartirilmaydi):
 
 {lang_rule}
 
-HAR BIR GAP UCHUN qisqa, amaliy izoh yoz (2-3 jumla). Keyin umumiy roadmap qadamlarini ber.
+HAR BIR GAP UCHUN qisqa, amaliy izoh yoz (2-3 jumla).
 
 JSON (boshqa hech narsa yozma):
 {{
@@ -130,28 +159,36 @@ JSON (boshqa hech narsa yozma):
   ],
   "total_days": 90,
   "estimated_cost": 2000,
-  "cost_breakdown": {{"consulting": 1500, "certification_body": 500}},
-  "roadmap_steps": [
-    {{
-      "order": 1,
-      "title": "Qadam nomi",
-      "description": "Nima qilinadi, qaysi hujjat, natija",
-      "deliverables": ["Hujjat 1", "Hujjat 2"],
-      "duration_days": 14
-    }}
-  ],
+  "cost_breakdown": {{"consulting": 1500, "certification_body": 500}}{roadmap_json_block},
   "summary": "Umumiy holat 2-3 jumlada"
 }}
 
 QOIDALAR:
 - gap_descriptions soni aniqlangan gaplar soniga teng ({len(structured_gaps)} ta)
 - estimated_cost: kichik korxona $500-2000, o'rta $2000-5000
-- roadmap_steps: 4-7 ta aniq bosqich
+- {roadmap_rule}
 - O'zing yangi gap ixtiro qilma — faqat yuqoridagi ro'yxatga izoh yoz"""
 
     else:
         # Gap yo'q — korxona yaxshi holatda
         weak_text = '\n'.join([f"- {q}: {a}" for q, a in weak_answers]) if weak_answers else "Barcha savollarga ijobiy javob berildi"
+
+        if has_db_roadmap:
+            roadmap_json_block = ""
+            roadmap_note = ""
+        else:
+            roadmap_json_block = """,
+  "roadmap_steps": [
+    {{
+      "order": 1,
+      "title": "Hujjatlarni tekshirish",
+      "description": "Mavjud hujjatlarni standart talablariga muvofiqligini tekshirish",
+      "deliverables": ["Tekshiruv hisoboti"],
+      "duration_days": 14
+    }}
+  ]"""
+            roadmap_note = ""
+
         prompt = f"""Sen sertifikatlash bo'yicha maslahatchi.
 
 Soha: {industry_name}, Maqsad: {target_codes}
@@ -165,30 +202,20 @@ JSON:
   "gap_descriptions": [],
   "total_days": 30,
   "estimated_cost": 1000,
-  "cost_breakdown": {{"consulting": 700, "certification_body": 300}},
-  "roadmap_steps": [
-    {{
-      "order": 1,
-      "title": "Hujjatlarni tekshirish",
-      "description": "Mavjud hujjatlarni standart talablariga muvofiqligini tekshirish",
-      "deliverables": ["Tekshiruv hisoboti"],
-      "duration_days": 14
-    }}
-  ],
+  "cost_breakdown": {{"consulting": 700, "certification_body": 300}}{roadmap_json_block},
   "summary": "Korxona yaxshi holatda. Audit tayyor."
 }}"""
 
-    # ── 3. GROQ CHAQIRUVI ─────────────────────────────────────────────────────
     client = Groq(api_key=os.environ.get('GROQ_API_KEY'), timeout=settings.AI_TIMEOUT, max_retries=1)
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
-        temperature=0.2,  # Kamroq ijodkorlik = kamroq hallucination
-        max_tokens=2000,
+        temperature=0.2,
+        max_tokens=1500,
     )
     ai_data = _extract_json(response.choices[0].message.content)
 
-    # ── 4. GAP NOMLARINI BAZADAN OLIB, AI IZOHINI QO'SHISH ───────────────────
+    # ── 5. GAP NOMLARINI BAZADAN OLIB, AI IZOHINI QO'SHISH ───────────────────
     if structured_gaps:
         desc_map = {}
         for item in ai_data.get('gap_descriptions', []):
@@ -213,6 +240,22 @@ JSON:
         ai_data['total_days'] = ai_data.get('total_days') or total_days_calc
     else:
         ai_data['gaps'] = []
+
+    # ── 6. ROADMAP DB'DAN (AI TEGMAYDI) ──────────────────────────────────────
+    if has_db_roadmap:
+        ai_data['roadmap_steps'] = [
+            {
+                'order': step.order,
+                'title': step.title,                  # ← DB'dan, o'zgarmas
+                'description': step.description,     # ← DB'dan, o'zgarmas
+                'deliverables': step.deliverables,   # ← DB'dan, o'zgarmas
+                'duration_days': step.duration_days, # ← DB'dan, o'zgarmas
+            }
+            for step in db_roadmap_steps
+        ]
+        ai_data['total_days'] = ai_data.get('total_days') or sum(
+            s.duration_days for s in db_roadmap_steps
+        )
 
     return ai_data
 

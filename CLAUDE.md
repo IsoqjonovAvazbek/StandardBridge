@@ -130,7 +130,14 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 ### Tahlil jonli ish maydoni (2-daraja, real test)
 - [x] gap_toggle_resolved view (/analysis/<pk>/gap/<gap_pk>/toggle/) — GapItem.is_resolved AJAX toggle (avval ishlatilmas edi). analysis_detail.html: har gap yonida checkbox, line-through, progress bar (resolved_count/gaps_total/resolved_pct), begona user 404. gap_resolved_label/gap_mark_resolved tarjimalar (UZ/RU/EN)
 
-### Avtomatlashtirilgan testlar (Django TestCase, 36 ta test — hammasi OK)
+### Roadmap qadamlari bazadan (AI tegmaydi)
+- [x] StandardRoadmapStep model (Standard FK, order, title, description, deliverables JSONField, duration_days, is_active). migration 0007
+- [x] seed_roadmap_steps management command: ISO 9001/14001/45001/22000 uchun jami 163 ta tayyor qadam bazaga yuklandi (idempotent)
+- [x] get_ai_analysis: DB roadmap yuklash promptdan OLDIN bajariladi. has_db_roadmap=True bo'lsa prompt JSON shablonidan roadmap_steps bloki olib tashlanadi va AI ga "sen tegma" qoidasi yoziladi. AI faqat gap izohlari + summary yozadi
+- [x] StandardRoadmapStep Django admin ga qo'shildi (list_editable: order/duration_days/is_active)
+- [x] start.sh ga seed_roadmap_steps qo'shildi (Railway Postgres da ham yuklangani uchun)
+
+### Avtomatlashtirilgan testlar (Django TestCase, 60 ta test — hammasi OK)
 - [x] accounts/tests.py (9): register validatsiya (bo'sh ism crash yo'q, parol >=8, password2, dublikat, noto'g'ri rol), login
 - [x] experts/tests.py (7): hamyon pul yechish (rezerv, balansdan ko'p rad, harf=crash yo'q, kartasiz rad), admin tasdiqlash/rad (refund)
 - [x] qms/tests.py (8): NC kod generatsiya + increment, bo'sh forma silent-fail yo'q, overdue property, CSV eksport, hujjat muddati

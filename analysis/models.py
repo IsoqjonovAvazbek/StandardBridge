@@ -46,6 +46,23 @@ class Standard(models.Model):
         return f"{self.code} — {self.name}"
 
 
+class StandardRoadmapStep(models.Model):
+    """Standart uchun tayyor roadmap qadami — bazadan, AI tegmaydi."""
+    standard = models.ForeignKey(Standard, on_delete=models.CASCADE, related_name='roadmap_template_steps')
+    order = models.IntegerField(default=1)
+    title = models.CharField(max_length=300)
+    description = models.TextField()
+    deliverables = models.JSONField(default=list)
+    duration_days = models.IntegerField(default=14)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['standard', 'order']
+
+    def __str__(self):
+        return f"{self.standard.code} — {self.order}. {self.title}"
+
+
 class GapAnalysis(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Kutilmoqda'),
