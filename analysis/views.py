@@ -230,7 +230,7 @@ JSON:
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.2,
-        max_tokens=1500,
+        max_tokens=2500,
     )
     ai_data = _extract_json(response.choices[0].message.content)
 
@@ -637,9 +637,11 @@ def _relaunch_analysis(analysis):
     """Re-run the AI task for an existing analysis using its saved data (for retry)."""
     answers = {str(a.question_id): a.answer for a in analysis.answers.all()}
     weak_answers = []
+    weak_question_ids = []
     for a in analysis.answers.select_related('question').all():
         if a.answer in ('no', 'partial'):
             weak_answers.append((a.question.text, 'Yo\'q' if a.answer == 'no' else 'Qisman'))
+            weak_question_ids.append((a.question_id, a.answer))
     readiness = _compute_readiness(answers)
     local_ids = [analysis.local_standard_id] if analysis.local_standard_id else []
     target_ids = [analysis.target_standard_id] if analysis.target_standard_id else []
@@ -649,14 +651,13 @@ def _relaunch_analysis(analysis):
     analysis.status = 'in_progress'
     analysis.ai_result = None
     analysis.save(update_fields=['status', 'ai_result'])
-    # Clear any partial previous results
     analysis.gaps.all().delete()
     Roadmap.objects.filter(analysis=analysis).delete()
 
     thread = threading.Thread(
         target=_ai_background_task,
         args=(analysis.pk, local_ids, target_ids, industry_name, weak_answers,
-              analysis.company_info or '', readiness, language),
+              analysis.company_info or '', readiness, language, weak_question_ids),
         daemon=True,
     )
     thread.start()
