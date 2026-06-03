@@ -29,5 +29,6 @@ urlpatterns = [
     path('crm/add/', views.crm_add, name='crm_add'),
     path('crm/<int:pk>/', views.crm_detail, name='crm_detail'),
     path('crm/<int:pk>/update/', views.crm_update, name='crm_update'),
+    path('crm/<int:pk>/delete/', views.crm_delete, name='crm_delete'),
     path('crm/<int:pk>/note/', views.crm_add_note, name='crm_add_note'),
 ]

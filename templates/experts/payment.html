@@ -158,21 +158,17 @@
         </a>
         {% endif %}
 
-        <!-- Mock (test rejim) -->
+        {% if debug %}
+        <!-- Mock to'lov: faqat DEBUG rejimida -->
         <form method="POST" action="{% url 'payment_confirm' project.pk %}">
             {% csrf_token %}
             <button type="submit"
-                class="w-full border-2 border-gray-300 text-gray-700 py-4 rounded-xl font-bold text-lg hover:bg-gray-50 transition flex items-center justify-center gap-3">
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                Test rejim (mock to'lov)
+                onclick="return confirm('⚠️ TEST REJIM: Haqiqiy pul o\'tkazilmaydi. Davom etasizmi?')"
+                class="w-full border-2 border-dashed border-orange-300 text-orange-600 py-3 rounded-xl font-medium text-sm hover:bg-orange-50 transition flex items-center justify-center gap-2">
+                🧪 Test rejim (mock to'lov — faqat dev uchun)
             </button>
         </form>
-
-        <p class="text-center text-gray-400 text-xs pt-1">
-            Click sozlanmagan bo'lsa test rejim ishlatiladi
-        </p>
+        {% endif %}
     </div>
     {% endif %}
 </div>

@@ -514,6 +514,16 @@ def crm_update(request, pk):
 
 
 @expert_required
+def crm_delete(request, pk):
+    client = get_object_or_404(ClientCRM, pk=pk, expert=request.user)
+    if request.method == 'POST':
+        client.delete()
+        messages.success(request, 'Mijoz CRM\'dan o\'chirildi.')
+        return redirect('crm_list')
+    return redirect('crm_detail', pk=pk)
+
+
+@expert_required
 def crm_add_note(request, pk):
     client = get_object_or_404(ClientCRM, pk=pk, expert=request.user)
     if request.method == 'POST':

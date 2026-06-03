@@ -4,11 +4,21 @@
 {% block content %}
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-  <!-- Breadcrumb -->
-  <div class="flex items-center gap-2 mb-6 text-sm text-gray-400">
-    <a href="{% url 'crm_list' %}" class="hover:text-gray-600">{{ T.et_crm_list }}</a>
-    <span>›</span>
-    <span class="text-gray-600">{{ client.company_name }}</span>
+  <!-- Breadcrumb + O'chirish -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-2 text-sm text-gray-400">
+      <a href="{% url 'crm_list' %}" class="hover:text-gray-600">{{ T.et_crm_list }}</a>
+      <span>›</span>
+      <span class="text-gray-600">{{ client.company_name }}</span>
+    </div>
+    <form method="post" action="{% url 'crm_delete' client.pk %}">
+      {% csrf_token %}
+      <button type="submit"
+        onclick="return confirm('{{ client.company_name }} ni CRM\'dan o\'chirasizmi? Bu amal qaytarib bo\'lmaydi.')"
+        class="text-xs text-red-400 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg transition">
+        🗑 O'chirish
+      </button>
+    </form>
   </div>
 
   <div class="grid lg:grid-cols-3 gap-6">

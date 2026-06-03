@@ -232,10 +232,12 @@
                         <input type="text" name="admin_note" placeholder="Izoh (ixtiyoriy)"
                             class="flex-1 px-2 py-1 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-400">
                         <button type="submit" name="action" value="approve"
+                            onclick="return confirm('Pul yechish so\'rovini tasdiqlaysizmi? Pul kartaga o\'tkaziladi.')"
                             class="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition">
                             ✓ Tasdiqlash
                         </button>
                         <button type="submit" name="action" value="reject"
+                            onclick="return confirm('So\'rovni rad etasizmi? Pul hamyonga qaytariladi.')"
                             class="text-xs bg-red-100 hover:bg-red-200 text-red-600 px-3 py-1.5 rounded-lg transition">
                             ✕ Rad
                         </button>
@@ -280,10 +282,12 @@
                         </div>
                         <div class="flex gap-2">
                             <button type="submit" name="status" value="resolved"
+                                onclick="return confirm('Nizoni hal qilingan deb belgilaysizmi? Pul harakati sodir bo\'ladi.')"
                                 class="flex-1 text-xs bg-green-500 hover:bg-green-600 text-white py-1.5 rounded-lg transition">
                                 ✓ Hal qilindi
                             </button>
                             <button type="submit" name="status" value="closed"
+                                onclick="return confirm('Nizoni yopasizmi?')"
                                 class="flex-1 text-xs bg-gray-400 hover:bg-gray-500 text-white py-1.5 rounded-lg transition">
                                 Yopish
                             </button>

@@ -682,6 +682,7 @@ def roadmap_step_toggle(request, pk, step_pk):
             'progress': progress,
             'completed': completed,
             'total': total,
+            'order': step.order,
         })
     return redirect('roadmap', pk=pk)
 

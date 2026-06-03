@@ -9,13 +9,24 @@
         <p class="text-gray-500 mt-1">{{ T.blog_subtitle }}</p>
     </div>
 
-    <!-- Kategoriyalar -->
+    <!-- Qidiruv + Kategoriyalar -->
+    <form method="get" action="" class="flex gap-2 mb-5 max-w-sm">
+        {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+        <input type="text" name="q" value="{{ search_q }}"
+            placeholder="{{ T.search_placeholder|default:'Qidirish...' }}"
+            class="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button type="submit"
+            class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90">
+            {{ T.search_btn|default:'Qidirish' }}
+        </button>
+    </form>
+
     {% if categories %}
     <div class="flex flex-wrap gap-2 mb-8">
         <a href="{% url 'blog_list' %}"
             class="px-4 py-1.5 rounded-full text-sm font-medium transition
             {% if not selected_category %}gradient-bg text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
-            {{ T.all_regions }}
+            {{ T.all_categories|default:'Hammasi' }}
         </a>
         {% for cat in categories %}
         <a href="?category={{ cat.slug }}"
@@ -104,16 +115,5 @@
     </div>
     {% endif %}
 
-    <!-- Qidiruv -->
-    <form method="get" action="" class="mt-6 flex gap-2 max-w-sm mx-auto">
-        {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
-        <input type="text" name="q" value="{{ search_q }}"
-            placeholder="Qidirish..."
-            class="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <button type="submit"
-            class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90">
-            Qidirish
-        </button>
-    </form>
 </div>
 {% endblock %}
