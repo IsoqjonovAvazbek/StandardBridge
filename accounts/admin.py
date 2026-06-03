@@ -61,7 +61,8 @@ class ExpertProfileAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Foydalanuvchi', {'fields': ('user',)}),
-        ('Profil', {'fields': ('bio', 'specializations', 'experience_years', 'region', 'phone', 'certificates')}),
+        ('Profil', {'fields': ('bio', 'specializations', 'standard_tags', 'experience_years', 'region', 'phone', 'certificates')}),
+        ('Sertifikat', {'fields': ('cert_number', 'issuing_body', 'cert_expiry')}),
         ('Narx va muddat', {'fields': ('project_price', 'completion_days', 'hourly_rate')}),
         ('Statistika', {'fields': ('rating', 'total_projects')}),
         ('Holat', {'fields': ('is_available', 'is_verified', 'verified_at')}),

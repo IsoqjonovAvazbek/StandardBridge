@@ -469,10 +469,16 @@ def admin_process_withdrawal(request, pk):
         return redirect('admin_panel')
 
     if action == 'approve':
-        wr.status = 'approved'
-        wr.admin_note = admin_note
-        wr.processed_at = timezone.now()
-        wr.save()
+        from django.db import transaction as _tx
+        with _tx.atomic():
+            wr_locked = WithdrawalRequest.objects.select_for_update().get(pk=wr.pk)
+            if wr_locked.status != 'pending':
+                messages.warning(request, 'Bu so\'rov allaqachon ko\'rib chiqilgan!')
+                return redirect('admin_panel')
+            wr_locked.status = 'approved'
+            wr_locked.admin_note = admin_note
+            wr_locked.processed_at = timezone.now()
+            wr_locked.save()
         Notification.objects.create(
             user=wr.wallet.user,
             title='Pul yechish tasdiqlandi!',
