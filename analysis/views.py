@@ -162,19 +162,25 @@ def select_industry(request):
 
 @login_required
 def select_standards(request, industry_id):
+    from django.db.models import Q
     industry = get_object_or_404(Industry, pk=industry_id)
-    local_standards = Standard.objects.filter(
-        type='local', is_active=True, industry=industry
-    )
-    target_standards = Standard.objects.filter(
-        type='international', is_active=True, industry=industry
-    )
+    # Universal ("Ko'p soha") standartlarni ham qo'shish
+    universal = Industry.objects.filter(name__icontains='universal').first()
+    local_q = Q(type='local', is_active=True, industry=industry)
+    if universal and universal != industry:
+        local_q |= Q(type='local', is_active=True, industry=universal)
+    local_standards = Standard.objects.filter(local_q).order_by('code')
+
+    intl_q = Q(type='international', is_active=True, industry=industry)
+    if universal and universal != industry:
+        intl_q |= Q(type='international', is_active=True, industry=universal)
+    target_standards = Standard.objects.filter(intl_q).order_by('code')
 
     if request.method == 'POST':
         local_ids = request.POST.getlist('local_standards')
         target_ids = request.POST.getlist('target_standards')
 
-        # Validate: only IDs from the current industry are allowed
+        # Validate: only IDs from available standards
         valid_local_pks = set(local_standards.values_list('pk', flat=True))
         valid_target_pks = set(target_standards.values_list('pk', flat=True))
         local_ids = [i for i in local_ids if i.isdigit() and int(i) in valid_local_pks]
@@ -209,6 +215,26 @@ def answer_questions(request, industry_id):
         standard__in=target_standards,
         is_active=True
     ).select_related('standard')
+
+    # UzDST/GOST standartlar uchun fallback: ISO kalit raqamiga qarab tegishli ISO savollarni olish
+    if not questions:
+        ISO_CODE_MAP = {
+            '9001': '9001', '14001': '14001', '45001': '45001',
+            '22000': '22000', '27001': '27001', '50001': '50001',
+        }
+        fallback_codes = []
+        for std in target_standards:
+            for key in ISO_CODE_MAP:
+                if key in std.code:
+                    iso_std = Standard.objects.filter(
+                        code__icontains=f'ISO {key}', type='international'
+                    ).first()
+                    if iso_std:
+                        fallback_codes.append(iso_std.pk)
+        if fallback_codes:
+            questions = Question.objects.filter(
+                standard__pk__in=fallback_codes, is_active=True
+            ).select_related('standard')
 
     if not questions:
         return redirect('run_analysis', industry_id=industry_id)

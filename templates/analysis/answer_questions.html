@@ -4,8 +4,17 @@
 {% block content %}
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-8">
-        <a href="{% url 'select_standards' industry.pk %}" class="text-blue-600 hover:underline text-sm">← Standartlar</a>
-        <h1 class="text-3xl font-bold text-gray-900 mt-2">Korxonangiz holati</h1>
+        <div class="flex items-center gap-2 text-sm text-gray-400 mb-3">
+            <a href="{% url 'select_industry' %}" class="hover:text-blue-600 transition">Soha</a>
+            <span>›</span>
+            <a href="{% url 'select_standards' industry.pk %}" class="hover:text-blue-600 transition">Standartlar</a>
+            <span>›</span>
+            <span class="text-gray-700 font-medium">Savollar</span>
+        </div>
+        <span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 text-sm font-semibold px-3 py-1 rounded-full border border-blue-200 mb-2">
+            {{ industry.name }}
+        </span>
+        <h1 class="text-3xl font-bold text-gray-900 mt-2">{{ T.ctx_company_context|default:"Korxonangiz holati" }}</h1>
         <p class="text-gray-600 mt-1">Har bir savolga halol javob bering — natija shuncha aniq bo'ladi</p>
     </div>
 
