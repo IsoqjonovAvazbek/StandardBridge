@@ -10,11 +10,13 @@ from .models import (
     DocumentTemplate, GeneratedDocument,
     AuditChecklist, AuditChecklistItem,
     ProjectTemplate, ClientCRM, CRMNote,
+    Proposal, TimeLog,
 )
-from experts.models import Project
+from experts.models import Project, Payment
 import os
 import json
 import logging
+from decimal import Decimal
 
 logger = logging.getLogger('standardbridge')
 
@@ -42,10 +44,17 @@ def expert_tools_dashboard(request):
     audits_count = AuditChecklist.objects.filter(expert=request.user).count()
     clients_count = ClientCRM.objects.filter(expert=request.user).count()
     active_clients = ClientCRM.objects.filter(expert=request.user, status='active').count()
+    proposals_count = Proposal.objects.filter(expert=request.user).count()
+
+    # Today's CRM follow-ups
+    today_followups = ClientCRM.objects.filter(
+        expert=request.user,
+        next_followup=today,
+    ).order_by('company_name')
 
     upcoming_followups = ClientCRM.objects.filter(
         expert=request.user,
-        next_followup__gte=today,
+        next_followup__gt=today,
         next_followup__lte=today + timedelta(days=7),
     ).order_by('next_followup')[:5]
 
@@ -53,13 +62,32 @@ def expert_tools_dashboard(request):
         expert=request.user
     ).order_by('-created_at')[:5]
 
+    # This month time logs
+    month_start = today.replace(day=1)
+    month_hours = sum(
+        t.hours for t in TimeLog.objects.filter(expert=request.user, date__gte=month_start)
+    ) or Decimal('0')
+
+    # This month released earnings
+    month_earnings = sum(
+        p.expert_amount for p in Payment.objects.filter(
+            project__expert=request.user,
+            status='released',
+            paid_at__date__gte=month_start,
+        ) if p.expert_amount
+    ) or Decimal('0')
+
     return render(request, 'expert_tools/dashboard.html', {
         'docs_count': docs_count,
         'audits_count': audits_count,
         'clients_count': clients_count,
         'active_clients': active_clients,
+        'proposals_count': proposals_count,
+        'today_followups': today_followups,
         'upcoming_followups': upcoming_followups,
         'recent_docs': recent_docs,
+        'month_hours': month_hours,
+        'month_earnings': month_earnings,
     })
 
 
@@ -536,3 +564,327 @@ def crm_add_note(request, pk):
         if note_text:
             CRMNote.objects.create(client=client, author=request.user, note=note_text)
     return redirect('crm_detail', pk=pk)
+
+
+# ── Proposal Generator ────────────────────────────────────────────────────────
+
+@expert_required
+def proposal_list(request):
+    proposals = Proposal.objects.filter(expert=request.user)
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        proposals = proposals.filter(status=status_filter)
+    projects = Project.objects.filter(expert=request.user).exclude(status='completed')
+    return render(request, 'expert_tools/proposal_list.html', {
+        'proposals': proposals,
+        'status_filter': status_filter,
+        'projects': projects,
+    })
+
+
+@expert_required
+@ratelimit(key='user', rate='5/m', method='POST', block=False)
+def create_proposal(request):
+    if request.method != 'POST':
+        return redirect('proposal_list')
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Juda ko\'p so\'rov. Biroz kuting.')
+        return redirect('proposal_list')
+
+    company_name = request.POST.get('company_name', '').strip()
+    contact_person = request.POST.get('contact_person', '').strip()
+    standard = request.POST.get('standard', '').strip()
+    industry = request.POST.get('industry', '').strip()
+    scope = request.POST.get('scope', '').strip()
+    project_id = request.POST.get('project_id', '').strip()
+    lang = request.session.get('lang', 'uz')
+
+    if not company_name or not standard:
+        messages.error(request, 'Korxona nomi va standartni kiriting!')
+        return redirect('proposal_list')
+
+    project = None
+    if project_id:
+        try:
+            project = Project.objects.get(pk=project_id, expert=request.user)
+            company_name = project.entrepreneur.company_name or company_name
+            industry = project.entrepreneur.industry or industry
+        except Project.DoesNotExist:
+            pass
+
+    try:
+        price_min = Decimal(str(request.POST.get('price_min', '0') or '0'))
+        price_max = Decimal(str(request.POST.get('price_max', '0') or '0'))
+        duration_days = int(request.POST.get('duration_days', 90) or 90)
+    except (ValueError, Exception):
+        price_min, price_max, duration_days = Decimal('0'), Decimal('0'), 90
+
+    lang_map = {
+        'uz': "O'zbek tilida yoz.",
+        'ru': "Напиши на русском языке.",
+        'en': "Write in English.",
+    }
+    expert_name = request.user.get_full_name() or request.user.username
+    expert_company = request.user.company_name or 'StandartBridge orqali'
+
+    prompt = (
+        f"Sen ISO sertifikatsiya bo'yicha tajribali konsultantsan. {lang_map.get(lang, lang_map['uz'])}\n\n"
+        f"Quyidagi mijoz uchun professional taklifnoma (commercial proposal) tayyorla:\n\n"
+        f"Mijoz korxona: {company_name}\n"
+        f"Soha: {industry or 'Ko\'rsatilmagan'}\n"
+        f"Maqsad standart: {standard}\n"
+        f"Loyiha qamrovi: {scope or 'Standart bo\'yicha to\'liq sertifikatsiyaga tayyorlash'}\n"
+        f"Narx oralig'i: ${price_min} – ${price_max}\n"
+        f"Taxminiy muddat: {duration_days} kun\n"
+        f"Konsultant: {expert_name} ({expert_company})\n\n"
+        "Taklifnomada bo'lsin:\n"
+        "1. Kirish (mijoz muammosi va bizning yechim)\n"
+        "2. Xizmat qamrovi (nima qilamiz, nima qilmaymiz)\n"
+        "3. Ish bosqichlari (3-5 ta aniq bosqich)\n"
+        "4. Narx va to'lov shartlari\n"
+        "5. Nima uchun biz? (ustunliklarimiz)\n"
+        "6. Keyingi qadam\n\n"
+        "Professional, qisqa va mijozni ishontiruvchi tarzda yoz. Markdown formatida."
+    )
+
+    content = ''
+    try:
+        from groq import Groq
+        client_ai = Groq(api_key=os.environ.get('GROQ_API_KEY'), timeout=settings.AI_TIMEOUT, max_retries=1)
+        resp = client_ai.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.4,
+            max_tokens=2000,
+        )
+        content = resp.choices[0].message.content.strip()
+    except Exception as e:
+        logger.exception('Proposal AI xatosi: %s', e)
+        content = f"# {company_name} uchun {standard} Taklifnoma\n\n*AI hozir ishlamadi. Qo'lda to'ldiring.*"
+        messages.warning(request, 'AI vaqtincha ishlamadi. Taklifnomani qo\'lda to\'ldiring.')
+
+    from datetime import date as _date, timedelta as _td
+    valid_until = _date.today() + _td(days=30)
+
+    proposal = Proposal.objects.create(
+        expert=request.user,
+        project=project,
+        company_name=company_name[:300],
+        contact_person=contact_person[:200],
+        standard=standard[:50],
+        industry=industry[:100],
+        scope=scope,
+        price_min=price_min,
+        price_max=price_max,
+        duration_days=duration_days,
+        content=content,
+        valid_until=valid_until,
+    )
+    messages.success(request, 'Taklifnoma yaratildi.')
+    return redirect('proposal_detail', pk=proposal.pk)
+
+
+@expert_required
+def proposal_detail(request, pk):
+    proposal = get_object_or_404(Proposal, pk=pk, expert=request.user)
+    return render(request, 'expert_tools/proposal_detail.html', {'proposal': proposal})
+
+
+@expert_required
+def proposal_print(request, pk):
+    proposal = get_object_or_404(Proposal, pk=pk, expert=request.user)
+    return render(request, 'expert_tools/proposal_print.html', {
+        'proposal': proposal,
+        'today': timezone.now().date(),
+        'expert': request.user,
+    })
+
+
+@expert_required
+def edit_proposal(request, pk):
+    proposal = get_object_or_404(Proposal, pk=pk, expert=request.user)
+    if request.method == 'POST':
+        proposal.content = request.POST.get('content', proposal.content)
+        proposal.status = request.POST.get('status', proposal.status)
+        try:
+            proposal.price_min = Decimal(str(request.POST.get('price_min', proposal.price_min) or proposal.price_min))
+            proposal.price_max = Decimal(str(request.POST.get('price_max', proposal.price_max) or proposal.price_max))
+            proposal.duration_days = int(request.POST.get('duration_days', proposal.duration_days) or proposal.duration_days)
+        except (ValueError, Exception):
+            pass
+        proposal.save()
+        messages.success(request, 'Taklifnoma saqlandi.')
+        return redirect('proposal_detail', pk=pk)
+    return render(request, 'expert_tools/edit_proposal.html', {'proposal': proposal})
+
+
+@expert_required
+def delete_proposal(request, pk):
+    proposal = get_object_or_404(Proposal, pk=pk, expert=request.user)
+    if request.method == 'POST':
+        proposal.delete()
+        messages.success(request, 'Taklifnoma o\'chirildi.')
+    return redirect('proposal_list')
+
+
+# ── Time Tracker ──────────────────────────────────────────────────────────────
+
+@expert_required
+def time_logs(request):
+    today = timezone.now().date()
+    logs = TimeLog.objects.filter(expert=request.user).select_related('project')
+    projects = Project.objects.filter(expert=request.user).exclude(status='completed')
+
+    # Per-project totals
+    project_totals = {}
+    for log in logs:
+        pid = log.project_id
+        project_totals[pid] = project_totals.get(pid, Decimal('0')) + log.hours
+
+    # This month totals
+    month_start = today.replace(day=1)
+    month_logs = logs.filter(date__gte=month_start)
+    month_total = sum(l.hours for l in month_logs) or Decimal('0')
+
+    # Recent 20 entries
+    recent_logs = logs[:20]
+
+    return render(request, 'expert_tools/time_logs.html', {
+        'recent_logs': recent_logs,
+        'projects': projects,
+        'project_totals': project_totals,
+        'month_total': month_total,
+        'today': today,
+    })
+
+
+@expert_required
+def add_time_log(request):
+    if request.method != 'POST':
+        return redirect('time_logs')
+    project_id = request.POST.get('project_id', '').strip()
+    date_raw = request.POST.get('date', '').strip()
+    description = request.POST.get('description', '').strip()
+
+    try:
+        hours = Decimal(str(request.POST.get('hours', '1') or '1'))
+        hours = max(Decimal('0.5'), min(Decimal('24'), hours))
+    except Exception:
+        hours = Decimal('1')
+
+    if not project_id or not date_raw:
+        messages.error(request, 'Loyiha va sanani tanlang!')
+        return redirect('time_logs')
+
+    project = get_object_or_404(Project, pk=project_id, expert=request.user)
+    TimeLog.objects.create(
+        expert=request.user,
+        project=project,
+        date=date_raw,
+        hours=hours,
+        description=description[:300],
+    )
+    messages.success(request, f'{hours} soat yozildi.')
+    return redirect('time_logs')
+
+
+@expert_required
+def delete_time_log(request, pk):
+    log = get_object_or_404(TimeLog, pk=pk, expert=request.user)
+    if request.method == 'POST':
+        log.delete()
+        messages.success(request, 'Yozuv o\'chirildi.')
+    return redirect('time_logs')
+
+
+# ── Earnings Dashboard ────────────────────────────────────────────────────────
+
+@expert_required
+def earnings_dashboard(request):
+    from django.db.models import Sum
+    today = timezone.now().date()
+
+    payments = Payment.objects.filter(
+        project__expert=request.user,
+        status='released',
+    ).select_related('project__entrepreneur')
+
+    # Total earnings
+    total_earned = sum(p.expert_amount for p in payments if p.expert_amount) or Decimal('0')
+
+    # This month
+    month_start = today.replace(day=1)
+    month_payments = [p for p in payments if p.paid_at and p.paid_at.date() >= month_start]
+    month_earned = sum(p.expert_amount for p in month_payments if p.expert_amount) or Decimal('0')
+
+    # Last 6 months chart data
+    chart_labels = []
+    chart_data = []
+    for i in range(5, -1, -1):
+        if today.month - i <= 0:
+            m = today.month - i + 12
+            y = today.year - 1
+        else:
+            m = today.month - i
+            y = today.year
+        label = f"{y}-{m:02d}"
+        month_ps = [
+            p for p in payments
+            if p.paid_at and p.paid_at.year == y and p.paid_at.month == m
+        ]
+        amount = float(sum(p.expert_amount for p in month_ps if p.expert_amount) or 0)
+        chart_labels.append(f"{m:02d}/{y}")
+        chart_data.append(amount)
+
+    # Per-project breakdown
+    project_breakdown = {}
+    for p in payments:
+        pid = p.project_id
+        name = p.project.entrepreneur.company_name or f'Loyiha #{pid}'
+        if pid not in project_breakdown:
+            project_breakdown[pid] = {'name': name, 'amount': Decimal('0'), 'count': 0}
+        project_breakdown[pid]['amount'] += p.expert_amount or Decimal('0')
+        project_breakdown[pid]['count'] += 1
+    project_breakdown = sorted(project_breakdown.values(), key=lambda x: x['amount'], reverse=True)[:10]
+
+    # Time stats this month
+    month_hours = sum(
+        t.hours for t in TimeLog.objects.filter(expert=request.user, date__gte=month_start)
+    ) or Decimal('0')
+
+    return render(request, 'expert_tools/earnings.html', {
+        'total_earned': total_earned,
+        'month_earned': month_earned,
+        'month_hours': month_hours,
+        'chart_labels': json.dumps(chart_labels),
+        'chart_data': json.dumps(chart_data),
+        'project_breakdown': project_breakdown,
+        'payments': payments[:20],
+        'today': today,
+    })
+
+
+# ── Audit Print ───────────────────────────────────────────────────────────────
+
+@expert_required
+def audit_print(request, pk):
+    audit = get_object_or_404(AuditChecklist, pk=pk, expert=request.user)
+    items = audit.items.all()
+    total = items.count()
+    compliant = items.filter(status='compliant').count()
+    partial = items.filter(status='partial').count()
+    non_compliant = items.filter(status='non_compliant').count()
+    score = int(compliant / total * 100) if total else 0
+    findings = items.exclude(finding='').order_by('order')
+    return render(request, 'expert_tools/audit_print.html', {
+        'audit': audit,
+        'items': items,
+        'total': total,
+        'compliant': compliant,
+        'partial': partial,
+        'non_compliant': non_compliant,
+        'score': score,
+        'findings': findings,
+        'today': timezone.now().date(),
+        'expert': request.user,
+    })

@@ -31,4 +31,19 @@ urlpatterns = [
     path('crm/<int:pk>/update/', views.crm_update, name='crm_update'),
     path('crm/<int:pk>/delete/', views.crm_delete, name='crm_delete'),
     path('crm/<int:pk>/note/', views.crm_add_note, name='crm_add_note'),
+    # Proposal Generator
+    path('proposals/', views.proposal_list, name='proposal_list'),
+    path('proposals/create/', views.create_proposal, name='create_proposal'),
+    path('proposals/<int:pk>/', views.proposal_detail, name='proposal_detail'),
+    path('proposals/<int:pk>/edit/', views.edit_proposal, name='edit_proposal'),
+    path('proposals/<int:pk>/delete/', views.delete_proposal, name='delete_proposal'),
+    path('proposals/<int:pk>/print/', views.proposal_print, name='proposal_print'),
+    # Time Tracker
+    path('time/', views.time_logs, name='time_logs'),
+    path('time/add/', views.add_time_log, name='add_time_log'),
+    path('time/<int:pk>/delete/', views.delete_time_log, name='delete_time_log'),
+    # Earnings Dashboard
+    path('earnings/', views.earnings_dashboard, name='earnings_dashboard'),
+    # Audit Print
+    path('audit/<int:pk>/print/', views.audit_print, name='audit_print'),
 ]

@@ -123,10 +123,16 @@
     </div>
   </form>
   {% else %}
-  <a href="{% url 'audit_list' %}"
-     class="block text-center border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
-    {{ T.et_back }}
-  </a>
+  <div class="flex gap-3">
+    <a href="{% url 'audit_list' %}"
+       class="flex-1 text-center border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+      {{ T.et_back }}
+    </a>
+    <a href="{% url 'audit_print' audit.pk %}" target="_blank"
+       class="flex-1 text-center bg-gray-800 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
+      🖨️ PDF Hisobot
+    </a>
+  </div>
   {% endif %}
 </div>
 

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Taklifnoma — {{ proposal.company_name }}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #111; background: #fff; }
+  .page { max-width: 800px; margin: 0 auto; padding: 48px 48px 64px; }
+
+  .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 28px; }
+  .brand { font-size: 20px; font-weight: 800; color: #2563eb; }
+  .brand span { color: #111; }
+  .header-right { text-align: right; font-size: 11px; color: #555; }
+
+  .title-block { margin-bottom: 28px; }
+  .doc-type { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #888; margin-bottom: 4px; }
+  h1 { font-size: 24px; font-weight: 800; color: #111; }
+  .subtitle { color: #555; font-size: 14px; margin-top: 4px; }
+
+  .meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+  .meta-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; }
+  .meta-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 3px; }
+  .meta-value { font-size: 15px; font-weight: 700; color: #111; }
+
+  .content { line-height: 1.7; color: #222; }
+  .content h1 { font-size: 18px; font-weight: 700; margin: 20px 0 8px; color: #1e3a5f; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; }
+  .content h2 { font-size: 15px; font-weight: 700; margin: 16px 0 6px; color: #1e3a5f; }
+  .content h3 { font-size: 13px; font-weight: 700; margin: 12px 0 4px; }
+  .content p { margin-bottom: 10px; }
+  .content ul, .content ol { margin: 8px 0 12px 24px; }
+  .content li { margin-bottom: 4px; }
+  .content strong { color: #111; }
+
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; font-size: 11px; color: #888; }
+  .sign-block { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .sign-line { border-top: 1px solid #999; padding-top: 6px; font-size: 11px; color: #666; }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <div class="brand">Standart<span>Bridge</span></div>
+      <div style="font-size:11px;color:#888;margin-top:2px;">ISO Sertifikatsiya Konsaltingi</div>
+    </div>
+    <div class="header-right">
+      <div>Sana: {{ today|date:"d.m.Y" }}</div>
+      {% if proposal.valid_until %}
+      <div>Amal qilish muddati: {{ proposal.valid_until|date:"d.m.Y" }}</div>
+      {% endif %}
+      <div style="margin-top:4px;">Mutaxassis: {{ expert.get_full_name }}</div>
+    </div>
+  </div>
+
+  <!-- Title -->
+  <div class="title-block">
+    <div class="doc-type">Tijorat taklifnomasi</div>
+    <h1>{{ proposal.standard }} Sertifikatsiyasi</h1>
+    <div class="subtitle">{{ proposal.company_name }}{% if proposal.contact_person %} · {{ proposal.contact_person }}{% endif %}</div>
+  </div>
+
+  <!-- Meta -->
+  <div class="meta-grid">
+    <div class="meta-card">
+      <div class="meta-label">Narx oralig'i</div>
+      <div class="meta-value">
+        {% if proposal.price_min or proposal.price_max %}
+          ${{ proposal.price_min|floatformat:0 }} – ${{ proposal.price_max|floatformat:0 }}
+        {% else %}Kelishiladi{% endif %}
+      </div>
+    </div>
+    <div class="meta-card">
+      <div class="meta-label">Taxminiy muddat</div>
+      <div class="meta-value">{{ proposal.duration_days }} kun</div>
+    </div>
+    <div class="meta-card">
+      <div class="meta-label">Standart</div>
+      <div class="meta-value">{{ proposal.standard }}</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content" id="proposal-body">{{ proposal.content }}</div>
+
+  <!-- Signatures -->
+  <div class="sign-block">
+    <div>
+      <p style="font-size:12px;margin-bottom:32px;color:#555;">Konsultant:</p>
+      <div class="sign-line">{{ expert.get_full_name }} / Imzo</div>
+    </div>
+    <div>
+      <p style="font-size:12px;margin-bottom:32px;color:#555;">Mijoz:</p>
+      <div class="sign-line">{{ proposal.company_name }} / Imzo</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>StandartBridge — standardbridge.up.railway.app</span>
+    <span>Bu hujjat {{ today|date:"d.m.Y" }} da yaratilgan</span>
+  </div>
+</div>
+
+<div class="no-print" style="position:fixed;top:16px;right:16px;z-index:100;">
+  <button onclick="window.print()" style="background:#2563eb;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">🖨️ Chop etish / PDF</button>
+  <button onclick="window.close()" style="background:#f3f4f6;color:#374151;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px;margin-left:8px;">Yopish</button>
+</div>
+
+<script>
+const body = document.getElementById('proposal-body');
+let html = body.textContent
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n?)+/g, m => '<ul>' + m + '</ul>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>');
+body.innerHTML = '<p>' + html + '</p>';
+</script>
+</body>
+</html>

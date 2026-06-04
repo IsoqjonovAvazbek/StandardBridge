@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}{{ proposal.company_name }} — Taklifnoma{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div>
+            <a href="{% url 'proposal_list' %}" class="text-blue-600 hover:underline text-sm">← Taklifnomalar</a>
+            <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ proposal.company_name }}</h1>
+            <p class="text-gray-500 text-sm">{{ proposal.standard }} · {{ proposal.created_at|date:"d.m.Y" }}</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'proposal_print' proposal.pk %}" target="_blank"
+               class="border border-gray-300 text-gray-700 px-4 py-2 rounded-xl text-sm hover:bg-gray-50 transition flex items-center gap-2">
+                🖨️ PDF / Chop etish
+            </a>
+            <a href="{% url 'edit_proposal' proposal.pk %}"
+               class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
+                ✏️ Tahrirlash
+            </a>
+        </div>
+    </div>
+
+    <!-- Meta cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-xl border border-gray-100 p-4">
+            <p class="text-xs text-gray-400 mb-1">Holat</p>
+            <span class="text-sm font-semibold
+                {% if proposal.status == 'accepted' %}text-green-600
+                {% elif proposal.status == 'rejected' %}text-red-600
+                {% elif proposal.status == 'sent' %}text-blue-600
+                {% else %}text-gray-600{% endif %}">
+                {% if proposal.status == 'accepted' %}✅ Qabul{% elif proposal.status == 'rejected' %}❌ Rad{% elif proposal.status == 'sent' %}📤 Yuborilgan{% else %}📝 Qoralama{% endif %}
+            </span>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 p-4">
+            <p class="text-xs text-gray-400 mb-1">Narx</p>
+            <p class="text-sm font-semibold text-gray-800">
+                {% if proposal.price_min or proposal.price_max %}
+                ${{ proposal.price_min|floatformat:0 }}–${{ proposal.price_max|floatformat:0 }}
+                {% else %}—{% endif %}
+            </p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 p-4">
+            <p class="text-xs text-gray-400 mb-1">Muddat</p>
+            <p class="text-sm font-semibold text-gray-800">{{ proposal.duration_days }} kun</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 p-4">
+            <p class="text-xs text-gray-400 mb-1">Amal qilishi</p>
+            <p class="text-sm font-semibold text-gray-800">
+                {% if proposal.valid_until %}{{ proposal.valid_until|date:"d.m.Y" }}{% else %}—{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-6">
+        <div id="rendered-content" class="prose prose-sm max-w-none text-gray-800 leading-relaxed">
+            {{ proposal.content }}
+        </div>
+    </div>
+
+    <!-- Status update -->
+    <div class="mt-4 bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-4">
+        <p class="text-sm text-gray-600 shrink-0">Holatni o'zgartirish:</p>
+        <form method="POST" action="{% url 'edit_proposal' proposal.pk %}" class="flex gap-2 items-center flex-wrap">
+            {% csrf_token %}
+            <input type="hidden" name="content" value="{{ proposal.content }}">
+            <select name="status" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-400">
+                <option value="draft" {% if proposal.status == 'draft' %}selected{% endif %}>Qoralama</option>
+                <option value="sent" {% if proposal.status == 'sent' %}selected{% endif %}>Yuborilgan</option>
+                <option value="accepted" {% if proposal.status == 'accepted' %}selected{% endif %}>Qabul qilindi</option>
+                <option value="rejected" {% if proposal.status == 'rejected' %}selected{% endif %}>Rad etildi</option>
+            </select>
+            <button type="submit" class="gradient-bg text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:opacity-90 transition">Saqlash</button>
+        </form>
+        <form method="POST" action="{% url 'delete_proposal' proposal.pk %}" class="ml-auto"
+              onsubmit="return confirm('Taklifnomani o\'chirishni tasdiqlaysizmi?')">
+            {% csrf_token %}
+            <button type="submit" class="text-red-500 hover:text-red-700 text-sm">O'chir</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Simple markdown → HTML renderer
+const raw = document.getElementById('rendered-content').textContent;
+let html = raw
+    .replace(/^### (.+)$/gm, '<h3 class="text-base font-bold text-gray-900 mt-4 mb-1">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 class="text-lg font-bold text-gray-900 mt-5 mb-2">$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1 class="text-xl font-bold text-gray-900 mt-6 mb-2">$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-gray-700">$1</li>')
+    .replace(/^\d+\. (.+)$/gm, '<li class="ml-4 list-decimal text-gray-700">$1</li>')
+    .replace(/\n\n/g, '</p><p class="mb-3">')
+    .replace(/\n/g, '<br>');
+document.getElementById('rendered-content').innerHTML = '<p class="mb-3">' + html + '</p>';
+</script>
+{% endblock %}

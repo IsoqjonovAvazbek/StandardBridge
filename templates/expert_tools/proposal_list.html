@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block title %}Taklifnomalar — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <a href="{% url 'expert_tools_dashboard' %}" class="text-blue-600 hover:underline text-sm">← Expert Tools</a>
+            <h1 class="text-2xl font-bold text-gray-900 mt-1">📄 Taklifnomalar</h1>
+        </div>
+        <button onclick="document.getElementById('createModal').classList.remove('hidden')"
+            class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Yangi taklifnoma
+        </button>
+    </div>
+
+    <!-- Status filters -->
+    <div class="flex gap-2 mb-5">
+        {% for code, label in proposal.STATUS_CHOICES|default:"" %}{% endfor %}
+        <a href="{% url 'proposal_list' %}" class="text-sm px-3 py-1.5 rounded-lg {% if not status_filter %}bg-blue-600 text-white{% else %}bg-white border border-gray-200 text-gray-600{% endif %}">Barchasi</a>
+        <a href="?status=draft" class="text-sm px-3 py-1.5 rounded-lg {% if status_filter == 'draft' %}bg-gray-600 text-white{% else %}bg-white border border-gray-200 text-gray-600{% endif %}">Qoralama</a>
+        <a href="?status=sent" class="text-sm px-3 py-1.5 rounded-lg {% if status_filter == 'sent' %}bg-blue-600 text-white{% else %}bg-white border border-gray-200 text-gray-600{% endif %}">Yuborilgan</a>
+        <a href="?status=accepted" class="text-sm px-3 py-1.5 rounded-lg {% if status_filter == 'accepted' %}bg-green-600 text-white{% else %}bg-white border border-gray-200 text-gray-600{% endif %}">Qabul qilindi</a>
+        <a href="?status=rejected" class="text-sm px-3 py-1.5 rounded-lg {% if status_filter == 'rejected' %}bg-red-500 text-white{% else %}bg-white border border-gray-200 text-gray-600{% endif %}">Rad etildi</a>
+    </div>
+
+    {% if proposals %}
+    <div class="space-y-3">
+        {% for p in proposals %}
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4 card-hover">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0
+                {% if p.status == 'accepted' %}bg-green-100{% elif p.status == 'rejected' %}bg-red-100{% elif p.status == 'sent' %}bg-blue-100{% else %}bg-gray-100{% endif %}">
+                <span class="text-lg">
+                    {% if p.status == 'accepted' %}✅{% elif p.status == 'rejected' %}❌{% elif p.status == 'sent' %}📤{% else %}📝{% endif %}
+                </span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-semibold text-gray-900">{{ p.company_name }}</p>
+                <p class="text-gray-500 text-sm">{{ p.standard }} · {{ p.created_at|date:"d.m.Y" }}</p>
+                {% if p.price_min or p.price_max %}
+                <p class="text-xs text-gray-400 mt-0.5">
+                    ${{ p.price_min|floatformat:0 }} – ${{ p.price_max|floatformat:0 }} · {{ p.duration_days }} kun
+                </p>
+                {% endif %}
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <span class="text-xs px-2.5 py-1 rounded-full font-medium
+                    {% if p.status == 'accepted' %}bg-green-100 text-green-700
+                    {% elif p.status == 'rejected' %}bg-red-100 text-red-700
+                    {% elif p.status == 'sent' %}bg-blue-100 text-blue-700
+                    {% else %}bg-gray-100 text-gray-600{% endif %}">
+                    {% if p.status == 'accepted' %}Qabul{% elif p.status == 'rejected' %}Rad{% elif p.status == 'sent' %}Yuborilgan{% else %}Qoralama{% endif %}
+                </span>
+                <a href="{% url 'proposal_detail' p.pk %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Ko'rish</a>
+                <a href="{% url 'proposal_print' p.pk %}" target="_blank" class="text-gray-500 hover:text-gray-700 text-sm">PDF</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-2xl border border-gray-100 py-16 text-center">
+        <p class="text-4xl mb-3">📄</p>
+        <p class="text-gray-500 mb-4">Hali taklifnoma yaratilmagan</p>
+        <button onclick="document.getElementById('createModal').classList.remove('hidden')"
+            class="gradient-bg text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition">
+            Birinchi taklifnomani yarating
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Create Proposal Modal -->
+<div id="createModal" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <div>
+                <h3 class="font-bold text-gray-900">Yangi taklifnoma</h3>
+                <p class="text-xs text-gray-400">AI matn tayyorlaydi, siz tahrirlaysiz</p>
+            </div>
+            <button onclick="document.getElementById('createModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        <form method="POST" action="{% url 'create_proposal' %}" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Korxona nomi <span class="text-red-500">*</span></label>
+                    <input type="text" name="company_name" required placeholder="Mijoz korxona nomi"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kontakt shaxs</label>
+                    <input type="text" name="contact_person" placeholder="Ism Familiya"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Soha</label>
+                    <input type="text" name="industry" placeholder="Oziq-ovqat, Qurilish..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Maqsad standart <span class="text-red-500">*</span></label>
+                <select name="standard" required class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="">Tanlang...</option>
+                    <option value="ISO 9001">ISO 9001 (Sifat menejmenti)</option>
+                    <option value="ISO 14001">ISO 14001 (Atrof-muhit)</option>
+                    <option value="ISO 45001">ISO 45001 (Mehnat xavfsizligi)</option>
+                    <option value="ISO 22000">ISO 22000 (Oziq-ovqat xavfsizligi)</option>
+                    <option value="ISO 27001">ISO 27001 (Axborot xavfsizligi)</option>
+                    <option value="CE marking">CE marking</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Loyiha qamrovi</label>
+                <textarea name="scope" rows="2" placeholder="Nima qilamiz? Qaysi jarayonlar..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Narx min ($)</label>
+                    <input type="number" name="price_min" placeholder="1000" min="0"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Narx max ($)</label>
+                    <input type="number" name="price_max" placeholder="3000" min="0"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Muddat (kun)</label>
+                    <input type="number" name="duration_days" value="90" min="1"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+            </div>
+            {% if projects %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Loyiha bilan bog'lash (ixtiyoriy)</label>
+                <select name="project_id" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="">Bog'lamaslik</option>
+                    {% for pr in projects %}
+                    <option value="{{ pr.pk }}">{{ pr.entrepreneur.company_name|default:pr.entrepreneur.username }} — {{ pr.target_standard }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="document.getElementById('createModal').classList.add('hidden')"
+                    class="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-xl text-sm hover:bg-gray-50 transition">Bekor</button>
+                <button type="submit" class="flex-1 gradient-bg text-white py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition flex items-center justify-center gap-2">
+                    ✨ AI bilan yaratish
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

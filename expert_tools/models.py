@@ -170,3 +170,56 @@ class CRMNote(models.Model):
 
     def __str__(self):
         return f"{self.client.company_name} — {self.created_at:%d.%m.%Y}"
+
+
+class Proposal(models.Model):
+    STATUS_CHOICES = [
+        ('draft', 'Qoralama'),
+        ('sent', 'Yuborilgan'),
+        ('accepted', 'Qabul qilindi'),
+        ('rejected', 'Rad etildi'),
+    ]
+    STANDARD_CHOICES = [
+        ('ISO 9001', 'ISO 9001'),
+        ('ISO 14001', 'ISO 14001'),
+        ('ISO 45001', 'ISO 45001'),
+        ('ISO 22000', 'ISO 22000'),
+        ('ISO 27001', 'ISO 27001'),
+        ('CE marking', 'CE marking'),
+    ]
+    expert = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='proposals')
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='proposals')
+    company_name = models.CharField(max_length=300)
+    contact_person = models.CharField(max_length=200, blank=True)
+    standard = models.CharField(max_length=50)
+    industry = models.CharField(max_length=100, blank=True)
+    scope = models.TextField(blank=True, help_text='Loyiha qamrovi')
+    price_min = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    price_max = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    duration_days = models.IntegerField(default=90)
+    content = models.TextField(help_text='Taklifnoma matni (AI yoki qo\'lda)')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    valid_until = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.company_name} — {self.standard} [{self.status}]"
+
+
+class TimeLog(models.Model):
+    expert = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='time_logs')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='time_logs')
+    date = models.DateField()
+    hours = models.DecimalField(max_digits=4, decimal_places=1)
+    description = models.CharField(max_length=300, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-date', '-created_at']
+
+    def __str__(self):
+        return f"{self.project} — {self.date} — {self.hours}h"

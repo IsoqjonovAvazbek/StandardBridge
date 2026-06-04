@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Audit Hisoboti — {{ audit.company_name }}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #111; background: #fff; }
+  .page { max-width: 800px; margin: 0 auto; padding: 40px 48px 60px; }
+
+  .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #2563eb; padding-bottom: 16px; margin-bottom: 24px; }
+  .brand { font-size: 18px; font-weight: 800; color: #2563eb; }
+  .brand span { color: #111; }
+  .header-right { text-align: right; font-size: 11px; color: #555; line-height: 1.7; }
+
+  .title-block { margin-bottom: 20px; }
+  .doc-type { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #888; margin-bottom: 3px; }
+  h1 { font-size: 20px; font-weight: 800; }
+  .subtitle { color: #555; font-size: 13px; margin-top: 3px; }
+
+  .score-row { display: flex; gap: 16px; margin-bottom: 24px; }
+  .score-box { flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; text-align: center; }
+  .score-box .val { font-size: 22px; font-weight: 800; }
+  .score-box .lbl { font-size: 10px; text-transform: uppercase; color: #888; letter-spacing: 1px; margin-top: 2px; }
+  .score-good { color: #16a34a; }
+  .score-mid  { color: #d97706; }
+  .score-bad  { color: #dc2626; }
+
+  h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #475569; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; margin: 20px 0 10px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 16px; }
+  th { background: #f1f5f9; text-align: left; padding: 8px 10px; color: #475569; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .status-c { color: #16a34a; font-weight: 600; }
+  .status-p { color: #d97706; font-weight: 600; }
+  .status-n { color: #dc2626; font-weight: 600; }
+  .status-u { color: #94a3b8; }
+  .clause { font-weight: 700; color: #2563eb; }
+
+  .finding-block { background: #fef2f2; border-left: 3px solid #ef4444; padding: 10px 12px; margin-bottom: 10px; border-radius: 0 6px 6px 0; }
+  .finding-block .clause { color: #dc2626; }
+  .finding-text { color: #7f1d1d; font-size: 11.5px; margin-top: 3px; }
+
+  .footer { margin-top: 40px; padding-top: 14px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; }
+  .sign-block { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 32px; }
+  .sign-line { border-top: 1px solid #999; padding-top: 5px; font-size: 10px; color: #666; }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <div class="brand">Standart<span>Bridge</span></div>
+      <div style="font-size:11px;color:#888;margin-top:2px;">ISO Audit Xizmatlari</div>
+    </div>
+    <div class="header-right">
+      <div>Hisobot sanasi: {{ today|date:"d.m.Y" }}</div>
+      <div>Auditor: {{ expert.get_full_name }}</div>
+      <div>Audit turi: {{ audit.get_standard_display|default:audit.standard }}</div>
+    </div>
+  </div>
+
+  <!-- Title -->
+  <div class="title-block">
+    <div class="doc-type">Audit hisoboti</div>
+    <h1>{{ audit.company_name }}</h1>
+    <div class="subtitle">{{ audit.standard|upper }} · Audit sanasi: {{ audit.audit_date|date:"d.m.Y" }}</div>
+  </div>
+
+  <!-- Scores -->
+  <div class="score-row">
+    <div class="score-box">
+      <div class="val {% if score >= 70 %}score-good{% elif score >= 40 %}score-mid{% else %}score-bad{% endif %}">{{ score }}%</div>
+      <div class="lbl">Umumiy muvofiqlik</div>
+    </div>
+    <div class="score-box">
+      <div class="val score-good">{{ compliant }}</div>
+      <div class="lbl">Mos (✓)</div>
+    </div>
+    <div class="score-box">
+      <div class="val score-mid">{{ partial }}</div>
+      <div class="lbl">Qisman</div>
+    </div>
+    <div class="score-box">
+      <div class="val score-bad">{{ non_compliant }}</div>
+      <div class="lbl">Mos emas</div>
+    </div>
+    <div class="score-box">
+      <div class="val" style="color:#94a3b8;">{{ total }}</div>
+      <div class="lbl">Jami band</div>
+    </div>
+  </div>
+
+  <!-- Findings summary -->
+  {% if findings %}
+  <h2>Asosiy topilmalar ({{ findings|length }} ta)</h2>
+  {% for item in findings %}
+  <div class="finding-block">
+    <div class="clause">§{{ item.clause }} — {{ item.question|truncatechars:80 }}</div>
+    {% if item.finding %}
+    <div class="finding-text">{{ item.finding }}</div>
+    {% endif %}
+    {% if item.evidence %}
+    <div style="font-size:10.5px;color:#555;margin-top:3px;">Dalil: {{ item.evidence }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- Full checklist -->
+  <h2>To'liq checklist natijasi</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:60px;">Band</th>
+        <th>Savol</th>
+        <th style="width:90px;">Holat</th>
+        <th>Dalil / Izoh</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td class="clause">{{ item.clause }}</td>
+        <td>{{ item.question }}</td>
+        <td>
+          {% if item.status == 'compliant' %}<span class="status-c">✓ Mos</span>
+          {% elif item.status == 'partial' %}<span class="status-p">~ Qisman</span>
+          {% elif item.status == 'non_compliant' %}<span class="status-n">✗ Mos emas</span>
+          {% else %}<span class="status-u">Tekshirilmagan</span>{% endif %}
+        </td>
+        <td style="color:#555;">{{ item.evidence|default:"" }}{% if item.finding %}<br><em style="color:#dc2626;font-size:10.5px;">{{ item.finding }}</em>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if audit.notes %}
+  <h2>Qo'shimcha izohlar</h2>
+  <p style="color:#444;line-height:1.6;">{{ audit.notes }}</p>
+  {% endif %}
+
+  <!-- Signatures -->
+  <div class="sign-block">
+    <div>
+      <p style="font-size:11px;margin-bottom:28px;color:#555;">Auditor:</p>
+      <div class="sign-line">{{ expert.get_full_name }} / Imzo / Sana</div>
+    </div>
+    <div>
+      <p style="font-size:11px;margin-bottom:28px;color:#555;">Mijoz vakili:</p>
+      <div class="sign-line">{{ audit.company_name }} / Imzo / Sana</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>StandartBridge — standardbridge.up.railway.app</span>
+    <span>Hisobot {{ today|date:"d.m.Y" }} da yaratildi · Maxfiy</span>
+  </div>
+</div>
+
+<div class="no-print" style="position:fixed;top:16px;right:16px;z-index:100;">
+  <button onclick="window.print()" style="background:#2563eb;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">🖨️ Chop etish / PDF</button>
+  <button onclick="window.close()" style="background:#f3f4f6;color:#374151;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px;margin-left:8px;">Yopish</button>
+</div>
+</body>
+</html>

@@ -88,6 +88,64 @@
     </a>
   </div>
 
+  <!-- New tools row -->
+  <div class="grid grid-cols-3 gap-3 mb-8">
+    <a href="{% url 'proposal_list' %}"
+       class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition flex items-center gap-3 group">
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
+        <span class="text-xl">📄</span>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-gray-700">Taklifnomalar</p>
+        <p class="text-xs text-gray-400">{{ proposals_count }} ta</p>
+      </div>
+    </a>
+    <a href="{% url 'time_logs' %}"
+       class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition flex items-center gap-3 group">
+      <div class="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center shrink-0">
+        <span class="text-xl">⏱️</span>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-gray-700">Vaqt hisoblagich</p>
+        <p class="text-xs text-gray-400">Bu oy: {{ month_hours }}h</p>
+      </div>
+    </a>
+    <a href="{% url 'earnings_dashboard' %}"
+       class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition flex items-center gap-3 group">
+      <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+        <span class="text-xl">💰</span>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-gray-700">Daromad</p>
+        <p class="text-xs text-gray-400">Bu oy: ${{ month_earnings|floatformat:0 }}</p>
+      </div>
+    </a>
+  </div>
+
+  <!-- Today's follow-ups alert -->
+  {% if today_followups %}
+  <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-lg">📞</span>
+      <p class="font-semibold text-amber-800 text-sm">Bugun {{ today_followups|length }} ta follow-up!</p>
+    </div>
+    <div class="space-y-2">
+      {% for client in today_followups %}
+      <a href="{% url 'crm_detail' client.pk %}" class="flex items-center gap-3 bg-white rounded-xl px-4 py-2.5 hover:bg-amber-50 transition">
+        <div class="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center shrink-0">
+          <span class="text-amber-700 font-bold text-xs">{{ client.company_name|slice:":1" }}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-900">{{ client.company_name }}</p>
+          <p class="text-xs text-gray-500">{{ client.contact_person }} · {{ client.target_standard }}</p>
+        </div>
+        <span class="text-xs text-amber-600 font-medium">Qo'ng'iroq →</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   <div class="grid lg:grid-cols-2 gap-6">
     <!-- Upcoming follow-ups -->
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
