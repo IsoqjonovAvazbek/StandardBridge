@@ -94,7 +94,7 @@ def project_list(request):
     if region:
         experts = experts.filter(region=region)
     if standard:
-        experts = experts.filter(standard_tags__contains=standard)
+        experts = experts.filter(specializations__icontains=standard)
     if search:
         experts = experts.filter(specializations__icontains=search)
     if min_rating:

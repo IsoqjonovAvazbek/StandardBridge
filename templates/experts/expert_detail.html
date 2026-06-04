@@ -128,7 +128,8 @@
             </div>
             {% endif %}
 
-            <!-- Tahlil yuborish -->
+            <!-- Tahlil yuborish — faqat tadbirkorlarga -->
+            {% if not request.user.is_expert %}
             <div class="bg-white rounded-2xl p-6 border border-gray-100">
                 <h3 class="font-bold text-gray-900 mb-2">{{ T.send_analysis_title }}</h3>
                 <p class="text-gray-500 text-sm mb-2">{{ T.send_analysis_sub }}</p>
@@ -192,6 +193,7 @@
                 </div>
                 {% endif %}
             </div>
+            {% endif %}
         </div>
     </div>
 </div>
