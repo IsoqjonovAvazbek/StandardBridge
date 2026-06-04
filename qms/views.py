@@ -555,30 +555,39 @@ def qms_generate_policy(request):
         title=title[:300],
         doc_type=doc_type,
         version='1.0',
+        ai_content=text,
     )
+    # Faylga ham saqlaymiz (yuklab olish uchun), lekin xato bo'lsa ham davom etamiz
     try:
         safe_name = f"ai_{doc_type}_{timezone.now():%Y%m%d_%H%M%S}.md"
         doc.file.save(safe_name, ContentFile(text.encode('utf-8')), save=False)
+    except Exception:
+        pass
+    try:
         doc.save()
     except Exception:
         messages.error(request, 'Hujjat saqlashda xato yuz berdi. Qayta urinib ko\'ring.')
         return redirect('qms_documents')
-    messages.success(request, 'AI hujjat yaratildi va hujjatlar ro\'yxatiga qo\'shildi.')
+    messages.success(request, 'AI hujjat yaratildi.')
     return redirect('qms_document_view', pk=doc.pk)
 
 
 @login_required
 def qms_document_view(request, pk):
-    """Inline rendered view for .md documents (AI-generated)."""
+    """Inline rendered view for AI-generated documents."""
     doc = get_object_or_404(QMSDocument, pk=pk, company=request.user, is_active=True)
-    content = ''
-    if doc.file and doc.file.name.endswith('.md'):
+    # ai_content DB field dan o'qiymiz (fayl kerak emas)
+    content = doc.ai_content
+    # Eski hujjatlar uchun fallback: fayldan o'qib ai_content ga saqlaymiz
+    if not content and doc.file and doc.file.name.endswith('.md'):
         try:
             doc.file.open('r')
-            content = doc.file.read()
-            if isinstance(content, bytes):
-                content = content.decode('utf-8')
+            raw = doc.file.read()
             doc.file.close()
+            content = raw.decode('utf-8') if isinstance(raw, bytes) else raw
+            # Bir marta saqlab qo'yamiz
+            doc.ai_content = content
+            doc.save(update_fields=['ai_content'])
         except Exception:
             content = ''
     return render(request, 'qms/document_view.html', {'doc': doc, 'content': content})

@@ -14,10 +14,9 @@
       <button onclick="copyContent()" class="border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-sm hover:bg-gray-50 transition">
         📋 Nusxalash
       </button>
-      <a href="{{ doc.file.url }}" download
-         class="border border-gray-300 text-gray-700 px-4 py-2 rounded-xl text-sm hover:bg-gray-50 transition">
-        ⬇️ Yuklab olish
-      </a>
+      <button onclick="downloadMd()" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-xl text-sm hover:bg-gray-50 transition">
+        ⬇️ Yuklab olish (.md)
+      </button>
     </div>
   </div>
 
@@ -73,6 +72,13 @@ document.getElementById('docContent').innerHTML = raw ? marked.parse(raw) : '<p 
 
 function copyContent() {
   navigator.clipboard.writeText(raw).then(() => alert('Nusxalandi!'));
+}
+function downloadMd() {
+  const blob = new Blob([raw], {type: 'text/markdown;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '{{ doc.title|slugify }}.md';
+  a.click();
 }
 </script>
 {% endblock %}

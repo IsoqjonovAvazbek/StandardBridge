@@ -62,6 +62,7 @@ class QMSDocument(models.Model):
     expiry_date = models.DateField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     expiry_notified = models.BooleanField(default=False, help_text='Muddat eslatmasi yuborilganmi')
+    ai_content = models.TextField(blank=True, help_text='AI tomonidan yaratilgan hujjat matni (markdown)')
 
     class Meta:
         ordering = ['-uploaded_at']
