@@ -56,7 +56,7 @@ class QMSDocument(models.Model):
     company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='qms_documents')
     title = models.CharField(max_length=300)
     doc_type = models.CharField(max_length=20, choices=DOC_TYPE_CHOICES)
-    file = models.FileField(upload_to='qms_documents/')
+    file = models.FileField(upload_to='qms_documents/', blank=True)
     version = models.CharField(max_length=20, default='1.0')
     uploaded_at = models.DateTimeField(auto_now_add=True)
     expiry_date = models.DateField(null=True, blank=True)

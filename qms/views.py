@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from django.conf import settings
-from django.core.files.base import ContentFile
 from datetime import timedelta
 from django_ratelimit.decorators import ratelimit
 from .models import ChecklistItem, ChecklistResponse, QMSDocument, QMSDocumentVersion, NonConformity, AuditSchedule, RiskItem, TrainingRecord
@@ -557,12 +556,6 @@ def qms_generate_policy(request):
         version='1.0',
         ai_content=text,
     )
-    # Faylga ham saqlaymiz (yuklab olish uchun), lekin xato bo'lsa ham davom etamiz
-    try:
-        safe_name = f"ai_{doc_type}_{timezone.now():%Y%m%d_%H%M%S}.md"
-        doc.file.save(safe_name, ContentFile(text.encode('utf-8')), save=False)
-    except Exception:
-        pass
     try:
         doc.save()
     except Exception:

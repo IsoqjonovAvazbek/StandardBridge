@@ -95,11 +95,12 @@
                    class="px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition">
                     👁 Ko'rish
                 </a>
-                {% endif %}
+                {% elif doc.file %}
                 <a href="{{ doc.file.url }}" target="_blank"
                    class="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition">
                     {{ T.qms_download }}
                 </a>
+                {% endif %}
                 <button onclick="document.getElementById('ver-modal-{{ doc.pk }}').classList.remove('hidden')"
                         class="px-3 py-1.5 rounded-lg text-xs font-medium bg-green-50 text-green-600 hover:bg-green-100 transition">
                     ↑ {{ T.qms_new_version_btn }}
