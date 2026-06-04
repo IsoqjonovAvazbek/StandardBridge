@@ -511,9 +511,13 @@ def qms_generate_policy(request):
         doc_type=doc_type,
         version='1.0',
     )
-    safe_name = f"ai_{doc_type}_{timezone.now():%Y%m%d_%H%M%S}.md"
-    doc.file.save(safe_name, ContentFile(text.encode('utf-8')), save=False)
-    doc.save()
+    try:
+        safe_name = f"ai_{doc_type}_{timezone.now():%Y%m%d_%H%M%S}.md"
+        doc.file.save(safe_name, ContentFile(text.encode('utf-8')), save=False)
+        doc.save()
+    except Exception:
+        messages.error(request, 'Hujjat saqlashda xato yuz berdi. Qayta urinib ko\'ring.')
+        return redirect('qms_documents')
     messages.success(request, 'AI hujjat yaratildi va hujjatlar ro\'yxatiga qo\'shildi.')
     return redirect('qms_documents')
 

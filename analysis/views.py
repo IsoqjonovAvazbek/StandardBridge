@@ -565,6 +565,9 @@ def run_analysis(request, industry_id):
     if not local_ids or not target_ids:
         return redirect('select_industry')
 
+    if not question_answers:
+        return redirect('answer_questions', industry_id=industry_id)
+
     local_standards = Standard.objects.filter(pk__in=local_ids)
     target_standards = Standard.objects.filter(pk__in=target_ids)
 
