@@ -222,6 +222,14 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] Roadmap batafsilroq: RoadmapStep.deliverables (JSONField), AI prompt 5-8 batafsil bosqich + deliverables so'raydi, roadmap.html + project_detail.html da "Tayyorlanadigan hujjatlar" bloki. migration 0005
 - [x] step_word/step_deliverables_lbl tarjimalar. 47 test OK
 
+### Expert Tools mukammallashtirish (real muammolar hal qilindi)
+- [x] Proposal Generator: Proposal model (company, standard, scope, price_min/max, duration_days, content, status, valid_until), AI taklifnoma generatsiyasi (Groq), list/detail/edit/delete views, proposal_print.html (PDF, imzolar), status workflow (draft→sent→accepted/rejected)
+- [x] Time Tracker: TimeLog model (expert, project, date, hours, description), add/delete views, time_logs.html (bu oy jami, loyiha bo'yicha breakdown, so'nggi 20 yozuv)
+- [x] Earnings Dashboard: 6 oylik Chart.js bar chart, loyiha bo'yicha daromad breakdown, to'lovlar tarixi, bu oy soat+daromad
+- [x] Audit PDF Hisobot: audit_print.html (professional: score boxes, asosiy topilmalar, to'liq checklist jadval, imzo joylari), audit_detail.html ga "PDF Hisobot" tugma
+- [x] Dashboard yangilandi: yangi 3-quick action (taklifnomalar/vaqt/daromad), bugungi CRM follow-up alert bloki, month_hours/month_earnings context vars
+- [x] migration 0002 (Proposal, TimeLog)
+
 ## PENDING (bajarilmagan)
 - [ ] Auditor mobile checklist tool
 - [ ] Payme integratsiya (Click bor, Payme yo'q)
