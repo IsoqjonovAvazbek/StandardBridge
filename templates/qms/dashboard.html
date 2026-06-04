@@ -11,6 +11,39 @@
         <p class="text-gray-600 mt-1">{{ T.qms_dashboard_sub }}</p>
     </div>
 
+    <!-- QMS Health Score -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-6 flex items-center gap-6">
+        <div class="relative w-20 h-20 shrink-0">
+            <svg class="w-20 h-20 -rotate-90" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f3f4f6" stroke-width="3"/>
+                <circle cx="18" cy="18" r="15.9" fill="none"
+                    stroke="{% if health_score >= 70 %}#22c55e{% elif health_score >= 40 %}#f59e0b{% else %}#ef4444{% endif %}"
+                    stroke-width="3"
+                    stroke-dasharray="{{ health_score }} {{ 100|add:0 }}"
+                    stroke-linecap="round"/>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-lg font-bold {% if health_score >= 70 %}text-green-600{% elif health_score >= 40 %}text-amber-500{% else %}text-red-500{% endif %}">
+                    {{ health_score }}%
+                </span>
+            </div>
+        </div>
+        <div>
+            <h3 class="font-bold text-gray-900 text-lg">QMS Umumiy holat</h3>
+            <p class="text-gray-500 text-sm">
+                {% if health_score >= 70 %}Yaxshi — ISO audit uchun tayyor
+                {% elif health_score >= 40 %}O'rtacha — Yaxshilash kerak
+                {% else %}Zaif — Tezda choralar ko'ring{% endif %}
+            </p>
+            <div class="flex gap-4 mt-2 text-xs text-gray-400">
+                <span>Checklist 40%</span>
+                <span>NC yopish 30%</span>
+                <span>Hujjatlar 20%</span>
+                <span>Audit 10%</span>
+            </div>
+        </div>
+    </div>
+
     <!-- 4-card stat row -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
 
@@ -83,6 +116,36 @@
             {% endif %}
             <a href="{% url 'audit_schedule' %}" class="text-blue-600 text-sm font-medium hover:underline">{{ T.qms_plan_audit }}</a>
         </div>
+    </div>
+
+    <!-- Risk + Training mini-cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <a href="{% url 'risk_register' %}"
+           class="bg-white rounded-2xl border {% if open_risks > 0 %}border-orange-200{% else %}border-gray-100{% endif %} p-5 card-hover flex items-center gap-4">
+            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center shrink-0">
+                <span class="text-2xl">⚠️</span>
+            </div>
+            <div>
+                <p class="text-xs text-gray-400 uppercase">Risk Register</p>
+                <p class="text-2xl font-bold {% if open_risks > 0 %}text-orange-500{% else %}text-gray-400{% endif %}">{{ total_risks }}</p>
+                <p class="text-xs text-gray-500">{{ open_risks }} ochiq risk</p>
+            </div>
+        </a>
+        <a href="{% url 'training_records' %}"
+           class="bg-white rounded-2xl border {% if expiring_trainings > 0 %}border-amber-200{% else %}border-gray-100{% endif %} p-5 card-hover flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
+                <span class="text-2xl">🎓</span>
+            </div>
+            <div>
+                <p class="text-xs text-gray-400 uppercase">O'quv yozuvlari</p>
+                <p class="text-2xl font-bold text-gray-900">{{ total_trainings }}</p>
+                {% if expiring_trainings > 0 %}
+                <p class="text-xs text-amber-600 font-medium">{{ expiring_trainings }} ta muddati yaqin</p>
+                {% else %}
+                <p class="text-xs text-gray-500">Hammasi joriy</p>
+                {% endif %}
+            </div>
+        </a>
     </div>
 
     <!-- Quick nav cards -->

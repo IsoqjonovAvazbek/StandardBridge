@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from datetime import timedelta
 from django_ratelimit.decorators import ratelimit
-from .models import ChecklistItem, ChecklistResponse, QMSDocument, QMSDocumentVersion, NonConformity, AuditSchedule
+from .models import ChecklistItem, ChecklistResponse, QMSDocument, QMSDocumentVersion, NonConformity, AuditSchedule, RiskItem, TrainingRecord
 import json
 import csv
 import os
@@ -57,6 +57,46 @@ def qms_dashboard(request):
     # Recent documents (last 5)
     recent_docs = QMSDocument.objects.filter(company=user, is_active=True).order_by('-uploaded_at')[:5]
 
+    # Risk register stats
+    total_risks = RiskItem.objects.filter(company=user).count()
+    open_risks = RiskItem.objects.filter(company=user, status='open').count()
+    critical_risks = RiskItem.objects.filter(company=user, status='open').count()
+
+    # Training records stats
+    total_trainings = TrainingRecord.objects.filter(company=user).count()
+    expiring_trainings = TrainingRecord.objects.filter(
+        company=user,
+        expiry_date__lte=today + timedelta(days=30),
+        expiry_date__gte=today,
+    ).count()
+
+    # QMS Health Score (weighted)
+    # 1. Checklist compliance 40%
+    checklist_score = compliance_pct * 0.4
+
+    # 2. NC resolution rate 30%
+    total_nc = NonConformity.objects.filter(company=user).count()
+    closed_nc = NonConformity.objects.filter(company=user, status='closed').count()
+    nc_score = (int(closed_nc / total_nc * 100) if total_nc > 0 else 100) * 0.3
+
+    # 3. Document validity 20%
+    expired_docs = QMSDocument.objects.filter(
+        company=user, is_active=True, expiry_date__lt=today
+    ).count()
+    doc_valid_pct = int((total_docs - expired_docs) / total_docs * 100) if total_docs > 0 else 100
+    doc_score = doc_valid_pct * 0.2
+
+    # 4. Audit on schedule 10%
+    total_audits = AuditSchedule.objects.filter(company=user).count()
+    overdue_audits = sum(
+        1 for a in AuditSchedule.objects.filter(company=user)
+        if a.is_overdue
+    )
+    audit_pct = int((total_audits - overdue_audits) / total_audits * 100) if total_audits > 0 else 100
+    audit_score = audit_pct * 0.1
+
+    health_score = int(checklist_score + nc_score + doc_score + audit_score)
+
     return render(request, 'qms/dashboard.html', {
         'completion_pct': completion_pct,
         'compliance_pct': compliance_pct,
@@ -72,6 +112,11 @@ def qms_dashboard(request):
         'next_audit': next_audit,
         'recent_ncs': recent_ncs,
         'recent_docs': recent_docs,
+        'total_risks': total_risks,
+        'open_risks': open_risks,
+        'total_trainings': total_trainings,
+        'expiring_trainings': expiring_trainings,
+        'health_score': health_score,
     })
 
 
@@ -520,6 +565,206 @@ def qms_generate_policy(request):
         return redirect('qms_documents')
     messages.success(request, 'AI hujjat yaratildi va hujjatlar ro\'yxatiga qo\'shildi.')
     return redirect('qms_documents')
+
+
+# ---------------------------------------------------------------------------
+# Risk Register
+# ---------------------------------------------------------------------------
+
+@login_required
+def risk_register(request):
+    risks = RiskItem.objects.filter(company=request.user)
+    standard_filter = request.GET.get('standard', '')
+    status_filter = request.GET.get('status', '')
+    if standard_filter:
+        risks = risks.filter(standard=standard_filter)
+    if status_filter:
+        risks = risks.filter(status=status_filter)
+
+    # Stats for matrix
+    total = risks.count()
+    critical_count = sum(1 for r in risks if r.risk_level == 'critical')
+    high_count = sum(1 for r in risks if r.risk_level == 'high')
+
+    return render(request, 'qms/risk_register.html', {
+        'risks': risks,
+        'standard_filter': standard_filter,
+        'status_filter': status_filter,
+        'total': total,
+        'critical_count': critical_count,
+        'high_count': high_count,
+        'standards': RiskItem.STANDARD_CHOICES,
+        'statuses': RiskItem.STATUS_CHOICES,
+    })
+
+
+@login_required
+def add_risk(request):
+    if request.method == 'POST':
+        process_area = request.POST.get('process_area', '').strip()
+        description = request.POST.get('description', '').strip()
+        standard = request.POST.get('standard', 'iso9001')
+        owner = request.POST.get('owner', '').strip()
+        due_raw = request.POST.get('due_date', '').strip()
+
+        try:
+            likelihood = int(request.POST.get('likelihood', 3))
+            impact = int(request.POST.get('impact', 3))
+            likelihood = max(1, min(5, likelihood))
+            impact = max(1, min(5, impact))
+        except (ValueError, TypeError):
+            likelihood, impact = 3, 3
+
+        if process_area and description:
+            RiskItem.objects.create(
+                company=request.user,
+                standard=standard,
+                process_area=process_area[:200],
+                description=description,
+                likelihood=likelihood,
+                impact=impact,
+                owner=owner,
+                due_date=due_raw if due_raw else None,
+            )
+            messages.success(request, 'Risk qo\'shildi.')
+        else:
+            messages.error(request, 'Jarayon nomi va risk tavsifini kiriting!')
+    return redirect('risk_register')
+
+
+@login_required
+def update_risk(request, pk):
+    risk = get_object_or_404(RiskItem, pk=pk, company=request.user)
+    if request.method == 'POST':
+        new_status = request.POST.get('status', risk.status)
+        if new_status in {c[0] for c in RiskItem.STATUS_CHOICES}:
+            risk.status = new_status
+        risk.mitigation = request.POST.get('mitigation', '').strip()
+        risk.owner = request.POST.get('owner', '').strip()
+        try:
+            likelihood = int(request.POST.get('likelihood', risk.likelihood))
+            impact = int(request.POST.get('impact', risk.impact))
+            risk.likelihood = max(1, min(5, likelihood))
+            risk.impact = max(1, min(5, impact))
+        except (ValueError, TypeError):
+            pass
+        due_raw = request.POST.get('due_date', '').strip()
+        risk.due_date = due_raw if due_raw else None
+        risk.save()
+        messages.success(request, 'Risk yangilandi.')
+    return redirect('risk_register')
+
+
+@login_required
+def delete_risk(request, pk):
+    if request.method != 'POST':
+        return redirect('risk_register')
+    risk = get_object_or_404(RiskItem, pk=pk, company=request.user)
+    risk.delete()
+    messages.success(request, 'Risk o\'chirildi.')
+    return redirect('risk_register')
+
+
+@login_required
+def export_risk_csv(request):
+    risks = RiskItem.objects.filter(company=request.user)
+    resp = _csv_response('risk_register.csv')
+    w = csv.writer(resp)
+    w.writerow(['Standart', 'Jarayon', 'Tavsif', 'Ehtimol', 'Ta\'sir', 'Risk ball',
+                'Risk darajasi', 'Kamaytirish', 'Masul', 'Holat', 'Muddat'])
+    for r in risks:
+        w.writerow([
+            r.get_standard_display(), r.process_area, r.description,
+            r.likelihood, r.impact, r.risk_score, r.risk_level,
+            r.mitigation, r.owner, r.get_status_display(),
+            r.due_date or '',
+        ])
+    return resp
+
+
+# ---------------------------------------------------------------------------
+# Training Records
+# ---------------------------------------------------------------------------
+
+@login_required
+def training_records(request):
+    records = TrainingRecord.objects.filter(company=request.user)
+    today = timezone.now().date()
+    expiring_soon = [r for r in records if r.days_to_expiry is not None and 0 <= r.days_to_expiry <= 30]
+    expired = [r for r in records if r.is_expired]
+    return render(request, 'qms/training_records.html', {
+        'records': records,
+        'expiring_soon': expiring_soon,
+        'expired': expired,
+        'today': today,
+    })
+
+
+@login_required
+def add_training(request):
+    if request.method == 'POST':
+        employee_name = request.POST.get('employee_name', '').strip()
+        training_name = request.POST.get('training_name', '').strip()
+        date_completed = request.POST.get('date_completed', '').strip()
+
+        if employee_name and training_name and date_completed:
+            expiry_raw = request.POST.get('expiry_date', '').strip()
+            TrainingRecord.objects.create(
+                company=request.user,
+                employee_name=employee_name[:200],
+                position=request.POST.get('position', '').strip()[:200],
+                training_name=training_name[:300],
+                standard_clause=request.POST.get('standard_clause', '').strip()[:100],
+                date_completed=date_completed,
+                trainer=request.POST.get('trainer', '').strip()[:200],
+                certificate_number=request.POST.get('certificate_number', '').strip()[:100],
+                expiry_date=expiry_raw if expiry_raw else None,
+            )
+            messages.success(request, 'O\'quv yozuvi qo\'shildi.')
+        else:
+            messages.error(request, 'Xodim ismi, o\'quv nomi va sana kiritilishi shart!')
+    return redirect('training_records')
+
+
+@login_required
+def delete_training(request, pk):
+    if request.method != 'POST':
+        return redirect('training_records')
+    record = get_object_or_404(TrainingRecord, pk=pk, company=request.user)
+    record.delete()
+    messages.success(request, 'Yozuv o\'chirildi.')
+    return redirect('training_records')
+
+
+@login_required
+def export_training_csv(request):
+    records = TrainingRecord.objects.filter(company=request.user)
+    resp = _csv_response('training_records.csv')
+    w = csv.writer(resp)
+    w.writerow(['Xodim', 'Lavozim', 'O\'quv nomi', 'ISO band', 'Sana',
+                'O\'qituvchi', 'Sertifikat raqami', 'Amal qilish muddati'])
+    for r in records:
+        w.writerow([
+            r.employee_name, r.position, r.training_name, r.standard_clause,
+            r.date_completed, r.trainer, r.certificate_number, r.expiry_date or '',
+        ])
+    return resp
+
+
+# ---------------------------------------------------------------------------
+# NC Effectiveness verify
+# ---------------------------------------------------------------------------
+
+@login_required
+def verify_nc_effectiveness(request, pk):
+    nc = get_object_or_404(NonConformity, pk=pk, company=request.user)
+    if request.method == 'POST' and nc.status == 'closed':
+        nc.is_effective_verified = True
+        nc.verification_note = request.POST.get('verification_note', '').strip()
+        nc.verified_at = timezone.now()
+        nc.save(update_fields=['is_effective_verified', 'verification_note', 'verified_at'])
+        messages.success(request, 'Samaradorlik tasdiqlandi.')
+    return redirect('nonconformities')
 
 
 # ---------------------------------------------------------------------------

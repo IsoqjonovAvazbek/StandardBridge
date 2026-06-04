@@ -137,6 +137,39 @@
             </div>
             {% endif %}
 
+            <!-- Effectiveness verification (only for closed NCs) -->
+            {% if nc.status == 'closed' %}
+            <div class="px-5 pb-4">
+                {% if nc.is_effective_verified %}
+                <div class="bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div>
+                        <p class="text-green-700 text-xs font-semibold">Samaradorligi tasdiqlandi — {{ nc.verified_at|date:"d.m.Y" }}</p>
+                        {% if nc.verification_note %}<p class="text-green-600 text-xs">{{ nc.verification_note }}</p>{% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <button onclick="document.getElementById('verify-nc-{{ nc.pk }}').classList.toggle('hidden')"
+                    class="text-xs border border-green-300 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-50 transition flex items-center gap-1">
+                    ✓ Tuzatish samaradorligini tasdiqlash
+                </button>
+                <div id="verify-nc-{{ nc.pk }}" class="hidden mt-3 bg-green-50 rounded-xl p-4">
+                    <form method="POST" action="{% url 'verify_nc_effectiveness' nc.pk %}">
+                        {% csrf_token %}
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Tasdiq izohi (ixtiyoriy)</label>
+                        <input type="text" name="verification_note" placeholder="Masalan: Qayta tekshiruvda muammo yo'q, jarayon barqarorlashdi"
+                            class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-green-400 mb-2">
+                        <button type="submit" class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-green-700 transition">
+                            Tasdiqlash
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
             <!-- Inline update form (collapsed by default) -->
             <div id="update-nc-{{ nc.pk }}" class="hidden border-t border-gray-100 px-5 py-4 bg-gray-50">
                 <form method="POST" action="{% url 'update_nonconformity' nc.pk %}">

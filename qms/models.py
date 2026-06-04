@@ -118,6 +118,9 @@ class NonConformity(models.Model):
     root_cause = models.TextField(blank=True)
     corrective_action = models.TextField(blank=True)
     ai_suggestion = models.TextField(blank=True, help_text='AI taklif qilgan tub sabab va tuzatuvchi chora')
+    is_effective_verified = models.BooleanField(default=False, help_text='Tuzatuvchi chora samarali bo\'lganmi?')
+    verification_note = models.TextField(blank=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     closed_at = models.DateTimeField(null=True, blank=True)
 
@@ -134,6 +137,93 @@ class NonConformity(models.Model):
             and self.status != 'closed'
             and self.due_date < timezone.now().date()
         )
+
+
+class RiskItem(models.Model):
+    STANDARD_CHOICES = [
+        ('iso9001', 'ISO 9001'),
+        ('iso14001', 'ISO 14001'),
+        ('iso45001', 'ISO 45001'),
+        ('iso22000', 'ISO 22000'),
+    ]
+    LIKELIHOOD_CHOICES = [(i, str(i)) for i in range(1, 6)]
+    IMPACT_CHOICES = [(i, str(i)) for i in range(1, 6)]
+    STATUS_CHOICES = [
+        ('open', 'Ochiq'),
+        ('mitigated', 'Kamaytarilgan'),
+        ('accepted', 'Qabul qilingan'),
+        ('closed', 'Yopilgan'),
+    ]
+
+    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='risk_items')
+    standard = models.CharField(max_length=20, choices=STANDARD_CHOICES, default='iso9001')
+    process_area = models.CharField(max_length=200, help_text="Jarayon yoki bo'lim nomi")
+    description = models.TextField(help_text='Risk tavsifi')
+    likelihood = models.IntegerField(choices=LIKELIHOOD_CHOICES, default=3)
+    impact = models.IntegerField(choices=IMPACT_CHOICES, default=3)
+    mitigation = models.TextField(blank=True, help_text='Riskni kamaytirish choralari')
+    owner = models.CharField(max_length=200, blank=True, help_text='Masul shaxs')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
+    due_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"[{self.get_standard_display()}] {self.process_area} — risk_score={self.risk_score}"
+
+    @property
+    def risk_score(self):
+        return self.likelihood * self.impact
+
+    @property
+    def risk_level(self):
+        s = self.risk_score
+        if s >= 15:
+            return 'critical'
+        if s >= 9:
+            return 'high'
+        if s >= 4:
+            return 'medium'
+        return 'low'
+
+    @property
+    def is_overdue(self):
+        return (
+            self.due_date is not None
+            and self.status not in ('closed',)
+            and self.due_date < timezone.now().date()
+        )
+
+
+class TrainingRecord(models.Model):
+    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='training_records')
+    employee_name = models.CharField(max_length=200)
+    position = models.CharField(max_length=200, blank=True)
+    training_name = models.CharField(max_length=300)
+    standard_clause = models.CharField(max_length=100, blank=True, help_text='Masalan: ISO 9001 7.2')
+    date_completed = models.DateField()
+    trainer = models.CharField(max_length=200, blank=True)
+    certificate_number = models.CharField(max_length=100, blank=True)
+    expiry_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-date_completed']
+
+    def __str__(self):
+        return f"{self.employee_name} — {self.training_name}"
+
+    @property
+    def is_expired(self):
+        return self.expiry_date is not None and self.expiry_date < timezone.now().date()
+
+    @property
+    def days_to_expiry(self):
+        if self.expiry_date is None:
+            return None
+        return (self.expiry_date - timezone.now().date()).days
 
 
 class AuditSchedule(models.Model):

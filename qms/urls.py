@@ -22,4 +22,17 @@ urlpatterns = [
     # Eksport
     path('checklist/export/', views.export_checklist_csv, name='export_checklist_csv'),
     path('nonconformities/export/', views.export_nc_csv, name='export_nc_csv'),
+    # Risk Register
+    path('risks/', views.risk_register, name='risk_register'),
+    path('risks/add/', views.add_risk, name='add_risk'),
+    path('risks/<int:pk>/update/', views.update_risk, name='update_risk'),
+    path('risks/<int:pk>/delete/', views.delete_risk, name='delete_risk'),
+    path('risks/export/', views.export_risk_csv, name='export_risk_csv'),
+    # Training Records
+    path('training/', views.training_records, name='training_records'),
+    path('training/add/', views.add_training, name='add_training'),
+    path('training/<int:pk>/delete/', views.delete_training, name='delete_training'),
+    path('training/export/', views.export_training_csv, name='export_training_csv'),
+    # NC Effectiveness
+    path('nonconformities/<int:pk>/verify/', views.verify_nc_effectiveness, name='verify_nc_effectiveness'),
 ]
