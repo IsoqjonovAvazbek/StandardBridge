@@ -564,7 +564,24 @@ def qms_generate_policy(request):
         messages.error(request, 'Hujjat saqlashda xato yuz berdi. Qayta urinib ko\'ring.')
         return redirect('qms_documents')
     messages.success(request, 'AI hujjat yaratildi va hujjatlar ro\'yxatiga qo\'shildi.')
-    return redirect('qms_documents')
+    return redirect('qms_document_view', pk=doc.pk)
+
+
+@login_required
+def qms_document_view(request, pk):
+    """Inline rendered view for .md documents (AI-generated)."""
+    doc = get_object_or_404(QMSDocument, pk=pk, company=request.user, is_active=True)
+    content = ''
+    if doc.file and doc.file.name.endswith('.md'):
+        try:
+            doc.file.open('r')
+            content = doc.file.read()
+            if isinstance(content, bytes):
+                content = content.decode('utf-8')
+            doc.file.close()
+        except Exception:
+            content = ''
+    return render(request, 'qms/document_view.html', {'doc': doc, 'content': content})
 
 
 # ---------------------------------------------------------------------------

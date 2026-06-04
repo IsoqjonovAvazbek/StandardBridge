@@ -88,7 +88,8 @@
   </div>
 
   <!-- Content -->
-  <div class="content" id="proposal-body">{{ proposal.content }}</div>
+  <div class="content" id="proposal-body"></div>
+  <script id="proposal-raw" type="text/plain">{{ proposal.content }}</script>
 
   <!-- Signatures -->
   <div class="sign-block">
@@ -114,19 +115,11 @@
   <button onclick="window.close()" style="background:#f3f4f6;color:#374151;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px;margin-left:8px;">Yopish</button>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
 <script>
-const body = document.getElementById('proposal-body');
-let html = body.textContent
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>\n?)+/g, m => '<ul>' + m + '</ul>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/\n/g, '<br>');
-body.innerHTML = '<p>' + html + '</p>';
+marked.setOptions({ breaks: true, gfm: true });
+const raw = document.getElementById('proposal-raw').textContent;
+document.getElementById('proposal-body').innerHTML = marked.parse(raw);
 </script>
 </body>
 </html>

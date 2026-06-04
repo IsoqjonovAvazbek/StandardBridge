@@ -4,99 +4,137 @@
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <div>
-            <a href="{% url 'proposal_list' %}" class="text-blue-600 hover:underline text-sm">← Taklifnomalar</a>
-            <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ proposal.company_name }}</h1>
-            <p class="text-gray-500 text-sm">{{ proposal.standard }} · {{ proposal.created_at|date:"d.m.Y" }}</p>
-        </div>
-        <div class="flex gap-2">
-            <a href="{% url 'proposal_print' proposal.pk %}" target="_blank"
-               class="border border-gray-300 text-gray-700 px-4 py-2 rounded-xl text-sm hover:bg-gray-50 transition flex items-center gap-2">
-                🖨️ PDF / Chop etish
-            </a>
-            <a href="{% url 'edit_proposal' proposal.pk %}"
-               class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
-                ✏️ Tahrirlash
-            </a>
-        </div>
+  <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div>
+      <a href="{% url 'proposal_list' %}" class="text-blue-600 hover:underline text-sm">← Taklifnomalar</a>
+      <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ proposal.company_name }}</h1>
+      <p class="text-gray-500 text-sm">{{ proposal.standard }} · {{ proposal.created_at|date:"d.m.Y" }}</p>
+    </div>
+    <div class="flex gap-2 flex-wrap">
+      <button onclick="copyRaw()" class="border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-sm hover:bg-gray-50 transition">
+        📋 Nusxalash
+      </button>
+      <a href="{% url 'proposal_print' proposal.pk %}" target="_blank"
+         class="border border-gray-300 text-gray-700 px-4 py-2 rounded-xl text-sm hover:bg-gray-50 transition flex items-center gap-2">
+        🖨️ PDF / Chop etish
+      </a>
+      <a href="{% url 'edit_proposal' proposal.pk %}"
+         class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
+        ✏️ Tahrirlash
+      </a>
+    </div>
+  </div>
+
+  <!-- Meta strip -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+    <div class="bg-white rounded-xl border border-gray-100 p-3 text-center">
+      <p class="text-xs text-gray-400 mb-0.5">Holat</p>
+      <span class="text-sm font-semibold
+        {% if proposal.status == 'accepted' %}text-green-600
+        {% elif proposal.status == 'rejected' %}text-red-600
+        {% elif proposal.status == 'sent' %}text-blue-600
+        {% else %}text-gray-500{% endif %}">
+        {% if proposal.status == 'accepted' %}✅ Qabul
+        {% elif proposal.status == 'rejected' %}❌ Rad
+        {% elif proposal.status == 'sent' %}📤 Yuborilgan
+        {% else %}📝 Qoralama{% endif %}
+      </span>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-100 p-3 text-center">
+      <p class="text-xs text-gray-400 mb-0.5">Narx</p>
+      <p class="text-sm font-semibold text-gray-800">
+        {% if proposal.price_min or proposal.price_max %}${{ proposal.price_min|floatformat:0 }}–${{ proposal.price_max|floatformat:0 }}
+        {% else %}—{% endif %}
+      </p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-100 p-3 text-center">
+      <p class="text-xs text-gray-400 mb-0.5">Muddat</p>
+      <p class="text-sm font-semibold text-gray-800">{{ proposal.duration_days }} kun</p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-100 p-3 text-center">
+      <p class="text-xs text-gray-400 mb-0.5">Amal qilishi</p>
+      <p class="text-sm font-semibold text-gray-800">
+        {% if proposal.valid_until %}{{ proposal.valid_until|date:"d.m.Y" }}{% else %}—{% endif %}
+      </p>
+    </div>
+  </div>
+
+  <!-- Document paper -->
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <!-- Header band -->
+    <div class="gradient-bg px-8 py-4 flex items-center justify-between">
+      <div>
+        <p class="text-white font-bold">Tijorat Taklifnomasi</p>
+        <p class="text-white/70 text-xs mt-0.5">{{ proposal.standard }} · {{ proposal.company_name }}</p>
+      </div>
+      <div class="text-right text-white/70 text-xs">
+        <p>{{ proposal.created_at|date:"d.m.Y" }}</p>
+        {% if proposal.valid_until %}<p>Muddati: {{ proposal.valid_until|date:"d.m.Y" }}</p>{% endif %}
+      </div>
     </div>
 
-    <!-- Meta cards -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-xl border border-gray-100 p-4">
-            <p class="text-xs text-gray-400 mb-1">Holat</p>
-            <span class="text-sm font-semibold
-                {% if proposal.status == 'accepted' %}text-green-600
-                {% elif proposal.status == 'rejected' %}text-red-600
-                {% elif proposal.status == 'sent' %}text-blue-600
-                {% else %}text-gray-600{% endif %}">
-                {% if proposal.status == 'accepted' %}✅ Qabul{% elif proposal.status == 'rejected' %}❌ Rad{% elif proposal.status == 'sent' %}📤 Yuborilgan{% else %}📝 Qoralama{% endif %}
-            </span>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-100 p-4">
-            <p class="text-xs text-gray-400 mb-1">Narx</p>
-            <p class="text-sm font-semibold text-gray-800">
-                {% if proposal.price_min or proposal.price_max %}
-                ${{ proposal.price_min|floatformat:0 }}–${{ proposal.price_max|floatformat:0 }}
-                {% else %}—{% endif %}
-            </p>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-100 p-4">
-            <p class="text-xs text-gray-400 mb-1">Muddat</p>
-            <p class="text-sm font-semibold text-gray-800">{{ proposal.duration_days }} kun</p>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-100 p-4">
-            <p class="text-xs text-gray-400 mb-1">Amal qilishi</p>
-            <p class="text-sm font-semibold text-gray-800">
-                {% if proposal.valid_until %}{{ proposal.valid_until|date:"d.m.Y" }}{% else %}—{% endif %}
-            </p>
-        </div>
-    </div>
+    <!-- Rendered proposal body -->
+    <div id="proposalContent" class="doc-paper px-10 py-8"></div>
+  </div>
 
-    <!-- Content -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-6">
-        <div id="rendered-content" class="prose prose-sm max-w-none text-gray-800 leading-relaxed">
-            {{ proposal.content }}
-        </div>
-    </div>
+  <textarea id="docRaw" class="hidden">{{ proposal.content }}</textarea>
 
-    <!-- Status update -->
-    <div class="mt-4 bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-4">
-        <p class="text-sm text-gray-600 shrink-0">Holatni o'zgartirish:</p>
-        <form method="POST" action="{% url 'edit_proposal' proposal.pk %}" class="flex gap-2 items-center flex-wrap">
-            {% csrf_token %}
-            <input type="hidden" name="content" value="{{ proposal.content }}">
-            <select name="status" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-400">
-                <option value="draft" {% if proposal.status == 'draft' %}selected{% endif %}>Qoralama</option>
-                <option value="sent" {% if proposal.status == 'sent' %}selected{% endif %}>Yuborilgan</option>
-                <option value="accepted" {% if proposal.status == 'accepted' %}selected{% endif %}>Qabul qilindi</option>
-                <option value="rejected" {% if proposal.status == 'rejected' %}selected{% endif %}>Rad etildi</option>
-            </select>
-            <button type="submit" class="gradient-bg text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:opacity-90 transition">Saqlash</button>
-        </form>
-        <form method="POST" action="{% url 'delete_proposal' proposal.pk %}" class="ml-auto"
-              onsubmit="return confirm('Taklifnomani o\'chirishni tasdiqlaysizmi?')">
-            {% csrf_token %}
-            <button type="submit" class="text-red-500 hover:text-red-700 text-sm">O'chir</button>
-        </form>
-    </div>
+  <!-- Status update bar -->
+  <div class="mt-4 bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4 flex-wrap">
+    <p class="text-sm text-gray-500 shrink-0">Holatni yangilash:</p>
+    <form method="POST" action="{% url 'edit_proposal' proposal.pk %}" class="flex gap-2 items-center">
+      {% csrf_token %}
+      <input type="hidden" name="content" value="{{ proposal.content }}">
+      <select name="status" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-400">
+        <option value="draft" {% if proposal.status == 'draft' %}selected{% endif %}>📝 Qoralama</option>
+        <option value="sent" {% if proposal.status == 'sent' %}selected{% endif %}>📤 Yuborilgan</option>
+        <option value="accepted" {% if proposal.status == 'accepted' %}selected{% endif %}>✅ Qabul qilindi</option>
+        <option value="rejected" {% if proposal.status == 'rejected' %}selected{% endif %}>❌ Rad etildi</option>
+      </select>
+      <button type="submit" class="gradient-bg text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:opacity-90 transition">Saqlash</button>
+    </form>
+    <form method="POST" action="{% url 'delete_proposal' proposal.pk %}" class="ml-auto"
+          onsubmit="return confirm('O\'chirishni tasdiqlaysizmi?')">
+      {% csrf_token %}
+      <button type="submit" class="text-red-400 hover:text-red-600 text-sm">O'chir</button>
+    </form>
+  </div>
 </div>
+
+<style>
+.doc-paper { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.8; color: #1f2937; }
+.doc-paper h1 { font-size: 1.35rem; font-weight: 800; color: #111827; margin: 1.8rem 0 0.6rem; padding-bottom: 0.4rem; border-bottom: 2px solid #2563eb; }
+.doc-paper h2 { font-size: 1.1rem; font-weight: 700; color: #1e3a5f; margin: 1.5rem 0 0.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid #e5e7eb; }
+.doc-paper h3 { font-size: 0.95rem; font-weight: 700; color: #374151; margin: 1.2rem 0 0.4rem; }
+.doc-paper p  { margin: 0.65rem 0; }
+.doc-paper ul { list-style: none; padding-left: 0; margin: 0.6rem 0; }
+.doc-paper ul li { padding: 0.25rem 0 0.25rem 1.4rem; position: relative; }
+.doc-paper ul li::before { content: "▸"; color: #2563eb; position: absolute; left: 0; font-size: 0.75rem; top: 0.38rem; }
+.doc-paper ol { counter-reset: ol-c; padding-left: 0; margin: 0.6rem 0; }
+.doc-paper ol li { counter-increment: ol-c; padding: 0.25rem 0 0.25rem 1.8rem; position: relative; }
+.doc-paper ol li::before { content: counter(ol-c) "."; color: #2563eb; font-weight: 700; position: absolute; left: 0; }
+.doc-paper strong { font-weight: 700; color: #111827; }
+.doc-paper em { font-style: italic; color: #4b5563; }
+.doc-paper blockquote { border-left: 3px solid #2563eb; padding: 0.5rem 1rem; margin: 1rem 0; color: #475569; background: #f8fafc; border-radius: 0 6px 6px 0; }
+.doc-paper hr { border: 0; border-top: 1px solid #e5e7eb; margin: 1.5rem 0; }
+.doc-paper table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem; }
+.doc-paper thead tr { background: #f1f5f9; }
+.doc-paper th { padding: 0.6rem 0.8rem; font-weight: 600; color: #374151; border: 1px solid #e2e8f0; text-align: left; }
+.doc-paper td { padding: 0.55rem 0.8rem; border: 1px solid #e2e8f0; }
+.doc-paper tr:nth-child(even) td { background: #f9fafb; }
+</style>
+
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
 <script>
-// Simple markdown → HTML renderer
-const raw = document.getElementById('rendered-content').textContent;
-let html = raw
-    .replace(/^### (.+)$/gm, '<h3 class="text-base font-bold text-gray-900 mt-4 mb-1">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 class="text-lg font-bold text-gray-900 mt-5 mb-2">$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1 class="text-xl font-bold text-gray-900 mt-6 mb-2">$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-gray-700">$1</li>')
-    .replace(/^\d+\. (.+)$/gm, '<li class="ml-4 list-decimal text-gray-700">$1</li>')
-    .replace(/\n\n/g, '</p><p class="mb-3">')
-    .replace(/\n/g, '<br>');
-document.getElementById('rendered-content').innerHTML = '<p class="mb-3">' + html + '</p>';
+marked.setOptions({ breaks: true, gfm: true });
+document.getElementById('proposalContent').innerHTML = marked.parse(document.getElementById('docRaw').value);
+
+function copyRaw() {
+  navigator.clipboard.writeText(document.getElementById('docRaw').value)
+    .then(() => alert('Nusxalandi!'));
+}
 </script>
 {% endblock %}

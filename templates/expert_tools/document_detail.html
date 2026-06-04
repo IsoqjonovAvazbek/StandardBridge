@@ -3,15 +3,15 @@
 {% block title %}{{ doc.title }} — StandardBridge{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-  <!-- Header -->
+  <!-- Breadcrumb + actions -->
   <div class="flex flex-col sm:flex-row sm:items-start gap-4 mb-6">
     <div class="flex-1">
-      <div class="flex items-center gap-2 mb-2">
-        <a href="{% url 'expert_doc_list' %}" class="text-sm text-gray-400 hover:text-gray-600">{{ T.et_doc_list }}</a>
-        <span class="text-gray-300">›</span>
-        <span class="text-sm text-gray-600 truncate">{{ doc.title }}</span>
+      <div class="flex items-center gap-2 mb-2 text-sm text-gray-400">
+        <a href="{% url 'expert_doc_list' %}" class="hover:text-gray-600">{{ T.et_doc_list }}</a>
+        <span>›</span>
+        <span class="text-gray-600 truncate">{{ doc.title }}</span>
       </div>
       <h1 class="text-xl font-bold text-gray-900">{{ doc.title }}</h1>
       <div class="flex flex-wrap items-center gap-2 mt-2">
@@ -30,7 +30,10 @@
         <span class="text-xs text-gray-400">{{ doc.created_at|date:"d.m.Y H:i" }}</span>
       </div>
     </div>
-    <div class="flex items-center gap-2 flex-shrink-0">
+    <div class="flex items-center gap-2 shrink-0">
+      <button onclick="copyRaw()" class="border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-sm hover:bg-gray-50 transition">
+        📋 Nusxalash
+      </button>
       <a href="{% url 'edit_document' doc.pk %}"
          class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
         {{ T.et_edit_doc }}
@@ -38,112 +41,80 @@
       <form method="post" action="{% url 'delete_expert_doc' doc.pk %}"
             onsubmit="return confirm('Hujjatni o\'chirish?')">
         {% csrf_token %}
-        <button type="submit"
-                class="border border-red-200 text-red-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-50 transition">
+        <button type="submit" class="border border-red-200 text-red-600 px-3 py-2 rounded-xl text-sm hover:bg-red-50 transition">
           {{ T.et_delete_doc }}
         </button>
       </form>
     </div>
   </div>
 
-  <!-- Content -->
-  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm">
-    <!-- Toolbar -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-      <span class="text-sm font-medium text-gray-600">{{ T.et_doc_content }}</span>
-      <button onclick="copyContent()" class="text-xs text-blue-600 hover:underline">Nusxalash</button>
+  <!-- Document body — paper style -->
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <!-- Document header band -->
+    <div class="gradient-bg px-8 py-4 flex items-center justify-between">
+      <div>
+        <p class="text-white font-semibold text-sm">{{ doc.title }}</p>
+        {% if doc.template %}<p class="text-white/70 text-xs mt-0.5">{{ doc.template.get_standard_display }} · {% label doc.template.doc_type %}</p>{% endif %}
+      </div>
+      <div class="text-right text-white/70 text-xs">
+        <p>{{ doc.created_at|date:"d.m.Y" }}</p>
+        {% if doc.project %}<p>{{ doc.project.entrepreneur.company_name }}</p>{% endif %}
+      </div>
     </div>
-    <!-- Document text (rendered) -->
-    <div id="docContent" class="px-8 py-6 doc-body text-gray-800 leading-relaxed"></div>
-    <!-- Raw markdown (hidden, used for copy + render source) -->
-    <textarea id="docRaw" class="hidden">{{ doc.content }}</textarea>
+
+    <!-- Rendered content -->
+    <div id="docContent" class="doc-paper px-10 py-8"></div>
   </div>
 
+  <!-- Hidden raw source -->
+  <textarea id="docRaw" class="hidden">{{ doc.content }}</textarea>
+
   {% if doc.project %}
-  <div class="mt-4 text-sm text-gray-500 text-center">
+  <p class="text-center text-xs text-gray-400 mt-4">
     Loyiha: <a href="{% url 'project_detail' doc.project.pk %}" class="text-blue-600 hover:underline">{{ doc.project.entrepreneur.company_name }}</a>
-  </div>
+  </p>
   {% endif %}
 </div>
 
 <style>
-  .doc-body h1 { font-size: 1.5rem; font-weight: 700; color: #111827; margin: 1.2rem 0 0.6rem; }
-  .doc-body h2 { font-size: 1.25rem; font-weight: 700; color: #111827; margin: 1.1rem 0 0.5rem; padding-bottom: .25rem; border-bottom: 1px solid #f3f4f6; }
-  .doc-body h3 { font-size: 1.05rem; font-weight: 600; color: #1f2937; margin: 1rem 0 0.4rem; }
-  .doc-body p  { margin: 0.5rem 0; }
-  .doc-body ul { list-style: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
-  .doc-body ol { list-style: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
-  .doc-body li { margin: 0.2rem 0; }
-  .doc-body strong { font-weight: 700; color: #111827; }
-  .doc-body em { font-style: italic; }
-  .doc-body hr { border: 0; border-top: 1px solid #e5e7eb; margin: 1rem 0; }
-  .doc-body table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.875rem; }
-  .doc-body th, .doc-body td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; }
-  .doc-body th { background: #f9fafb; font-weight: 600; }
+.doc-paper { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.75; color: #1f2937; }
+.doc-paper h1 { font-size: 1.4rem; font-weight: 800; color: #111827; margin: 1.8rem 0 0.6rem; padding-bottom: 0.4rem; border-bottom: 2px solid #2563eb; }
+.doc-paper h2 { font-size: 1.15rem; font-weight: 700; color: #1e3a5f; margin: 1.5rem 0 0.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid #e5e7eb; }
+.doc-paper h3 { font-size: 1rem; font-weight: 700; color: #374151; margin: 1.2rem 0 0.4rem; }
+.doc-paper h4 { font-size: 0.9rem; font-weight: 600; color: #4b5563; margin: 1rem 0 0.3rem; }
+.doc-paper p  { margin: 0.6rem 0; }
+.doc-paper ul { list-style: none; padding-left: 0; margin: 0.6rem 0; }
+.doc-paper ul li { padding: 0.2rem 0 0.2rem 1.4rem; position: relative; }
+.doc-paper ul li::before { content: "▸"; color: #2563eb; position: absolute; left: 0; font-size: 0.75rem; top: 0.35rem; }
+.doc-paper ol { counter-reset: ol-counter; padding-left: 0; margin: 0.6rem 0; }
+.doc-paper ol li { counter-increment: ol-counter; padding: 0.2rem 0 0.2rem 1.8rem; position: relative; }
+.doc-paper ol li::before { content: counter(ol-counter) "."; color: #2563eb; font-weight: 700; position: absolute; left: 0; font-size: 0.85rem; }
+.doc-paper strong { font-weight: 700; color: #111827; }
+.doc-paper em { font-style: italic; color: #4b5563; }
+.doc-paper code { background: #f1f5f9; color: #0f172a; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.85em; font-family: monospace; }
+.doc-paper pre { background: #1e293b; color: #e2e8f0; padding: 1rem 1.2rem; border-radius: 8px; overflow-x: auto; margin: 1rem 0; }
+.doc-paper pre code { background: none; color: inherit; padding: 0; }
+.doc-paper blockquote { border-left: 3px solid #2563eb; padding: 0.4rem 0 0.4rem 1rem; margin: 1rem 0; color: #475569; background: #f8fafc; border-radius: 0 6px 6px 0; }
+.doc-paper hr { border: 0; border-top: 1px solid #e5e7eb; margin: 1.5rem 0; }
+.doc-paper table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem; }
+.doc-paper thead tr { background: #f1f5f9; }
+.doc-paper th { padding: 0.6rem 0.8rem; text-align: left; font-weight: 600; color: #374151; border: 1px solid #e2e8f0; }
+.doc-paper td { padding: 0.55rem 0.8rem; border: 1px solid #e2e8f0; color: #374151; }
+.doc-paper tr:nth-child(even) { background: #f9fafb; }
 </style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
 <script>
-function escapeHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-function inlineMd(s) {
-  s = escapeHtml(s);
-  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  s = s.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
-  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
-  return s;
-}
-function renderMarkdown(md) {
-  var lines = md.replace(/\r\n/g, '\n').split('\n');
-  var html = '', listType = null, tableRows = [];
-  function closeList() { if (listType) { html += '</' + listType + '>'; listType = null; } }
-  function flushTable() {
-    if (!tableRows.length) return;
-    html += '<table>';
-    tableRows.forEach(function(row, idx) {
-      var cells = row.replace(/^\||\|$/g, '').split('|');
-      var tag = idx === 0 ? 'th' : 'td';
-      html += '<tr>' + cells.map(function(c){ return '<'+tag+'>'+inlineMd(c.trim())+'</'+tag+'>'; }).join('') + '</tr>';
-    });
-    html += '</table>';
-    tableRows = [];
-  }
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i].replace(/\s+$/, '');
-    var t = line.trim();
-    if (/^\|.*\|/.test(t)) {
-      if (/^[|\s:|-]+$/.test(t)) { /* separator row — skip */ continue; }
-      closeList(); tableRows.push(t); continue;
-    } else { flushTable(); }
-    if (t === '') { closeList(); continue; }
-    if (/^#{1,6}\s/.test(t)) {
-      closeList();
-      var level = t.match(/^#+/)[0].length;
-      html += '<h' + level + '>' + inlineMd(t.replace(/^#+\s*/, '')) + '</h' + level + '>';
-    } else if (/^([-*_])\1{2,}$/.test(t)) {
-      closeList(); html += '<hr>';
-    } else if (/^[-*]\s+/.test(t)) {
-      if (listType !== 'ul') { closeList(); listType = 'ul'; html += '<ul>'; }
-      html += '<li>' + inlineMd(t.replace(/^[-*]\s+/, '')) + '</li>';
-    } else if (/^\d+[.)]\s+/.test(t)) {
-      if (listType !== 'ol') { closeList(); listType = 'ol'; html += '<ol>'; }
-      html += '<li>' + inlineMd(t.replace(/^\d+[.)]\s+/, '')) + '</li>';
-    } else {
-      closeList();
-      html += '<p>' + inlineMd(t) + '</p>';
-    }
-  }
-  flushTable(); closeList();
-  return html;
-}
-(function() {
-  var raw = document.getElementById('docRaw').value;
-  document.getElementById('docContent').innerHTML = renderMarkdown(raw);
-})();
-function copyContent() {
-  var text = document.getElementById('docRaw').value;
-  navigator.clipboard.writeText(text).then(function() {
-    alert('Nusxalandi!');
-  });
+marked.setOptions({ breaks: true, gfm: true });
+const raw = document.getElementById('docRaw').value;
+document.getElementById('docContent').innerHTML = marked.parse(raw);
+
+function copyRaw() {
+  navigator.clipboard.writeText(document.getElementById('docRaw').value)
+    .then(() => { alert('Nusxalandi!'); });
 }
 </script>
 {% endblock %}

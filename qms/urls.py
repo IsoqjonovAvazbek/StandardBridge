@@ -19,6 +19,8 @@ urlpatterns = [
     # AI yordamchi
     path('nonconformities/<int:pk>/ai-suggest/', views.ai_nc_suggestion, name='ai_nc_suggestion'),
     path('documents/ai-generate/', views.qms_generate_policy, name='qms_generate_policy'),
+    # Document viewer (AI .md hujjatlar uchun)
+    path('documents/<int:pk>/view/', views.qms_document_view, name='qms_document_view'),
     # Eksport
     path('checklist/export/', views.export_checklist_csv, name='export_checklist_csv'),
     path('nonconformities/export/', views.export_nc_csv, name='export_nc_csv'),
