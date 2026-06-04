@@ -103,6 +103,15 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] Hujjat muddati eslatma: QMSDocument.expiry_notified + is_expired/days_to_expiry, check_document_expiry management command (Notification + email, takror yubormaydi, --days/--reset), documents.html da muddat badge (orange <=30 kun, qizil tugagan)
 - [x] qms migration 0004 (NC code, ai_suggestion, expiry_notified)
 
+### QMS — 1-yo'nalish to'liq (menejer/sifat bo'limi uchun, ISO sertifikatsiyaga tayyor)
+- [x] Risk Register: RiskItem model (likelihood×impact matrix, risk_level critical/high/medium/low, mitigation, owner, due_date, is_overdue), risk_register.html (jadval+filtrlash+modal+Excel), ISO 9001/14001/45001 §6.1 talabini qoplaydi
+- [x] Training Records: TrainingRecord model (xodim, lavozim, trening nomi, ISO band, sertifikat raqami, expiry_date, is_expired/days_to_expiry), training_records.html (jadval+alertlar+modal+Excel), ISO 9001 §7.2 talabini qoplaydi
+- [x] NC Effectiveness Verification: NonConformity ga is_effective_verified+verification_note+verified_at, nonconformities.html da yopilgan NC uchun "Samaradorligini tasdiqlash" tugma+forma (ISO 10.2.1)
+- [x] QMS Health Score dashboard: Weighted score (checklist 40% + NC yopish 30% + hujjat validligi 20% + audit jadval 10%), SVG gauge, rangkod (yashil/sariq/qizil)
+- [x] Dashboard: Risk va Training mini-kartalar (open_risks, expiring_trainings alertlar)
+- [x] qms/admin.py: RiskItem, TrainingRecord, NonConformity admin registratsiyasi
+- [x] migration 0005
+
 ### Tahlil (gap-analiz) mukammallashtirildi — loyihaning yuragi
 - [x] Korxona konteksti → AI: answer_questions.html da kontekst bloki (xodimlar soni, eksport bozorlari, mavjud sertifikatlar, hozirgi holat), session['company_context'], _build_company_context(), GapAnalysis.company_info ga saqlanadi va AI promptiga uzatiladi
 - [x] Tayyorlik foizi (readiness): _compute_readiness() (yes=1.0/partial=0.5/no=0.0), analysis_detail.html SVG gauge + prioritet breakdown (critical/high/medium/low), AI promptiga ham uzatiladi
