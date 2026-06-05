@@ -1,33 +1,33 @@
 {% extends 'base.html' %}
-{% block title %}Daromad statistikasi — StandartBridge{% endblock %}
+{% block title %}{{ T.et_earnings }} — StandartBridge{% endblock %}
 
 {% block content %}
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <div class="mb-6">
-        <a href="{% url 'expert_tools_dashboard' %}" class="text-blue-600 hover:underline text-sm">← Expert Tools</a>
-        <h1 class="text-2xl font-bold text-gray-900 mt-1">💰 Daromad statistikasi</h1>
+        <a href="{% url 'expert_tools_dashboard' %}" class="text-blue-600 hover:underline text-sm">← {{ T.et_dashboard }}</a>
+        <h1 class="text-2xl font-bold text-gray-900 mt-1">💰 {{ T.et_earnings }}</h1>
     </div>
 
     <!-- Top stats -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-2xl border border-gray-100 p-5">
-            <p class="text-xs text-gray-400 uppercase mb-1">Jami daromad</p>
+            <p class="text-xs text-gray-400 uppercase mb-1">{{ T.et_total_earned }}</p>
             <p class="text-2xl font-bold text-green-600">${{ total_earned|floatformat:0 }}</p>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 p-5">
-            <p class="text-xs text-gray-400 uppercase mb-1">Bu oy</p>
+            <p class="text-xs text-gray-400 uppercase mb-1">{{ T.et_month_earned }}</p>
             <p class="text-2xl font-bold text-blue-600">${{ month_earned|floatformat:0 }}</p>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 p-5">
-            <p class="text-xs text-gray-400 uppercase mb-1">Bu oy soat</p>
+            <p class="text-xs text-gray-400 uppercase mb-1">{{ T.et_month_hours }}</p>
             <p class="text-2xl font-bold text-gray-700">{{ month_hours }}h</p>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 p-5">
-            <p class="text-xs text-gray-400 uppercase mb-1">Soatlik (oylik)</p>
+            <p class="text-xs text-gray-400 uppercase mb-1">{{ T.et_hourly_rate }}</p>
             <p class="text-2xl font-bold text-gray-700">
                 {% if month_hours and month_earned %}
-                ${% widthratio month_earned 1 1 %}
+                ${% widthratio month_earned month_hours 1 %}
                 {% else %}—{% endif %}
             </p>
         </div>

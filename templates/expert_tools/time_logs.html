@@ -1,26 +1,25 @@
 {% extends 'base.html' %}
-{% block title %}Vaqt hisoblagich — StandartBridge{% endblock %}
+{% block title %}{{ T.et_time_tracker }} — StandartBridge{% endblock %}
 
 {% block content %}
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-            <a href="{% url 'expert_tools_dashboard' %}" class="text-blue-600 hover:underline text-sm">← Expert Tools</a>
-            <h1 class="text-2xl font-bold text-gray-900 mt-1">⏱️ Vaqt hisoblagich</h1>
-            <p class="text-gray-500 text-sm">Loyihaga sarflangan soatlarni kuzating</p>
+            <a href="{% url 'expert_tools_dashboard' %}" class="text-blue-600 hover:underline text-sm">← {{ T.et_dashboard }}</a>
+            <h1 class="text-2xl font-bold text-gray-900 mt-1">⏱️ {{ T.et_time_tracker }}</h1>
         </div>
         <button onclick="document.getElementById('addLogModal').classList.remove('hidden')"
             class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Vaqt qo'shish
+            {{ T.et_add_time }}
         </button>
     </div>
 
     <!-- Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div class="bg-white rounded-2xl border border-gray-100 p-5">
-            <p class="text-xs text-gray-400 uppercase mb-1">Bu oy</p>
+            <p class="text-xs text-gray-400 uppercase mb-1">{{ T.et_time_this_month }}</p>
             <p class="text-3xl font-bold text-blue-600">{{ month_total }}h</p>
         </div>
         {% for pid, hours in project_totals.items %}

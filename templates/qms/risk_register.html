@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Risk Register — StandartBridge{% endblock %}
+{% block title %}{{ T.qms_risk_title }} — StandartBridge{% endblock %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -7,9 +7,9 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div>
-            <a href="{% url 'qms_dashboard' %}" class="text-blue-600 hover:underline text-sm">← QMS Dashboard</a>
-            <h1 class="text-2xl font-bold text-gray-900 mt-1">⚠️ Risk Register</h1>
-            <p class="text-gray-500 text-sm">ISO 9001 §6.1 • ISO 14001 §6.1 • ISO 45001 §6.1</p>
+            <a href="{% url 'qms_dashboard' %}" class="text-blue-600 hover:underline text-sm">← {{ T.qms_tool }}</a>
+            <h1 class="text-2xl font-bold text-gray-900 mt-1">⚠️ {{ T.qms_risk_title }}</h1>
+            <p class="text-gray-500 text-sm">{{ T.qms_risk_sub }}</p>
         </div>
         <div class="flex gap-2">
             <a href="{% url 'export_risk_csv' %}"
@@ -17,14 +17,14 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
-                Excel
+                {{ T.qms_risk_export }}
             </a>
             <button onclick="document.getElementById('addRiskModal').classList.remove('hidden')"
                 class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Risk qo'shish
+                {{ T.qms_add_risk }}
             </button>
         </div>
     </div>

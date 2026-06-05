@@ -469,6 +469,7 @@ def apply_template(request, pk, project_pk):
             message=f"Loyiha rejasi ({template.title}):\n\n{steps_text}",
             update_type='progress',
         )
+        messages.success(request, f"'{template.title}' shabloni muvaffaqiyatli qo'llandi.")
         return redirect('project_detail', pk=project_pk)
 
     return render(request, 'expert_tools/apply_template.html', {
