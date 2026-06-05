@@ -123,7 +123,7 @@
   <!-- Complete button -->
   {% if not audit.is_completed %}
   <form method="post" action="{% url 'complete_audit' audit.pk %}"
-        onsubmit="return confirm('Auditni yakunlashni tasdiqlaysizmi?')">
+        onsubmit="return confirm('{{ T.confirm_audit_finish }}')">
     {% csrf_token %}
     <div class="flex gap-3">
       <a href="{% url 'audit_list' %}"

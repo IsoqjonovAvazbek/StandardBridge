@@ -39,7 +39,7 @@
         {{ T.et_edit_doc }}
       </a>
       <form method="post" action="{% url 'delete_expert_doc' doc.pk %}"
-            onsubmit="return confirm('Hujjatni o\'chirish?')">
+            onsubmit="return confirm('{{ T.confirm_delete }}')">
         {% csrf_token %}
         <button type="submit" class="border border-red-200 text-red-600 px-3 py-2 rounded-xl text-sm hover:bg-red-50 transition">
           {{ T.et_delete_doc }}

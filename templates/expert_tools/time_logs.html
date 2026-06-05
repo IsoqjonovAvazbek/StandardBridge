@@ -82,9 +82,9 @@
                     <p class="text-xs text-gray-400">{{ log.date|date:"d.m.Y" }}</p>
                 </div>
                 <form method="POST" action="{% url 'delete_time_log' log.pk %}"
-                      onsubmit="return confirm('O\'chirishni tasdiqlaysizmi?')">
+                      onsubmit="return confirm('{{ T.confirm_delete }}')">
                     {% csrf_token %}
-                    <button type="submit" class="text-red-400 hover:text-red-600 text-xs">O'chir</button>
+                    <button type="submit" class="text-red-400 hover:text-red-600 text-xs">{{ T.delete_btn }}</button>
                 </form>
             </div>
             {% endfor %}

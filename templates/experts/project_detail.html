@@ -172,9 +172,9 @@
                         <form method="POST" action="{% url 'project_cancel' project.pk %}" class="mt-2">
                             {% csrf_token %}
                             <button type="submit"
-                                onclick="return confirm('Loyihani bekor qilasizmi? Bu harakat qaytarib bo\'lmaydi.')"
+                                onclick="return confirm('{{ T.confirm_cancel_project }}')"
                                 class="w-full text-xs text-gray-400 hover:text-red-500 py-1.5 transition">
-                                Loyihani bekor qilish
+                                {{ T.cancel }}
                             </button>
                         </form>
                         {% endif %}
@@ -419,7 +419,7 @@
                                     </svg>
                                 </button>
                                 <form method="POST" action="{% url 'delete_roadmap_step' project.pk step.pk %}"
-                                      onsubmit="return confirm('Qadamni o\'chirasizmi?')">
+                                      onsubmit="return confirm('{{ T.confirm_delete_step }}')">
                                     {% csrf_token %}
                                     <button type="submit" class="text-gray-300 hover:text-red-500 transition p-1" title="{{ T.delete_step_btn }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -55,7 +55,7 @@
         <form method="POST" action="{% url 'payment_release' project.pk %}">
             {% csrf_token %}
             <button type="submit"
-                onclick="return confirm('Ishni tasdiqlaysizmi? Pul mutaxassisga o\'tkaziladi.')"
+                onclick="return confirm('{{ T.confirm_release_payment }}')"
                 class="w-full bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition">
                 ✓ Ishni qabul qildim — pul o'tkazilsin
             </button>
@@ -163,7 +163,7 @@
         <form method="POST" action="{% url 'payment_confirm' project.pk %}">
             {% csrf_token %}
             <button type="submit"
-                onclick="return confirm('To\'lovni tasdiqlaysizmi? ${{ project.expert_price }} escrowga o\'tkaziladi.')"
+                onclick="return confirm('{{ T.confirm_escrow_payment }}')"
                 class="w-full gradient-bg text-white py-4 rounded-xl font-bold text-lg transition hover:opacity-90 flex items-center justify-center gap-3">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>

@@ -15,6 +15,11 @@
         .priority-high { border-left: 4px solid #f97316; }
         .priority-medium { border-left: 4px solid #eab308; }
         .priority-low { border-left: 4px solid #22c55e; }
+        @keyframes sbFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        #page-content { animation: sbFadeIn 0.22s ease-out; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -222,11 +227,11 @@
         </div>
     </div>
 
-    <div class="lg:ml-64 flex-1 min-h-screen">
+    <div id="page-content" class="lg:ml-64 flex-1 min-h-screen">
         {% if messages %}
-        <div class="fixed top-20 right-4 z-50 space-y-2">
+        <div class="fixed top-20 right-4 z-50 space-y-2" id="msg-container">
             {% for message in messages %}
-            <div class="px-6 py-3 rounded-lg shadow-lg text-white text-sm font-medium
+            <div class="auto-dismiss-msg px-6 py-3 rounded-lg shadow-lg text-white text-sm font-medium
                 {% if message.tags == 'error' %}bg-red-500{% else %}bg-green-500{% endif %}">
                 {{ message }}
             </div>
@@ -237,9 +242,9 @@
 {% else %}
 
 {% if messages %}
-<div class="fixed top-4 right-4 z-50 space-y-2">
+<div class="fixed top-4 right-4 z-50 space-y-2" id="msg-container">
     {% for message in messages %}
-    <div class="px-6 py-3 rounded-lg shadow-lg text-white text-sm font-medium
+    <div class="auto-dismiss-msg px-6 py-3 rounded-lg shadow-lg text-white text-sm font-medium
         {% if message.tags == 'error' %}bg-red-500{% else %}bg-green-500{% endif %}">
         {{ message }}
     </div>
@@ -274,19 +279,44 @@ function toggleSidebar() {
     }
 }
 
-// Close sidebar when a nav link is clicked on mobile
 document.addEventListener('DOMContentLoaded', function () {
+    // Sidebar: close on mobile nav click
     const sidebar = document.getElementById('sidebar');
-    if (!sidebar) return;
-    sidebar.querySelectorAll('a').forEach(function (link) {
-        link.addEventListener('click', function () {
-            if (window.innerWidth < 1024) {
-                sidebar.classList.add('-translate-x-full');
-                const overlay = document.getElementById('sidebar-overlay');
-                if (overlay) overlay.classList.add('hidden');
-            }
+    if (sidebar) {
+        sidebar.querySelectorAll('a').forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (window.innerWidth < 1024) {
+                    sidebar.classList.add('-translate-x-full');
+                    const overlay = document.getElementById('sidebar-overlay');
+                    if (overlay) overlay.classList.add('hidden');
+                }
+            });
         });
-    });
+    }
+
+    // Auto-dismiss Django messages after 4s
+    var msgs = document.querySelectorAll('.auto-dismiss-msg');
+    if (msgs.length) {
+        setTimeout(function () {
+            msgs.forEach(function (m) {
+                m.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                m.style.opacity = '0';
+                m.style.transform = 'translateX(80px)';
+                setTimeout(function () { if (m.parentNode) m.parentNode.removeChild(m); }, 420);
+            });
+        }, 4000);
+    }
+});
+
+// Form submit → loading state on submit button (prevents double-submit)
+document.addEventListener('submit', function (e) {
+    if (e.defaultPrevented) return;
+    if (e.target.hasAttribute('data-ajax')) return;
+    var btn = e.target.querySelector('button[type="submit"]:not([data-no-loading])');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="inline w-3.5 h-3.5 mr-1 align-middle animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>{{ T.loading_text|default:"Yuklanmoqda..." }}';
+    }
 });
 </script>
 {% block extra_js %}{% endblock %}

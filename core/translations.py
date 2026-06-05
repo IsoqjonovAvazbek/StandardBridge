@@ -977,6 +977,16 @@ TRANSLATIONS = {
         'expert_onboarding_step2_desc': 'Admin profilingizni tekshiradi (1-2 ish kuni)',
         'expert_onboarding_step3': '3. Loyihalar kela boshlaydi',
         'expert_onboarding_step3_desc': 'Tadbirkorlar tahlillarini yuboradi, siz narx belgilaysiz',
+
+        # === CONFIRM DIALOGS ===
+        'confirm_delete': "O'chirishni tasdiqlaysizmi?",
+        'confirm_cancel_project': "Loyihani bekor qilasizmi? Bu harakat qaytarib bo'lmaydi.",
+        'confirm_audit_finish': 'Auditni yakunlashni tasdiqlaysizmi?',
+        'confirm_release_payment': "Ishni tasdiqlaysizmi? Pul mutaxassisga o'tkaziladi.",
+        'confirm_escrow_payment': "To'lovni tasdiqlaysizmi?",
+        'locked_active_badge': 'Faol loyiha',
+        'loading_text': 'Yuklanmoqda...',
+        'confirm_delete_step': 'Qadamni o\'chirasizmi?',
     },
 
     'ru': {
@@ -1920,6 +1930,16 @@ TRANSLATIONS = {
         'expert_onboarding_step2_desc': 'Администратор проверит ваш профиль (1-2 рабочих дня)',
         'expert_onboarding_step3': '3. Приходят проекты',
         'expert_onboarding_step3_desc': 'Предприниматели присылают анализы, вы устанавливаете цену',
+
+        # === CONFIRM DIALOGS ===
+        'confirm_delete': 'Подтвердить удаление?',
+        'confirm_cancel_project': 'Отменить проект? Это действие необратимо.',
+        'confirm_audit_finish': 'Завершить аудит?',
+        'confirm_release_payment': 'Подтвердить работу? Деньги перейдут эксперту.',
+        'confirm_escrow_payment': 'Подтвердить оплату?',
+        'locked_active_badge': 'Активный проект',
+        'loading_text': 'Загрузка...',
+        'confirm_delete_step': 'Удалить шаг?',
     },
 
     'en': {
@@ -2891,6 +2911,16 @@ TRANSLATIONS = {
         'expert_onboarding_step2_desc': 'Admin verifies your profile (1-2 business days)',
         'expert_onboarding_step3': '3. Projects start coming',
         'expert_onboarding_step3_desc': 'Entrepreneurs send analyses, you set the price',
+
+        # === CONFIRM DIALOGS ===
+        'confirm_delete': 'Confirm deletion?',
+        'confirm_cancel_project': 'Cancel project? This action is irreversible.',
+        'confirm_audit_finish': 'Finish the audit?',
+        'confirm_release_payment': 'Confirm completion? Funds will be released to expert.',
+        'confirm_escrow_payment': 'Confirm payment?',
+        'locked_active_badge': 'Active project',
+        'loading_text': 'Loading...',
+        'confirm_delete_step': 'Delete this step?',
     },
 }
 

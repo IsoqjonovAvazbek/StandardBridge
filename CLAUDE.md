@@ -235,12 +235,21 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [ ] Payme integratsiya (Click bor, Payme yo'q)
 - [x] Ko'p tillar uchun email shablonlar — CustomUser.preferred_language + 10 funksiya UZ/RU/EN
 
-### Oxirgi sессiyada bajarilganlar (2026-06-05)
+### Oxirgi sessiyada bajarilganlar (2026-06-05)
 - [x] To'lov tugmasi bug: payment_page har doim Payment yaratadi (CLICK_SERVICE_ID bo'lsa ham bo'lmasa ham)
 - [x] payment.html: `{% if debug %}` → `{% if not click_service_id %}` — Railway da to'lov ko'rinmas edi
 - [x] Dashboard: accepted loyihalar uchun "To'lov qilish" CTA tugmasi qo'shildi
 - [x] training_records, risk_register, earnings, time_logs, proposal_list: barcha hardcoded text T.* ga o'tkazildi
 - [x] N+1, dead code, import tozalash (oldingi sessiya — cda17af, 7009b50)
+- [x] QMS health score 60% bug yangi user uchun — else 100→0, no_qms_data flag, dashboard gauge "—" ko'rsatadi
+- [x] UX yaxshilanishlar: onboarding guide, project status timeline, audit_mobile tarjimalar, proposal toast
+
+### Global UX silliqlash (2026-06-05)
+- [x] base.html: Django messages 4s keyin avtomatik yo'qoladi (fade-out animation)
+- [x] base.html: Forma submit tugmasi "Yuklanmoqda..." loading state + disabled (double-submit oldini oladi)
+- [x] base.html: Sahifa yuklanganda yumshoq fade-in animatsiya (#page-content)
+- [x] translations.py: confirm_delete/cancel_project/audit_finish/release_payment/escrow_payment/locked_active_badge (UZ/RU/EN)
+- [x] 8 ta templateda hardcoded confirm() matni T.* ga o'tkazildi (audit_detail, training_records, time_logs, documents×2, document_detail, project_detail, payment)
 
 ---
 
