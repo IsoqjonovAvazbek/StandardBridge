@@ -16,30 +16,37 @@
         <div class="relative w-20 h-20 shrink-0">
             <svg class="w-20 h-20 -rotate-90" viewBox="0 0 36 36">
                 <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f3f4f6" stroke-width="3"/>
+                {% if not no_qms_data %}
                 <circle cx="18" cy="18" r="15.9" fill="none"
                     stroke="{% if health_score >= 70 %}#22c55e{% elif health_score >= 40 %}#f59e0b{% else %}#ef4444{% endif %}"
                     stroke-width="3"
                     stroke-dasharray="{{ health_score }} {{ 100|add:0 }}"
                     stroke-linecap="round"/>
+                {% endif %}
             </svg>
             <div class="absolute inset-0 flex items-center justify-center">
+                {% if no_qms_data %}
+                <span class="text-xs font-medium text-gray-400">—</span>
+                {% else %}
                 <span class="text-lg font-bold {% if health_score >= 70 %}text-green-600{% elif health_score >= 40 %}text-amber-500{% else %}text-red-500{% endif %}">
                     {{ health_score }}%
                 </span>
+                {% endif %}
             </div>
         </div>
         <div>
-            <h3 class="font-bold text-gray-900 text-lg">QMS Umumiy holat</h3>
+            <h3 class="font-bold text-gray-900 text-lg">{{ T.qms_dashboard_title }}</h3>
             <p class="text-gray-500 text-sm">
-                {% if health_score >= 70 %}Yaxshi — ISO audit uchun tayyor
-                {% elif health_score >= 40 %}O'rtacha — Yaxshilash kerak
-                {% else %}Zaif — Tezda choralar ko'ring{% endif %}
+                {% if no_qms_data %}{{ T.qms_health_no_data }}
+                {% elif health_score >= 70 %}{{ T.qms_health_good }}
+                {% elif health_score >= 40 %}{{ T.qms_health_medium }}
+                {% else %}{{ T.qms_health_poor }}{% endif %}
             </p>
-            <div class="flex gap-4 mt-2 text-xs text-gray-400">
-                <span>Checklist 40%</span>
-                <span>NC yopish 30%</span>
-                <span>Hujjatlar 20%</span>
-                <span>Audit 10%</span>
+            <div class="flex flex-wrap gap-3 mt-2 text-xs text-gray-400">
+                <span>{{ T.qms_checklist_card }} 40%</span>
+                <span>{{ T.qms_nc_card }} 30%</span>
+                <span>{{ T.qms_docs_card }} 20%</span>
+                <span>{{ T.qms_audit_card }} 10%</span>
             </div>
         </div>
     </div>

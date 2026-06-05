@@ -930,6 +930,12 @@ TRANSLATIONS = {
         'readiness_trend_title': 'Tayyorlik o\'sishi',
         'readiness_trend_sub': 'Tahlillar bo\'yicha tayyorlik foizining dinamikasi',
 
+        # === QMS HEALTH SCORE ===
+        'qms_health_good': 'Yaxshi — ISO audit uchun tayyor',
+        'qms_health_medium': "O'rtacha — Yaxshilash kerak",
+        'qms_health_poor': 'Zaif — Choralar ko\'ring',
+        'qms_health_no_data': 'Hali ma\'lumot yo\'q — boshlang',
+
         # === AUDIT MOBILE ===
         'audit_finding_label': 'Topilma / Eslatma',
         'audit_finding_ph': 'Nima topildi? (ixtiyoriy)',
@@ -1866,6 +1872,12 @@ TRANSLATIONS = {
         'pending_price_title': 'Ожидание установки цены',
         'readiness_trend_title': 'Динамика готовности',
         'readiness_trend_sub': 'Изменение процента готовности по анализам',
+
+        # === QMS HEALTH SCORE ===
+        'qms_health_good': 'Хорошо — Готово к ISO аудиту',
+        'qms_health_medium': 'Средне — Требует улучшения',
+        'qms_health_poor': 'Слабо — Примите меры',
+        'qms_health_no_data': 'Данных ещё нет — начните',
 
         # === AUDIT MOBILE ===
         'audit_finding_label': 'Находка / Примечание',
@@ -2831,6 +2843,12 @@ TRANSLATIONS = {
         'pending_price_title': 'Waiting for price',
         'readiness_trend_title': 'Readiness trend',
         'readiness_trend_sub': 'Readiness percentage change across analyses',
+
+        # === QMS HEALTH SCORE ===
+        'qms_health_good': 'Good — Ready for ISO audit',
+        'qms_health_medium': 'Average — Needs improvement',
+        'qms_health_poor': 'Weak — Take action',
+        'qms_health_no_data': 'No data yet — get started',
 
         # === AUDIT MOBILE ===
         'audit_finding_label': 'Finding / Note',

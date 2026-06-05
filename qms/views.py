@@ -76,29 +76,31 @@ def qms_dashboard(request):
     # 1. Checklist compliance 40%
     checklist_score = compliance_pct * 0.4
 
-    # 2. NC resolution rate 30%
+    # 2. NC resolution rate 30% — data yo'q bo'lsa 0 (hali kuzatish boshlanmagan)
     total_nc = NonConformity.objects.filter(company=user).count()
     closed_nc = NonConformity.objects.filter(company=user, status='closed').count()
-    nc_score = (int(closed_nc / total_nc * 100) if total_nc > 0 else 100) * 0.3
+    nc_score = (int(closed_nc / total_nc * 100) if total_nc > 0 else 0) * 0.3
 
-    # 3. Document validity 20%
+    # 3. Document validity 20% — hujjat yuklanmagan bo'lsa 0
     expired_docs = QMSDocument.objects.filter(
         company=user, is_active=True, expiry_date__lt=today
     ).count()
-    doc_valid_pct = int((total_docs - expired_docs) / total_docs * 100) if total_docs > 0 else 100
+    doc_valid_pct = int((total_docs - expired_docs) / total_docs * 100) if total_docs > 0 else 0
     doc_score = doc_valid_pct * 0.2
 
-    # 4. Audit on schedule 10%
+    # 4. Audit on schedule 10% — audit rejalashtirilmagan bo'lsa 0
     total_audits = AuditSchedule.objects.filter(company=user).count()
     overdue_audits = AuditSchedule.objects.filter(
         company=user,
         status__in=('planned', 'in_progress'),
         planned_date__lt=today,
     ).count()
-    audit_pct = int((total_audits - overdue_audits) / total_audits * 100) if total_audits > 0 else 100
+    audit_pct = int((total_audits - overdue_audits) / total_audits * 100) if total_audits > 0 else 0
     audit_score = audit_pct * 0.1
 
     health_score = int(checklist_score + nc_score + doc_score + audit_score)
+    # Yangi foydalanuvchi: hech qanday ma'lumot kiritilmagan
+    no_qms_data = (checked == 0 and total_nc == 0 and total_docs == 0 and total_audits == 0)
 
     return render(request, 'qms/dashboard.html', {
         'completion_pct': completion_pct,
@@ -120,6 +122,7 @@ def qms_dashboard(request):
         'total_trainings': total_trainings,
         'expiring_trainings': expiring_trainings,
         'health_score': health_score,
+        'no_qms_data': no_qms_data,
     })
 
 
