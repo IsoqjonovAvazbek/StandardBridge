@@ -16,6 +16,8 @@ def set_language_view(request):
     if lang not in ('uz', 'ru', 'en'):
         lang = 'uz'
     request.session['lang'] = lang
+    if request.user.is_authenticated:
+        CustomUser.objects.filter(pk=request.user.pk).update(preferred_language=lang)
     next_url = request.POST.get('next', '')
     # Faqat xavfsiz relative URL: / bilan boshlansin, // yoki \ bo'lmasin
     from django.utils.http import url_has_allowed_host_and_scheme

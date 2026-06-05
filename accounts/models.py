@@ -10,11 +10,14 @@ class CustomUser(AbstractUser):
         ('admin', 'Admin'),
     ]
 
+    LANG_CHOICES = [('uz', "O'zbek"), ('ru', 'Русский'), ('en', 'English')]
+
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='entrepreneur')
     company_name = models.CharField(max_length=200, blank=True)
     phone = models.CharField(max_length=20, blank=True)
     region = models.CharField(max_length=100, blank=True)
     industry = models.CharField(max_length=100, blank=True)
+    preferred_language = models.CharField(max_length=5, choices=LANG_CHOICES, default='uz')
     created_at = models.DateTimeField(auto_now_add=True)
 
     # Referral
