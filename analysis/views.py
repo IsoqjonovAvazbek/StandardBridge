@@ -4,8 +4,10 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
 from django.conf import settings
+from django.db.models import Sum, Q
 from .models import GapAnalysis, Standard, GapItem, Roadmap, RoadmapStep, Industry, Question, QuestionAnswer, DisclaimerAcceptance
-from experts.models import Project, Notification
+from experts.models import Project, Notification, Payment
+from decimal import Decimal
 import json
 import os
 import threading
@@ -315,7 +317,12 @@ def entrepreneur_dashboard(request):
     ).order_by('-created_at')
 
     # Readiness trend grafigi uchun (oxirgi 6 ta completed tahlil, eskidan yangi tartibda)
-    trend_analyses = list(analyses.order_by('created_at')[:6])
+    trend_analyses = list(
+        GapAnalysis.objects.filter(entrepreneur=request.user, status='completed')
+        .select_related('target_standard')
+        .prefetch_related('answers')
+        .order_by('created_at')[:6]
+    )
     readiness_trend = []
     for a in trend_analyses:
         answers_map = {str(ans.question_id): ans.answer for ans in a.answers.all()}
@@ -991,10 +998,10 @@ def entrepreneur_projects(request):
         'completed': completed,
     }
     return render(request, 'analysis/entrepreneur_projects.html', context)
+
+
 @login_required
 def entrepreneur_wallet(request):
-    from experts.models import Payment, Project
-    
     projects = Project.objects.filter(
         entrepreneur=request.user
     ).select_related('analysis', 'expert').order_by('-created_at')
@@ -1002,10 +1009,15 @@ def entrepreneur_wallet(request):
     payments = Payment.objects.filter(
         entrepreneur=request.user
     ).select_related('project').order_by('-created_at')
-    
-    total_spent = sum(p.amount for p in payments.filter(status__in=['held', 'released']))
-    held = sum(p.amount for p in payments.filter(status='held'))
-    released = sum(p.amount for p in payments.filter(status='released'))
+
+    totals = Payment.objects.filter(entrepreneur=request.user).aggregate(
+        total_spent=Sum('amount', filter=Q(status__in=['held', 'released'])),
+        held=Sum('amount', filter=Q(status='held')),
+        released=Sum('amount', filter=Q(status='released')),
+    )
+    total_spent = totals['total_spent'] or Decimal('0')
+    held = totals['held'] or Decimal('0')
+    released = totals['released'] or Decimal('0')
     
     return render(request, 'analysis/entrepreneur_wallet.html', {
         'payments': payments,

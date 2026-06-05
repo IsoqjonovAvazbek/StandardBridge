@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from django.conf import settings
+from django.db.models import Count, F, ExpressionWrapper, IntegerField
 from datetime import timedelta
 from django_ratelimit.decorators import ratelimit
 from .models import ChecklistItem, ChecklistResponse, QMSDocument, QMSDocumentVersion, NonConformity, AuditSchedule, RiskItem, TrainingRecord
@@ -59,7 +60,9 @@ def qms_dashboard(request):
     # Risk register stats
     total_risks = RiskItem.objects.filter(company=user).count()
     open_risks = RiskItem.objects.filter(company=user, status='open').count()
-    critical_risks = RiskItem.objects.filter(company=user, status='open').count()
+    critical_risks = RiskItem.objects.annotate(
+        rs=ExpressionWrapper(F('likelihood') * F('impact'), output_field=IntegerField())
+    ).filter(company=user, status='open', rs__gte=15).count()
 
     # Training records stats
     total_trainings = TrainingRecord.objects.filter(company=user).count()
@@ -87,10 +90,11 @@ def qms_dashboard(request):
 
     # 4. Audit on schedule 10%
     total_audits = AuditSchedule.objects.filter(company=user).count()
-    overdue_audits = sum(
-        1 for a in AuditSchedule.objects.filter(company=user)
-        if a.is_overdue
-    )
+    overdue_audits = AuditSchedule.objects.filter(
+        company=user,
+        status__in=('planned', 'in_progress'),
+        planned_date__lt=today,
+    ).count()
     audit_pct = int((total_audits - overdue_audits) / total_audits * 100) if total_audits > 0 else 100
     audit_score = audit_pct * 0.1
 
@@ -143,20 +147,23 @@ def qms_checklist(request):
     # Build a structured list of standards with per-standard stats.
     # Django templates cannot do dict[variable] access, so we embed
     # all data into a list of plain dicts that the template iterates over.
-    std_codes = (
-        ChecklistItem.objects
-        .filter(is_active=True)
-        .values_list('standard', flat=True)
-        .distinct()
-        .order_by('standard')
-    )
+    # Aggregate in 2 queries instead of 2×N
+    item_totals = {
+        row['standard']: row['cnt']
+        for row in ChecklistItem.objects.filter(is_active=True)
+        .values('standard').annotate(cnt=Count('id'))
+    }
+    compliant_totals = {
+        row['item__standard']: row['cnt']
+        for row in ChecklistResponse.objects.filter(
+            company=request.user, status='compliant'
+        ).values('item__standard').annotate(cnt=Count('id'))
+    }
 
     standards = []
-    for code in std_codes:
-        total = ChecklistItem.objects.filter(standard=code, is_active=True).count()
-        compliant = ChecklistResponse.objects.filter(
-            company=request.user, item__standard=code, status='compliant'
-        ).count()
+    for code in sorted(item_totals.keys()):
+        total = item_totals[code]
+        compliant = compliant_totals.get(code, 0)
         standards.append({
             'code': code,
             'label': STANDARD_LABELS.get(code, code.upper()),

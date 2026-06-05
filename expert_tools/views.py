@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.conf import settings
 from django_ratelimit.decorators import ratelimit
+from functools import wraps
 from datetime import timedelta
 from .models import (
     DocumentTemplate, GeneratedDocument,
@@ -12,7 +13,7 @@ from .models import (
     ProjectTemplate, ClientCRM, CRMNote,
     Proposal, TimeLog,
 )
-from experts.models import Project, Payment
+from experts.models import Project, Payment, ProjectUpdate
 import os
 import json
 import logging
@@ -25,13 +26,13 @@ logger = logging.getLogger('standardbridge')
 
 def expert_required(view_func):
     """Decorator: allows authenticated experts (and admins for support)."""
+    @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('login')
         if not request.user.is_expert() and not request.user.is_admin():
             return redirect('entrepreneur_dashboard')
         return view_func(request, *args, **kwargs)
-    wrapper.__name__ = view_func.__name__
     return wrapper
 
 
@@ -457,7 +458,6 @@ def apply_template(request, pk, project_pk):
     project = get_object_or_404(Project, pk=project_pk, expert=request.user)
 
     if request.method == 'POST':
-        from experts.models import ProjectUpdate
         steps_text = "\n".join(
             f"{s.order}. {s.title} ({s.duration_days} kun)"
             + (f" — {s.deliverable}" if s.deliverable else "")

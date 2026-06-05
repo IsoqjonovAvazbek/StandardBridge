@@ -7,7 +7,6 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('accounts/login/', views.login_view, name='login'),
     path('accounts/logout/', views.logout_view, name='logout'),
-    path('role-select/', views.role_select, name='role_select'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('admin-panel/', views.admin_panel, name='admin_panel'),
     path('admin-panel/verify/<int:pk>/', views.verify_expert_action, name='verify_expert_action'),

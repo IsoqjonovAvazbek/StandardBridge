@@ -197,10 +197,22 @@ def send_to_expert(request, expert_pk, analysis_pk):
 
 @login_required
 def project_detail(request, pk):
+    from analysis.models import Roadmap
+    qs = Project.objects.select_related(
+        'entrepreneur__entrepreneur_profile',
+        'expert',
+        'analysis__roadmap',
+    ).prefetch_related(
+        'updates__author',
+        'documents',
+        'analysis__gaps',
+        'analysis__roadmap__steps',
+        'disputes',
+    )
     if request.user.is_expert():
-        project = get_object_or_404(Project, pk=pk, expert=request.user)
+        project = get_object_or_404(qs, pk=pk, expert=request.user)
     else:
-        project = get_object_or_404(Project, pk=pk, entrepreneur=request.user)
+        project = get_object_or_404(qs, pk=pk, entrepreneur=request.user)
 
     updates = project.updates.all()
     documents = project.documents.all()
@@ -211,8 +223,6 @@ def project_detail(request, pk):
     except Payment.DoesNotExist:
         payment = None
 
-    # Roadmap checklist
-    from analysis.models import Roadmap
     roadmap = None
     roadmap_steps = []
     roadmap_progress = 0
@@ -223,13 +233,11 @@ def project_detail(request, pk):
         total = len(roadmap_steps)
         roadmap_done_count = sum(1 for s in roadmap_steps if s.is_completed)
         roadmap_progress = int(roadmap_done_count / total * 100) if total > 0 else 0
-    except Roadmap.DoesNotExist:
+    except (Roadmap.DoesNotExist, AttributeError):
         pass
 
-    # Disputes
     project_disputes = project.disputes.all()
 
-    # Entrepreneur profile info (for expert to see company scope)
     entrepreneur_profile = None
     try:
         entrepreneur_profile = project.entrepreneur.entrepreneur_profile

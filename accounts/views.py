@@ -3,8 +3,9 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-from django.db import models
-from django_ratelimit.decorators import ratelimit
+from django.db.models import Sum, Count
+from django.utils import timezone
+from datetime import timedelta
 from .models import CustomUser, ExpertProfile, EntrepreneurProfile
 from experts.emails import send_welcome_email, send_expert_verified
 
@@ -278,20 +279,13 @@ def logout_view(request):
     return redirect('landing')
 
 
-def role_select(request):
-    return render(request, 'accounts/role_select.html')
-
-
 @login_required
 def admin_panel(request):
     if not request.user.is_staff and not request.user.is_admin():
         return redirect('dashboard')
 
-    from django.utils import timezone
-    from datetime import timedelta
-    from experts.models import Project, Payment
+    from experts.models import Project, Payment, WithdrawalRequest, Dispute
     from analysis.models import GapAnalysis
-    from accounts.models import ExpertProfile
 
     week_ago = timezone.now() - timedelta(days=7)
 
@@ -299,7 +293,6 @@ def admin_panel(request):
     experts = CustomUser.objects.filter(role='expert')
     expert_profiles = ExpertProfile.objects.all()
 
-    from django.db.models import Sum
     payments = Payment.objects.all()
     total_volume = payments.filter(status__in=['held', 'released']).aggregate(s=Sum('amount'))['s'] or 0
     platform_revenue = payments.filter(status='released').aggregate(s=Sum('platform_fee'))['s'] or 0
@@ -317,9 +310,13 @@ def admin_panel(request):
         ('completed',   'Yakunlandi',           'bg-green-400',  'bg-green-400'),
         ('cancelled',   'Bekor qilindi',        'bg-red-400',    'bg-red-400'),
     ]
+    from django.db.models import Count
+    status_counts = dict(
+        projects.values('status').annotate(cnt=Count('id')).values_list('status', 'cnt')
+    )
     project_stats = []
     for status, label, color, bar_color in project_statuses:
-        count = projects.filter(status=status).count()
+        count = status_counts.get(status, 0)
         percent = int(count / total_projects * 100) if total_projects else 0
         project_stats.append({
             'label': label, 'count': count,
@@ -340,11 +337,7 @@ def admin_panel(request):
         'active_projects': projects.filter(status='in_progress').count(),
     }
 
-    # Oxirgi 6 oy uchun oylik statistika — aggregate ile (N+1 yo'q)
-    from datetime import timedelta
     import json as _json
-    from django.db.models import Sum, Count
-    from django.db.models.functions import TruncMonth
     months_data = []
     for i in range(5, -1, -1):
         month_start = (timezone.now() - timedelta(days=30 * i)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -356,7 +349,6 @@ def admin_panel(request):
         ).aggregate(s=Sum('platform_fee'))['s'] or 0
         months_data.append({'label': month_label, 'users': new_users, 'revenue': float(month_revenue)})
 
-    from experts.models import WithdrawalRequest, Dispute, Project as ExpertProject
     pending_withdrawals = WithdrawalRequest.objects.filter(status='pending').select_related('wallet__user')[:10]
     open_disputes = Dispute.objects.filter(status__in=('open', 'in_review')).select_related('project', 'opened_by')[:10]
     # F-10: tarixiy nizolar
@@ -364,7 +356,7 @@ def admin_panel(request):
     # F-10: tarixiy withdrawal'lar
     processed_withdrawals = WithdrawalRequest.objects.exclude(status='pending').select_related('wallet__user').order_by('-processed_at')[:10]
     # F-11: expert o'chirilgan faol loyihalar
-    orphaned_projects = ExpertProject.objects.filter(
+    orphaned_projects = Project.objects.filter(
         expert__isnull=True,
         status__in=('pending', 'negotiating', 'accepted', 'in_progress', 'review'),
     ).select_related('entrepreneur', 'analysis__local_standard', 'analysis__target_standard')
