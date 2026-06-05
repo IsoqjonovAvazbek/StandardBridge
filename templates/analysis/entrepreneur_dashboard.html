@@ -182,10 +182,15 @@
                 {% endwith %}
                 <div class="flex gap-3">
                     <a href="{% url 'project_detail' project.pk %}"
-                        class="flex-1 gradient-bg text-white py-3 rounded-xl font-semibold text-center hover:opacity-90 transition">
+                        class="flex-1 {% if project.status == 'accepted' %}border border-blue-300 text-blue-600 hover:bg-blue-50{% else %}gradient-bg text-white hover:opacity-90{% endif %} py-3 rounded-xl font-semibold text-center transition">
                         {{ T.track_project }}
                     </a>
-                    {% if project.status == 'review' %}
+                    {% if project.status == 'accepted' %}
+                    <a href="{% url 'payment_page' project.pk %}"
+                        class="gradient-bg text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition flex items-center gap-2">
+                        💳 {{ T.pay_to_start }}
+                    </a>
+                    {% elif project.status == 'review' %}
                     <form method="POST" action="{% url 'payment_release' project.pk %}">
                         {% csrf_token %}
                         <button type="submit"
