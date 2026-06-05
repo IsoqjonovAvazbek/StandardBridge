@@ -235,6 +235,13 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [ ] Payme integratsiya (Click bor, Payme yo'q)
 - [ ] Ko'p tillar uchun email shablonlar
 
+### Oxirgi sессiyada bajarilganlar (2026-06-05)
+- [x] To'lov tugmasi bug: payment_page har doim Payment yaratadi (CLICK_SERVICE_ID bo'lsa ham bo'lmasa ham)
+- [x] payment.html: `{% if debug %}` → `{% if not click_service_id %}` — Railway da to'lov ko'rinmas edi
+- [x] Dashboard: accepted loyihalar uchun "To'lov qilish" CTA tugmasi qo'shildi
+- [x] training_records, risk_register, earnings, time_logs, proposal_list: barcha hardcoded text T.* ga o'tkazildi
+- [x] N+1, dead code, import tozalash (oldingi sessiya — cda17af, 7009b50)
+
 ---
 
 ## HALI BAJARILMAGAN (PENDING)
