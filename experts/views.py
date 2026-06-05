@@ -244,6 +244,22 @@ def project_detail(request, pk):
     except AttributeError:
         pass
 
+    # Status timeline
+    from core.translations import get_translation
+    T = get_translation(request.session.get('lang', 'uz'))
+    STATUS_ORDER = ['pending', 'negotiating', 'accepted', 'in_progress', 'review', 'completed']
+    step_labels = {
+        'pending': T.get('proj_step_pending', ''),
+        'negotiating': T.get('proj_step_negotiating', ''),
+        'accepted': T.get('proj_step_accepted', ''),
+        'in_progress': T.get('proj_step_in_progress', ''),
+        'review': T.get('proj_step_review', ''),
+        'completed': T.get('proj_step_completed', ''),
+    }
+    current_idx = STATUS_ORDER.index(project.status) if project.status in STATUS_ORDER else 0
+    project_steps = [(s, step_labels[s]) for s in STATUS_ORDER]
+    project_done_steps = set(STATUS_ORDER[:current_idx])
+
     context = {
         'project': project,
         'updates': updates,
@@ -256,6 +272,8 @@ def project_detail(request, pk):
         'roadmap_done_count': roadmap_done_count,
         'project_disputes': project_disputes,
         'entrepreneur_profile': entrepreneur_profile,
+        'project_steps': project_steps,
+        'project_done_steps': project_done_steps,
     }
     return render(request, 'experts/project_detail.html', context)
 

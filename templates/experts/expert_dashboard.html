@@ -29,6 +29,34 @@
         </div>
     </div>
 
+    <!-- Onboarding: hech loyiha bo'lmasa ko'rsat -->
+    {% if total == 0 and not new_projects %}
+    <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-6 mb-8 text-white">
+        <h2 class="text-xl font-bold mb-1">{{ T.expert_onboarding_title }}</h2>
+        <p class="text-blue-200 text-sm mb-5">{{ T.profile_sub }}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white/10 rounded-xl p-4">
+                <p class="font-semibold text-sm">{{ T.expert_onboarding_step1 }}</p>
+                <p class="text-blue-200 text-xs mt-1">{{ T.expert_onboarding_step1_desc }}</p>
+                <a href="{% url 'expert_profile_edit' %}" class="mt-3 inline-block bg-white text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-blue-50 transition">{{ T.complete_profile_btn }}</a>
+            </div>
+            <div class="bg-white/10 rounded-xl p-4">
+                <p class="font-semibold text-sm">{{ T.expert_onboarding_step2 }}</p>
+                <p class="text-blue-200 text-xs mt-1">{{ T.expert_onboarding_step2_desc }}</p>
+                {% if request.user.expertprofile.is_verified %}
+                <span class="mt-3 inline-block bg-green-400 text-white text-xs font-semibold px-3 py-1.5 rounded-lg">✓ {{ T.verified_lbl }}</span>
+                {% else %}
+                <span class="mt-3 inline-block bg-yellow-400 text-gray-800 text-xs font-semibold px-3 py-1.5 rounded-lg">⏳ {{ T.sla_warning }}</span>
+                {% endif %}
+            </div>
+            <div class="bg-white/10 rounded-xl p-4">
+                <p class="font-semibold text-sm">{{ T.expert_onboarding_step3 }}</p>
+                <p class="text-blue-200 text-xs mt-1">{{ T.expert_onboarding_step3_desc }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Yangi takliflar -->
     {% if new_projects %}
     <div class="mb-8">
@@ -120,9 +148,9 @@
                         <form method="post" action="{% url 'project_decline' project.pk %}">
                             {% csrf_token %}
                             <button type="submit"
-                                onclick="return confirm('Loyihani rad etasizmi?')"
+                                onclick="return confirm('{{ T.decline_confirm }}')"
                                 class="bg-gray-100 text-gray-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-50 hover:text-red-600 transition">
-                                Rad etish
+                                {{ T.decline_project }}
                             </button>
                         </form>
                     </div>

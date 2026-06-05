@@ -929,6 +929,48 @@ TRANSLATIONS = {
         'pending_price_title': 'Narx belgilanishini kutmoqda',
         'readiness_trend_title': 'Tayyorlik o\'sishi',
         'readiness_trend_sub': 'Tahlillar bo\'yicha tayyorlik foizining dinamikasi',
+
+        # === AUDIT MOBILE ===
+        'audit_finding_label': 'Topilma / Eslatma',
+        'audit_finding_ph': 'Nima topildi? (ixtiyoriy)',
+        'audit_prev_btn': '← Oldingi',
+        'audit_next_btn': 'Keyingi →',
+        'audit_finish_btn': 'Yakunlash →',
+        'audit_skip_btn': 'Keyingisi →',
+
+        # === PROPOSAL DETAIL ===
+        'proposal_commercial_title': 'Tijorat Taklifnomasi',
+        'proposal_validity_lbl': 'Muddati:',
+        'proposal_copy_btn': 'Nusxalash',
+
+        # === EXPERT DASHBOARD ===
+        'decline_project': 'Rad etish',
+        'decline_confirm': 'Loyihani rad etasizmi?',
+
+        # === PROJECT STATUS TIMELINE ===
+        'proj_timeline_title': 'Loyiha jarayoni',
+        'proj_step_pending': 'Yuborildi',
+        'proj_step_negotiating': 'Kelishmoqda',
+        'proj_step_accepted': 'Qabul qilindi',
+        'proj_step_in_progress': 'Bajarilmoqda',
+        'proj_step_review': 'Tekshiruvda',
+        'proj_step_completed': 'Yakunlandi',
+
+        # === ONBOARDING (yangi foydalanuvchi) ===
+        'onboarding_title': 'Qayerdan boshlash?',
+        'onboarding_step1_title': '1. Gap tahlil o\'tkazing',
+        'onboarding_step1_desc': 'AI 30-60 soniyada barcha kamchiliklarni aniqlaydi',
+        'onboarding_step2_title': '2. Mutaxassis toping',
+        'onboarding_step2_desc': 'Narx va muddatni kelishing — to\'lov faqat qabul qilgach',
+        'onboarding_step3_title': '3. To\'lov qilib boshlang',
+        'onboarding_step3_desc': 'Escrow orqali xavfsiz — pul ish tugagandan keyin o\'tadi',
+        'expert_onboarding_title': 'Mutaxassis sifatida boshlang',
+        'expert_onboarding_step1': '1. Profilingizni to\'ldiring',
+        'expert_onboarding_step1_desc': 'Bio, ixtisoslik, sertifikatlar qo\'shing',
+        'expert_onboarding_step2': '2. Tasdiqlashni kuting',
+        'expert_onboarding_step2_desc': 'Admin profilingizni tekshiradi (1-2 ish kuni)',
+        'expert_onboarding_step3': '3. Loyihalar kela boshlaydi',
+        'expert_onboarding_step3_desc': 'Tadbirkorlar tahlillarini yuboradi, siz narx belgilaysiz',
     },
 
     'ru': {
@@ -1824,6 +1866,48 @@ TRANSLATIONS = {
         'pending_price_title': 'Ожидание установки цены',
         'readiness_trend_title': 'Динамика готовности',
         'readiness_trend_sub': 'Изменение процента готовности по анализам',
+
+        # === AUDIT MOBILE ===
+        'audit_finding_label': 'Находка / Примечание',
+        'audit_finding_ph': 'Что выявлено? (необязательно)',
+        'audit_prev_btn': '← Назад',
+        'audit_next_btn': 'Следующий →',
+        'audit_finish_btn': 'Завершить →',
+        'audit_skip_btn': 'Пропустить →',
+
+        # === PROPOSAL DETAIL ===
+        'proposal_commercial_title': 'Коммерческое предложение',
+        'proposal_validity_lbl': 'Срок:',
+        'proposal_copy_btn': 'Скопировать',
+
+        # === EXPERT DASHBOARD ===
+        'decline_project': 'Отклонить',
+        'decline_confirm': 'Отклонить проект?',
+
+        # === PROJECT STATUS TIMELINE ===
+        'proj_timeline_title': 'Ход проекта',
+        'proj_step_pending': 'Отправлен',
+        'proj_step_negotiating': 'Согласование',
+        'proj_step_accepted': 'Принят',
+        'proj_step_in_progress': 'В работе',
+        'proj_step_review': 'На проверке',
+        'proj_step_completed': 'Завершён',
+
+        # === ONBOARDING ===
+        'onboarding_title': 'С чего начать?',
+        'onboarding_step1_title': '1. Пройдите gap-анализ',
+        'onboarding_step1_desc': 'AI за 30-60 сек выявит все пробелы',
+        'onboarding_step2_title': '2. Найдите эксперта',
+        'onboarding_step2_desc': 'Согласуйте цену — оплата после подтверждения',
+        'onboarding_step3_title': '3. Оплатите и начните',
+        'onboarding_step3_desc': 'Безопасно через Escrow — деньги переходят после выполнения',
+        'expert_onboarding_title': 'Начните как эксперт',
+        'expert_onboarding_step1': '1. Заполните профиль',
+        'expert_onboarding_step1_desc': 'Добавьте биографию, специализации, сертификаты',
+        'expert_onboarding_step2': '2. Ожидайте подтверждения',
+        'expert_onboarding_step2_desc': 'Администратор проверит ваш профиль (1-2 рабочих дня)',
+        'expert_onboarding_step3': '3. Приходят проекты',
+        'expert_onboarding_step3_desc': 'Предприниматели присылают анализы, вы устанавливаете цену',
     },
 
     'en': {
@@ -2747,6 +2831,48 @@ TRANSLATIONS = {
         'pending_price_title': 'Waiting for price',
         'readiness_trend_title': 'Readiness trend',
         'readiness_trend_sub': 'Readiness percentage change across analyses',
+
+        # === AUDIT MOBILE ===
+        'audit_finding_label': 'Finding / Note',
+        'audit_finding_ph': 'What was found? (optional)',
+        'audit_prev_btn': '← Prev',
+        'audit_next_btn': 'Next →',
+        'audit_finish_btn': 'Finish →',
+        'audit_skip_btn': 'Skip unchecked →',
+
+        # === PROPOSAL DETAIL ===
+        'proposal_commercial_title': 'Commercial Proposal',
+        'proposal_validity_lbl': 'Valid until:',
+        'proposal_copy_btn': 'Copy',
+
+        # === EXPERT DASHBOARD ===
+        'decline_project': 'Decline',
+        'decline_confirm': 'Decline this project?',
+
+        # === PROJECT STATUS TIMELINE ===
+        'proj_timeline_title': 'Project Progress',
+        'proj_step_pending': 'Sent',
+        'proj_step_negotiating': 'Negotiating',
+        'proj_step_accepted': 'Accepted',
+        'proj_step_in_progress': 'In Progress',
+        'proj_step_review': 'Under Review',
+        'proj_step_completed': 'Completed',
+
+        # === ONBOARDING ===
+        'onboarding_title': 'Where to start?',
+        'onboarding_step1_title': '1. Run a gap analysis',
+        'onboarding_step1_desc': 'AI identifies all gaps in 30-60 seconds',
+        'onboarding_step2_title': '2. Find an expert',
+        'onboarding_step2_desc': 'Agree on price — payment only after approval',
+        'onboarding_step3_title': '3. Pay and start',
+        'onboarding_step3_desc': 'Secure Escrow — funds release when work is done',
+        'expert_onboarding_title': 'Get started as an expert',
+        'expert_onboarding_step1': '1. Complete your profile',
+        'expert_onboarding_step1_desc': 'Add bio, specializations, certificates',
+        'expert_onboarding_step2': '2. Wait for verification',
+        'expert_onboarding_step2_desc': 'Admin verifies your profile (1-2 business days)',
+        'expert_onboarding_step3': '3. Projects start coming',
+        'expert_onboarding_step3_desc': 'Entrepreneurs send analyses, you set the price',
     },
 }
 
