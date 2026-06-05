@@ -32,19 +32,19 @@
     <!-- Stats row -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-2xl border border-gray-100 p-4">
-            <p class="text-xs text-gray-400 uppercase mb-1">Jami</p>
+            <p class="text-xs text-gray-400 uppercase mb-1">{{ T.total_lbl }}</p>
             <p class="text-2xl font-bold text-gray-900">{{ total }}</p>
         </div>
         <div class="bg-white rounded-2xl border {% if critical_count > 0 %}border-red-200{% else %}border-gray-100{% endif %} p-4">
-            <p class="text-xs text-gray-400 uppercase mb-1">Kritik</p>
+            <p class="text-xs text-gray-400 uppercase mb-1">{{ T.qms_risk_critical }}</p>
             <p class="text-2xl font-bold {% if critical_count > 0 %}text-red-600{% else %}text-gray-400{% endif %}">{{ critical_count }}</p>
         </div>
         <div class="bg-white rounded-2xl border {% if high_count > 0 %}border-orange-200{% else %}border-gray-100{% endif %} p-4">
-            <p class="text-xs text-gray-400 uppercase mb-1">Yuqori</p>
+            <p class="text-xs text-gray-400 uppercase mb-1">{{ T.qms_risk_high }}</p>
             <p class="text-2xl font-bold {% if high_count > 0 %}text-orange-500{% else %}text-gray-400{% endif %}">{{ high_count }}</p>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 p-4">
-            <p class="text-xs text-gray-400 uppercase mb-1">Yopilgan</p>
+            <p class="text-xs text-gray-400 uppercase mb-1">{{ T.qms_risk_closed }}</p>
             <p class="text-2xl font-bold text-green-600">{{ risks|length }}</p>
         </div>
     </div>
@@ -53,7 +53,7 @@
     <div class="flex flex-wrap gap-3 mb-5">
         <a href="{% url 'risk_register' %}"
            class="text-sm px-3 py-1.5 rounded-lg {% if not standard_filter and not status_filter %}bg-blue-600 text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:bg-gray-50{% endif %}">
-            Barchasi
+            {{ T.et_all_statuses }}
         </a>
         {% for code, label in standards %}
         <a href="?standard={{ code }}{% if status_filter %}&status={{ status_filter }}{% endif %}"
@@ -64,11 +64,11 @@
         <span class="border-l border-gray-200 mx-1"></span>
         <a href="?status=open{% if standard_filter %}&standard={{ standard_filter }}{% endif %}"
            class="text-sm px-3 py-1.5 rounded-lg {% if status_filter == 'open' %}bg-orange-500 text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:bg-gray-50{% endif %}">
-            Ochiq
+            {{ T.qms_risk_open }}
         </a>
         <a href="?status=mitigated{% if standard_filter %}&standard={{ standard_filter }}{% endif %}"
            class="text-sm px-3 py-1.5 rounded-lg {% if status_filter == 'mitigated' %}bg-blue-600 text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:bg-gray-50{% endif %}">
-            Kamaytarilgan
+            {{ T.qms_risk_mitigated }}
         </a>
     </div>
 
@@ -79,14 +79,14 @@
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 border-b border-gray-100">
                     <tr>
-                        <th class="text-left px-4 py-3 text-gray-500 font-medium">Jarayon / Tavsif</th>
-                        <th class="text-center px-3 py-3 text-gray-500 font-medium">Ehtimol</th>
-                        <th class="text-center px-3 py-3 text-gray-500 font-medium">Ta'sir</th>
-                        <th class="text-center px-3 py-3 text-gray-500 font-medium">Ball</th>
-                        <th class="text-center px-3 py-3 text-gray-500 font-medium">Daraja</th>
-                        <th class="text-left px-3 py-3 text-gray-500 font-medium">Masul</th>
-                        <th class="text-center px-3 py-3 text-gray-500 font-medium">Holat</th>
-                        <th class="text-center px-3 py-3 text-gray-500 font-medium">Amallar</th>
+                        <th class="text-left px-4 py-3 text-gray-500 font-medium">{{ T.qms_risk_process }} / {{ T.qms_risk_description }}</th>
+                        <th class="text-center px-3 py-3 text-gray-500 font-medium">{{ T.qms_risk_likelihood }}</th>
+                        <th class="text-center px-3 py-3 text-gray-500 font-medium">{{ T.qms_risk_impact }}</th>
+                        <th class="text-center px-3 py-3 text-gray-500 font-medium">{{ T.qms_risk_score }}</th>
+                        <th class="text-center px-3 py-3 text-gray-500 font-medium">{{ T.qms_risk_level }}</th>
+                        <th class="text-left px-3 py-3 text-gray-500 font-medium">{{ T.qms_risk_owner }}</th>
+                        <th class="text-center px-3 py-3 text-gray-500 font-medium">{{ T.qms_risk_status }}</th>
+                        <th class="text-center px-3 py-3 text-gray-500 font-medium"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -137,10 +137,10 @@
                                 {% elif risk.risk_level == 'high' %}bg-orange-100 text-orange-700
                                 {% elif risk.risk_level == 'medium' %}bg-yellow-100 text-yellow-700
                                 {% else %}bg-green-100 text-green-700{% endif %}">
-                                {% if risk.risk_level == 'critical' %}Kritik
-                                {% elif risk.risk_level == 'high' %}Yuqori
-                                {% elif risk.risk_level == 'medium' %}O'rta
-                                {% else %}Past{% endif %}
+                                {% if risk.risk_level == 'critical' %}{{ T.qms_risk_critical }}
+                                {% elif risk.risk_level == 'high' %}{{ T.qms_risk_high }}
+                                {% elif risk.risk_level == 'medium' %}{{ T.qms_risk_medium }}
+                                {% else %}{{ T.qms_risk_low }}{% endif %}
                             </span>
                         </td>
                         <td class="px-3 py-3 text-gray-600 text-xs">
@@ -164,12 +164,12 @@
                         <td class="px-3 py-3 text-center">
                             <button onclick="openEditRisk({{ risk.pk }}, '{{ risk.status }}', {{ risk.likelihood }}, {{ risk.impact }}, '{{ risk.owner|escapejs }}', '{{ risk.mitigation|escapejs }}', '{% if risk.due_date %}{{ risk.due_date|date:"Y-m-d" }}{% endif %}')"
                                 class="text-blue-600 hover:text-blue-800 text-xs font-medium">
-                                Tahrir
+                                {{ T.et_proposal_edit }}
                             </button>
                             <form method="POST" action="{% url 'delete_risk' risk.pk %}" class="inline ml-2"
-                                  onsubmit="return confirm('O\'chirishni tasdiqlaysizmi?')">
+                                  onsubmit="return confirm('{{ T.delete_btn }}?')">
                                 {% csrf_token %}
-                                <button type="submit" class="text-red-500 hover:text-red-700 text-xs">O'chir</button>
+                                <button type="submit" class="text-red-500 hover:text-red-700 text-xs">{{ T.delete_btn }}</button>
                             </form>
                         </td>
                     </tr>
@@ -180,10 +180,10 @@
         {% else %}
         <div class="py-16 text-center">
             <p class="text-4xl mb-3">⚠️</p>
-            <p class="text-gray-500 mb-4">Hali risk qo'shilmagan</p>
+            <p class="text-gray-500 mb-4">{{ T.qms_no_risks }}</p>
             <button onclick="document.getElementById('addRiskModal').classList.remove('hidden')"
                 class="gradient-bg text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition">
-                Birinchi riskni qo'shing
+                {{ T.qms_add_risk }}
             </button>
         </div>
         {% endif %}
@@ -191,28 +191,12 @@
 
     <!-- Risk Matrix legend -->
     <div class="mt-6 bg-white rounded-2xl border border-gray-100 p-5">
-        <h3 class="font-semibold text-gray-800 mb-3 text-sm">Risk matritsasi (Ehtimol × Ta'sir)</h3>
-        <div class="grid grid-cols-5 gap-1.5 max-w-xs">
-            {% for row in "54321" %}
-            {% for col in "12345" %}
-            {% with score=row|add:0 %}
-            <div class="h-8 rounded text-xs font-bold flex items-center justify-center
-                {% with s=forloop.parentloop.counter|add:forloop.counter %}
-                {% if s >= 10 %}bg-red-200 text-red-700
-                {% elif s >= 7 %}bg-orange-200 text-orange-700
-                {% elif s >= 5 %}bg-yellow-200 text-yellow-700
-                {% else %}bg-green-200 text-green-700{% endif %}
-                {% endwith %}">
-            </div>
-            {% endwith %}
-            {% endfor %}
-            {% endfor %}
-        </div>
+        <h3 class="font-semibold text-gray-800 mb-3 text-sm">{{ T.qms_risk_likelihood }} × {{ T.qms_risk_impact }}</h3>
         <div class="flex gap-4 mt-3 text-xs">
-            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-200 rounded"></span> Kritik (≥15)</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-orange-200 rounded"></span> Yuqori (9-14)</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-yellow-200 rounded"></span> O'rta (4-8)</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-green-200 rounded"></span> Past (1-3)</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-200 rounded"></span> {{ T.qms_risk_critical }} (≥15)</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-orange-200 rounded"></span> {{ T.qms_risk_high }} (9-14)</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-yellow-200 rounded"></span> {{ T.qms_risk_medium }} (4-8)</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-green-200 rounded"></span> {{ T.qms_risk_low }} (1-3)</span>
         </div>
     </div>
 </div>
@@ -221,14 +205,14 @@
 <div id="addRiskModal" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h3 class="font-bold text-gray-900">Risk qo'shish</h3>
+            <h3 class="font-bold text-gray-900">{{ T.qms_add_risk }}</h3>
             <button onclick="document.getElementById('addRiskModal').classList.add('hidden')"
                 class="text-gray-400 hover:text-gray-600">✕</button>
         </div>
         <form method="POST" action="{% url 'add_risk' %}" class="p-6 space-y-4">
             {% csrf_token %}
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Standart</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_proposal_standard }}</label>
                 <select name="standard" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                     {% for code, label in standards %}
                     <option value="{{ code }}">{{ label }}</option>
@@ -236,54 +220,54 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Jarayon / Bo'lim <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_risk_process }} <span class="text-red-500">*</span></label>
                 <input type="text" name="process_area" required placeholder="Masalan: Xarid jarayoni, Ishlab chiqarish"
                     class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Risk tavsifi <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_risk_description }} <span class="text-red-500">*</span></label>
                 <textarea name="description" required rows="3" placeholder="Risk nima? Qanday zararli oqibat bo'lishi mumkin?"
                     class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Ehtimollik (1–5)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_risk_likelihood }} (1–5)</label>
                     <select name="likelihood" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="1">1 — Deyarli yo'q</option>
-                        <option value="2">2 — Kam</option>
-                        <option value="3" selected>3 — O'rta</option>
-                        <option value="4">4 — Ko'p</option>
-                        <option value="5">5 — Deyarli aniq</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3" selected>3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Ta'sir darajasi (1–5)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_risk_impact }} (1–5)</label>
                     <select name="impact" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="1">1 — Minimal</option>
-                        <option value="2">2 — Kichik</option>
-                        <option value="3" selected>3 — O'rta</option>
-                        <option value="4">4 — Katta</option>
-                        <option value="5">5 — Juda katta</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3" selected>3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
                     </select>
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Masul shaxs</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_risk_owner }}</label>
                 <input type="text" name="owner" placeholder="Ism Familiya yoki lavozim"
                     class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Muddat</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_risk_due }}</label>
                 <input type="date" name="due_date"
                     class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             <div class="flex gap-3 pt-2">
                 <button type="button" onclick="document.getElementById('addRiskModal').classList.add('hidden')"
                     class="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-xl text-sm hover:bg-gray-50 transition">
-                    Bekor
+                    {{ T.cancel }}
                 </button>
                 <button type="submit" class="flex-1 gradient-bg text-white py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition">
-                    Qo'shish
+                    {{ T.save }}
                 </button>
             </div>
         </form>
@@ -294,7 +278,7 @@
 <div id="editRiskModal" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h3 class="font-bold text-gray-900">Risk tahrirlash</h3>
+            <h3 class="font-bold text-gray-900">{{ T.et_proposal_edit }}</h3>
             <button onclick="document.getElementById('editRiskModal').classList.add('hidden')"
                 class="text-gray-400 hover:text-gray-600">✕</button>
         </div>
@@ -302,14 +286,14 @@
             {% csrf_token %}
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Ehtimollik</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_risk_likelihood }}</label>
                     <select name="likelihood" id="editLikelihood" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                         <option value="1">1</option><option value="2">2</option><option value="3">3</option>
                         <option value="4">4</option><option value="5">5</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Ta'sir</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_risk_impact }}</label>
                     <select name="impact" id="editImpact" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                         <option value="1">1</option><option value="2">2</option><option value="3">3</option>
                         <option value="4">4</option><option value="5">5</option>
@@ -317,23 +301,22 @@
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Kamaytirish choralari</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_risk_mitigation }}</label>
                 <textarea name="mitigation" id="editMitigation" rows="3"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-                    placeholder="Qanday chora ko'rildi yoki ko'riladi?"></textarea>
+                    class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Masul</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_risk_owner }}</label>
                 <input type="text" name="owner" id="editOwner"
                     class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Muddat</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_risk_due }}</label>
                 <input type="date" name="due_date" id="editDueDate"
                     class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Holat</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.qms_risk_status }}</label>
                 <select name="status" id="editStatus" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                     {% for code, label in statuses %}
                     <option value="{{ code }}">{{ label }}</option>
@@ -343,10 +326,10 @@
             <div class="flex gap-3 pt-2">
                 <button type="button" onclick="document.getElementById('editRiskModal').classList.add('hidden')"
                     class="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-xl text-sm hover:bg-gray-50 transition">
-                    Bekor
+                    {{ T.cancel }}
                 </button>
                 <button type="submit" class="flex-1 gradient-bg text-white py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition">
-                    Saqlash
+                    {{ T.save }}
                 </button>
             </div>
         </form>

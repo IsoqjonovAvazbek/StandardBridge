@@ -683,8 +683,8 @@ def payment_page(request, project_pk):
     except Payment.DoesNotExist:
         payment = None
 
-    # Click uchun Payment oldindan yaratilishi kerak (merchant_trans_id = payment.pk)
-    if project.status == 'accepted' and settings.CLICK_SERVICE_ID:
+    # Payment ob'ekti har doim yaratilishi kerak (Click yoki mock uchun)
+    if project.status == 'accepted':
         if not payment:
             payment = Payment.objects.create(
                 project=project,
@@ -693,7 +693,6 @@ def payment_page(request, project_pk):
                 status='pending',
             )
         elif payment.status == 'pending' and payment.amount != project.expert_price:
-            # Narx o'zgargan bo'lsa (counter-offer) yangilash
             payment.amount = project.expert_price
             payment.save(update_fields=['amount', 'platform_fee', 'expert_amount'])
 

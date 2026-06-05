@@ -75,7 +75,7 @@
     <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <div>
-                <h3 class="font-bold text-gray-900">Yangi taklifnoma</h3>
+                <h3 class="font-bold text-gray-900">{{ T.et_new_proposal }}</h3>
                 <p class="text-xs text-gray-400">AI matn tayyorlaydi, siz tahrirlaysiz</p>
             </div>
             <button onclick="document.getElementById('createModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">✕</button>
@@ -84,23 +84,23 @@
             {% csrf_token %}
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Korxona nomi <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_proposal_company }} <span class="text-red-500">*</span></label>
                     <input type="text" name="company_name" required placeholder="Mijoz korxona nomi"
                         class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kontakt shaxs</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_proposal_contact }}</label>
                     <input type="text" name="contact_person" placeholder="Ism Familiya"
                         class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Soha</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_industry_lbl }}</label>
                     <input type="text" name="industry" placeholder="Oziq-ovqat, Qurilish..."
                         class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Maqsad standart <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_proposal_standard }} <span class="text-red-500">*</span></label>
                 <select name="standard" required class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                     <option value="">Tanlang...</option>
                     <option value="ISO 9001">ISO 9001 (Sifat menejmenti)</option>
@@ -112,23 +112,23 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Loyiha qamrovi</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_proposal_scope }}</label>
                 <textarea name="scope" rows="2" placeholder="Nima qilamiz? Qaysi jarayonlar..."
                     class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
             </div>
             <div class="grid grid-cols-3 gap-3">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Narx min ($)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_proposal_price_min }}</label>
                     <input type="number" name="price_min" placeholder="1000" min="0"
                         class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Narx max ($)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_proposal_price_max }}</label>
                     <input type="number" name="price_max" placeholder="3000" min="0"
                         class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Muddat (kun)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_proposal_duration }}</label>
                     <input type="number" name="duration_days" value="90" min="1"
                         class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
@@ -146,9 +146,9 @@
             {% endif %}
             <div class="flex gap-3 pt-2">
                 <button type="button" onclick="document.getElementById('createModal').classList.add('hidden')"
-                    class="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-xl text-sm hover:bg-gray-50 transition">Bekor</button>
+                    class="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-xl text-sm hover:bg-gray-50 transition">{{ T.cancel }}</button>
                 <button type="submit" class="flex-1 gradient-bg text-white py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition flex items-center justify-center gap-2">
-                    ✨ AI bilan yaratish
+                    ✨ {{ T.et_proposal_generate }}
                 </button>
             </div>
         </form>

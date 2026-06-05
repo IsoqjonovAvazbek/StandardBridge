@@ -35,7 +35,7 @@
 
     <!-- Chart -->
     <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
-        <h3 class="font-semibold text-gray-800 mb-4 text-sm">So'nggi 6 oy daromadi</h3>
+        <h3 class="font-semibold text-gray-800 mb-4 text-sm">{{ T.et_chart_title }}</h3>
         {% if chart_data != "[0, 0, 0, 0, 0, 0]" %}
         <canvas id="earningsChart" height="80"></canvas>
         {% else %}
@@ -47,14 +47,14 @@
     {% if project_breakdown %}
     <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-6">
         <div class="px-5 py-4 border-b border-gray-100">
-            <h3 class="font-semibold text-gray-800 text-sm">Loyiha bo'yicha daromad</h3>
+            <h3 class="font-semibold text-gray-800 text-sm">{{ T.et_by_project }}</h3>
         </div>
         <div class="divide-y divide-gray-50">
             {% for item in project_breakdown %}
             <div class="px-5 py-3 flex items-center gap-3">
                 <div class="flex-1">
                     <p class="text-sm font-medium text-gray-800">{{ item.name }}</p>
-                    <p class="text-xs text-gray-400">{{ item.count }} ta to'lov</p>
+                    <p class="text-xs text-gray-400">{{ item.count }} {{ T.et_payment_count }}</p>
                 </div>
                 <span class="font-bold text-green-600">${{ item.amount|floatformat:0 }}</span>
             </div>
@@ -67,15 +67,15 @@
     {% if payments %}
     <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div class="px-5 py-4 border-b border-gray-100">
-            <h3 class="font-semibold text-gray-800 text-sm">So'nggi to'lovlar</h3>
+            <h3 class="font-semibold text-gray-800 text-sm">{{ T.et_recent_payments }}</h3>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="text-left px-5 py-3 text-gray-400 font-medium text-xs uppercase">Mijoz</th>
-                        <th class="text-right px-5 py-3 text-gray-400 font-medium text-xs uppercase">Miqdor</th>
-                        <th class="text-center px-5 py-3 text-gray-400 font-medium text-xs uppercase">Sana</th>
+                        <th class="text-left px-5 py-3 text-gray-400 font-medium text-xs uppercase">{{ T.et_clients_count }}</th>
+                        <th class="text-right px-5 py-3 text-gray-400 font-medium text-xs uppercase">{{ T.et_total_earned }}</th>
+                        <th class="text-center px-5 py-3 text-gray-400 font-medium text-xs uppercase">{{ T.qms_training_date }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -93,7 +93,7 @@
     {% else %}
     <div class="bg-white rounded-2xl border border-gray-100 py-12 text-center text-gray-400">
         <p class="text-3xl mb-2">💰</p>
-        <p class="text-sm">Hali to'lov amalga oshmagan</p>
+        <p class="text-sm">{{ T.et_no_payments }}</p>
     </div>
     {% endif %}
 </div>
