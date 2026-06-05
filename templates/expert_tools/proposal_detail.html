@@ -6,7 +6,7 @@
 
   <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
     <div>
-      <a href="{% url 'proposal_list' %}" class="text-blue-600 hover:underline text-sm">← Taklifnomalar</a>
+      <a href="{% url 'proposal_list' %}" class="text-blue-600 hover:underline text-sm">← {{ T.et_proposals }}</a>
       <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ proposal.company_name }}</h1>
       <p class="text-gray-500 text-sm">{{ proposal.standard }} · {{ proposal.created_at|date:"d.m.Y" }}</p>
     </div>
@@ -16,11 +16,11 @@
       </button>
       <a href="{% url 'proposal_print' proposal.pk %}" target="_blank"
          class="border border-gray-300 text-gray-700 px-4 py-2 rounded-xl text-sm hover:bg-gray-50 transition flex items-center gap-2">
-        🖨️ PDF / Chop etish
+        🖨️ {{ T.et_proposal_print }}
       </a>
       <a href="{% url 'edit_proposal' proposal.pk %}"
          class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
-        ✏️ Tahrirlash
+        ✏️ {{ T.et_proposal_edit }}
       </a>
     </div>
   </div>
@@ -28,31 +28,31 @@
   <!-- Meta strip -->
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
     <div class="bg-white rounded-xl border border-gray-100 p-3 text-center">
-      <p class="text-xs text-gray-400 mb-0.5">Holat</p>
+      <p class="text-xs text-gray-400 mb-0.5">{{ T.et_proposal_status }}</p>
       <span class="text-sm font-semibold
         {% if proposal.status == 'accepted' %}text-green-600
         {% elif proposal.status == 'rejected' %}text-red-600
         {% elif proposal.status == 'sent' %}text-blue-600
         {% else %}text-gray-500{% endif %}">
-        {% if proposal.status == 'accepted' %}✅ Qabul
-        {% elif proposal.status == 'rejected' %}❌ Rad
-        {% elif proposal.status == 'sent' %}📤 Yuborilgan
-        {% else %}📝 Qoralama{% endif %}
+        {% if proposal.status == 'accepted' %}✅ {{ T.et_proposal_accepted }}
+        {% elif proposal.status == 'rejected' %}❌ {{ T.et_proposal_rejected }}
+        {% elif proposal.status == 'sent' %}📤 {{ T.et_proposal_sent }}
+        {% else %}📝 {{ T.et_proposal_draft }}{% endif %}
       </span>
     </div>
     <div class="bg-white rounded-xl border border-gray-100 p-3 text-center">
-      <p class="text-xs text-gray-400 mb-0.5">Narx</p>
+      <p class="text-xs text-gray-400 mb-0.5">{{ T.et_proposal_price_min }}</p>
       <p class="text-sm font-semibold text-gray-800">
         {% if proposal.price_min or proposal.price_max %}${{ proposal.price_min|floatformat:0 }}–${{ proposal.price_max|floatformat:0 }}
         {% else %}—{% endif %}
       </p>
     </div>
     <div class="bg-white rounded-xl border border-gray-100 p-3 text-center">
-      <p class="text-xs text-gray-400 mb-0.5">Muddat</p>
-      <p class="text-sm font-semibold text-gray-800">{{ proposal.duration_days }} kun</p>
+      <p class="text-xs text-gray-400 mb-0.5">{{ T.et_proposal_duration }}</p>
+      <p class="text-sm font-semibold text-gray-800">{{ proposal.duration_days }} {{ T.days_word }}</p>
     </div>
     <div class="bg-white rounded-xl border border-gray-100 p-3 text-center">
-      <p class="text-xs text-gray-400 mb-0.5">Amal qilishi</p>
+      <p class="text-xs text-gray-400 mb-0.5">{{ T.et_proposal_valid }}</p>
       <p class="text-sm font-semibold text-gray-800">
         {% if proposal.valid_until %}{{ proposal.valid_until|date:"d.m.Y" }}{% else %}—{% endif %}
       </p>
@@ -81,22 +81,22 @@
 
   <!-- Status update bar -->
   <div class="mt-4 bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4 flex-wrap">
-    <p class="text-sm text-gray-500 shrink-0">Holatni yangilash:</p>
+    <p class="text-sm text-gray-500 shrink-0">{{ T.et_proposal_update_status }}:</p>
     <form method="POST" action="{% url 'edit_proposal' proposal.pk %}" class="flex gap-2 items-center">
       {% csrf_token %}
       <input type="hidden" name="content" value="{{ proposal.content }}">
       <select name="status" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-400">
-        <option value="draft" {% if proposal.status == 'draft' %}selected{% endif %}>📝 Qoralama</option>
-        <option value="sent" {% if proposal.status == 'sent' %}selected{% endif %}>📤 Yuborilgan</option>
-        <option value="accepted" {% if proposal.status == 'accepted' %}selected{% endif %}>✅ Qabul qilindi</option>
-        <option value="rejected" {% if proposal.status == 'rejected' %}selected{% endif %}>❌ Rad etildi</option>
+        <option value="draft" {% if proposal.status == 'draft' %}selected{% endif %}>📝 {{ T.et_proposal_draft }}</option>
+        <option value="sent" {% if proposal.status == 'sent' %}selected{% endif %}>📤 {{ T.et_proposal_sent }}</option>
+        <option value="accepted" {% if proposal.status == 'accepted' %}selected{% endif %}>✅ {{ T.et_proposal_accepted }}</option>
+        <option value="rejected" {% if proposal.status == 'rejected' %}selected{% endif %}>❌ {{ T.et_proposal_rejected }}</option>
       </select>
-      <button type="submit" class="gradient-bg text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:opacity-90 transition">Saqlash</button>
+      <button type="submit" class="gradient-bg text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:opacity-90 transition">{{ T.save }}</button>
     </form>
     <form method="POST" action="{% url 'delete_proposal' proposal.pk %}" class="ml-auto"
-          onsubmit="return confirm('O\'chirishni tasdiqlaysizmi?')">
+          onsubmit="return confirm('{{ T.delete_btn }}?')">
       {% csrf_token %}
-      <button type="submit" class="text-red-400 hover:text-red-600 text-sm">O'chir</button>
+      <button type="submit" class="text-red-400 hover:text-red-600 text-sm">{{ T.delete_btn }}</button>
     </form>
   </div>
 </div>
