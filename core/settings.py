@@ -79,6 +79,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.notifications_count',
                 'core.context_processors.language_context',
+                'core.context_processors.profile_completeness',
             ],
         },
     },

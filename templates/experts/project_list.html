@@ -286,3 +286,26 @@
 
 {% endif %}
 {% endblock %}
+
+{% block extra_js %}
+{% if not is_expert %}
+<script>
+(function () {
+    var form = document.getElementById('filter-form');
+    if (!form) return;
+    var timer;
+    // Text/number inputs: debounce 400ms then submit
+    form.querySelectorAll('input[type="text"], input[type="number"]').forEach(function (inp) {
+        inp.addEventListener('input', function () {
+            clearTimeout(timer);
+            timer = setTimeout(function () { form.submit(); }, 400);
+        });
+    });
+    // Selects: submit immediately on change
+    form.querySelectorAll('select').forEach(function (sel) {
+        sel.addEventListener('change', function () { form.submit(); });
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}

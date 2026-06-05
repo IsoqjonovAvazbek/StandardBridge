@@ -20,6 +20,10 @@ class CustomUser(AbstractUser):
     preferred_language = models.CharField(max_length=5, choices=LANG_CHOICES, default='uz')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Email verification
+    is_email_verified = models.BooleanField(default=True)
+    email_verify_token = models.CharField(max_length=72, blank=True, db_index=True)
+
     # Referral
     referral_code = models.CharField(max_length=12, unique=True, blank=True)
     referred_by = models.ForeignKey(

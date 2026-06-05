@@ -1,3 +1,28 @@
+def profile_completeness(request):
+    if not request.user.is_authenticated:
+        return {'profile_pct': 100}
+    user = request.user
+    if user.role == 'entrepreneur':
+        fields = [user.first_name, user.last_name, user.email, user.company_name, user.phone, user.region, user.industry]
+        try:
+            ep = user.entrepreneur_profile
+            fields += [ep.company_description, ep.employee_count or None]
+        except Exception:
+            pass
+    elif user.role == 'expert':
+        fields = [user.first_name, user.last_name, user.email, user.phone]
+        try:
+            xp = user.expert_profile
+            fields += [xp.bio, xp.specializations, xp.project_price or None, xp.region]
+        except Exception:
+            pass
+    else:
+        return {'profile_pct': 100}
+    filled = sum(1 for f in fields if f)
+    pct = int(filled / len(fields) * 100) if fields else 100
+    return {'profile_pct': pct}
+
+
 def notifications_count(request):
     if request.user.is_authenticated:
         from experts.models import Notification

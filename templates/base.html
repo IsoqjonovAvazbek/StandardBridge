@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}StandartBridge{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}StandartBridge — O'zbekistonda ISO, CE, EN standartlariga o'tish uchun AI gap tahlil va tasdiqlangan mutaxassislar platformasi{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}StandartBridge — ISO Sertifikatsiya Platformasi{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}O'zbekistonda ISO, CE, EN sertifikatsiyasiga eng tez va arzon yo'l. AI gap tahlil, tasdiqlangan mutaxassislar, escrow to'lov.{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:site_name" content="StandartBridge">
+    <meta name="twitter:card" content="summary">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -44,6 +53,23 @@
             </a>
         </div>
         <div class="flex items-center gap-3">
+            <!-- Global search -->
+            {% if user.is_authenticated %}
+            <div class="relative" id="gsearch-wrap">
+                <button onclick="toggleGlobalSearch()" class="p-2 rounded-lg hover:bg-gray-100 transition" title="{{ T.search_btn }}">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </button>
+                <div id="gsearch-dropdown" class="hidden absolute right-0 top-10 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+                    <div class="p-3 border-b border-gray-100">
+                        <input id="gsearch-input" type="text" placeholder="{{ T.search_btn }}..." autocomplete="off"
+                            class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div id="gsearch-results" class="max-h-72 overflow-y-auto py-1"></div>
+                </div>
+            </div>
+            {% endif %}
             {% include 'includes/lang_switcher.html' %}
             <span class="text-gray-600 text-sm hidden sm:block">{{ user.get_full_name }}</span>
             <span class="text-xs px-2 py-1 rounded-full
@@ -68,7 +94,7 @@
         style="will-change: transform;">
 
         <div class="p-5 border-b border-gray-100">
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 mb-3">
                 <div class="w-11 h-11 rounded-full gradient-bg flex items-center justify-center flex-shrink-0">
                     <span class="text-white font-bold">{{ user.first_name|first }}{{ user.last_name|first }}</span>
                 </div>
@@ -79,6 +105,22 @@
                     </p>
                 </div>
             </div>
+            {% if profile_pct < 100 %}
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-gray-400">{{ T.profile }}</span>
+                    <span class="font-semibold {% if profile_pct >= 80 %}text-green-600{% elif profile_pct >= 50 %}text-yellow-600{% else %}text-red-500{% endif %}">{{ profile_pct }}%</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-1.5">
+                    <div class="h-1.5 rounded-full transition-all duration-500 {% if profile_pct >= 80 %}bg-green-500{% elif profile_pct >= 50 %}bg-yellow-500{% else %}bg-red-400{% endif %}"
+                         style="width:{{ profile_pct }}%"></div>
+                </div>
+                {% if profile_pct < 80 %}
+                <a href="{% if user.role == 'expert' %}{% url 'expert_profile_edit' %}{% else %}{% url 'entrepreneur_profile' %}{% endif %}" data-no-loading
+                   class="text-xs text-blue-600 hover:underline mt-1 block">{{ T.complete_profile_btn }} →</a>
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
 
         <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto">
@@ -107,9 +149,7 @@
                 {% if request.resolver_match.url_name == 'notifications' %}gradient-bg text-white{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                 {{ T.notifications }}
-                {% if unread_notifications > 0 %}
-                <span class="ml-auto bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{{ unread_notifications }}</span>
-                {% endif %}
+                <span class="ml-auto bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center notif-badge {% if unread_notifications == 0 %}hidden{% endif %}">{{ unread_notifications }}</span>
             </a>
             <a href="{% url 'expert_profile' %}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition
@@ -185,9 +225,7 @@
                 {% if request.resolver_match.url_name == 'notifications' %}gradient-bg text-white{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                 {{ T.notifications }}
-                {% if unread_notifications > 0 %}
-                <span class="ml-auto bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{{ unread_notifications }}</span>
-                {% endif %}
+                <span class="ml-auto bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center notif-badge {% if unread_notifications == 0 %}hidden{% endif %}">{{ unread_notifications }}</span>
             </a>
             <a href="{% url 'qms_dashboard' %}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition
@@ -226,6 +264,15 @@
             </form>
         </div>
     </div>
+
+    {% if user.is_authenticated and not user.is_email_verified %}
+    <div id="email-banner" class="lg:ml-64 bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-center justify-between gap-3 text-sm">
+        <span class="text-amber-800">📧 {% if current_lang == 'ru' %}Ваш email не подтверждён.{% elif current_lang == 'en' %}Your email is not verified.{% else %}Email manzilingiz tasdiqlanmagan.{% endif %}
+            <a href="{% url 'resend_verification' %}" class="underline font-medium ml-1">{% if current_lang == 'ru' %}Отправить повторно{% elif current_lang == 'en' %}Resend{% else %}Qayta yuborish{% endif %}</a>
+        </span>
+        <button onclick="document.getElementById('email-banner').remove()" class="text-amber-400 hover:text-amber-600 text-lg leading-none flex-shrink-0">✕</button>
+    </div>
+    {% endif %}
 
     <div id="page-content" class="lg:ml-64 flex-1 min-h-screen">
         {% if messages %}
@@ -318,6 +365,77 @@ document.addEventListener('submit', function (e) {
         btn.innerHTML = '<svg class="inline w-3.5 h-3.5 mr-1 align-middle animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>{{ T.loading_text|default:"Yuklanmoqda..." }}';
     }
 });
+
+// Real-time notification badge polling (30s)
+(function () {
+    var badges = document.querySelectorAll('.notif-badge');
+    if (!badges.length) return;
+    function poll() {
+        fetch('/accounts/api/notif-count/', {credentials: 'same-origin'})
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+                if (!d) return;
+                badges.forEach(function (b) {
+                    b.textContent = d.count;
+                    if (d.count > 0) b.classList.remove('hidden');
+                    else b.classList.add('hidden');
+                });
+            })
+            .catch(function () {});
+    }
+    setInterval(poll, 30000);
+})();
+
+// Global search
+function toggleGlobalSearch() {
+    var dd = document.getElementById('gsearch-dropdown');
+    if (!dd) return;
+    dd.classList.toggle('hidden');
+    if (!dd.classList.contains('hidden')) {
+        document.getElementById('gsearch-input').focus();
+    }
+}
+document.addEventListener('click', function (e) {
+    var wrap = document.getElementById('gsearch-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+        var dd = document.getElementById('gsearch-dropdown');
+        if (dd) dd.classList.add('hidden');
+    }
+});
+(function () {
+    var inp = document.getElementById('gsearch-input');
+    if (!inp) return;
+    var timer;
+    var resultBox = document.getElementById('gsearch-results');
+    inp.addEventListener('input', function () {
+        clearTimeout(timer);
+        var q = this.value.trim();
+        if (q.length < 2) { resultBox.innerHTML = ''; return; }
+        timer = setTimeout(function () {
+            fetch('/accounts/api/search/?q=' + encodeURIComponent(q), {credentials: 'same-origin'})
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data.results.length) {
+                        resultBox.innerHTML = '<p class="px-4 py-3 text-xs text-gray-400">Natija topilmadi</p>';
+                        return;
+                    }
+                    resultBox.innerHTML = data.results.map(function (r) {
+                        return '<a href="' + r.url + '" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition">' +
+                            '<span class="text-lg flex-shrink-0">' + r.icon + '</span>' +
+                            '<div class="min-w-0"><p class="text-sm font-medium text-gray-900 truncate">' + r.title + '</p>' +
+                            (r.sub ? '<p class="text-xs text-gray-400 truncate">' + r.sub + '</p>' : '') +
+                            '</div></a>';
+                    }).join('');
+                })
+                .catch(function () {});
+        }, 300);
+    });
+    inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.getElementById('gsearch-dropdown').classList.add('hidden');
+        }
+    });
+})();
 </script>
 {% block extra_js %}{% endblock %}
 </body>

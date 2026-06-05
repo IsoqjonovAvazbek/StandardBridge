@@ -3,7 +3,8 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Q
+from django.http import JsonResponse
 from django.utils import timezone
 from datetime import timedelta
 from .models import CustomUser, ExpertProfile, EntrepreneurProfile
@@ -239,7 +240,23 @@ def register_view(request):
 
         login(request, user)
         send_welcome_email(user)
-        messages.success(request, 'Xush kelibsiz!')
+        # Email tasdiqlash xatini yuborish (fon threadida)
+        import secrets, threading as _th
+        _tok = secrets.token_urlsafe(48)
+        user.is_email_verified = False
+        user.email_verify_token = _tok
+        user.save(update_fields=['is_email_verified', 'email_verify_token'])
+        from experts.emails import _send as _esend
+        _lang = request.session.get('lang', 'uz')
+        _vurl = request.build_absolute_uri(f'/accounts/verify-email/{_tok}/')
+        _ESUBJ = {'uz': 'Email manzilingizni tasdiqlang', 'ru': 'Подтвердите вашу почту', 'en': 'Verify your email'}
+        _EBODY = {
+            'uz': f'StandartBridge ga xush kelibsiz!\n\nEmail manzilingizni tasdiqlash uchun:\n{_vurl}',
+            'ru': f'Добро пожаловать на StandartBridge!\n\nПодтвердите email:\n{_vurl}',
+            'en': f'Welcome to StandartBridge!\n\nVerify your email:\n{_vurl}',
+        }
+        _esend(_ESUBJ.get(_lang, _ESUBJ['uz']), _EBODY.get(_lang, _EBODY['uz']), user.email)
+        messages.success(request, 'Xush kelibsiz! Email manzilingizni tasdiqlang.')
         return redirect('dashboard')
 
     return render(request, 'accounts/register.html')
@@ -617,3 +634,90 @@ def dashboard(request):
         return redirect('admin_panel')
     else:
         return redirect('entrepreneur_dashboard')
+
+@login_required
+def api_notification_count(request):
+    from experts.models import Notification
+    count = Notification.objects.filter(user=request.user, is_read=False).count()
+    return JsonResponse({'count': count})
+
+
+def global_search_api(request):
+    q = request.GET.get('q', '').strip()
+    if len(q) < 2:
+        return JsonResponse({'results': []})
+    results = []
+    # Mutaxassislar
+    for ep in ExpertProfile.objects.filter(is_verified=True).filter(
+        Q(user__first_name__icontains=q) | Q(user__last_name__icontains=q) |
+        Q(specializations__icontains=q) | Q(bio__icontains=q)
+    ).select_related('user')[:5]:
+        results.append({
+            'type': 'expert',
+            'icon': '👤',
+            'title': ep.user.get_full_name(),
+            'sub': (ep.specializations or '')[:60],
+            'url': f'/experts/{ep.user.pk}/',
+        })
+    # Standartlar
+    from analysis.models import Standard
+    for std in Standard.objects.filter(
+        Q(code__icontains=q) | Q(name__icontains=q)
+    )[:4]:
+        results.append({
+            'type': 'standard',
+            'icon': '📋',
+            'title': std.code,
+            'sub': (std.name or '')[:60],
+            'url': '/analysis/select-industry/',
+        })
+    # Blog
+    from blog.models import BlogPost
+    for post in BlogPost.objects.filter(is_published=True).filter(
+        Q(title__icontains=q) | Q(content__icontains=q)
+    )[:4]:
+        results.append({
+            'type': 'blog',
+            'icon': '📰',
+            'title': post.title[:60],
+            'sub': '',
+            'url': f'/blog/{post.slug}/',
+        })
+    return JsonResponse({'results': results})
+
+
+@login_required
+def resend_verification(request):
+    if request.user.is_email_verified:
+        return redirect('dashboard')
+    import secrets
+    token = secrets.token_urlsafe(48)
+    request.user.email_verify_token = token
+    request.user.save(update_fields=['email_verify_token'])
+    from experts.emails import _send
+    lang = request.session.get('lang', 'uz')
+    verify_url = request.build_absolute_uri(f'/accounts/verify-email/{token}/')
+    _SUBJ = {'uz': 'Email manzilingizni tasdiqlang', 'ru': 'Подтвердите вашу почту', 'en': 'Verify your email'}
+    _BODY = {
+        'uz': f'StandartBridge ga xush kelibsiz!\n\nEmail manzilingizni tasdiqlash uchun quyidagi havolani bosing:\n{verify_url}\n\nHavola 48 soat amal qiladi.',
+        'ru': f'Добро пожаловать на StandartBridge!\n\nПерейдите по ссылке для подтверждения email:\n{verify_url}\n\nСсылка действительна 48 часов.',
+        'en': f'Welcome to StandartBridge!\n\nClick the link below to verify your email:\n{verify_url}\n\nLink valid for 48 hours.',
+    }
+    _send(_SUBJ.get(lang, _SUBJ['uz']), _BODY.get(lang, _BODY['uz']), request.user.email)
+    messages.success(request, 'Tasdiqlash xati yuborildi!' if lang == 'uz' else ('Письмо отправлено!' if lang == 'ru' else 'Verification email sent!'))
+    return redirect(request.META.get('HTTP_REFERER', '/dashboard/'))
+
+
+def verify_email(request, token):
+    if not token:
+        messages.error(request, 'Noto\'g\'ri havola!')
+        return redirect('dashboard')
+    try:
+        user = CustomUser.objects.get(email_verify_token=token)
+        user.is_email_verified = True
+        user.email_verify_token = ''
+        user.save(update_fields=['is_email_verified', 'email_verify_token'])
+        messages.success(request, 'Email manzil muvaffaqiyatli tasdiqlandi!')
+    except CustomUser.DoesNotExist:
+        messages.error(request, 'Havola yaroqsiz yoki muddati o\'tgan!')
+    return redirect('dashboard')

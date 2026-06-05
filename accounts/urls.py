@@ -32,4 +32,10 @@ urlpatterns = [
     path('accounts/password-reset/complete/', auth_views.PasswordResetCompleteView.as_view(
         template_name='accounts/password_reset_complete.html',
     ), name='password_reset_complete'),
+    # API endpoints
+    path('accounts/api/notif-count/', views.api_notification_count, name='api_notification_count'),
+    path('accounts/api/search/', views.global_search_api, name='global_search_api'),
+    # Email tasdiqlash
+    path('accounts/verify-email/<str:token>/', views.verify_email, name='verify_email'),
+    path('accounts/resend-verification/', views.resend_verification, name='resend_verification'),
 ]

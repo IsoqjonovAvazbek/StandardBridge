@@ -244,12 +244,18 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] QMS health score 60% bug yangi user uchun — else 100→0, no_qms_data flag, dashboard gauge "—" ko'rsatadi
 - [x] UX yaxshilanishlar: onboarding guide, project status timeline, audit_mobile tarjimalar, proposal toast
 
-### Global UX silliqlash (2026-06-05)
+### 6 ta yangi feature (2026-06-05)
 - [x] base.html: Django messages 4s keyin avtomatik yo'qoladi (fade-out animation)
 - [x] base.html: Forma submit tugmasi "Yuklanmoqda..." loading state + disabled (double-submit oldini oladi)
 - [x] base.html: Sahifa yuklanganda yumshoq fade-in animatsiya (#page-content)
 - [x] translations.py: confirm_delete/cancel_project/audit_finish/release_payment/escrow_payment/locked_active_badge (UZ/RU/EN)
 - [x] 8 ta templateda hardcoded confirm() matni T.* ga o'tkazildi (audit_detail, training_records, time_logs, documents×2, document_detail, project_detail, payment)
+- [x] SEO meta tags: base.html (description/og:title/og:description/canonical), landing.html, blog/post_detail.html override qilingan
+- [x] Profil to'liqlik foizi: profile_completeness context processor, sidebar progress bar (rangli: yashil ≥80%, sariq ≥50%, qizil <50%)
+- [x] Expert qidiruvida instant natija: project_list.html — select onChange submit, input 400ms debounce
+- [x] Bildirishnomalar real-vaqt: 30s polling (/accounts/api/notif-count/), notif-badge har doim DOM da (hidden/visible)
+- [x] Global qidiruv: navbar search icon → dropdown (expert/standart/blog — AJAX /accounts/api/search/), Escape bilan yopiladi
+- [x] Email tasdiqlash: CustomUser.is_email_verified/email_verify_token, migration 0008, ro'yxatdan o'tishda email yuboriladi (fon thread), verify/resend view'lar, base.html sariq banner
 
 ---
 
