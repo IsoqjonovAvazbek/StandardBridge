@@ -231,7 +231,7 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] migration 0002 (Proposal, TimeLog)
 
 ## PENDING (bajarilmagan)
-- [ ] Auditor mobile checklist tool
+- [x] Auditor mobile checklist tool — /audit/<pk>/mobile/ (kartadan karta, AJAX auto-save, real-time foiz)
 - [ ] Payme integratsiya (Click bor, Payme yo'q)
 - [ ] Ko'p tillar uchun email shablonlar
 
