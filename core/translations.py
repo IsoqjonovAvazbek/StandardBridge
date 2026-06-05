@@ -923,6 +923,12 @@ TRANSLATIONS = {
         'qms_training_expired': 'Muddati o\'tgan',
         'qms_training_expiring': 'Muddat yaqinlashmoqda',
         'qms_training_valid': 'Amaldagi',
+
+        # === DASHBOARD STATUS LABELS ===
+        'analysis_ai_processing': 'AI ishlov beryapti…',
+        'pending_price_title': 'Narx belgilanishini kutmoqda',
+        'readiness_trend_title': 'Tayyorlik o\'sishi',
+        'readiness_trend_sub': 'Tahlillar bo\'yicha tayyorlik foizining dinamikasi',
     },
 
     'ru': {
@@ -1812,6 +1818,12 @@ TRANSLATIONS = {
         'qms_training_expired': 'Истёк',
         'qms_training_expiring': 'Скоро истечёт',
         'qms_training_valid': 'Действителен',
+
+        # === DASHBOARD STATUS LABELS ===
+        'analysis_ai_processing': 'AI обрабатывает…',
+        'pending_price_title': 'Ожидание установки цены',
+        'readiness_trend_title': 'Динамика готовности',
+        'readiness_trend_sub': 'Изменение процента готовности по анализам',
     },
 
     'en': {
@@ -2729,6 +2741,12 @@ TRANSLATIONS = {
         'qms_training_expired': 'Expired',
         'qms_training_expiring': 'Expiring soon',
         'qms_training_valid': 'Valid',
+
+        # === DASHBOARD STATUS LABELS ===
+        'analysis_ai_processing': 'AI is processing…',
+        'pending_price_title': 'Waiting for price',
+        'readiness_trend_title': 'Readiness trend',
+        'readiness_trend_sub': 'Readiness percentage change across analyses',
     },
 }
 

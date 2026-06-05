@@ -37,14 +37,14 @@
             <div class="flex items-center gap-3">
                 {% if a.ai_result and a.ai_result.error %}
                 <span class="w-2 h-2 rounded-full bg-red-500 flex-shrink-0"></span>
-                <span class="text-sm text-red-700 font-medium">Tahlil #{{ a.pk }} — AI xatosi</span>
+                <span class="text-sm text-red-700 font-medium">Tahlil #{{ a.pk }} — {{ T.analysis_error_title }}</span>
                 {% else %}
                 <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse flex-shrink-0"></span>
-                <span class="text-sm text-yellow-700 font-medium">Tahlil #{{ a.pk }} — AI ishlov beryapti…</span>
+                <span class="text-sm text-yellow-700 font-medium">Tahlil #{{ a.pk }} — {{ T.analysis_ai_processing }}</span>
                 {% endif %}
             </div>
             <a href="{% url 'analysis_processing' a.pk %}"
-               class="text-xs text-yellow-700 underline hover:text-yellow-900">Kuzatish →</a>
+               class="text-xs text-yellow-700 underline hover:text-yellow-900">{{ T.track_project }}</a>
         </div>
         {% endfor %}
     </div>
@@ -53,8 +53,8 @@
     <!-- Readiness trend grafigi -->
     {% if show_trend %}
     <div class="bg-white rounded-2xl border border-gray-100 p-6 mb-8">
-        <h2 class="font-bold text-gray-900 mb-1">📈 Tayyorlik o'sishi</h2>
-        <p class="text-sm text-gray-500 mb-4">Tahlillar bo'yicha tayyorlik foizining dinamikasi</p>
+        <h2 class="font-bold text-gray-900 mb-1">📈 {{ T.readiness_trend_title }}</h2>
+        <p class="text-sm text-gray-500 mb-4">{{ T.readiness_trend_sub }}</p>
         <canvas id="readinessTrendChart" height="100"></canvas>
     </div>
     {% endif %}
@@ -62,7 +62,7 @@
     <!-- F-3: Narx belgilanishini kutayotgan loyihalar -->
     {% if pending_projects %}
     <div class="mb-8">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">⏳ Narx belgilanishini kutmoqda</h2>
+        <h2 class="text-xl font-bold text-gray-900 mb-4">⏳ {{ T.pending_price_title }}</h2>
         <div class="space-y-3">
             {% for project in pending_projects %}
             <div class="bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 flex items-center justify-between">
@@ -71,16 +71,16 @@
                         {{ project.analysis.local_standard.code }} → {{ project.analysis.target_standard.code }}
                     </p>
                     <p class="text-gray-500 text-xs mt-0.5">
-                        Mutaxassis: {% if project.expert %}{{ project.expert.get_full_name }}{% else %}—{% endif %}
+                        {{ T.expert_lbl }} {% if project.expert %}{{ project.expert.get_full_name }}{% else %}—{% endif %}
                     </p>
                 </div>
                 <div class="flex items-center gap-3">
                     <span class="text-xs text-gray-400">{{ project.created_at|date:"d.m.Y" }}</span>
-                    <a href="{% url 'project_detail' project.pk %}" class="text-xs text-blue-600 hover:underline">Ko'rish</a>
+                    <a href="{% url 'project_detail' project.pk %}" class="text-xs text-blue-600 hover:underline">{{ T.et_view }}</a>
                     <form method="post" action="{% url 'project_cancel' project.pk %}" class="inline">
                         {% csrf_token %}
-                        <button type="submit" onclick="return confirm('Loyihani bekor qilasizmi?')"
-                            class="text-xs text-red-500 hover:text-red-700">Bekor qilish</button>
+                        <button type="submit" onclick="return confirm('{{ T.cancel }}?')"
+                            class="text-xs text-red-500 hover:text-red-700">{{ T.cancel }}</button>
                     </form>
                 </div>
             </div>
