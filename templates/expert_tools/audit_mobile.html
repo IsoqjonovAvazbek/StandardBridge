@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2563eb">
+    <title>{{ audit.company_name }} — Audit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html, body { height: 100%; overflow: hidden; }
+        .card-container { scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+        .card { scroll-snap-align: start; scroll-snap-stop: always; }
+        .status-btn { transition: all 0.15s ease; }
+        .status-btn.active-compliant { background: #22c55e; color: #fff; border-color: #22c55e; transform: scale(1.02); }
+        .status-btn.active-partial { background: #f59e0b; color: #fff; border-color: #f59e0b; transform: scale(1.02); }
+        .status-btn.active-non { background: #ef4444; color: #fff; border-color: #ef4444; transform: scale(1.02); }
+        .progress-fill { transition: width 0.3s ease; }
+        textarea { font-size: 16px; } /* prevent iOS zoom on focus */
+        input { font-size: 16px; }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col" style="height:100dvh">
+
+<!-- Top bar -->
+<div class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0 safe-area-top">
+    <div class="flex items-center gap-3">
+        <a href="{% url 'audit_detail' audit.pk %}" class="text-gray-500 hover:text-gray-700">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+        </a>
+        <div>
+            <p class="font-semibold text-gray-900 text-sm leading-tight">{{ audit.company_name }}</p>
+            <p class="text-xs text-gray-400">{{ audit.standard|upper }} · {{ audit.audit_date|date:"d.m.Y" }}</p>
+        </div>
+    </div>
+    <div class="text-right">
+        <span id="score-display" class="text-2xl font-bold {% if score >= 70 %}text-green-600{% elif score >= 40 %}text-yellow-500{% else %}text-red-500{% endif %}">{{ score }}%</span>
+        <p class="text-xs text-gray-400" id="count-display">{{ compliant }}/{{ total }}</p>
+    </div>
+</div>
+
+<!-- Progress bar -->
+<div class="bg-white h-1.5 flex-shrink-0">
+    <div id="progress-bar" class="h-full bg-blue-500 progress-fill" style="width:{{ score }}%"></div>
+</div>
+
+<!-- Card counter -->
+<div class="bg-white border-b border-gray-100 px-4 py-2 flex items-center justify-between flex-shrink-0">
+    <span class="text-xs text-gray-500"><span id="current-card">1</span> / {{ total }}</span>
+    <div class="flex gap-1">
+        {% for item in items %}
+        <div class="w-2 h-2 rounded-full dot-{{ item.pk }}
+            {% if item.status == 'compliant' %}bg-green-400
+            {% elif item.status == 'partial' %}bg-yellow-400
+            {% elif item.status == 'non_compliant' %}bg-red-400
+            {% else %}bg-gray-200{% endif %}"></div>
+        {% endfor %}
+    </div>
+    <button onclick="skipToNext()" class="text-xs text-blue-600 font-medium">Keyingisi →</button>
+</div>
+
+<!-- Cards carousel -->
+<div class="flex-1 overflow-x-auto overflow-y-hidden card-container flex" id="carousel">
+    {% for item in items %}
+    <div class="card flex-shrink-0 w-full overflow-y-auto p-4" id="card-{{ item.pk }}" data-index="{{ forloop.counter0 }}">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-3">
+            <!-- Clause tag -->
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-xs font-mono font-bold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">{{ item.clause }}</span>
+                <span class="text-xs text-gray-400">Savol {{ forloop.counter }}/{{ total }}</span>
+                {% if item.status != 'not_checked' %}
+                <span class="ml-auto text-xs px-2 py-0.5 rounded-full font-medium
+                    {% if item.status == 'compliant' %}bg-green-100 text-green-700
+                    {% elif item.status == 'partial' %}bg-yellow-100 text-yellow-700
+                    {% else %}bg-red-100 text-red-700{% endif %}">
+                    {% if item.status == 'compliant' %}✓{% elif item.status == 'partial' %}~{% else %}✗{% endif %}
+                </span>
+                {% endif %}
+            </div>
+            <!-- Question -->
+            <p class="text-gray-900 font-medium leading-relaxed">{{ item.question }}</p>
+        </div>
+
+        <!-- Status buttons — large touch targets -->
+        {% if not audit.is_completed %}
+        <div class="grid grid-cols-3 gap-3 mb-4">
+            <button onclick="setStatus({{ item.pk }}, 'compliant', this)"
+                    class="status-btn py-4 rounded-2xl border-2 text-sm font-bold flex flex-col items-center gap-1
+                        {% if item.status == 'compliant' %}active-compliant{% else %}border-gray-200 text-gray-600 bg-white{% endif %}"
+                    data-item="{{ item.pk }}" data-val="compliant">
+                <span class="text-2xl">✓</span>
+                <span>Muvofiq</span>
+            </button>
+            <button onclick="setStatus({{ item.pk }}, 'partial', this)"
+                    class="status-btn py-4 rounded-2xl border-2 text-sm font-bold flex flex-col items-center gap-1
+                        {% if item.status == 'partial' %}active-partial{% else %}border-gray-200 text-gray-600 bg-white{% endif %}"
+                    data-item="{{ item.pk }}" data-val="partial">
+                <span class="text-2xl">~</span>
+                <span>Qisman</span>
+            </button>
+            <button onclick="setStatus({{ item.pk }}, 'non_compliant', this)"
+                    class="status-btn py-4 rounded-2xl border-2 text-sm font-bold flex flex-col items-center gap-1
+                        {% if item.status == 'non_compliant' %}active-non{% else %}border-gray-200 text-gray-600 bg-white{% endif %}"
+                    data-item="{{ item.pk }}" data-val="non_compliant">
+                <span class="text-2xl">✗</span>
+                <span>Nomuvofiq</span>
+            </button>
+        </div>
+
+        <!-- Finding / Note -->
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wide">Topilma / Eslatma</label>
+                <textarea rows="2" placeholder="Nima topildi? (ixtiyoriy)"
+                    class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white resize-none focus:ring-2 focus:ring-blue-400 outline-none"
+                    onblur="saveFinding({{ item.pk }}, this.value)" id="finding-{{ item.pk }}">{{ item.finding }}</textarea>
+            </div>
+        </div>
+        {% else %}
+        <!-- Read-only: audit completed -->
+        {% if item.status == 'non_compliant' and item.finding %}
+        <div class="bg-red-50 border border-red-100 rounded-xl p-3 text-sm text-red-700">
+            {{ item.finding }}
+        </div>
+        {% endif %}
+        {% endif %}
+
+        <!-- Navigation -->
+        <div class="flex gap-3 mt-4">
+            {% if not forloop.first %}
+            <button onclick="goToCard({{ forloop.counter0 }} - 1)"
+                    class="flex-1 border border-gray-200 text-gray-600 py-3 rounded-xl text-sm font-medium bg-white">
+                ← Oldingi
+            </button>
+            {% endif %}
+            {% if not forloop.last %}
+            <button onclick="goToCard({{ forloop.counter0 }} + 1)"
+                    class="flex-1 gradient-bg text-white py-3 rounded-xl text-sm font-bold bg-blue-600">
+                Keyingi →
+            </button>
+            {% else %}
+            <a href="{% url 'audit_detail' audit.pk %}"
+               class="flex-1 bg-green-500 text-white py-3 rounded-xl text-sm font-bold text-center">
+                Yakunlash →
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+const AUDIT_PK = {{ audit.pk }};
+const UPDATE_URL = "{% url 'update_audit_item' audit.pk %}";
+const CSRF = "{{ csrf_token }}";
+
+// Status colours
+const STATUS_CLS = {
+    compliant: 'bg-green-400',
+    partial: 'bg-yellow-400',
+    non_compliant: 'bg-red-400',
+    not_checked: 'bg-gray-200',
+};
+const ACTIVE_CLS = {
+    compliant: 'active-compliant',
+    partial: 'active-partial',
+    non_compliant: 'active-non',
+};
+
+let pendingFindings = {}; // itemPk → value
+let saving = {};
+
+function goToCard(idx) {
+    const card = document.querySelectorAll('.card')[idx];
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'start' });
+}
+
+function skipToNext() {
+    // go to first not_checked after current
+    const cards = document.querySelectorAll('.card');
+    const scroll = document.getElementById('carousel');
+    // find visible card
+    let visible = 0;
+    cards.forEach((c, i) => {
+        const rect = c.getBoundingClientRect();
+        if (rect.left >= 0 && rect.left < window.innerWidth) visible = i;
+    });
+    for (let i = visible + 1; i < cards.length; i++) {
+        const item = cards[i].id.replace('card-', '');
+        const dot = document.querySelector('.dot-' + item);
+        if (dot && dot.classList.contains('bg-gray-200')) {
+            goToCard(i);
+            return;
+        }
+    }
+    // wrap around
+    for (let i = 0; i < visible; i++) {
+        const item = cards[i].id.replace('card-', '');
+        const dot = document.querySelector('.dot-' + item);
+        if (dot && dot.classList.contains('bg-gray-200')) {
+            goToCard(i);
+            return;
+        }
+    }
+    goToCard(visible + 1 < cards.length ? visible + 1 : 0);
+}
+
+// Track current card for counter
+const carousel = document.getElementById('carousel');
+const cards = document.querySelectorAll('.card');
+const cardCounter = document.getElementById('current-card');
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting && e.intersectionRatio > 0.5) {
+            const idx = parseInt(e.target.dataset.index) + 1;
+            cardCounter.textContent = idx;
+        }
+    });
+}, { root: carousel, threshold: 0.5 });
+cards.forEach(c => observer.observe(c));
+
+function setStatus(itemPk, status, btn) {
+    if (saving[itemPk]) return;
+    saving[itemPk] = true;
+
+    // optimistic UI
+    const btns = document.querySelectorAll(`[data-item="${itemPk}"]`);
+    btns.forEach(b => {
+        b.classList.remove('active-compliant', 'active-partial', 'active-non');
+    });
+    if (ACTIVE_CLS[status]) btn.classList.add(ACTIVE_CLS[status]);
+
+    // update dot
+    const card = document.getElementById('card-' + itemPk);
+    const dot = document.querySelector('.dot-' + itemPk);
+    if (dot) {
+        dot.className = `w-2 h-2 rounded-full dot-${itemPk} ${STATUS_CLS[status] || 'bg-gray-200'}`;
+    }
+
+    const finding = document.getElementById('finding-' + itemPk);
+    const findingVal = finding ? finding.value : '';
+
+    fetch(UPDATE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ item_id: itemPk, status: status, finding: findingVal, evidence: '' }),
+    })
+    .then(r => r.json())
+    .then(data => {
+        saving[itemPk] = false;
+        if (data.success) {
+            updateScoreDisplay(data.score, data.compliant, data.total);
+            // auto advance after 600ms
+            setTimeout(() => {
+                const cardEl = document.getElementById('card-' + itemPk);
+                const idx = parseInt(cardEl.dataset.index);
+                if (idx + 1 < cards.length) goToCard(idx + 1);
+            }, 600);
+        }
+    })
+    .catch(() => { saving[itemPk] = false; });
+}
+
+function saveFinding(itemPk, value) {
+    const btns = document.querySelectorAll(`[data-item="${itemPk}"]`);
+    let currentStatus = 'not_checked';
+    btns.forEach(b => {
+        if (b.classList.contains('active-compliant')) currentStatus = 'compliant';
+        else if (b.classList.contains('active-partial')) currentStatus = 'partial';
+        else if (b.classList.contains('active-non')) currentStatus = 'non_compliant';
+    });
+    if (currentStatus === 'not_checked') return;
+    fetch(UPDATE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ item_id: itemPk, status: currentStatus, finding: value, evidence: '' }),
+    }).then(r => r.json()).then(d => { if (d.success) updateScoreDisplay(d.score, d.compliant, d.total); });
+}
+
+function updateScoreDisplay(score, compliant, total) {
+    const sd = document.getElementById('score-display');
+    const cd = document.getElementById('count-display');
+    const pb = document.getElementById('progress-bar');
+    sd.textContent = score + '%';
+    cd.textContent = compliant + '/' + total;
+    pb.style.width = score + '%';
+    // colour
+    sd.className = 'text-2xl font-bold ' + (score >= 70 ? 'text-green-600' : score >= 40 ? 'text-yellow-500' : 'text-red-500');
+}
+
+// Auto scroll to first unchecked
+window.addEventListener('load', () => {
+    const idx = {{ first_unchecked }};
+    if (idx > 0) setTimeout(() => goToCard(idx), 200);
+});
+</script>
+</body>
+</html>

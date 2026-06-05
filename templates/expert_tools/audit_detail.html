@@ -106,6 +106,20 @@
     </div>
   </div>
 
+  <!-- Mobile mode banner -->
+  {% if not audit.is_completed %}
+  <div class="sm:hidden bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-4 flex items-center justify-between">
+      <div>
+          <p class="text-sm font-semibold text-blue-800">📱 Mobil rejim</p>
+          <p class="text-xs text-blue-600">Sahada tezroq to'ldiring</p>
+      </div>
+      <a href="{% url 'audit_mobile' audit.pk %}"
+         class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
+          Ochish
+      </a>
+  </div>
+  {% endif %}
+
   <!-- Complete button -->
   {% if not audit.is_completed %}
   <form method="post" action="{% url 'complete_audit' audit.pk %}"
@@ -113,8 +127,12 @@
     {% csrf_token %}
     <div class="flex gap-3">
       <a href="{% url 'audit_list' %}"
-         class="flex-1 text-center border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+         class="border border-gray-200 text-gray-600 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
         {{ T.et_back }}
+      </a>
+      <a href="{% url 'audit_mobile' audit.pk %}"
+         class="hidden sm:flex items-center gap-2 border border-blue-300 text-blue-600 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-50 transition">
+        📱 Mobil rejim
       </a>
       <button type="submit"
               class="flex-1 gradient-bg text-white py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition">

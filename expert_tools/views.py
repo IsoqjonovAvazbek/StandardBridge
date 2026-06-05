@@ -384,6 +384,25 @@ def update_audit_item(request, pk):
 
 
 @expert_required
+def audit_mobile(request, pk):
+    audit = get_object_or_404(AuditChecklist, pk=pk, expert=request.user)
+    items = list(audit.items.order_by('order', 'pk'))
+    total = len(items)
+    compliant = sum(1 for i in items if i.status == 'compliant')
+    score = int(compliant / total * 100) if total > 0 else 0
+    # index of first unchecked item for auto-scroll
+    first_unchecked = next((i for i, item in enumerate(items) if item.status == 'not_checked'), 0)
+    return render(request, 'expert_tools/audit_mobile.html', {
+        'audit': audit,
+        'items': items,
+        'score': score,
+        'compliant': compliant,
+        'total': total,
+        'first_unchecked': first_unchecked,
+    })
+
+
+@expert_required
 def complete_audit(request, pk):
     audit = get_object_or_404(AuditChecklist, pk=pk, expert=request.user)
     if request.method == 'POST':

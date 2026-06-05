@@ -18,6 +18,7 @@ urlpatterns = [
     path('audit/<int:pk>/', views.audit_detail, name='audit_detail'),
     path('audit/<int:pk>/update-item/', views.update_audit_item, name='update_audit_item'),
     path('audit/<int:pk>/complete/', views.complete_audit, name='complete_audit'),
+    path('audit/<int:pk>/mobile/', views.audit_mobile, name='audit_mobile'),
     path('audit/from-analysis/<int:project_id>/', views.audit_from_analysis, name='audit_from_analysis'),
 
     # Project templates
