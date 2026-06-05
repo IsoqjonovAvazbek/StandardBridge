@@ -233,7 +233,7 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 ## PENDING (bajarilmagan)
 - [x] Auditor mobile checklist tool — /audit/<pk>/mobile/ (kartadan karta, AJAX auto-save, real-time foiz)
 - [ ] Payme integratsiya (Click bor, Payme yo'q)
-- [ ] Ko'p tillar uchun email shablonlar
+- [x] Ko'p tillar uchun email shablonlar — CustomUser.preferred_language + 10 funksiya UZ/RU/EN
 
 ### Oxirgi sессiyada bajarilganlar (2026-06-05)
 - [x] To'lov tugmasi bug: payment_page har doim Payment yaratadi (CLICK_SERVICE_ID bo'lsa ham bo'lmasa ham)
