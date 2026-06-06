@@ -46,10 +46,10 @@
          Main layout: LEFT TOC | CENTER Article | RIGHT Related
          ═══════════════════════════════════════════════════════ -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
+        <div class="flex flex-col md:flex-row gap-6 md:gap-8">
 
-            <!-- ── LEFT SIDEBAR: Table of Contents (sticky, desktop only) ── -->
-            <div class="hidden lg:block lg:w-52 flex-shrink-0" id="toc-sidebar">
+            <!-- ── LEFT SIDEBAR: Table of Contents (sticky, tablet+) ── -->
+            <div class="hidden md:block md:w-44 flex-shrink-0" id="toc-sidebar">
                 <div class="sticky top-24 bg-white rounded-2xl border border-gray-100 p-5 shadow-sm" id="toc-card">
                     <h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
                         <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,8 +66,8 @@
             <!-- ── CENTER: Article column ── -->
             <div class="flex-1 min-w-0">
 
-                <!-- Mobile: collapsible TOC -->
-                <div class="lg:hidden mb-4" id="mobile-toc-container">
+                <!-- Mobile: collapsible TOC (shown only on phones < 768px) -->
+                <div class="md:hidden mb-4" id="mobile-toc-container">
                     <button onclick="document.getElementById('mobile-toc-body').classList.toggle('hidden');
                                      this.querySelector('svg').classList.toggle('rotate-180')"
                         class="w-full flex items-center justify-between bg-white rounded-xl border border-gray-100 px-4 py-3 shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
@@ -177,9 +177,9 @@
                     </a>
                 </div>
 
-                <!-- Mobile: related posts (below article, only on small screens) -->
+                <!-- Non-XL: related posts below article (hidden only on xl+ where sidebar shows) -->
                 {% if related %}
-                <div class="lg:hidden bg-white rounded-2xl border border-gray-100 p-5 shadow-sm mb-6">
+                <div class="xl:hidden bg-white rounded-2xl border border-gray-100 p-5 shadow-sm mb-6">
                     <h3 class="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
                         <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                         {{ T.blog_related_title }}
@@ -277,9 +277,9 @@
 
             </div><!-- /CENTER article col -->
 
-            <!-- ── RIGHT SIDEBAR: Related posts (sticky, desktop only) ── -->
+            <!-- ── RIGHT SIDEBAR: Related posts (sticky, large desktop+) ── -->
             {% if related %}
-            <div class="hidden lg:block lg:w-56 flex-shrink-0">
+            <div class="hidden xl:block xl:w-52 flex-shrink-0">
                 <div class="sticky top-24 bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
                     <h3 class="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
                         <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -342,17 +342,17 @@ function showToast(msg, type){
 
 // ── Auto-generate Table of Contents ───────────────────────────
 (function(){
-    var content = document.getElementById('article-content');
+    var content    = document.getElementById('article-content');
     var navDesktop = document.getElementById('toc-nav');
     var navMobile  = document.getElementById('toc-nav-mobile');
-    var tocCard    = document.getElementById('toc-card');
+    var tocSidebar = document.getElementById('toc-sidebar');
     var mobileCont = document.getElementById('mobile-toc-container');
 
     if(!content) return;
     var headings = content.querySelectorAll('h2, h3');
 
     if(headings.length < 2){
-        if(tocCard) tocCard.style.display = 'none';
+        if(tocSidebar) tocSidebar.style.display = 'none';
         if(mobileCont) mobileCont.style.display = 'none';
         return;
     }
