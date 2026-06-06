@@ -1,20 +1,20 @@
 {% extends 'base.html' %}
 {% load labels %}
-{% block title %}Admin Panel — StandartBridge{% endblock %}
+{% block title %}{{ T.admin_panel }} — StandartBridge{% endblock %}
 
 {% block content %}
 <div class="p-6 max-w-7xl mx-auto">
 
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Admin Panel</h1>
-        <p class="text-gray-500 mt-1">Platforma statistikasi va boshqaruv</p>
+        <h1 class="text-3xl font-bold text-gray-900">{{ T.admin_panel }}</h1>
+        <p class="text-gray-500 mt-1">{{ T.admin_subtitle }}</p>
     </div>
 
     <!-- Asosiy statistika -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div class="bg-white rounded-2xl p-5 border border-gray-100">
             <div class="flex items-center justify-between mb-3">
-                <span class="text-gray-500 text-sm">Tadbirkorlar</span>
+                <span class="text-gray-500 text-sm">{{ T.admin_entrepreneurs }}</span>
                 <div class="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center">
                     <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
@@ -22,12 +22,12 @@
                 </div>
             </div>
             <div class="text-3xl font-bold text-gray-900">{{ stats.entrepreneurs }}</div>
-            <div class="text-xs text-green-600 mt-1">+{{ stats.new_entrepreneurs }} bu hafta</div>
+            <div class="text-xs text-green-600 mt-1">+{{ stats.new_entrepreneurs }} {{ T.admin_this_week }}</div>
         </div>
 
         <div class="bg-white rounded-2xl p-5 border border-gray-100">
             <div class="flex items-center justify-between mb-3">
-                <span class="text-gray-500 text-sm">Mutaxassislar</span>
+                <span class="text-gray-500 text-sm">{{ T.experts }}</span>
                 <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center">
                     <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
@@ -35,12 +35,12 @@
                 </div>
             </div>
             <div class="text-3xl font-bold text-gray-900">{{ stats.experts }}</div>
-            <div class="text-xs text-blue-600 mt-1">{{ stats.verified_experts }} ta tasdiqlangan</div>
+            <div class="text-xs text-blue-600 mt-1">{{ stats.verified_experts }} {{ T.admin_verified_count }}</div>
         </div>
 
         <div class="bg-white rounded-2xl p-5 border border-gray-100">
             <div class="flex items-center justify-between mb-3">
-                <span class="text-gray-500 text-sm">Jami tahlillar</span>
+                <span class="text-gray-500 text-sm">{{ T.admin_total_analyses }}</span>
                 <div class="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center">
                     <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
@@ -48,12 +48,12 @@
                 </div>
             </div>
             <div class="text-3xl font-bold text-gray-900">{{ stats.analyses }}</div>
-            <div class="text-xs text-purple-600 mt-1">{{ stats.completed_analyses }} ta yakunlangan</div>
+            <div class="text-xs text-purple-600 mt-1">{{ stats.completed_analyses }} {{ T.admin_completed_count }}</div>
         </div>
 
         <div class="bg-white rounded-2xl p-5 border border-gray-100">
             <div class="flex items-center justify-between mb-3">
-                <span class="text-gray-500 text-sm">Daromad (20%)</span>
+                <span class="text-gray-500 text-sm">{{ T.admin_revenue }}</span>
                 <div class="w-9 h-9 bg-yellow-100 rounded-xl flex items-center justify-center">
                     <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -61,7 +61,7 @@
                 </div>
             </div>
             <div class="text-3xl font-bold text-gray-900">${{ stats.platform_revenue|floatformat:0 }}</div>
-            <div class="text-xs text-yellow-600 mt-1">${{ stats.total_volume|floatformat:0 }} jami hajm</div>
+            <div class="text-xs text-yellow-600 mt-1">${{ stats.total_volume|floatformat:0 }} {{ T.admin_total_volume }}</div>
         </div>
     </div>
 
@@ -69,7 +69,7 @@
 
         <!-- Loyihalar holati -->
         <div class="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 class="font-bold text-gray-900 mb-4">Loyihalar holati</h2>
+            <h2 class="font-bold text-gray-900 mb-4">{{ T.admin_project_statuses }}</h2>
             <div class="space-y-3">
                 {% for status_item in project_stats %}
                 <div class="flex items-center justify-between">
@@ -92,9 +92,9 @@
         <!-- Tasdiqlanmagan mutaxassislar -->
         <div class="bg-white rounded-2xl border border-gray-100 p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="font-bold text-gray-900">Tasdiq kutayotganlar</h2>
+                <h2 class="font-bold text-gray-900">{{ T.admin_pending_experts }}</h2>
                 <span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">
-                    {{ pending_experts|length }} ta
+                    {{ pending_experts|length }}
                 </span>
             </div>
             <div class="space-y-3">
@@ -111,7 +111,7 @@
                             <p class="text-xs text-blue-600 mt-0.5">📋 {{ profile.cert_number }} — {{ profile.issuing_body|truncatechars:20 }}</p>
                             {% endif %}
                             {% if profile.cert_expiry %}
-                            <p class="text-xs text-gray-400">Muddat: {{ profile.cert_expiry|date:"d.m.Y" }}</p>
+                            <p class="text-xs text-gray-400">{{ T.admin_cert_expiry }} {{ profile.cert_expiry|date:"d.m.Y" }}</p>
                             {% endif %}
                         </div>
                     </div>
@@ -120,19 +120,19 @@
                         <input type="hidden" name="action" value="verify">
                         <button type="submit"
                             class="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition">
-                            Tasdiqlash
+                            {{ T.admin_verify_btn }}
                         </button>
                     </form>
                 </div>
                 {% empty %}
-                <p class="text-gray-400 text-sm text-center py-4">Hammasi tasdiqlangan ✓</p>
+                <p class="text-gray-400 text-sm text-center py-4">{{ T.admin_all_verified }}</p>
                 {% endfor %}
             </div>
         </div>
 
         <!-- So'nggi to'lovlar -->
         <div class="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 class="font-bold text-gray-900 mb-4">So'nggi to'lovlar</h2>
+            <h2 class="font-bold text-gray-900 mb-4">{{ T.admin_recent_payments }}</h2>
             <div class="space-y-3">
                 {% for payment in recent_payments %}
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
@@ -148,7 +148,7 @@
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-gray-400 text-sm text-center py-4">To'lovlar yo'q</p>
+                <p class="text-gray-400 text-sm text-center py-4">{{ T.admin_no_payments }}</p>
                 {% endfor %}
             </div>
         </div>
@@ -157,47 +157,47 @@
     <!-- So'nggi ro'yxatdan o'tganlar -->
     <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-6">
         <div class="flex items-center justify-between p-5 border-b border-gray-100">
-            <h2 class="font-bold text-gray-900">So'nggi foydalanuvchilar</h2>
-            <a href="/admin/accounts/customuser/" class="text-sm text-blue-600 hover:underline">Barchasi →</a>
+            <h2 class="font-bold text-gray-900">{{ T.admin_recent_users }}</h2>
+            <a href="/admin/accounts/customuser/" class="text-sm text-blue-600 hover:underline">{{ T.admin_view_all }}</a>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Ism</th>
-                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Email</th>
-                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Rol</th>
-                        <th class="text-left px-5 py-3 text-gray-500 font-medium">Ro'yxat sanasi</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">{{ T.admin_col_name }}</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">{{ T.admin_col_email }}</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">{{ T.admin_col_role }}</th>
+                        <th class="text-left px-5 py-3 text-gray-500 font-medium">{{ T.admin_col_date }}</th>
                         <th class="text-left px-5 py-3 text-gray-500 font-medium"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    {% for user in recent_users %}
+                    {% for usr in recent_users %}
                     <tr class="hover:bg-gray-50">
                         <td class="px-5 py-3">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center flex-shrink-0">
-                                    <span class="text-white text-xs font-bold">{{ user.first_name|first }}{{ user.last_name|first }}</span>
+                                    <span class="text-white text-xs font-bold">{{ usr.first_name|first }}{{ usr.last_name|first }}</span>
                                 </div>
-                                <span class="font-medium text-gray-900">{{ user.get_full_name }}</span>
+                                <span class="font-medium text-gray-900">{{ usr.get_full_name }}</span>
                             </div>
                         </td>
-                        <td class="px-5 py-3 text-gray-500">{{ user.email }}</td>
+                        <td class="px-5 py-3 text-gray-500">{{ usr.email }}</td>
                         <td class="px-5 py-3">
                             <span class="px-2 py-1 rounded-full text-xs font-medium
-                                {% if user.role == 'expert' %}bg-blue-100 text-blue-700
+                                {% if usr.role == 'expert' %}bg-blue-100 text-blue-700
                                 {% else %}bg-green-100 text-green-700{% endif %}">
-                                {{ user.get_role_display }}
+                                {{ usr.get_role_display }}
                             </span>
                         </td>
-                        <td class="px-5 py-3 text-gray-500">{{ user.created_at|date:"d.m.Y H:i" }}</td>
+                        <td class="px-5 py-3 text-gray-500">{{ usr.created_at|date:"d.m.Y H:i" }}</td>
                         <td class="px-5 py-3">
-                            <a href="/admin/accounts/customuser/{{ user.pk }}/change/"
-                                class="text-blue-600 hover:underline text-xs">Tahrirlash</a>
+                            <a href="/admin/accounts/customuser/{{ usr.pk }}/change/"
+                                class="text-blue-600 hover:underline text-xs">{{ T.admin_edit }}</a>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="5" class="px-5 py-8 text-center text-gray-400">Foydalanuvchilar yo'q</td></tr>
+                    <tr><td colspan="5" class="px-5 py-8 text-center text-gray-400">{{ T.admin_no_users }}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -210,9 +210,9 @@
         <!-- Pul yechish so'rovlari -->
         <div class="bg-white rounded-2xl border border-orange-100 p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="font-bold text-gray-900">💸 Pul yechish so'rovlari</h2>
+                <h2 class="font-bold text-gray-900">{{ T.admin_withdrawals_title }}</h2>
                 <span class="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full font-medium">
-                    {{ pending_withdrawals|length }} ta
+                    {{ pending_withdrawals|length }}
                 </span>
             </div>
             <div class="space-y-3">
@@ -221,7 +221,7 @@
                     <div class="flex items-center justify-between mb-2">
                         <div>
                             <p class="font-semibold text-gray-900 text-sm">{{ wr.wallet.user.get_full_name }}</p>
-                            <p class="text-xs text-gray-500">Karta: {{ wr.card_number_plain }} · {{ wr.card_holder }}</p>
+                            <p class="text-xs text-gray-500">{{ T.admin_card_label }} **** {{ wr.card_number_plain|slice:"-4:" }} · {{ wr.card_holder }}</p>
                             <p class="text-xs text-gray-400">{{ wr.created_at|date:"d.m.Y H:i" }}</p>
                             {% if wr.note %}<p class="text-xs text-gray-600 mt-1">{{ wr.note }}</p>{% endif %}
                         </div>
@@ -229,22 +229,22 @@
                     </div>
                     <form method="POST" action="{% url 'admin_process_withdrawal' wr.pk %}" class="flex gap-2">
                         {% csrf_token %}
-                        <input type="text" name="admin_note" placeholder="Izoh (ixtiyoriy)"
+                        <input type="text" name="admin_note" placeholder="{{ T.admin_note_ph }}"
                             class="flex-1 px-2 py-1 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-400">
                         <button type="submit" name="action" value="approve"
-                            onclick="return confirm('Pul yechish so\'rovini tasdiqlaysizmi? Pul kartaga o\'tkaziladi.')"
+                            onclick="return confirm('{{ T.admin_confirm_withdrawal }}')"
                             class="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition">
-                            ✓ Tasdiqlash
+                            {{ T.admin_approve }}
                         </button>
                         <button type="submit" name="action" value="reject"
-                            onclick="return confirm('So\'rovni rad etasizmi? Pul hamyonga qaytariladi.')"
+                            onclick="return confirm('{{ T.admin_confirm_reject_wr }}')"
                             class="text-xs bg-red-100 hover:bg-red-200 text-red-600 px-3 py-1.5 rounded-lg transition">
-                            ✕ Rad
+                            {{ T.admin_reject }}
                         </button>
                     </form>
                 </div>
                 {% empty %}
-                <p class="text-gray-400 text-sm text-center py-4">Kutayotgan so'rovlar yo'q ✓</p>
+                <p class="text-gray-400 text-sm text-center py-4">{{ T.admin_no_withdrawals }}</p>
                 {% endfor %}
             </div>
         </div>
@@ -252,79 +252,77 @@
         <!-- Ochiq nizolar -->
         <div class="bg-white rounded-2xl border border-red-100 p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="font-bold text-gray-900">⚠ Ochiq nizolar</h2>
+                <h2 class="font-bold text-gray-900">{{ T.admin_disputes_title }}</h2>
                 <span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">
-                    {{ open_disputes|length }} ta
+                    {{ open_disputes|length }}
                 </span>
             </div>
             <div class="space-y-3">
                 {% for dispute in open_disputes %}
                 <div class="bg-red-50 rounded-xl p-3">
                     <div class="mb-2">
-                        <p class="font-semibold text-gray-900 text-sm">Loyiha #{{ dispute.project_id }}</p>
+                        <p class="font-semibold text-gray-900 text-sm">{{ T.projects }} #{{ dispute.project_id }}</p>
                         <p class="text-xs text-gray-500">{{ dispute.opened_by.get_full_name }} • {{ dispute.created_at|date:"d.m.Y" }}</p>
                         <p class="text-xs text-red-700 mt-1">{{ dispute.reason|truncatechars:80 }}</p>
                     </div>
                     <form method="POST" action="{% url 'admin_resolve_dispute' dispute.pk %}" class="space-y-2">
                         {% csrf_token %}
-                        <textarea name="decision" rows="2" required placeholder="Admin qarori..."
+                        <textarea name="decision" rows="2" required placeholder="{{ T.admin_decision_ph }}"
                             class="w-full px-2 py-1 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-400 resize-none"></textarea>
                         <div class="flex gap-2 text-xs">
                             <label class="flex items-center gap-1 cursor-pointer">
-                                <input type="radio" name="favor" value="expert" class="accent-green-500"> Expert
+                                <input type="radio" name="favor" value="expert" class="accent-green-500"> {{ T.login_expert }}
                             </label>
                             <label class="flex items-center gap-1 cursor-pointer">
-                                <input type="radio" name="favor" value="entrepreneur" class="accent-blue-500"> Tadbirkor
+                                <input type="radio" name="favor" value="entrepreneur" class="accent-blue-500"> {{ T.login_entrepreneur }}
                             </label>
                             <label class="flex items-center gap-1 cursor-pointer">
-                                <input type="radio" name="favor" value="none" checked> Pulsiz
+                                <input type="radio" name="favor" value="none" checked> {{ T.admin_reject }}
                             </label>
                         </div>
                         <div class="flex gap-2">
                             <button type="submit" name="status" value="resolved"
-                                onclick="return confirm('Nizoni hal qilingan deb belgilaysizmi? Pul harakati sodir bo\'ladi.')"
+                                onclick="return confirm('{{ T.admin_confirm_resolve }}')"
                                 class="flex-1 text-xs bg-green-500 hover:bg-green-600 text-white py-1.5 rounded-lg transition">
-                                ✓ Hal qilindi
+                                {{ T.admin_resolve_btn }}
                             </button>
                             <button type="submit" name="status" value="closed"
-                                onclick="return confirm('Nizoni yopasizmi?')"
+                                onclick="return confirm('{{ T.admin_confirm_close_dispute }}')"
                                 class="flex-1 text-xs bg-gray-400 hover:bg-gray-500 text-white py-1.5 rounded-lg transition">
-                                Yopish
+                                {{ T.admin_close_btn }}
                             </button>
                         </div>
                     </form>
                 </div>
                 {% empty %}
-                <p class="text-gray-400 text-sm text-center py-4">Ochiq nizolar yo'q ✓</p>
+                <p class="text-gray-400 text-sm text-center py-4">{{ T.admin_no_disputes }}</p>
                 {% endfor %}
             </div>
         </div>
     </div>
 
-    <!-- F-11: Expert o'chirilgan faol loyihalar -->
     {% if orphaned_projects %}
     <div class="bg-red-50 border border-red-200 rounded-2xl p-5 mb-6">
-        <h2 class="font-bold text-red-800 mb-3">⚠️ Mutaxassisi yo'q faol loyihalar ({{ orphaned_projects|length }} ta)</h2>
+        <h2 class="font-bold text-red-800 mb-3">{{ T.admin_orphaned_title }} ({{ orphaned_projects|length }})</h2>
         <div class="space-y-2">
             {% for p in orphaned_projects %}
             <div class="flex items-center justify-between bg-white rounded-xl px-4 py-2 text-sm">
-                <span class="text-gray-700">Loyiha #{{ p.pk }} — {{ p.entrepreneur.get_full_name }} — <b>{{ p.status }}</b></span>
-                <a href="{% url 'project_detail' p.pk %}" class="text-red-600 hover:underline text-xs">Ko'rish</a>
+                <span class="text-gray-700">{{ T.projects }} #{{ p.pk }} — {{ p.entrepreneur.get_full_name }} — <b>{{ p.status }}</b></span>
+                <a href="{% url 'project_detail' p.pk %}" class="text-red-600 hover:underline text-xs">{{ T.admin_view_btn }}</a>
             </div>
             {% endfor %}
         </div>
     </div>
     {% endif %}
 
-    <!-- F-10: Hal qilingan nizolar tarixi -->
     {% if resolved_disputes %}
     <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
-        <h2 class="font-bold text-gray-900 mb-3">Hal qilingan nizolar (oxirgi {{ resolved_disputes|length }} ta)</h2>
+        <h2 class="font-bold text-gray-900 mb-3">{{ T.admin_resolved_disputes }} ({{ T.admin_last_n }} {{ resolved_disputes|length }})</h2>
         <div class="space-y-2">
             {% for d in resolved_disputes %}
             <div class="flex items-center justify-between text-sm border-b border-gray-50 py-2 last:border-0">
                 <div>
-                    <span class="font-medium text-gray-800">Loyiha #{{ d.project_id }}</span>
+                    <span class="font-medium text-gray-800">{{ T.projects }} #{{ d.project_id }}</span>
                     <span class="text-gray-500 ml-2">{{ d.opened_by.get_full_name }}</span>
                     {% if d.admin_decision %}<span class="text-gray-400 ml-2 text-xs italic">— {{ d.admin_decision|truncatechars:60 }}</span>{% endif %}
                 </div>
@@ -335,10 +333,9 @@
     </div>
     {% endif %}
 
-    <!-- F-10: Qayta ishlangan withdrawal'lar tarixi -->
     {% if processed_withdrawals %}
     <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
-        <h2 class="font-bold text-gray-900 mb-3">Qayta ishlangan pul yechish so'rovlari (oxirgi {{ processed_withdrawals|length }} ta)</h2>
+        <h2 class="font-bold text-gray-900 mb-3">{{ T.admin_processed_wr }} ({{ T.admin_last_n }} {{ processed_withdrawals|length }})</h2>
         <div class="space-y-2">
             {% for wr in processed_withdrawals %}
             <div class="flex items-center justify-between text-sm border-b border-gray-50 py-2 last:border-0">
@@ -357,11 +354,11 @@
     <!-- Statistika grafiklari -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div class="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 class="font-bold text-gray-900 mb-4">Yangi foydalanuvchilar (6 oy)</h2>
+            <h2 class="font-bold text-gray-900 mb-4">{{ T.admin_chart_users }}</h2>
             <canvas id="usersChart" height="120"></canvas>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 class="font-bold text-gray-900 mb-4">Oylik daromad (6 oy)</h2>
+            <h2 class="font-bold text-gray-900 mb-4">{{ T.admin_chart_revenue }}</h2>
             <canvas id="revenueChart" height="120"></canvas>
         </div>
     </div>
@@ -371,17 +368,17 @@
         <a href="/admin/accounts/expertprofile/?is_verified__exact=0"
             class="bg-white border border-orange-200 rounded-2xl p-5 hover:bg-orange-50 transition text-center">
             <div class="text-2xl font-bold text-orange-600 mb-1">{{ stats.unverified_experts }}</div>
-            <div class="text-sm text-gray-600">Tasdiqlanmagan experts</div>
+            <div class="text-sm text-gray-600">{{ T.admin_unverified_experts }}</div>
         </a>
         <a href="/admin/experts/project/?status__exact=in_progress"
             class="bg-white border border-blue-200 rounded-2xl p-5 hover:bg-blue-50 transition text-center">
             <div class="text-2xl font-bold text-blue-600 mb-1">{{ stats.active_projects }}</div>
-            <div class="text-sm text-gray-600">Faol loyihalar</div>
+            <div class="text-sm text-gray-600">{{ T.admin_active_projects }}</div>
         </a>
         <a href="/admin/experts/payment/?status__exact=held"
             class="bg-white border border-yellow-200 rounded-2xl p-5 hover:bg-yellow-50 transition text-center">
             <div class="text-2xl font-bold text-yellow-600 mb-1">${{ stats.held_amount|floatformat:0 }}</div>
-            <div class="text-sm text-gray-600">Escrow'da turgan pul</div>
+            <div class="text-sm text-gray-600">{{ T.admin_escrow_amount }}</div>
         </a>
         <a href="/admin/"
             class="gradient-bg rounded-2xl p-5 hover:opacity-90 transition text-center">
@@ -405,7 +402,7 @@ new Chart(document.getElementById('usersChart'), {
     data: {
         labels: labels,
         datasets: [{
-            label: "Foydalanuvchilar",
+            label: "{{ T.admin_chart_users }}",
             data: usersData,
             borderColor: '#185FA5',
             backgroundColor: 'rgba(24,95,165,0.08)',
@@ -427,7 +424,7 @@ new Chart(document.getElementById('revenueChart'), {
     data: {
         labels: labels,
         datasets: [{
-            label: "Daromad ($)",
+            label: "{{ T.admin_chart_revenue }}",
             data: revenueData,
             backgroundColor: 'rgba(55,138,221,0.7)',
             borderRadius: 6,
