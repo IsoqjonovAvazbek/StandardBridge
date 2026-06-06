@@ -13,7 +13,7 @@ def profile_completeness(request):
         fields = [user.first_name, user.last_name, user.email, user.phone]
         try:
             xp = user.expert_profile
-            fields += [xp.bio, xp.specializations, xp.project_price or None, xp.region]
+            fields += [xp.bio, xp.specializations, xp.region]
         except Exception:
             pass
     else:

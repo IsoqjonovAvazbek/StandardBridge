@@ -115,7 +115,7 @@
                     <div class="h-1.5 rounded-full transition-all duration-500 {% if profile_pct >= 80 %}bg-green-500{% elif profile_pct >= 50 %}bg-yellow-500{% else %}bg-red-400{% endif %}"
                          style="width:{{ profile_pct }}%"></div>
                 </div>
-                {% if profile_pct < 80 %}
+                {% if profile_pct < 100 %}
                 <a href="{% if user.role == 'expert' %}{% url 'expert_profile_edit' %}{% else %}{% url 'entrepreneur_profile' %}{% endif %}" data-no-loading
                    class="text-xs text-blue-600 hover:underline mt-1 block">{{ T.complete_profile_btn }} →</a>
                 {% endif %}

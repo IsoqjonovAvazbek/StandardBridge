@@ -22,6 +22,8 @@ class BlogPost(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='posts')
     cover_image = models.URLField(blank=True, help_text='Rasm URL manzili')
+    LANG_CHOICES = [('uz', 'O\'zbek'), ('ru', 'Русский'), ('en', 'English')]
+    language = models.CharField(max_length=5, choices=LANG_CHOICES, default='uz')
     is_published = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False, help_text='Asosiy featured post sifatida ko\'rsatish')
     views_count = models.PositiveIntegerField(default=0)

@@ -17,6 +17,7 @@ python manage.py load_checklist || echo "load_checklist xato (o'tkazib yuborildi
 python manage.py load_expert_templates || echo "load_expert_templates xato (o'tkazib yuborildi)"
 python manage.py seed_experts || echo "seed_experts xato (o'tkazib yuborildi)"
 python manage.py seed_roadmap_steps || echo "seed_roadmap_steps xato (o'tkazib yuborildi)"
+python manage.py seed_blog_posts || echo "seed_blog_posts xato (o'tkazib yuborildi)"
 python manage.py create_admin || echo "create_admin xato (o'tkazib yuborildi)"
 
 echo "==> Gunicorn ishga tushmoqda..."

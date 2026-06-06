@@ -8,10 +8,11 @@ from .models import BlogPost, Category, BlogComment, BlogLike
 
 
 def post_list(request):
-    qs = BlogPost.objects.filter(is_published=True).select_related('category', 'author')
+    lang = request.session.get('lang', 'uz')
+    qs = BlogPost.objects.filter(is_published=True, language=lang).select_related('category', 'author')
     categories = (
         Category.objects
-        .filter(posts__is_published=True)
+        .filter(posts__is_published=True, posts__language=lang)
         .annotate(post_count=Count('posts'))
         .distinct()
     )
