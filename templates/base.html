@@ -69,6 +69,15 @@
     </script>
     {% block no_dark_override %}{% endblock %}
     {% block extra_head %}{% endblock %}
+    {% if GOOGLE_ANALYTICS_ID %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ GOOGLE_ANALYTICS_ID }}');
+    </script>
+    {% endif %}
 </head>
 <body class="bg-gray-50">
 
@@ -534,5 +543,83 @@ if('serviceWorker' in navigator){
     });
 }
 </script>
+
+<!-- ── AI Chatbot float ── -->
+{% if user.is_authenticated %}
+<div id="sb-chat-wrap" style="position:fixed;bottom:24px;right:24px;z-index:9999;">
+    <!-- Ochish tugmasi -->
+    <button id="sb-chat-btn" onclick="sbChatToggle()"
+        style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#042C53,#378ADD);
+               border:none;cursor:pointer;box-shadow:0 4px 16px rgba(4,44,83,.35);
+               display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;"
+        title="AI Yordamchi">
+        💬
+    </button>
+    <!-- Chat oynasi -->
+    <div id="sb-chat-box" style="display:none;position:absolute;bottom:62px;right:0;
+        width:310px;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.15);
+        border:1px solid #e5e7eb;overflow:hidden;flex-direction:column;">
+        <div style="background:linear-gradient(135deg,#042C53,#185FA5);padding:12px 16px;
+                    display:flex;align-items:center;justify-content:space-between;">
+            <span style="color:#fff;font-weight:600;font-size:14px;">🤖 AI Yordamchi</span>
+            <button onclick="sbChatToggle()" style="background:none;border:none;color:#fff;cursor:pointer;font-size:18px;">×</button>
+        </div>
+        <div id="sb-chat-msgs" style="height:240px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;">
+            <div style="background:#f0f7ff;border-radius:10px;padding:8px 12px;font-size:13px;color:#1e3a5f;max-width:90%;">
+                Salom! ISO sertifikatsiya yoki platforma haqida savol bering 👋
+            </div>
+        </div>
+        <div style="padding:10px;border-top:1px solid #f3f4f6;display:flex;gap:6px;">
+            <input id="sb-chat-input" type="text" maxlength="400"
+                placeholder="Savol yozing..."
+                onkeydown="if(event.key==='Enter')sbChatSend()"
+                style="flex:1;padding:8px 12px;border:1px solid #e5e7eb;border-radius:10px;
+                       font-size:13px;outline:none;">
+            <button onclick="sbChatSend()"
+                style="background:#042C53;color:#fff;border:none;border-radius:10px;
+                       padding:8px 14px;cursor:pointer;font-size:13px;white-space:nowrap;">
+                ➤
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+function sbChatToggle(){
+    var box = document.getElementById('sb-chat-box');
+    box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+    if(box.style.display === 'flex') document.getElementById('sb-chat-input').focus();
+}
+function sbChatSend(){
+    var inp = document.getElementById('sb-chat-input');
+    var msg = inp.value.trim();
+    if(!msg) return;
+    inp.value = '';
+    var msgs = document.getElementById('sb-chat-msgs');
+    msgs.innerHTML += '<div style="background:#042C53;color:#fff;border-radius:10px;padding:8px 12px;font-size:13px;align-self:flex-end;max-width:85%;">' + msg.replace(/</g,'&lt;') + '</div>';
+    msgs.innerHTML += '<div id="sb-typing" style="color:#94a3b8;font-size:12px;">Yozmoqda...</div>';
+    msgs.scrollTop = msgs.scrollHeight;
+    var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+    var fd = new FormData();
+    fd.append('message', msg);
+    if(csrf) fd.append('csrfmiddlewaretoken', csrf.value);
+    else {
+        var m = document.cookie.match(/csrftoken=([^;]+)/);
+        if(m) fd.append('csrfmiddlewaretoken', m[1]);
+    }
+    fetch('/accounts/api/chat/', {method:'POST', body:fd})
+        .then(function(r){return r.json();})
+        .then(function(d){
+            var t = document.getElementById('sb-typing');
+            if(t) t.remove();
+            msgs.innerHTML += '<div style="background:#f0f7ff;border-radius:10px;padding:8px 12px;font-size:13px;color:#1e3a5f;max-width:90%;">' + (d.reply||'').replace(/</g,'&lt;').replace(/\n/g,'<br>') + '</div>';
+            msgs.scrollTop = msgs.scrollHeight;
+        })
+        .catch(function(){
+            var t = document.getElementById('sb-typing');
+            if(t) t.textContent = "Xatolik yuz berdi, qayta urinib ko'ring.";
+        });
+}
+</script>
+{% endif %}
 </body>
 </html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Shartnoma #{{ project.pk }} — StandartBridge</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Times New Roman', serif; font-size: 12pt; color: #111; background: #fff; }
+  .page { max-width: 720px; margin: 0 auto; padding: 40px; }
+  h1 { text-align: center; font-size: 16pt; margin-bottom: 4px; }
+  .subtitle { text-align: center; font-size: 11pt; color: #555; margin-bottom: 30px; }
+  .meta { display: flex; justify-content: space-between; font-size: 10pt; color: #555; margin-bottom: 24px; }
+  .section { margin-bottom: 20px; }
+  .section h2 { font-size: 12pt; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  td, th { border: 1px solid #ccc; padding: 6px 10px; font-size: 11pt; text-align: left; }
+  th { background: #f5f5f5; font-weight: bold; }
+  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 20px; }
+  .party-box { border: 1px solid #ddd; border-radius: 6px; padding: 12px; }
+  .party-box h3 { font-size: 11pt; margin-bottom: 8px; color: #333; }
+  .party-box p { font-size: 10pt; color: #555; margin-bottom: 3px; }
+  .signature-area { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px; }
+  .sig-box { border-top: 1px solid #333; padding-top: 8px; text-align: center; font-size: 10pt; color: #555; }
+  .highlight { background: #f0f7ff; border: 1px solid #bfd8f8; border-radius: 4px; padding: 10px 14px; margin-bottom: 12px; font-size: 11pt; }
+  .no-print { text-align: center; margin-bottom: 20px; }
+  @media print { .no-print { display: none !important; } .page { padding: 20px; } }
+  .terms li { font-size: 10pt; color: #444; margin-bottom: 5px; list-style: decimal; margin-left: 18px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="no-print">
+    <button onclick="window.print()"
+      style="background:#042C53;color:#fff;border:none;padding:10px 28px;border-radius:8px;font-size:13pt;cursor:pointer;margin-right:12px;">
+      🖨️ Chop etish / PDF saqlash
+    </button>
+    <button onclick="history.back()"
+      style="background:#f3f4f6;color:#333;border:1px solid #ddd;padding:10px 20px;border-radius:8px;font-size:13pt;cursor:pointer;">
+      ← Orqaga
+    </button>
+  </div>
+
+  <h1>XIZMATLAR KO'RSATISH SHARTNOMASI</h1>
+  <p class="subtitle">ISO / Sertifikatsiya maslahat xizmatlari</p>
+
+  <div class="meta">
+    <span>Shartnoma raqami: <strong>#{{ project.pk }}</strong></span>
+    <span>Tuzilgan sana: <strong>{{ project.created_at|date:"d.m.Y" }}</strong></span>
+    <span>Status: <strong>{{ project.get_status_display }}</strong></span>
+  </div>
+
+  <!-- Tomonlar -->
+  <div class="section">
+    <h2>1. SHARTNOMA TOMONLARI</h2>
+    <div class="parties">
+      <div class="party-box">
+        <h3>📋 Buyurtmachi (Tadbirkor)</h3>
+        <p><strong>F.I.O.:</strong> {{ project.entrepreneur.get_full_name }}</p>
+        <p><strong>Email:</strong> {{ project.entrepreneur.email }}</p>
+        {% if project.entrepreneur.company_name %}
+        <p><strong>Kompaniya:</strong> {{ project.entrepreneur.company_name }}</p>
+        {% endif %}
+        {% if project.entrepreneur.phone %}
+        <p><strong>Telefon:</strong> {{ project.entrepreneur.phone }}</p>
+        {% endif %}
+        {% if project.entrepreneur.region %}
+        <p><strong>Viloyat:</strong> {{ project.entrepreneur.region }}</p>
+        {% endif %}
+      </div>
+      <div class="party-box">
+        <h3>👨‍💼 Ijrochi (Mutaxassis)</h3>
+        {% if project.expert %}
+        <p><strong>F.I.O.:</strong> {{ project.expert.get_full_name }}</p>
+        <p><strong>Email:</strong> {{ project.expert.email }}</p>
+        {% if project.expert.expert_profile.phone %}
+        <p><strong>Telefon:</strong> {{ project.expert.expert_profile.phone }}</p>
+        {% endif %}
+        {% if project.expert.expert_profile.region %}
+        <p><strong>Viloyat:</strong> {{ project.expert.expert_profile.region }}</p>
+        {% endif %}
+        {% if project.expert.expert_profile.cert_number %}
+        <p><strong>Sertifikat:</strong> {{ project.expert.expert_profile.cert_number }}</p>
+        {% endif %}
+        {% else %}
+        <p><em>Mutaxassis belgilanmagan</em></p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Xizmat predmeti -->
+  <div class="section">
+    <h2>2. SHARTNOMA PREDMETI</h2>
+    <div class="highlight">
+      Ushbu shartnoma bo'yicha Ijrochi Buyurtmachiga
+      <strong>{{ project.analysis.local_standard.code }} → {{ project.analysis.target_standard.code }}</strong>
+      sertifikatsiyasiga o'tish bo'yicha maslahat va yo'l-yo'riq xizmatlarini ko'rsatadi.
+    </div>
+    {% if project.expert_message %}
+    <p style="font-size:10pt;color:#555;margin-top:6px;"><em>Mutaxassis izohi: {{ project.expert_message }}</em></p>
+    {% endif %}
+  </div>
+
+  <!-- Narx va muddat -->
+  <div class="section">
+    <h2>3. NARX VA TO'LOV SHARTLARI</h2>
+    <table>
+      <tr><th>Ko'rsatkich</th><th>Qiymat</th></tr>
+      <tr><td>Xizmat narxi</td><td><strong>${{ project.expert_price }}</strong></td></tr>
+      <tr><td>Platforma komissiyasi (20%)</td><td>${{ project.platform_fee }}</td></tr>
+      <tr><td>Mutaxassisga to'lov (80%)</td><td>${{ project.expert_payment }}</td></tr>
+      <tr><td>Bajarish muddati</td><td>{{ project.expert_days }} kun</td></tr>
+      {% if project.started_at %}<tr><td>Boshlangan sana</td><td>{{ project.started_at|date:"d.m.Y" }}</td></tr>{% endif %}
+      {% if project.work_deadline %}<tr><td>Tugash muddati</td><td>{{ project.work_deadline|date:"d.m.Y" }}</td></tr>{% endif %}
+    </table>
+    <p style="font-size:10pt;color:#666;">To'lov StandartBridge escrow tizimi orqali amalga oshiriladi. Mablag' bajarilgan ish
+    qabul qilinganidan so'ng mutaxassisga o'tkaziladi.</p>
+  </div>
+
+  <!-- Tomonlar majburiyatlari -->
+  <div class="section">
+    <h2>4. TOMONLAR MAJBURIYATLARI</h2>
+    <p style="font-weight:bold;margin-bottom:6px;">Ijrochi majburiyatlari:</p>
+    <ul class="terms">
+      <li>Sertifikatsiya jarayoni bo'yicha professional maslahat berish.</li>
+      <li>Kelishilgan muddatda vazifalarni bajarish.</li>
+      <li>Buyurtmachi hujjatlarini maxfiy saqlash.</li>
+      <li>Ish borishi haqida muntazam xabar berish.</li>
+    </ul>
+    <p style="font-weight:bold;margin:10px 0 6px;">Buyurtmachi majburiyatlari:</p>
+    <ul class="terms">
+      <li>Zarur hujjat va ma'lumotlarni o'z vaqtida taqdim etish.</li>
+      <li>Kelishilgan narxni escrow orqali to'lash.</li>
+      <li>Bajarilgan ishni belgilangan muddatda qabul qilish yoki asosli rad etish.</li>
+    </ul>
+  </div>
+
+  <!-- Muhim shartlar -->
+  <div class="section">
+    <h2>5. BOSHQA SHARTLAR</h2>
+    <ul class="terms">
+      <li>Nizo yuzaga kelsa, tomonlar muzokaralar yo'li bilan hal qilishga harakat qiladi.</li>
+      <li>Muzokaralar natija bermasa, StandartBridge platformasi arbitr sifatida ishtirok etadi.</li>
+      <li>Shartnoma StandartBridge platformasida ro'yxatdan o'tgan kundan kuchga kiradi.</li>
+    </ul>
+  </div>
+
+  <!-- Imzolar -->
+  <div class="signature-area">
+    <div class="sig-box">
+      <p style="margin-bottom:40px;"><strong>Buyurtmachi:</strong></p>
+      <p>{{ project.entrepreneur.get_full_name }}</p>
+      <p style="color:#888;font-size:9pt;margin-top:4px;">Sana: _______________</p>
+    </div>
+    <div class="sig-box">
+      <p style="margin-bottom:40px;"><strong>Ijrochi:</strong></p>
+      <p>{% if project.expert %}{{ project.expert.get_full_name }}{% else %}_______________{% endif %}</p>
+      <p style="color:#888;font-size:9pt;margin-top:4px;">Sana: _______________</p>
+    </div>
+  </div>
+
+  <p style="text-align:center;font-size:9pt;color:#aaa;margin-top:30px;">
+    Ushbu shartnoma StandartBridge platformasi (standardbridge.up.railway.app) tomonidan yaratilgan.
+  </p>
+</div>
+</body>
+</html>

@@ -103,6 +103,26 @@ class ExpertProfile(models.Model):
     issuing_body = models.CharField(max_length=200, blank=True, help_text='Sertifikat bergan tashkilot')
     cert_expiry = models.DateField(null=True, blank=True, help_text='Sertifikat amal qilish muddati')
 
+    _TIERS = [
+        ('elite',    25, None, 12, 'Sariq',   'yellow'),
+        ('premium',  10, 25,   15, 'Binafsha', 'purple'),
+        ('silver',    3, 10,   18, 'Ko\'k',    'blue'),
+        ('new',       0,  3,   20, 'Kulrang',  'gray'),
+    ]
+
+    @property
+    def tier_info(self):
+        n = self.total_projects
+        for key, min_p, max_p, commission, label_uz, color in self._TIERS:
+            if n >= min_p:
+                to_next = max(0, max_p - n) if max_p else 0
+                return {
+                    'key': key, 'label': label_uz, 'color': color,
+                    'commission': commission, 'to_next': to_next,
+                    'max_p': max_p, 'min_p': min_p,
+                }
+        return {'key': 'new', 'label': 'Yangi', 'color': 'gray', 'commission': 20, 'to_next': 3}
+
 class EntrepreneurProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='entrepreneur_profile')
     company_description = models.TextField(blank=True)

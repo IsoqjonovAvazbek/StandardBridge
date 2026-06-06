@@ -35,6 +35,7 @@ urlpatterns = [
     # API endpoints
     path('accounts/api/notif-count/', views.api_notification_count, name='api_notification_count'),
     path('accounts/api/search/', views.global_search_api, name='global_search_api'),
+    path('accounts/api/chat/', views.api_chatbot, name='api_chatbot'),
     # Email tasdiqlash
     path('accounts/verify-email/<str:token>/', views.verify_email, name='verify_email'),
     path('accounts/resend-verification/', views.resend_verification, name='resend_verification'),

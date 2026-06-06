@@ -1492,3 +1492,14 @@ def edit_roadmap_step(request, pk, step_pk):
 
         messages.success(request, 'Qadam yangilandi!')
     return redirect('project_detail', pk=pk)
+
+@login_required
+def project_contract(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+    if request.user != project.entrepreneur and request.user != project.expert:
+        from django.http import Http404
+        raise Http404
+    if project.status not in ('accepted', 'in_progress', 'review', 'completed'):
+        messages.error(request, 'Shartnoma faqat qabul qilingan loyihalar uchun mavjud.')
+        return redirect('project_detail', pk=pk)
+    return render(request, 'experts/contract_print.html', {'project': project})

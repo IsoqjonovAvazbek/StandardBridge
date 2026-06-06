@@ -33,9 +33,11 @@ def notifications_count(request):
 
 def language_context(request):
     from core.translations import get_translation
+    from django.conf import settings as _s
     lang = request.session.get('lang', 'uz')
     return {
         'current_lang': lang,
         'T': get_translation(lang),
         'langs': [('uz', 'UZ'), ('ru', 'RU'), ('en', 'EN')],
+        'GOOGLE_ANALYTICS_ID': _s.GOOGLE_ANALYTICS_ID,
     }

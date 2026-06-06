@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.db.models import Sum, Count, Q
 from django.http import JsonResponse
 from django.utils import timezone
+from django.conf import settings
 from datetime import timedelta
 from .models import CustomUser, ExpertProfile, EntrepreneurProfile
 from experts.emails import send_welcome_email, send_expert_verified
@@ -55,9 +56,18 @@ def landing(request):
         return redirect('dashboard')
 
     from analysis.models import GapAnalysis
-    user_count = CustomUser.objects.filter(role='entrepreneur').count()
-    expert_count = CustomUser.objects.filter(role='expert', expert_profile__is_verified=True).count()
-    analysis_count = GapAnalysis.objects.filter(status='completed').count()
+    from django.core.cache import cache
+    _counts = cache.get('landing_counts')
+    if _counts is None:
+        _counts = {
+            'user_count': CustomUser.objects.filter(role='entrepreneur').count(),
+            'expert_count': CustomUser.objects.filter(role='expert', expert_profile__is_verified=True).count(),
+            'analysis_count': GapAnalysis.objects.filter(status='completed').count(),
+        }
+        cache.set('landing_counts', _counts, 3600)
+    user_count = _counts['user_count']
+    expert_count = _counts['expert_count']
+    analysis_count = _counts['analysis_count']
 
     lang = request.session.get('lang', 'uz')
 
@@ -370,8 +380,25 @@ def admin_panel(request):
             'color': color, 'bar_color': bar_color, 'percent': percent,
         })
 
+    _total_ent = entrepreneurs.count()
+    _with_analysis = entrepreneurs.filter(analyses__isnull=False).distinct().count()
+    _completed_analysis = entrepreneurs.filter(analyses__status='completed').distinct().count()
+    _sent_expert = Project.objects.values('entrepreneur').distinct().count()
+    _paid = Payment.objects.filter(status__in=['held', 'released']).values('entrepreneur').distinct().count()
+
+    def _pct(n):
+        return int(n / _total_ent * 100) if _total_ent else 0
+
+    funnel = [
+        {'label': "Ro'yxatdan o'tdi",  'count': _total_ent,          'pct': 100},
+        {'label': 'Tahlil boshladi',    'count': _with_analysis,      'pct': _pct(_with_analysis)},
+        {'label': 'Tahlil yakunladi',   'count': _completed_analysis, 'pct': _pct(_completed_analysis)},
+        {'label': 'Expertga yubordi',   'count': _sent_expert,        'pct': _pct(_sent_expert)},
+        {'label': "To'lov qildi",       'count': _paid,               'pct': _pct(_paid)},
+    ]
+
     stats = {
-        'entrepreneurs': entrepreneurs.count(),
+        'entrepreneurs': _total_ent,
         'new_entrepreneurs': entrepreneurs.filter(created_at__gte=week_ago).count(),
         'experts': experts.count(),
         'verified_experts': expert_profiles.filter(is_verified=True).count(),
@@ -410,6 +437,7 @@ def admin_panel(request):
 
     return render(request, 'accounts/admin_panel.html', {
         'stats': stats,
+        'funnel': funnel,
         'project_stats': project_stats,
         'pending_experts': expert_profiles.filter(is_verified=False).select_related('user')[:8],
         'recent_payments': payments.order_by('-created_at').select_related('entrepreneur', 'project')[:8],
@@ -765,3 +793,31 @@ def verify_email(request, token):
         )
         messages.success(request, 'Email manzil muvaffaqiyatli tasdiqlandi!')
     return redirect('landing')
+
+
+@require_POST
+def api_chatbot(request):
+    message = request.POST.get('message', '').strip()[:500]
+    if not message:
+        return JsonResponse({'error': 'empty'}, status=400)
+    try:
+        from groq import Groq
+        client = Groq(api_key=settings.GROQ_API_KEY, timeout=20, max_retries=1)
+        resp = client.chat.completions.create(
+            model='llama-3.3-70b-versatile',
+            messages=[
+                {'role': 'system', 'content': (
+                    "Sen StandartBridge platformasining AI yordamchisisisan. "
+                    "Platforma O'zbekistonda ISO 9001, ISO 14001, ISO 22000, ISO 45001, CE sertifikatsiyasiga "
+                    "yordam beradi: AI gap-analiz (30-60 soniyada), tasdiqlangan mutaxassislar bozori, escrow to'lov. "
+                    "Foydalanuvchiga qisqa, aniq va foydali javob ber. "
+                    "Savol o'zbekcha bo'lsa o'zbekcha, ruscha bo'lsa ruscha, inglizcha bo'lsa inglizcha javob ber."
+                )},
+                {'role': 'user', 'content': message},
+            ],
+            max_tokens=400,
+        )
+        reply = resp.choices[0].message.content.strip()
+        return JsonResponse({'reply': reply})
+    except Exception:
+        return JsonResponse({'reply': "Uzr, hozir javob bera olmayapman. Keyinroq urinib ko'ring."})

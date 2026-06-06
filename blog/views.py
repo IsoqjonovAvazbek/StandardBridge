@@ -8,14 +8,19 @@ from .models import BlogPost, Category, BlogComment, BlogLike
 
 
 def post_list(request):
+    from django.core.cache import cache
     lang = request.session.get('lang', 'uz')
     qs = BlogPost.objects.filter(is_published=True, language=lang).select_related('category', 'author')
-    categories = (
-        Category.objects
-        .filter(posts__is_published=True, posts__language=lang)
-        .annotate(post_count=Count('posts'))
-        .distinct()
-    )
+    _cat_key = f'blog_categories_{lang}'
+    categories = cache.get(_cat_key)
+    if categories is None:
+        categories = list(
+            Category.objects
+            .filter(posts__is_published=True, posts__language=lang)
+            .annotate(post_count=Count('posts'))
+            .distinct()
+        )
+        cache.set(_cat_key, categories, 300)
     category_slug = request.GET.get('category', '').strip()
     search_q = request.GET.get('q', '').strip()
 

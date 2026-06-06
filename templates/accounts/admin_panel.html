@@ -351,6 +351,30 @@
     </div>
     {% endif %}
 
+    <!-- Konversiya funnel -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
+        <h2 class="font-bold text-gray-900 mb-5">Konversiya Funnel (Tadbirkorlar)</h2>
+        <div class="space-y-3">
+            {% for step in funnel %}
+            <div class="flex items-center gap-3">
+                <div class="w-36 text-sm text-gray-600 flex-shrink-0">{{ step.label }}</div>
+                <div class="flex-1 bg-gray-100 rounded-full h-7 relative overflow-hidden">
+                    <div class="h-7 rounded-full flex items-center justify-end pr-2
+                        {% if forloop.counter == 1 %}bg-blue-500
+                        {% elif forloop.counter == 2 %}bg-indigo-500
+                        {% elif forloop.counter == 3 %}bg-purple-500
+                        {% elif forloop.counter == 4 %}bg-orange-500
+                        {% else %}bg-green-500{% endif %}"
+                        style="width: {{ step.pct }}%; min-width: 2px; transition: width .5s;">
+                        {% if step.pct > 10 %}<span class="text-white text-xs font-semibold">{{ step.pct }}%</span>{% endif %}
+                    </div>
+                </div>
+                <div class="w-14 text-right font-bold text-gray-800 text-sm flex-shrink-0">{{ step.count }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
     <!-- Statistika grafiklari -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div class="bg-white rounded-2xl border border-gray-100 p-6">

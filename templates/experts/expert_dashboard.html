@@ -29,6 +29,47 @@
         </div>
     </div>
 
+    <!-- Expert daraja (tier) -->
+    {% with tier=request.user.expert_profile.tier_info %}
+    {% if tier %}
+    <div class="mb-8 bg-white rounded-2xl border border-gray-100 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div class="flex items-center gap-3 flex-1">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg
+                {% if tier.key == 'elite' %}bg-yellow-400
+                {% elif tier.key == 'premium' %}bg-purple-500
+                {% elif tier.key == 'silver' %}bg-blue-500
+                {% else %}bg-gray-400{% endif %}">
+                {% if tier.key == 'elite' %}👑
+                {% elif tier.key == 'premium' %}⭐
+                {% elif tier.key == 'silver' %}🔵
+                {% else %}🆕{% endif %}
+            </div>
+            <div>
+                <p class="font-bold text-gray-900">{{ tier.label }} daraja</p>
+                <p class="text-sm text-gray-500">Komissiya: {{ tier.commission }}% · Bajarilgan: {{ request.user.expert_profile.total_projects }} loyiha</p>
+            </div>
+        </div>
+        {% if tier.to_next %}
+        <div class="flex-1 min-w-0">
+            <div class="flex justify-between text-xs text-gray-500 mb-1">
+                <span>Keyingi darajaga</span>
+                <span>{{ tier.to_next }} loyiha qoldi</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2">
+                <div class="h-2 rounded-full
+                    {% if tier.key == 'silver' %}bg-purple-500
+                    {% elif tier.key == 'new' %}bg-blue-500
+                    {% else %}bg-yellow-400{% endif %}"
+                    style="width: {% widthratio request.user.expert_profile.total_projects|add:0 tier.max_p 100 %}%"></div>
+            </div>
+        </div>
+        {% else %}
+        <span class="text-yellow-600 font-semibold text-sm">🏆 Eng yuqori daraja!</span>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
     <!-- Onboarding: hech loyiha bo'lmasa ko'rsat -->
     {% if total == 0 and not new_projects %}
     <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-6 mb-8 text-white">
