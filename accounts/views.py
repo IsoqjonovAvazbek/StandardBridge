@@ -636,7 +636,6 @@ def dashboard(request):
         return redirect('entrepreneur_dashboard')
 
 @login_required
-@login_required
 def api_notification_count(request):
     from experts.models import Notification
     count = Notification.objects.filter(user=request.user, is_read=False).count()
