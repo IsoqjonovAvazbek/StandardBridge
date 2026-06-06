@@ -459,7 +459,14 @@
                             </div>
                             <div class="max-w-xs">
                                 <div class="{% if update.author == request.user %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-900{% endif %} rounded-2xl px-4 py-3 text-sm">
-                                    {{ update.message }}
+                                    {% if update.message %}{{ update.message }}{% endif %}
+                                    {% if update.file %}
+                                    <a href="{{ update.file.url }}" target="_blank" download
+                                        class="flex items-center gap-1.5 mt-1 {% if update.author == request.user %}text-blue-100 hover:text-white{% else %}text-blue-600 hover:text-blue-800{% endif %} text-xs underline">
+                                        <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                        {{ update.file_name|default:"Fayl" }}
+                                    </a>
+                                    {% endif %}
                                 </div>
                                 <p class="text-gray-400 text-xs mt-1 {% if update.author == request.user %}text-right{% endif %}">
                                     {{ update.author.get_full_name }} • {{ update.created_at|date:"d.m H:i" }}
@@ -473,15 +480,26 @@
 
                     {% if project.status == 'in_progress' or project.status == 'review' %}
                     <div class="p-4 border-t border-gray-100 space-y-3">
-                        <form method="POST" action="{% url 'project_update' project.pk %}" class="flex gap-3" id="chat-form">
+                        <form method="POST" action="{% url 'project_update' project.pk %}" class="space-y-2" id="chat-form" enctype="multipart/form-data">
                             {% csrf_token %}
                             <input type="hidden" name="action" value="message">
-                            <input type="text" name="message" required id="chat-input"
-                                class="flex-1 px-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                                placeholder="{{ T.message_placeholder }}">
-                            <button type="submit" class="gradient-bg text-white px-5 py-2 rounded-xl text-sm font-medium">
-                                {{ T.send_btn }}
-                            </button>
+                            <div class="flex gap-2">
+                                <input type="text" name="message" id="chat-input"
+                                    class="flex-1 px-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                    placeholder="{{ T.message_placeholder }}">
+                                <label class="cursor-pointer p-2 rounded-xl border border-gray-300 hover:bg-gray-50 transition flex items-center" title="Fayl yuborish">
+                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                    <input type="file" name="chat_file" id="chat-file-input" class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.zip,.txt">
+                                </label>
+                                <button type="submit" class="gradient-bg text-white px-5 py-2 rounded-xl text-sm font-medium flex-shrink-0">
+                                    {{ T.send_btn }}
+                                </button>
+                            </div>
+                            <div id="chat-file-preview" class="hidden text-xs text-blue-600 flex items-center gap-1 px-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                <span id="chat-file-name"></span>
+                                <button type="button" onclick="clearChatFile()" class="text-gray-400 hover:text-red-500 ml-1">✕</button>
+                            </div>
                         </form>
                         {% if request.user.is_expert %}
                         <form method="POST" action="{% url 'project_update' project.pk %}" class="flex gap-3">
@@ -870,16 +888,20 @@
     function appendMessage(m) {
         const noMsg = document.getElementById('no-messages');
         if (noMsg) noMsg.remove();
-        const mine = String(m.is_mine);
         const wrap = document.createElement('div');
         wrap.className = 'flex gap-3' + (m.is_mine ? ' flex-row-reverse' : '');
+        var bubble = '<div class="' + (m.is_mine ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900') +
+            ' rounded-2xl px-4 py-3 text-sm">';
+        if(m.message) bubble += escapeHtml(m.message);
+        if(m.file_url) bubble += '<a href="' + escapeHtml(m.file_url) + '" target="_blank" download ' +
+            'class="flex items-center gap-1 mt-1 underline text-xs ' + (m.is_mine ? 'text-blue-100' : 'text-blue-600') + '">' +
+            '📎 ' + escapeHtml(m.file_name || 'Fayl') + '</a>';
+        bubble += '</div>';
         wrap.innerHTML =
             '<div class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ' +
             (m.type === 'progress' ? 'bg-green-100' : 'bg-gray-100') + '">' +
             '<span class="text-gray-600 text-xs font-bold">' + escapeHtml(m.author_initial) + '</span></div>' +
-            '<div class="max-w-xs"><div class="' +
-            (m.is_mine ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900') +
-            ' rounded-2xl px-4 py-3 text-sm">' + escapeHtml(m.message) + '</div>' +
+            '<div class="max-w-xs">' + bubble +
             '<p class="text-gray-400 text-xs mt-1' + (m.is_mine ? ' text-right' : '') + '">' +
             escapeHtml(m.author) + ' • ' + escapeHtml(m.created_at) + '</p></div>';
         box.appendChild(wrap);
@@ -894,20 +916,45 @@
             .catch(() => {});
     }
 
+    // File preview
+    const fileInput = document.getElementById('chat-file-input');
+    if(fileInput) {
+        fileInput.addEventListener('change', function(){
+            const preview = document.getElementById('chat-file-preview');
+            const nameEl = document.getElementById('chat-file-name');
+            if(fileInput.files.length > 0){
+                nameEl.textContent = fileInput.files[0].name;
+                preview.classList.remove('hidden');
+            } else {
+                preview.classList.add('hidden');
+            }
+        });
+    }
+    window.clearChatFile = function(){
+        if(fileInput) fileInput.value = '';
+        const preview = document.getElementById('chat-file-preview');
+        if(preview) preview.classList.add('hidden');
+    };
+
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            const text = input.value.trim();
-            if (!text) return;
+            const text = input ? input.value.trim() : '';
+            const hasFile = fileInput && fileInput.files.length > 0;
+            if (!text && !hasFile) return;
             const fd = new FormData(form);
             fetch(form.action, {
                 method: 'POST',
-                headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': chatCookie('csrftoken')},
+                headers: {'X-Requested-With': 'XMLHttpRequest'},
                 body: fd,
             })
             .then(r => r.json())
-            .then(() => { input.value = ''; poll(); })
-            .catch(() => { form.submit(); });  // AJAX ishlamasa — oddiy submit
+            .then(() => {
+                if(input) input.value = '';
+                clearChatFile();
+                poll();
+            })
+            .catch(() => { form.submit(); });
         });
     }
 

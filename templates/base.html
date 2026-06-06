@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ current_lang }}">
+<html lang="{{ current_lang }}" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +13,12 @@
     <meta name="twitter:card" content="summary">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ request.build_absolute_uri }}">
+    <!-- PWA -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#042C53">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -29,7 +35,37 @@
             to   { opacity: 1; transform: translateY(0); }
         }
         #page-content { animation: sbFadeIn 0.22s ease-out; }
+
+        /* ── Dark mode ── */
+        .dark body                         { background-color: #0f172a !important; color: #e2e8f0; }
+        .dark .bg-white                    { background-color: #1e293b !important; }
+        .dark .bg-gray-50                  { background-color: #0f172a !important; }
+        .dark .bg-gray-100                 { background-color: #1e293b !important; }
+        .dark .text-gray-900              { color: #f1f5f9 !important; }
+        .dark .text-gray-800              { color: #e2e8f0 !important; }
+        .dark .text-gray-700              { color: #cbd5e1 !important; }
+        .dark .text-gray-600              { color: #94a3b8 !important; }
+        .dark .text-gray-500              { color: #64748b !important; }
+        .dark .border-gray-100            { border-color: #334155 !important; }
+        .dark .border-gray-200            { border-color: #334155 !important; }
+        .dark nav.bg-white                { background-color: #1e293b !important; border-color: #334155 !important; }
+        .dark aside                       { background-color: #1e293b !important; border-color: #334155 !important; }
+        .dark input, .dark textarea, .dark select { background-color: #0f172a !important; color: #e2e8f0 !important; border-color: #334155 !important; }
+        .dark .shadow-sm                  { box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important; }
+        .dark a.text-gray-700             { color: #cbd5e1 !important; }
+        .dark .hover\:bg-gray-100:hover   { background-color: #334155 !important; }
+        .dark .hover\:bg-gray-50:hover    { background-color: #1e293b !important; }
+        .dark .bg-blue-50                 { background-color: #1e3a5f !important; }
+        .dark .bg-green-50                { background-color: #052e16 !important; }
+        .dark .bg-red-50                  { background-color: #3b0a0a !important; }
+        .dark .bg-yellow-50               { background-color: #2d1f00 !important; }
     </style>
+    <script>
+        /* Apply dark mode before render to avoid flash */
+        (function(){
+            if(localStorage.getItem('sb-dark')==='1') document.documentElement.classList.add('dark');
+        })();
+    </script>
 </head>
 <body class="bg-gray-50">
 
@@ -70,6 +106,16 @@
                 </div>
             </div>
             {% endif %}
+            <!-- Dark mode toggle -->
+            <button id="dark-toggle" onclick="toggleDark()" title="Dark mode"
+                class="p-2 rounded-lg hover:bg-gray-100 transition text-gray-500">
+                <svg id="icon-moon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                </svg>
+                <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+            </button>
             {% include 'includes/lang_switcher.html' %}
             <span class="text-gray-600 text-sm hidden sm:block">{{ user.get_full_name }}</span>
             <span class="text-xs px-2 py-1 rounded-full
@@ -459,5 +505,31 @@ document.addEventListener('click', function (e) {
 })();
 </script>
 {% block extra_js %}{% endblock %}
+
+<script>
+/* ── Dark mode ── */
+function toggleDark(){
+    var html = document.getElementById('html-root');
+    var isDark = html.classList.toggle('dark');
+    localStorage.setItem('sb-dark', isDark ? '1' : '0');
+    syncDarkIcons();
+}
+function syncDarkIcons(){
+    var isDark = document.getElementById('html-root').classList.contains('dark');
+    var moon = document.getElementById('icon-moon');
+    var sun  = document.getElementById('icon-sun');
+    if(moon) moon.classList.toggle('hidden', isDark);
+    if(sun)  sun.classList.toggle('hidden', !isDark);
+}
+document.addEventListener('DOMContentLoaded', syncDarkIcons);
+
+/* ── PWA service worker ── */
+if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+        navigator.serviceWorker.register('/static/js/sw.js', {scope: '/'})
+            .catch(function(){});
+    });
+}
+</script>
 </body>
 </html>

@@ -497,6 +497,8 @@ def project_messages(request, pk):
         'author': u.author.get_full_name() or u.author.username,
         'author_initial': (u.author.first_name or u.author.username or '?')[0],
         'created_at': u.created_at.strftime('%d.%m %H:%M'),
+        'file_url': u.file.url if u.file else '',
+        'file_name': u.file_name or '',
     } for u in updates]
     return JsonResponse({'messages': data})
 
@@ -512,23 +514,36 @@ def project_update(request, pk):
         action = request.POST.get('action')
         message_text = request.POST.get('message', '')
 
-        if action == 'message' and message_text:
-            upd = ProjectUpdate.objects.create(
+        if action == 'message' and (message_text or request.FILES.get('chat_file')):
+            import os as _os
+            chat_file = request.FILES.get('chat_file')
+            upd = ProjectUpdate(
                 project=project,
                 author=request.user,
                 message=message_text,
                 update_type='message'
             )
+            if chat_file:
+                allowed_exts = {'.pdf','.doc','.docx','.xls','.xlsx','.jpg','.jpeg','.png','.gif','.zip','.txt'}
+                file_ext = _os.path.splitext(chat_file.name)[1].lower()
+                if chat_file.size <= 10 * 1024 * 1024 and file_ext in allowed_exts:
+                    upd.file = chat_file
+                    upd.file_name = chat_file.name
+            upd.save()
             notify_user = project.entrepreneur if request.user.is_expert() else project.expert
             if notify_user:
+                notif_text = message_text[:80] if message_text else f'📎 {upd.file_name}'
                 Notification.objects.create(
                     user=notify_user,
                     title='Yangi xabar',
-                    message=f'{request.user.get_full_name()}: {message_text[:100]}'
+                    message=f'{request.user.get_full_name()}: {notif_text}'
                 )
-            # AJAX so'rov bo'lsa — JSON qaytaramiz (sahifa qayta yuklanmaydi)
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': True, 'id': upd.id})
+                file_url = upd.file.url if upd.file else ''
+                return JsonResponse({
+                    'success': True, 'id': upd.id,
+                    'file_url': file_url, 'file_name': upd.file_name
+                })
 
         elif action == 'progress' and message_text:
             ProjectUpdate.objects.create(
@@ -1067,7 +1082,6 @@ def expert_profile_edit(request):
         return redirect('expert_profile')
 
     return render(request, 'experts/expert_profile_edit.html', {'profile': profile})
-@login_required
 def expert_detail(request, expert_pk):
     from accounts.models import CustomUser, ExpertProfile
     from analysis.models import GapAnalysis
@@ -1078,12 +1092,14 @@ def expert_detail(request, expert_pk):
     except ExpertProfile.DoesNotExist:
         expert_profile = None
 
-    analyses = GapAnalysis.objects.filter(
-        entrepreneur=request.user,
-        status='completed'
-    ).order_by('-created_at')
+    analyses = (
+        GapAnalysis.objects.filter(entrepreneur=request.user, status='completed').order_by('-created_at')
+        if request.user.is_authenticated else []
+    )
 
     if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return redirect(f'/accounts/login/?next=/experts/expert/{expert_pk}/')
         analysis_id = request.POST.get('analysis_id', '').strip()
         message = request.POST.get('message', '')
 

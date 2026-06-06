@@ -713,6 +713,636 @@ CE marking is the key that unlocks the 450+ million consumer EU market for Uzbek
 
 *Sources: European Commission — "The 'Blue Guide' on the implementation of EU product rules 2022" (publications.europa.eu); CE Marking official portal (ec.europa.eu); EU Regulation 765/2008; ITC — "Standards and quality infrastructure" (intracen.org).*''',
     },
+
+    # ─────────────────────────────────────────────────────────────
+    # ARTICLE 3 — ISO 14001:2015 Environmental Management  (UZ)
+    # ─────────────────────────────────────────────────────────────
+    {
+        'slug': 'iso-14001-2015-atrof-muhit-uz',
+        'group_key': 'iso-14001-2015-env-management',
+        'language': 'uz',
+        'category_slug': 'sertifikatsiya',
+        'category_name': 'Sertifikatsiya',
+        'category_icon': '🏅',
+        'is_featured': False,
+        'read_time': 7,
+        'cover_image': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80',
+        'title': 'ISO 14001:2015 Atrof-Muhit Menejmenti: O\'zbekiston Korxonalari Uchun Qo\'llanma',
+        'excerpt': 'ISO 14001:2015 — atrof-muhitni boshqarish tizimining xalqaro standarti. Ushbu maqolada O\'zbekiston korxonalari uchun sertifikat olish bosqichlari, UzDST talablari va xarajatlar batafsil yoritilgan.',
+        'content': '''ISO 14001:2015 — Atrof-muhit menejmenti tizimi (AMT) bo'yicha xalqaro standart bo'lib, ISO tomonidan nashr etiladi. ISO Survey 2023 ma'lumotlariga ko'ra, dunyoning 180+ mamlakatida 400 000 dan ortiq tashkilot ushbu sertifikatga ega (manba: iso.org).
+
+## ISO 14001:2015 Nima?
+
+ISO 14001 standarti tashkilotning atrof-muhitga ta'sirini tizimli boshqarishga yo'naltirilgan. Standart quyidagi asosiy tamoyillarga asoslanadi:
+
+- **Atrof-muhit siyosati** — rahbariyat atrof-muhitni himoya qilish majburiyatini oladi
+- **Rejalashtirish** — atrof-muhit jihatlarini aniqlash va xatarlarni baholash (§6.1)
+- **Qo'llab-quvvatlash** — resurslar, kompetentlik, xabardorlik va aloqa (§7)
+- **Faoliyat nazorati** — ifloslanishning oldini olish, chiqindilarni boshqarish (§8)
+- **Ishlash baholash** — monitoring, o'lchash, audit (§9)
+- **Yaxshilanish** — tuzatuvchi choralar va uzluksiz takomillashtirish (§10)
+
+*Manba: ISO 14001:2015 §0.1 "Umumiy qoidalar", International Organization for Standardization, Geneva.*
+
+## O'zbekistonda ISO 14001 Holati
+
+O'zbekiston Standartlashtirish, Metrologiya va Sertifikatsiya Agentligi (UzDST) ISO 14001 ni O'zR DST ISO 14001:2015 sifatida qabul qilgan. Davlat ekologiya siyosati doirasida sanoat korxonalari uchun AMT joriy qilish tobora muhim ahamiyat kasb etmoqda.
+
+Sertifikatsiya organlari:
+- **UzDST akkreditatsiya markazi** — standart.uz
+- Xalqaro organlar: Bureau Veritas, SGS, TÜV SÜD, DNV (barchasi O'zbekistonda vakolatxonaga ega)
+
+*Manba: UzDST rasmiy sayti — standart.uz*
+
+## ISO 14001:2015 Asosiy Bo'limlari
+
+**§4 — Tashkilot konteksti:** Ichki va tashqi atrof-muhit omillarini tahlil qilish. Manfaatdor tomonlar (davlat organlari, mahalliy aholi, xaridorlar) talablarini aniqlash.
+
+**§5 — Yetakchilik:** Rahbariyat atrof-muhit siyosatini e'lon qiladi va barcha bo'linmalarga yetkazadi. Mas'uliyatlar aniq belgilanadi.
+
+**§6 — Rejalashtirish:** Tashkilotning atrof-muhit jihatlari (energiya sarfi, chiqindilar, emissiyalar) aniqlanadi va muhimliligi baholanadi. Huquqiy va boshqa talablar ro'yxati tuziladi.
+
+**§7 — Qo'llab-quvvatlash:** Xodimlar tayyorlash, tashqi aloqa (ekologik hisobot), hujjatlashtirilgan axborot.
+
+**§8 — Faoliyat:** Atrof-muhitga ta'sir etuvchi jarayonlarni nazorat qilish: chiqindilarni saralash, suvni tejash, energiya samaradorligi, favqulodda holatlarga tayyorlik.
+
+**§9 — Ishlash baholash:** Atrof-muhit ko'rsatkichlari (energiya, suv, CO2 emissiyasi) o'lchanadi. Yillik ichki audit va rahbariyat ko'rib chiqishi o'tkaziladi.
+
+**§10 — Yaxshilanish:** Nomuvofiqliklar bartaraf etiladi, uzluksiz takomillashtirish rejalari amalga oshiriladi.
+
+## Sertifikatsiya Bosqichlari
+
+### 1-bosqich: Dastlabki baholash va gap-tahlil (1–2 oy)
+
+Joriy atrof-muhit menejmenti ISO 14001 talablari bilan solishtiriladi. Asosiy atrof-muhit jihatlari (energiya, suv, chiqindi, havo emissiyalari) aniqlanadi.
+
+### 2-bosqich: AMT hujjatlarini tayyorlash (1–3 oy)
+
+- Atrof-muhit siyosati va maqsadlarini ishlab chiqish
+- Atrof-muhit jihatlarining reestri
+- Huquqiy talablar ro'yxati (O'zbekiston ekologiya qonunchiligiga muvofiq)
+- Favqulodda holatlarga tayyorlik rejasi
+
+### 3-bosqich: Amaliyot va ichki audit (1–2 oy)
+
+Joriy qilingan tizim real ish sharoitida sinovdan o'tkaziladi. ISO 14011 (ISO 19011) bo'yicha ichki audit o'tkaziladi.
+
+### 4-bosqich: Sertifikatsiya auditi
+
+Akkreditatsiya qilingan organ 2 bosqichli audit o'tkazadi: hujjatli tekshiruv (1–2 kun) va sahadagi audit (2–4 kun). Muvofiqlik tasdiqlangach 3 yillik sertifikat beriladi.
+
+## Vaqt va Xarajatlar
+
+| Bosqich | Vaqt | Taxminiy xarajat |
+|---------|------|-----------------|
+| Dastlabki gap-tahlil | 2–4 hafta | $500–$1,500 |
+| Hujjatlar va joriy qilish | 2–4 oy | Maslahat: $2,000–$6,000 |
+| Sertifikatsiya auditi | 1–2 oy | $1,500–$4,000 |
+| Yillik kuzatuv | 1 oy/yil | $800–$1,500 |
+
+*Eslatma: Narxlar tashkilot hajmi va akkreditatsiya organiga qarab farq qiladi. UzDST orqali mahalliy sertifikatsiya xarajati past bo'lishi mumkin.*
+
+## ISO 14001 Foydasi
+
+- **Eksport imkoniyatlari:** YeI, Xitoy va Koreya xaridorlari ISO 14001 ni tobora talab qilmoqda
+- **Xarajatlarni kamaytirish:** Energiya va suv sarfini 10–25% qisqartirish mumkin (IFC ma'lumotlari)
+- **Davlat soliq imtiyozlari:** O'zbekistonda yashil texnologiyalarni qo'llagan korxonalarga soliq imtiyozlari mavjud
+- **Reputatsiya:** Atrof-muhit mas'uliyati korporativ brendni mustahkamlaydi
+
+## Xulosa
+
+ISO 14001:2015 — bu nafaqat sertifikat, balki korxonaning ekologik mas'uliyatini va samaradorligini oshirish tizimidir. O'zbekistondagi sanoat korxonalari uchun, ayniqsa eksportga yo'naltirilgan ishlab chiqaruvchilar uchun, bu standart raqobatbardoshlikni oshirishning kuchli vositasidir.
+
+---
+
+*Manbalar: ISO.org — "ISO 14001:2015 Environmental management systems – Requirements with guidance for use"; UzDST — standart.uz; ISO Survey of Certifications 2023; IFC — "Environmental Management Systems" guidelines.*''',
+    },
+
+    # ─────────────────────────────────────────────────────────────
+    # ARTICLE 3 — ISO 14001:2015 Environmental Management  (RU)
+    # ─────────────────────────────────────────────────────────────
+    {
+        'slug': 'iso-14001-2015-okruzhayushchaya-sreda-ru',
+        'group_key': 'iso-14001-2015-env-management',
+        'language': 'ru',
+        'category_slug': 'sertifikatsiya',
+        'category_name': 'Сертификация',
+        'category_icon': '🏅',
+        'is_featured': False,
+        'read_time': 7,
+        'cover_image': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80',
+        'title': 'ISO 14001:2015 Экологический менеджмент: Руководство для предприятий Узбекистана',
+        'excerpt': 'ISO 14001:2015 — международный стандарт системы экологического менеджмента. В этой статье подробно описаны этапы сертификации для предприятий Узбекистана, требования UzDST и стоимость.',
+        'content': '''ISO 14001:2015 — международный стандарт системы экологического менеджмента (СЭМ), издаваемый ISO. По данным ISO Survey 2023, более 400 000 организаций в 180+ странах имеют этот сертификат (источник: iso.org).
+
+## Что такое ISO 14001:2015?
+
+ISO 14001 направлен на системное управление воздействием организации на окружающую среду. Стандарт основан на следующих принципах:
+
+- **Экологическая политика** — руководство принимает обязательства по охране окружающей среды
+- **Планирование** — выявление экологических аспектов и оценка рисков (§6.1)
+- **Обеспечение** — ресурсы, компетентность, осведомлённость, коммуникация (§7)
+- **Операционный контроль** — предотвращение загрязнения, управление отходами (§8)
+- **Оценка результативности** — мониторинг, измерение, аудит (§9)
+- **Улучшение** — корректирующие действия и непрерывное совершенствование (§10)
+
+*Источник: ISO 14001:2015 §0.1 "Общие положения", International Organization for Standardization, Geneva.*
+
+## ISO 14001 в Узбекистане
+
+Агентство UzDST приняло стандарт как O'zR DST ISO 14001:2015. В рамках государственной экологической политики внедрение СЭМ становится всё более важным для промышленных предприятий.
+
+Органы по сертификации:
+- **Аккредитационный центр UzDST** — standart.uz
+- Международные органы: Bureau Veritas, SGS, TÜV SÜD, DNV (все с представительствами в Узбекистане)
+
+*Источник: Официальный сайт UzDST — standart.uz*
+
+## Основные разделы ISO 14001:2015
+
+**§4 — Среда организации:** Анализ внутренних и внешних экологических факторов. Определение требований заинтересованных сторон (госорганы, местное население, покупатели).
+
+**§5 — Лидерство:** Руководство провозглашает экологическую политику и доводит её до всех подразделений.
+
+**§6 — Планирование:** Выявляются экологические аспекты (энергопотребление, выбросы, отходы) и оценивается их значимость. Составляется реестр правовых требований.
+
+**§7 — Обеспечение:** Подготовка персонала, внешние коммуникации (экологическая отчётность), документированная информация.
+
+**§8 — Деятельность:** Контроль процессов, влияющих на окружающую среду: сортировка отходов, экономия воды и энергии, готовность к аварийным ситуациям.
+
+**§9 — Оценка результативности:** Измерение экологических показателей (энергия, вода, выбросы CO2). Ежегодный внутренний аудит и анализ со стороны руководства.
+
+**§10 — Улучшение:** Устранение несоответствий, реализация планов непрерывного совершенствования.
+
+## Этапы сертификации
+
+### Этап 1: Предварительная оценка и анализ разрывов (1–2 месяца)
+
+Текущий экологический менеджмент сравнивается с требованиями ISO 14001. Определяются ключевые экологические аспекты (энергия, вода, отходы, выбросы).
+
+### Этап 2: Разработка документации СЭМ (1–3 месяца)
+
+- Экологическая политика и цели
+- Реестр экологических аспектов
+- Перечень правовых требований (в соответствии с экологическим законодательством Узбекистана)
+- План действий в аварийных ситуациях
+
+### Этап 3: Практика и внутренний аудит (1–2 месяца)
+
+Внедрённая система проверяется в реальных рабочих условиях. Проводится внутренний аудит по ISO 19011.
+
+### Этап 4: Сертификационный аудит
+
+Аккредитованный орган проводит двухстадийный аудит: проверка документов (1–2 дня) и аудит на месте (2–4 дня). После подтверждения соответствия выдаётся трёхлетний сертификат.
+
+## Сроки и стоимость
+
+| Этап | Срок | Ориентировочная стоимость |
+|------|------|--------------------------|
+| Предварительный анализ | 2–4 нед. | $500–$1 500 |
+| Документация и внедрение | 2–4 мес. | Консалтинг: $2 000–$6 000 |
+| Сертификационный аудит | 1–2 мес. | $1 500–$4 000 |
+| Ежегодный надзор | 1 мес./год | $800–$1 500 |
+
+*Стоимость варьируется в зависимости от размера организации и выбранного органа. Через UzDST сертификация может обойтись дешевле.*
+
+## Преимущества ISO 14001
+
+- **Экспортные возможности:** ЕС, Китай и Корея всё чаще требуют ISO 14001 от поставщиков
+- **Сокращение затрат:** Снижение потребления энергии и воды на 10–25% (данные IFC)
+- **Налоговые льготы:** В Узбекистане предприятиям, применяющим зелёные технологии, предоставляются льготы
+- **Репутация:** Экологическая ответственность укрепляет корпоративный бренд
+
+## Заключение
+
+ISO 14001:2015 — это не просто сертификат, а система повышения экологической ответственности и эффективности предприятия. Для промышленных предприятий Узбекистана, особенно ориентированных на экспорт, этот стандарт является мощным инструментом повышения конкурентоспособности.
+
+---
+
+*Источники: ISO.org — "ISO 14001:2015 Environmental management systems – Requirements with guidance for use"; UzDST — standart.uz; ISO Survey of Certifications 2023; IFC — "Environmental Management Systems" guidelines.*''',
+    },
+
+    # ─────────────────────────────────────────────────────────────
+    # ARTICLE 3 — ISO 14001:2015 Environmental Management  (EN)
+    # ─────────────────────────────────────────────────────────────
+    {
+        'slug': 'iso-14001-2015-environmental-management-en',
+        'group_key': 'iso-14001-2015-env-management',
+        'language': 'en',
+        'category_slug': 'sertifikatsiya',
+        'category_name': 'Certification',
+        'category_icon': '🏅',
+        'is_featured': False,
+        'read_time': 7,
+        'cover_image': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80',
+        'title': 'ISO 14001:2015 Environmental Management: A Guide for Uzbekistan Businesses',
+        'excerpt': 'ISO 14001:2015 is the international standard for environmental management systems. This article covers the certification steps, UzDST requirements, and costs for Uzbekistan companies.',
+        'content': '''ISO 14001:2015 is the international standard for Environmental Management Systems (EMS), published by ISO. According to the ISO Survey of Certifications 2023 (iso.org), over 400,000 organizations in 180+ countries hold this certification.
+
+## What Is ISO 14001:2015?
+
+ISO 14001 provides a framework for organizations to systematically manage their environmental impact. The standard is built on these core principles:
+
+- **Environmental policy** — top management commits to protecting the environment
+- **Planning** — identifying environmental aspects and assessing risks (§6.1)
+- **Support** — resources, competence, awareness, and communication (§7)
+- **Operational control** — preventing pollution, managing waste (§8)
+- **Performance evaluation** — monitoring, measurement, and audit (§9)
+- **Improvement** — corrective actions and continual improvement (§10)
+
+*Source: ISO 14001:2015 §0.1 "General", International Organization for Standardization, Geneva.*
+
+## ISO 14001 in Uzbekistan
+
+The Uzbekistan Agency for Technical Regulation (UzDST) has adopted the standard as O'zR DST ISO 14001:2015. As Uzbekistan's environmental legislation tightens and export markets demand green credentials, EMS certification is becoming increasingly important for industrial enterprises.
+
+Certification bodies active in Uzbekistan:
+- **UzDST Accreditation Centre** — standart.uz
+- International bodies: Bureau Veritas, SGS, TÜV SÜD, DNV (all with local offices)
+
+*Source: UzDST official website — standart.uz*
+
+## Key Clauses of ISO 14001:2015
+
+**§4 — Context of the organization:** Analyse internal and external environmental factors. Identify requirements of interested parties (regulators, local communities, customers).
+
+**§5 — Leadership:** Management declares an environmental policy and communicates it throughout the organization. Roles and responsibilities are clearly defined.
+
+**§6 — Planning:** Environmental aspects (energy use, emissions, water, waste) are identified and their significance rated. A register of legal requirements is compiled.
+
+**§7 — Support:** Staff training, external communication (environmental reporting), and documented information management.
+
+**§8 — Operation:** Control of processes that affect the environment: waste sorting, water and energy conservation, emergency preparedness.
+
+**§9 — Performance evaluation:** Environmental indicators (energy, water, CO2 emissions) are measured. Annual internal audit and management review are conducted.
+
+**§10 — Improvement:** Nonconformities are addressed, continual improvement plans are implemented.
+
+## Certification Steps
+
+### Step 1: Initial Assessment and Gap Analysis (1–2 months)
+
+Current environmental management practices are compared against ISO 14001 requirements. Key environmental aspects (energy, water, waste, air emissions) are identified.
+
+### Step 2: EMS Documentation (1–3 months)
+
+- Develop environmental policy and objectives
+- Compile register of environmental aspects
+- List legal requirements (Uzbekistan environmental legislation)
+- Draft emergency preparedness plan
+
+### Step 3: Implementation and Internal Audit (1–2 months)
+
+The implemented system is tested under real working conditions. An internal audit is conducted per ISO 19011 guidelines.
+
+### Step 4: Certification Audit
+
+An accredited body conducts a two-stage audit: document review (1–2 days) and on-site audit (2–4 days). A 3-year certificate is issued upon confirmed conformity.
+
+## Timeline and Costs
+
+| Stage | Duration | Estimated Cost |
+|-------|----------|----------------|
+| Initial gap analysis | 2–4 weeks | $500–$1,500 |
+| Documentation & implementation | 2–4 months | Consulting: $2,000–$6,000 |
+| Certification audit | 1–2 months | $1,500–$4,000 |
+| Annual surveillance | 1 month/year | $800–$1,500 |
+
+*Costs vary based on organization size and chosen certification body. UzDST-based certification may be more affordable.*
+
+## Benefits of ISO 14001
+
+- **Export access:** EU, Chinese, and Korean buyers increasingly require ISO 14001 from suppliers
+- **Cost savings:** Energy and water consumption can be reduced by 10–25% (IFC data)
+- **Tax incentives:** Uzbekistan offers tax benefits to enterprises applying green technologies
+- **Reputation:** Environmental responsibility strengthens corporate brand and stakeholder trust
+
+## Conclusion
+
+ISO 14001:2015 is more than a certificate — it is a system for improving environmental responsibility and operational efficiency. For Uzbekistan's industrial enterprises, especially export-oriented manufacturers, this standard is a powerful tool for enhancing competitiveness in global markets.
+
+---
+
+*Sources: ISO.org — "ISO 14001:2015 Environmental management systems – Requirements with guidance for use"; UzDST — standart.uz; ISO Survey of Certifications 2023; IFC — "Environmental Management Systems" guidelines.*''',
+    },
+
+    # ─────────────────────────────────────────────────────────────
+    # ARTICLE 4 — Halal Certification in Uzbekistan  (UZ)
+    # ─────────────────────────────────────────────────────────────
+    {
+        'slug': 'halol-sertifikati-ozbekiston-uz',
+        'group_key': 'halal-certification-uzbekistan',
+        'language': 'uz',
+        'category_slug': 'sertifikatsiya',
+        'category_name': 'Sertifikatsiya',
+        'category_icon': '🏅',
+        'is_featured': False,
+        'read_time': 6,
+        'cover_image': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80',
+        'title': 'Halol Sertifikati O\'zbekistonda: Jarayon, Xarajatlar va Eksport Imkoniyatlari',
+        'excerpt': 'O\'zbekistonda halol sertifikati UzDST Halol markazi tomonidan beriladi. Ushbu maqolada qaysi mahsulotlarga halol sertifikati kerak, Qo\'lf mamlakatlari va Malayziyaga eksport, jarayon bosqichlari va xarajatlar batafsil yoritilgan.',
+        'content': '''Halol sertifikati — mahsulot yoki xizmat Islom shariatiga muvofiq ekanligini tasdiqlovchi hujjat. O'zbekistonda aholining 93%+ i musulmonlar bo'lib, mahalliy bozor va eksport uchun halol sertifikati muhim ahamiyat kasb etmoqda.
+
+## O'zbekistonda Halol Sertifikati Beruvchi Organ
+
+O'zbekistonda halol sertifikatsiyasini **UzDST huzuridagi Halol sertifikatsiya markazi** amalga oshiradi. Markaz O'zbekiston Musulmonlar idorasi bilan hamkorlikda faoliyat yuritadi va xalqaro Halol standartlariga asoslanadi.
+
+- **Rasmiy sayt:** standart.uz
+- **Asosiy standart:** O'zR DST 2613 (Halol oziq-ovqat mahsulotlari umumiy talablar)
+- **Xalqaro standart:** OIC/SMIIC 1:2019 — Halol Food General Requirements (Islom Hamkorlik Tashkiloti va SMIIC tomonidan tasdiqlangan)
+
+*Manba: O'zbekiston Standartlashtirish, Metrologiya va Sertifikatsiya Agentligi — standart.uz; OIC/SMIIC — smiic.org*
+
+## Qaysi Mahsulotlarga Halol Sertifikati Kerak?
+
+**Oziq-ovqat mahsulotlari:**
+- Go'sht va go'sht mahsulotlari (parrandachilik, qo'y, mol go'shti)
+- Kolbasa, sausage, qayta ishlangan mahsulotlar
+- Sut va sut mahsulotlari (tarkibida hayvon gelatini bo'lishi mumkin)
+- Non va pishiriq mahsulotlari (alkogol yoki hayvon yog'i bo'lmasligi shart)
+- Konserva va yarim tayyorlangan mahsulotlar
+- Ichimliklar (alkogolsiz)
+
+**Boshqa sohalar:**
+- Dori-darmonlar va vitaminar (jelatin kapsulalar)
+- Kosmetika va shaxsiy gigiena mahsulotlari
+- Mehmonxona va restoran xizmatlari
+- Logistika va omborxona (Halol logistics)
+
+## Qo'lf Mamlakatlari va Malayziyaga Eksport
+
+Halol sertifikati O'zbekiston eksportchilari uchun yangi bozorlar eshigini ochadi:
+
+**Qo'lf hamkorlik kengashi (GCC) mamlakatlari:**
+Saudi Arabiya, BAA, Qatar, Kuwait, Bahrayn, Ummon — jami 54 million iste'molchi. GCC halol importida taniqli sertifikatsiya organlari: ESMA (BAA), SFDA (Saudi Arabiya).
+
+**Malayziya:** JAKIM (Jabatan Kemajuan Islam Malaysia) — Halol sertifikatsiyasida dunyodagi eng nufuzli organ. Malayziya O'zbekiston halol mahsulotlari uchun asosiy tranzit bozori hisoblanadi.
+
+**Indoneziya:** BPJPH (Badan Penyelenggara Jaminan Produk Halal) — 270 million aholi bilan dunyodagi eng katta halol bozori.
+
+*Manba: OIC/SMIIC — "Standards and Certification for Halal Products" (smiic.org); JAKIM rasmiy sayti*
+
+## Sertifikatsiya Jarayoni
+
+### 1-bosqich: Ariza berish
+
+UzDST Halol markazi yoki akkreditatsiya qilingan organga ariza beriladi. Hujjatlar: korxona guvohnomalari, mahsulot tarkibi, ishlab chiqarish texnologiyasi.
+
+### 2-bosqich: Hujjatlarni tekshirish
+
+Mutaxassislar mahsulot tarkibini, xom ashyo manbalarini va ishlab chiqarish texnologiyasini tekshiradi. Harom moddalar (cho'chqa go'shti, alkogol, qon va boshqalar) yo'qligi aniqlanadi.
+
+### 3-bosqich: Korxona auditi
+
+Inspektor ishlab chiqarish joyiga keladi va quyidagilarni tekshiradi:
+- Xom ashyo saqlash va ajratish (Halol va non-Halol mahsulotlar aralashmasligi)
+- Tozalash va dezinfektsiya protseduralari
+- Xodimlar tayyorgarligi va bilimi
+- Yorliqlar va qadoqlash
+
+### 4-bosqich: Sertifikat berish
+
+Muvofiqlik tasdiqlangach, halol sertifikati beriladi. Sertifikat muddati odatda **1 yil** (ba'zi hollarda 2 yil), shundan so'ng kuzatuv auditi o'tkaziladi.
+
+## Vaqt va Xarajatlar
+
+| Bosqich | Vaqt | Taxminiy xarajat |
+|---------|------|-----------------|
+| Ariza va hujjatlar | 1–2 hafta | $100–$300 |
+| Hujjatlar tekshiruvi | 2–4 hafta | Sertifikatsiya to'loviga kiradi |
+| Korxona auditi | 1–3 kun | $500–$2,000 |
+| Sertifikat va yorliq | 1–2 hafta | $300–$800 |
+| **Jami** | **1–3 oy** | **$1,000–$3,500** |
+
+*Narxlar mahsulot turiga, korxona hajmiga va sertifikatsiya organiga qarab farq qiladi. GCC yoki Malayziya bozoriga yo'naltirilgan sertifikatsiya uchun xalqaro organ tanlanishi mumkin — narxi yuqoriroq.*
+
+## Halol Sertifikatining Foydasi
+
+- **Mahalliy bozor:** O'zbekiston supermarketlari va tarmoq do'konlari halol yorlig'li mahsulotlarga talabni oshirmoqda
+- **Eksport:** GCC mamlakatlariga eksport uchun halol sertifikati majburiy shart
+- **Brendlash:** Halol yorlig'i global e'tirof qilingan sifat belgisiga aylanib bormoqda
+- **Ishonch:** Iste'molchilar halol mahsulotlarga yuqori ishonch bildiradi — qaytib keluvchi mijozlar ko'p
+
+## Xulosa
+
+O'zbekiston korxonalari uchun halol sertifikati nafaqat diniy majburiyat, balki kuchli biznes vositasidir. Milliy va xalqaro halol bozorining o'sishi fonida sertifikatlangan korxonalar yangi eksport shartnomalari va sherikliklar uchun keng imkoniyatlarga ega bo'ladi.
+
+---
+
+*Manbalar: UzDST Halol sertifikatsiya markazi — standart.uz; OIC/SMIIC 1:2019 "Halal Food – General Requirements"; JAKIM — halal.gov.my; BPJPH — halal.go.id.*''',
+    },
+
+    # ─────────────────────────────────────────────────────────────
+    # ARTICLE 4 — Halal Certification in Uzbekistan  (RU)
+    # ─────────────────────────────────────────────────────────────
+    {
+        'slug': 'halyal-sertifikat-uzbekistan-ru',
+        'group_key': 'halal-certification-uzbekistan',
+        'language': 'ru',
+        'category_slug': 'sertifikatsiya',
+        'category_name': 'Сертификация',
+        'category_icon': '🏅',
+        'is_featured': False,
+        'read_time': 6,
+        'cover_image': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80',
+        'title': 'Халяль-сертификация в Узбекистане: Процесс, Стоимость и Экспортные Возможности',
+        'excerpt': 'Халяль-сертификат в Узбекистане выдаётся Халяль-центром UzDST. В статье рассмотрены: какие продукты нуждаются в сертификации, экспорт в страны Залива и Малайзию, этапы процесса и стоимость.',
+        'content': '''Халяль-сертификат подтверждает, что продукт или услуга соответствует нормам исламского шариата. В Узбекистане, где более 93% населения составляют мусульмане, халяль-сертификация имеет важное значение как для внутреннего рынка, так и для экспорта.
+
+## Орган по халяль-сертификации в Узбекистане
+
+Халяль-сертификацию в Узбекистане осуществляет **Центр халяль-сертификации при UzDST**, работающий в сотрудничестве с Управлением мусульман Узбекистана. Деятельность основана на международных халяль-стандартах.
+
+- **Официальный сайт:** standart.uz
+- **Основной стандарт:** O'zR DST 2613 (Продукты питания халяль — общие требования)
+- **Международный стандарт:** OIC/SMIIC 1:2019 — Halal Food General Requirements (утверждён Организацией исламского сотрудничества и SMIIC)
+
+*Источник: Агентство UzDST — standart.uz; OIC/SMIIC — smiic.org*
+
+## Какие продукты нуждаются в халяль-сертификации?
+
+**Продукты питания:**
+- Мясо и мясопродукты (птица, баранина, говядина)
+- Колбасы, сосиски, переработанные продукты
+- Молоко и молочные продукты (возможно содержание животного желатина)
+- Хлебобулочные изделия (недопустимо использование алкоголя или животных жиров)
+- Консервы и полуфабрикаты
+- Безалкогольные напитки
+
+**Другие категории:**
+- Лекарственные препараты и витамины (желатиновые капсулы)
+- Косметика и средства личной гигиены
+- Гостиничные и ресторанные услуги
+- Логистика и складирование (Halal logistics)
+
+## Экспорт в страны Залива и Малайзию
+
+Халяль-сертификат открывает новые рынки для узбекских экспортёров:
+
+**Совет сотрудничества арабских государств Залива (ССАГЗ):**
+Саудовская Аравия, ОАЭ, Катар, Кувейт, Бахрейн, Оман — 54 млн потребителей. Ведущие органы по халяль-сертификации в регионе: ESMA (ОАЭ), SFDA (Саудовская Аравия).
+
+**Малайзия:** JAKIM (Jabatan Kemajuan Islam Malaysia) — один из наиболее авторитетных органов в мире. Малайзия является ключевым транзитным рынком для халяль-продукции из Узбекистана.
+
+**Индонезия:** BPJPH (Badan Penyelenggara Jaminan Produk Halal) — крупнейший халяль-рынок мира с населением 270 млн человек.
+
+*Источник: OIC/SMIIC — "Standards and Certification for Halal Products" (smiic.org); официальный сайт JAKIM*
+
+## Этапы сертификации
+
+### Этап 1: Подача заявки
+
+Заявка подаётся в Центр халяль-сертификации UzDST или аккредитованный орган. Документы: свидетельства предприятия, состав продукта, технология производства.
+
+### Этап 2: Проверка документации
+
+Специалисты проверяют состав продукта, источники сырья и технологию производства. Устанавливается отсутствие харамных ингредиентов (свинина, алкоголь, кровь и др.).
+
+### Этап 3: Аудит предприятия
+
+Инспектор выезжает на производство и проверяет:
+- Хранение и разделение сырья (исключить смешение халяль и не-халяль)
+- Процедуры уборки и дезинфекции
+- Обученность и осведомлённость персонала
+- Маркировку и упаковку
+
+### Этап 4: Выдача сертификата
+
+После подтверждения соответствия выдаётся халяль-сертификат сроком обычно **1 год** (в ряде случаев 2 года), затем проводится надзорный аудит.
+
+## Сроки и стоимость
+
+| Этап | Срок | Ориентировочная стоимость |
+|------|------|--------------------------|
+| Заявка и документы | 1–2 нед. | $100–$300 |
+| Проверка документов | 2–4 нед. | Включено в сертификационный сбор |
+| Аудит предприятия | 1–3 дня | $500–$2 000 |
+| Сертификат и маркировка | 1–2 нед. | $300–$800 |
+| **Итого** | **1–3 месяца** | **$1 000–$3 500** |
+
+*Стоимость зависит от вида продукции, размера предприятия и органа сертификации. Для экспорта в ОАЭ/Малайзию может потребоваться международный орган — стоимость будет выше.*
+
+## Преимущества халяль-сертификации
+
+- **Внутренний рынок:** Супермаркеты и торговые сети Узбекистана всё активнее требуют халяль-маркировку
+- **Экспорт:** Для экспорта в страны ССАГЗ наличие халяль-сертификата является обязательным
+- **Брендинг:** Халяль-маркировка становится глобально признанным знаком качества
+- **Доверие потребителей:** Лояльность к халяль-брендам традиционно высока, что обеспечивает повторные покупки
+
+## Заключение
+
+Для узбекских предприятий халяль-сертификация — это не только религиозное требование, но и мощный инструмент бизнеса. На фоне роста национального и международного халяль-рынка сертифицированные компании получают широкие возможности для новых экспортных контрактов и партнёрств.
+
+---
+
+*Источники: Центр халяль-сертификации UzDST — standart.uz; OIC/SMIIC 1:2019 "Halal Food – General Requirements"; JAKIM — halal.gov.my; BPJPH — halal.go.id.*''',
+    },
+
+    # ─────────────────────────────────────────────────────────────
+    # ARTICLE 4 — Halal Certification in Uzbekistan  (EN)
+    # ─────────────────────────────────────────────────────────────
+    {
+        'slug': 'halal-certification-uzbekistan-en',
+        'group_key': 'halal-certification-uzbekistan',
+        'language': 'en',
+        'category_slug': 'sertifikatsiya',
+        'category_name': 'Certification',
+        'category_icon': '🏅',
+        'is_featured': False,
+        'read_time': 6,
+        'cover_image': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80',
+        'title': 'Halal Certification in Uzbekistan: Process, Costs and Export Opportunities',
+        'excerpt': 'Halal certification in Uzbekistan is issued by the UzDST Halal Centre. This article covers which products need certification, exporting to Gulf countries and Malaysia, the full process steps, and costs.',
+        'content': '''A Halal certificate confirms that a product or service complies with Islamic Sharia law. In Uzbekistan, where over 93% of the population is Muslim, Halal certification is significant both for the domestic market and for export to Muslim-majority countries worldwide.
+
+## Halal Certification Authority in Uzbekistan
+
+Halal certification in Uzbekistan is carried out by the **Halal Certification Centre under UzDST**, operating in cooperation with the Muslim Board of Uzbekistan. The centre's work is grounded in international Halal standards.
+
+- **Official website:** standart.uz
+- **National standard:** O'zR DST 2613 (Halal food products — General requirements)
+- **International standard:** OIC/SMIIC 1:2019 — Halal Food General Requirements (endorsed by the Organisation of Islamic Cooperation and SMIIC)
+
+*Source: UzDST — standart.uz; OIC/SMIIC — smiic.org*
+
+## Which Products Need Halal Certification?
+
+**Food products:**
+- Meat and meat products (poultry, lamb, beef)
+- Sausages, processed meat products
+- Dairy products (may contain animal-derived gelatin)
+- Bakery products (no alcohol or animal fats permitted)
+- Canned goods and semi-prepared foods
+- Non-alcoholic beverages
+
+**Other categories:**
+- Medicines and vitamins (gelatin capsules)
+- Cosmetics and personal care products
+- Hotel and restaurant services
+- Logistics and warehousing (Halal logistics)
+
+## Exporting to Gulf Countries and Malaysia
+
+A Halal certificate opens new markets for Uzbekistan exporters:
+
+**Gulf Cooperation Council (GCC):**
+Saudi Arabia, UAE, Qatar, Kuwait, Bahrain, Oman — 54 million consumers. Leading Halal certification bodies in the region: ESMA (UAE), SFDA (Saudi Arabia).
+
+**Malaysia:** JAKIM (Jabatan Kemajuan Islam Malaysia) — one of the world's most authoritative Halal certification bodies. Malaysia serves as a key transit market for Uzbekistan's Halal products.
+
+**Indonesia:** BPJPH (Badan Penyelenggara Jaminan Produk Halal) — the world's largest Halal market with 270 million people.
+
+*Source: OIC/SMIIC — "Standards and Certification for Halal Products" (smiic.org); JAKIM official website*
+
+## Certification Process
+
+### Step 1: Application
+
+An application is submitted to the UzDST Halal Certification Centre or an accredited body. Required documents: company registration certificates, product composition, and production technology descriptions.
+
+### Step 2: Document Review
+
+Specialists review the product composition, raw material sources, and production technology. The absence of haram ingredients (pork, alcohol, blood, etc.) is verified.
+
+### Step 3: Factory Audit
+
+An inspector visits the production facility and checks:
+- Storage and separation of raw materials (preventing mixing of Halal and non-Halal)
+- Cleaning and disinfection procedures
+- Staff training and awareness
+- Labelling and packaging compliance
+
+### Step 4: Certificate Issuance
+
+Upon confirmed conformity, the Halal certificate is issued — typically valid for **1 year** (sometimes 2), after which a surveillance audit is conducted.
+
+## Timeline and Costs
+
+| Stage | Duration | Estimated Cost |
+|-------|----------|----------------|
+| Application and documents | 1–2 weeks | $100–$300 |
+| Document review | 2–4 weeks | Included in certification fee |
+| Factory audit | 1–3 days | $500–$2,000 |
+| Certificate and labelling | 1–2 weeks | $300–$800 |
+| **Total** | **1–3 months** | **$1,000–$3,500** |
+
+*Costs vary by product type, company size, and chosen certification body. For UAE/Malaysia markets, an internationally recognised body may be required — at higher cost.*
+
+## Benefits of Halal Certification
+
+- **Domestic market:** Uzbekistan supermarkets and retail chains are increasingly demanding Halal labelling
+- **Export:** Halal certification is a mandatory requirement for exporting to GCC member states
+- **Branding:** The Halal mark is becoming a globally recognised quality signal
+- **Consumer trust:** Loyalty to Halal brands is traditionally high, resulting in strong repeat purchase rates
+
+## Conclusion
+
+For Uzbekistan businesses, Halal certification is not only a religious obligation but a powerful commercial tool. As both the national and global Halal market continues to grow, certified companies are well positioned to secure new export contracts and partnerships across Muslim-majority markets worldwide.
+
+---
+
+*Sources: UzDST Halal Certification Centre — standart.uz; OIC/SMIIC 1:2019 "Halal Food – General Requirements"; JAKIM — halal.gov.my; BPJPH — halal.go.id.*''',
+    },
 ]
 
 

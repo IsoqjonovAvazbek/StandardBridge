@@ -54,6 +54,11 @@ def landing(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
 
+    from analysis.models import GapAnalysis
+    user_count = CustomUser.objects.filter(role='entrepreneur').count()
+    expert_count = CustomUser.objects.filter(role='expert', expert_profile__is_verified=True).count()
+    analysis_count = GapAnalysis.objects.filter(status='completed').count()
+
     lang = request.session.get('lang', 'uz')
 
     industry_lists = {
@@ -159,6 +164,9 @@ def landing(request):
         'industry_list': industry_lists.get(lang, industry_lists['uz']),
         'faq_list': faq_lists.get(lang, faq_lists['uz']),
         'standards_list': standards_list,
+        'user_count': user_count,
+        'expert_count': expert_count,
+        'analysis_count': analysis_count,
     })
 
 

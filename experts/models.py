@@ -129,8 +129,10 @@ class ProjectUpdate(models.Model):
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='updates')
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    message = models.TextField()
+    message = models.TextField(blank=True)
     update_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='message')
+    file = models.FileField(upload_to='chat_files/', blank=True, null=True)
+    file_name = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

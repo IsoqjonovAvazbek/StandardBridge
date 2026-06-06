@@ -128,8 +128,18 @@
             </div>
             {% endif %}
 
-            <!-- Tahlil yuborish — faqat tadbirkorlarga -->
-            {% if not request.user.is_expert %}
+            <!-- Tahlil yuborish -->
+            {% if not request.user.is_authenticated %}
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 text-center">
+                <svg class="w-12 h-12 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <h3 class="font-bold text-gray-900 mb-2">{{ T.send_analysis_title }}</h3>
+                <p class="text-gray-500 text-sm mb-4">{{ T.login_to_send_analysis|default:"Mutaxassisga tahlil yuborish uchun tizimga kiring" }}</p>
+                <div class="flex gap-3 justify-center">
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="gradient-bg text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition">{{ T.login }}</a>
+                    <a href="{% url 'register' %}" class="border-2 border-blue-600 text-blue-600 px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-blue-50 transition">{{ T.register }}</a>
+                </div>
+            </div>
+            {% elif not request.user.is_expert %}
             <div class="bg-white rounded-2xl p-6 border border-gray-100">
                 <h3 class="font-bold text-gray-900 mb-2">{{ T.send_analysis_title }}</h3>
                 <p class="text-gray-500 text-sm mb-2">{{ T.send_analysis_sub }}</p>
