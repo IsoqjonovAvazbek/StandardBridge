@@ -51,14 +51,20 @@ def post_detail(request, slug):
     BlogPost.objects.filter(pk=post.pk).update(views_count=F('views_count') + 1)
     post.refresh_from_db(fields=['views_count'])
 
+    lang = post.language
     related = (
         BlogPost.objects
-        .filter(is_published=True, category=post.category)
+        .filter(is_published=True, language=lang, category=post.category)
         .exclude(pk=post.pk)
         .select_related('category', 'author')[:3]
     )
     if not related.exists():
-        related = BlogPost.objects.filter(is_published=True).exclude(pk=post.pk).select_related('category', 'author')[:3]
+        related = (
+            BlogPost.objects
+            .filter(is_published=True, language=lang)
+            .exclude(pk=post.pk)
+            .select_related('category', 'author')[:3]
+        )
 
     comments = post.comments.filter(is_approved=True).select_related('author')
     likes_count = post.likes.count()
