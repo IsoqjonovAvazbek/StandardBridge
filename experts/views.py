@@ -1048,7 +1048,14 @@ def expert_profile_edit(request):
         profile.cert_number = request.POST.get('cert_number', '').strip()
         profile.issuing_body = request.POST.get('issuing_body', '').strip()
         cert_expiry_raw = request.POST.get('cert_expiry', '').strip()
-        profile.cert_expiry = cert_expiry_raw if cert_expiry_raw else None
+        if cert_expiry_raw:
+            try:
+                from datetime import datetime as _dt
+                profile.cert_expiry = _dt.strptime(cert_expiry_raw, '%Y-%m-%d').date()
+            except ValueError:
+                profile.cert_expiry = None
+        else:
+            profile.cert_expiry = None
         # Standart teglari (checkbox ro'yxati)
         valid_codes = {c[0] for c in ExpertProfile.STANDARD_CHOICES}
         profile.standard_tags = [t for t in request.POST.getlist('standard_tags') if t in valid_codes]

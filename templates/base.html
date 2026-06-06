@@ -415,15 +415,21 @@ document.addEventListener('click', function (e) {
             fetch('/accounts/api/search/?q=' + encodeURIComponent(q), {credentials: 'same-origin'})
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
+                    function esc(s) {
+                        var d = document.createElement('div');
+                        d.textContent = s;
+                        return d.innerHTML;
+                    }
                     if (!data.results.length) {
                         resultBox.innerHTML = '<p class="px-4 py-3 text-xs text-gray-400">Natija topilmadi</p>';
                         return;
                     }
                     resultBox.innerHTML = data.results.map(function (r) {
-                        return '<a href="' + r.url + '" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition">' +
-                            '<span class="text-lg flex-shrink-0">' + r.icon + '</span>' +
-                            '<div class="min-w-0"><p class="text-sm font-medium text-gray-900 truncate">' + r.title + '</p>' +
-                            (r.sub ? '<p class="text-xs text-gray-400 truncate">' + r.sub + '</p>' : '') +
+                        var safeUrl = r.url.replace(/[^a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=%]/g, '');
+                        return '<a href="' + safeUrl + '" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition">' +
+                            '<span class="text-lg flex-shrink-0">' + esc(r.icon) + '</span>' +
+                            '<div class="min-w-0"><p class="text-sm font-medium text-gray-900 truncate">' + esc(r.title) + '</p>' +
+                            (r.sub ? '<p class="text-xs text-gray-400 truncate">' + esc(r.sub) + '</p>' : '') +
                             '</div></a>';
                     }).join('');
                 })

@@ -18,6 +18,16 @@ import os
 import json
 import logging
 from decimal import Decimal
+from datetime import datetime as _dt
+
+
+def _parse_date(raw):
+    if not raw:
+        return None
+    try:
+        return _dt.strptime(raw.strip(), '%Y-%m-%d').date()
+    except (ValueError, AttributeError):
+        return None
 
 logger = logging.getLogger('standardbridge')
 
@@ -313,15 +323,16 @@ def new_audit(request):
 
     standard = request.POST.get('standard', 'iso9001')
     audit_date_raw = request.POST.get('audit_date', '').strip()
-    if not audit_date_raw:
-        messages.error(request, 'Audit sanasini kiriting!')
+    parsed_audit_date = _parse_date(audit_date_raw)
+    if not parsed_audit_date:
+        messages.error(request, 'To\'g\'ri audit sanasini kiriting!')
         return redirect('audit_list')
     audit = AuditChecklist.objects.create(
         expert=request.user,
         project=project,
         company_name=company_name,
         standard=standard,
-        audit_date=audit_date_raw,
+        audit_date=parsed_audit_date,
         notes=request.POST.get('notes', ''),
     )
 
@@ -792,15 +803,16 @@ def add_time_log(request):
     except Exception:
         hours = Decimal('1')
 
-    if not project_id or not date_raw:
-        messages.error(request, 'Loyiha va sanani tanlang!')
+    parsed_date = _parse_date(date_raw)
+    if not project_id or not parsed_date:
+        messages.error(request, 'Loyiha va to\'g\'ri sanani tanlang!')
         return redirect('time_logs')
 
     project = get_object_or_404(Project, pk=project_id, expert=request.user)
     TimeLog.objects.create(
         expert=request.user,
         project=project,
-        date=date_raw,
+        date=parsed_date,
         hours=hours,
         description=description[:300],
     )

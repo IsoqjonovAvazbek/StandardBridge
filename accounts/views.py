@@ -412,8 +412,8 @@ def referral_view(request):
 
 @login_required
 def entrepreneur_profile_view(request):
-    if request.user.is_expert():
-        return redirect('expert_profile')
+    if not request.user.is_entrepreneur():
+        return redirect('dashboard')
 
     user = request.user
     try:
@@ -636,6 +636,7 @@ def dashboard(request):
         return redirect('entrepreneur_dashboard')
 
 @login_required
+@login_required
 def api_notification_count(request):
     from experts.models import Notification
     count = Notification.objects.filter(user=request.user, is_read=False).count()
@@ -711,7 +712,7 @@ def resend_verification(request):
 def verify_email(request, token):
     if not token:
         messages.error(request, 'Noto\'g\'ri havola!')
-        return redirect('dashboard')
+        return redirect('landing')
     try:
         user = CustomUser.objects.get(email_verify_token=token)
         user.is_email_verified = True
@@ -720,4 +721,10 @@ def verify_email(request, token):
         messages.success(request, 'Email manzil muvaffaqiyatli tasdiqlandi!')
     except CustomUser.DoesNotExist:
         messages.error(request, 'Havola yaroqsiz yoki muddati o\'tgan!')
-    return redirect('dashboard')
+    except CustomUser.MultipleObjectsReturned:
+        # Token collision (juda kam ehtimol) — har ikkalasini ham tasdiqlash
+        CustomUser.objects.filter(email_verify_token=token).update(
+            is_email_verified=True, email_verify_token=''
+        )
+        messages.success(request, 'Email manzil muvaffaqiyatli tasdiqlandi!')
+    return redirect('landing')

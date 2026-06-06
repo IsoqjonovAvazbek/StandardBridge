@@ -16,7 +16,31 @@ import logging
 logger = logging.getLogger('standardbridge')
 
 
-@login_required
+def _parse_date(raw):
+    """Return a date object if raw is a valid YYYY-MM-DD string, else None."""
+    if not raw:
+        return None
+    try:
+        from datetime import datetime
+        return datetime.strptime(raw.strip(), '%Y-%m-%d').date()
+    except (ValueError, AttributeError):
+        return None
+
+
+def _entrepreneur_required(view_func):
+    from functools import wraps
+    @wraps(view_func)
+    def _wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            from django.conf import settings
+            return redirect(settings.LOGIN_URL)
+        if not request.user.is_entrepreneur():
+            return redirect('dashboard')
+        return view_func(request, *args, **kwargs)
+    return _wrapped
+
+
+@_entrepreneur_required
 def qms_dashboard(request):
     user = request.user
 
@@ -134,7 +158,7 @@ STANDARD_LABELS = {
 }
 
 
-@login_required
+@_entrepreneur_required
 def qms_checklist(request):
     standard = request.GET.get('standard', 'iso9001')
     items = ChecklistItem.objects.filter(standard=standard, is_active=True)
@@ -182,7 +206,7 @@ def qms_checklist(request):
     })
 
 
-@login_required
+@_entrepreneur_required
 def update_checklist(request):
     """AJAX endpoint — saves a single checklist item response."""
     if request.method == 'POST':
@@ -233,7 +257,7 @@ def update_checklist(request):
     return JsonResponse({'success': False}, status=405)
 
 
-@login_required
+@_entrepreneur_required
 def qms_documents(request):
     docs = QMSDocument.objects.filter(company=request.user, is_active=True).prefetch_related('version_history')
     doc_type = request.GET.get('type', '')
@@ -248,7 +272,7 @@ def qms_documents(request):
     })
 
 
-@login_required
+@_entrepreneur_required
 def upload_document(request):
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
@@ -276,13 +300,13 @@ def upload_document(request):
                 doc_type=doc_type,
                 file=file,
                 version=version,
-                expiry_date=expiry_raw if expiry_raw else None,
+                expiry_date=_parse_date(expiry_raw),
             )
             messages.success(request, 'Hujjat muvaffaqiyatli yuklandi.')
     return redirect('qms_documents')
 
 
-@login_required
+@_entrepreneur_required
 def delete_document(request, pk):
     if request.method != 'POST':
         return redirect('qms_documents')
@@ -293,7 +317,7 @@ def delete_document(request, pk):
     return redirect('qms_documents')
 
 
-@login_required
+@_entrepreneur_required
 def update_document_version(request, pk):
     """Upload a new version of an existing document, keeping history."""
     doc = get_object_or_404(QMSDocument, pk=pk, company=request.user)
@@ -321,7 +345,7 @@ def update_document_version(request, pk):
     return redirect('qms_documents')
 
 
-@login_required
+@_entrepreneur_required
 def nonconformities(request):
     ncs = NonConformity.objects.filter(company=request.user)
     status_filter = request.GET.get('status', '')
@@ -333,7 +357,7 @@ def nonconformities(request):
     })
 
 
-@login_required
+@_entrepreneur_required
 def add_nonconformity(request):
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
@@ -350,7 +374,7 @@ def add_nonconformity(request):
                 description=description,
                 severity=severity,
                 assigned_to=assigned_to,
-                due_date=due_raw if due_raw else None,
+                due_date=_parse_date(due_raw),
             )
             messages.success(request, 'Nomuvofiqlik qo\'shildi.')
         else:
@@ -368,7 +392,7 @@ def _next_nc_code(company):
     return f'{prefix}{count + 1:03d}'
 
 
-@login_required
+@_entrepreneur_required
 def update_nonconformity(request, pk):
     nc = get_object_or_404(NonConformity, pk=pk, company=request.user)
     if request.method == 'POST':
@@ -384,7 +408,7 @@ def update_nonconformity(request, pk):
     return redirect('nonconformities')
 
 
-@login_required
+@_entrepreneur_required
 def audit_schedule(request):
     audits = AuditSchedule.objects.filter(company=request.user)
     today = timezone.now().date()
@@ -394,7 +418,7 @@ def audit_schedule(request):
     })
 
 
-@login_required
+@_entrepreneur_required
 def checklist_print(request):
     """Print-friendly checklist report page."""
     standard = request.GET.get('standard', 'iso9001')
@@ -424,7 +448,7 @@ def checklist_print(request):
     })
 
 
-@login_required
+@_entrepreneur_required
 def update_audit(request, pk):
     """AJAX or POST: change audit status inline."""
     audit = get_object_or_404(AuditSchedule, pk=pk, company=request.user)
@@ -440,7 +464,7 @@ def update_audit(request, pk):
     return redirect('audit_schedule')
 
 
-@login_required
+@_entrepreneur_required
 def add_audit(request):
     if request.method == 'POST':
         audit_type = request.POST.get('audit_type', '')
@@ -449,25 +473,22 @@ def add_audit(request):
         auditor_name = request.POST.get('auditor_name', '').strip()
         notes = request.POST.get('notes', '').strip()
 
-        if audit_type and standard and planned_date:
-            from datetime import date as _date, datetime as _dt
-            try:
-                pd = _dt.strptime(planned_date, '%Y-%m-%d').date()
-                if pd < _date.today():
-                    messages.warning(request, 'Audit sanasi o\'tib ketgan. Kelajak sanasini kiriting.')
-            except ValueError:
-                pass
+        pd = _parse_date(planned_date)
+        if audit_type and standard and pd:
+            from datetime import date as _date
+            if pd < _date.today():
+                messages.warning(request, 'Audit sanasi o\'tib ketgan. Kelajak sanasini kiriting.')
             AuditSchedule.objects.create(
                 company=request.user,
                 audit_type=audit_type,
                 standard=standard,
-                planned_date=planned_date,
+                planned_date=pd,
                 auditor_name=auditor_name,
                 notes=notes,
             )
             messages.success(request, 'Audit rejaga qo\'shildi.')
         else:
-            messages.error(request, 'Audit turi, standart va sanani kiriting!')
+            messages.error(request, 'Audit turi, standart va to\'g\'ri sana kiriting!')
     return redirect('audit_schedule')
 
 
@@ -499,7 +520,7 @@ LANG_INSTRUCTION = {
 }
 
 
-@login_required
+@_entrepreneur_required
 @ratelimit(key='user', rate='10/m', method='POST', block=False)
 def ai_nc_suggestion(request, pk):
     """AJAX POST: AI suggests root cause + corrective action for a non-conformity."""
@@ -527,7 +548,7 @@ def ai_nc_suggestion(request, pk):
     return JsonResponse({'success': True, 'suggestion': text})
 
 
-@login_required
+@_entrepreneur_required
 @ratelimit(key='user', rate='5/m', method='POST', block=False)
 def qms_generate_policy(request):
     """AI generates an ISO policy/procedure and stores it as a QMS document."""
@@ -575,7 +596,7 @@ def qms_generate_policy(request):
     return redirect('qms_document_view', pk=doc.pk)
 
 
-@login_required
+@_entrepreneur_required
 def qms_document_view(request, pk):
     """Inline rendered view for AI-generated documents."""
     doc = get_object_or_404(QMSDocument, pk=pk, company=request.user, is_active=True)
@@ -600,7 +621,7 @@ def qms_document_view(request, pk):
 # Risk Register
 # ---------------------------------------------------------------------------
 
-@login_required
+@_entrepreneur_required
 def risk_register(request):
     risks = RiskItem.objects.filter(company=request.user)
     standard_filter = request.GET.get('standard', '')
@@ -627,7 +648,7 @@ def risk_register(request):
     })
 
 
-@login_required
+@_entrepreneur_required
 def add_risk(request):
     if request.method == 'POST':
         process_area = request.POST.get('process_area', '').strip()
@@ -653,7 +674,7 @@ def add_risk(request):
                 likelihood=likelihood,
                 impact=impact,
                 owner=owner,
-                due_date=due_raw if due_raw else None,
+                due_date=_parse_date(due_raw),
             )
             messages.success(request, 'Risk qo\'shildi.')
         else:
@@ -661,7 +682,7 @@ def add_risk(request):
     return redirect('risk_register')
 
 
-@login_required
+@_entrepreneur_required
 def update_risk(request, pk):
     risk = get_object_or_404(RiskItem, pk=pk, company=request.user)
     if request.method == 'POST':
@@ -684,7 +705,7 @@ def update_risk(request, pk):
     return redirect('risk_register')
 
 
-@login_required
+@_entrepreneur_required
 def delete_risk(request, pk):
     if request.method != 'POST':
         return redirect('risk_register')
@@ -694,7 +715,7 @@ def delete_risk(request, pk):
     return redirect('risk_register')
 
 
-@login_required
+@_entrepreneur_required
 def export_risk_csv(request):
     risks = RiskItem.objects.filter(company=request.user)
     resp = _csv_response('risk_register.csv')
@@ -715,7 +736,7 @@ def export_risk_csv(request):
 # Training Records
 # ---------------------------------------------------------------------------
 
-@login_required
+@_entrepreneur_required
 def training_records(request):
     records = TrainingRecord.objects.filter(company=request.user)
     today = timezone.now().date()
@@ -729,14 +750,15 @@ def training_records(request):
     })
 
 
-@login_required
+@_entrepreneur_required
 def add_training(request):
     if request.method == 'POST':
         employee_name = request.POST.get('employee_name', '').strip()
         training_name = request.POST.get('training_name', '').strip()
         date_completed = request.POST.get('date_completed', '').strip()
 
-        if employee_name and training_name and date_completed:
+        parsed_date = _parse_date(date_completed)
+        if employee_name and training_name and parsed_date:
             expiry_raw = request.POST.get('expiry_date', '').strip()
             TrainingRecord.objects.create(
                 company=request.user,
@@ -744,18 +766,18 @@ def add_training(request):
                 position=request.POST.get('position', '').strip()[:200],
                 training_name=training_name[:300],
                 standard_clause=request.POST.get('standard_clause', '').strip()[:100],
-                date_completed=date_completed,
+                date_completed=parsed_date,
                 trainer=request.POST.get('trainer', '').strip()[:200],
                 certificate_number=request.POST.get('certificate_number', '').strip()[:100],
-                expiry_date=expiry_raw if expiry_raw else None,
+                expiry_date=_parse_date(expiry_raw),
             )
             messages.success(request, 'O\'quv yozuvi qo\'shildi.')
         else:
-            messages.error(request, 'Xodim ismi, o\'quv nomi va sana kiritilishi shart!')
+            messages.error(request, 'Xodim ismi, o\'quv nomi va to\'g\'ri sana kiritilishi shart!')
     return redirect('training_records')
 
 
-@login_required
+@_entrepreneur_required
 def delete_training(request, pk):
     if request.method != 'POST':
         return redirect('training_records')
@@ -765,7 +787,7 @@ def delete_training(request, pk):
     return redirect('training_records')
 
 
-@login_required
+@_entrepreneur_required
 def export_training_csv(request):
     records = TrainingRecord.objects.filter(company=request.user)
     resp = _csv_response('training_records.csv')
@@ -784,7 +806,7 @@ def export_training_csv(request):
 # NC Effectiveness verify
 # ---------------------------------------------------------------------------
 
-@login_required
+@_entrepreneur_required
 def verify_nc_effectiveness(request, pk):
     nc = get_object_or_404(NonConformity, pk=pk, company=request.user)
     if request.method == 'POST' and nc.status == 'closed':
@@ -807,7 +829,7 @@ def _csv_response(filename):
     return resp
 
 
-@login_required
+@_entrepreneur_required
 def export_checklist_csv(request):
     standard = request.GET.get('standard', 'iso9001')
     items = ChecklistItem.objects.filter(standard=standard, is_active=True)
@@ -825,7 +847,7 @@ def export_checklist_csv(request):
     return resp
 
 
-@login_required
+@_entrepreneur_required
 def export_nc_csv(request):
     ncs = NonConformity.objects.filter(company=request.user)
     resp = _csv_response('nonconformities.csv')
