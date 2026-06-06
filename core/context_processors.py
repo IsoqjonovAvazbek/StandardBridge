@@ -6,7 +6,7 @@ def profile_completeness(request):
         fields = [user.first_name, user.last_name, user.email, user.company_name, user.phone, user.region, user.industry]
         try:
             ep = user.entrepreneur_profile
-            fields += [ep.company_description, ep.employee_count or None]
+            fields += [ep.company_description]
         except Exception:
             pass
     elif user.role == 'expert':
