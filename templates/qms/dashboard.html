@@ -251,8 +251,13 @@
                         <p class="text-sm font-medium text-gray-900 truncate">{{ doc.title }}</p>
                         <p class="text-xs text-gray-400">{{ T.qms_version_lbl }}{{ doc.version }} · {{ doc.uploaded_at|date:"d.m.Y" }}</p>
                     </div>
+                    {% if doc.ai_content %}
+                    <a href="{% url 'qms_document_view' doc.pk %}"
+                       class="text-xs text-indigo-600 hover:underline shrink-0">👁 Ko'rish</a>
+                    {% elif doc.file %}
                     <a href="{{ doc.file.url }}" target="_blank"
                        class="text-xs text-blue-600 hover:underline shrink-0">{{ T.qms_download }}</a>
+                    {% endif %}
                 </div>
                 {% empty %}
                 <p class="px-5 py-6 text-sm text-gray-400 text-center">{{ T.qms_no_docs_yet }}</p>
