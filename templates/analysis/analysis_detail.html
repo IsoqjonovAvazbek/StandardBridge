@@ -91,7 +91,7 @@
             <h2 class="font-bold text-gray-900">{{ T.ai_summary_label }}</h2>
             <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">AI</span>
         </div>
-        <p class="text-gray-700 leading-relaxed">{{ summary }}</p>
+        <div class="text-gray-700 leading-relaxed prose prose-sm max-w-none">{{ summary|render_md }}</div>
         <p class="text-xs text-gray-400 mt-2">{{ T.ai_content_note }}</p>
     </div>
     {% endif %}
@@ -248,7 +248,7 @@
                                     <span class="text-xs font-medium text-gray-500">{{ T.ai_advice_label }}</span>
                                     <span class="text-xs bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded font-medium">AI</span>
                                 </div>
-                                <p class="text-gray-700 text-sm leading-relaxed gap-desc">{{ gap.description }}</p>
+                                <div class="text-gray-700 text-sm leading-relaxed gap-desc prose prose-sm max-w-none">{{ gap.description|render_md }}</div>
                             </div>
                             {% elif not gap.is_resolved %}
                             <p class="text-xs text-gray-400 mt-1 italic">{{ T.ai_no_desc_hint }}</p>

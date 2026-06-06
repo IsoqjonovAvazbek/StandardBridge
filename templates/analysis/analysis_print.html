@@ -51,7 +51,7 @@
     {% if summary %}
     <div class="mb-6">
         <h2 class="text-lg font-bold text-gray-900 mb-2">{{ T.summary_label }}</h2>
-        <p class="text-sm text-gray-700 leading-relaxed">{{ summary }}</p>
+        <div class="text-sm text-gray-700 leading-relaxed">{{ summary|render_md }}</div>
     </div>
     {% endif %}
 
@@ -73,7 +73,7 @@
                     <td class="border border-gray-200 px-3 py-2">{{ forloop.counter }}</td>
                     <td class="border border-gray-200 px-3 py-2">
                         <p class="font-semibold">{{ gap.title }}</p>
-                        <p class="text-gray-500 text-xs mt-1">{{ gap.description }}</p>
+                        <div class="text-gray-500 text-xs mt-1">{{ gap.description|render_md }}</div>
                     </td>
                     <td class="border border-gray-200 px-3 py-2">{% label gap.priority %}</td>
                     <td class="border border-gray-200 px-3 py-2">{{ gap.estimated_days }}</td>
@@ -93,7 +93,7 @@
             {% for step in steps %}
             <li class="border border-gray-200 rounded-lg p-3">
                 <p class="font-semibold text-sm">{{ step.order }}. {{ step.title }} <span class="text-gray-400 font-normal">({{ step.duration_days }} {{ T.days }})</span></p>
-                <p class="text-gray-600 text-xs mt-1">{{ step.description }}</p>
+                <div class="text-gray-600 text-xs mt-1">{{ step.description|render_md }}</div>
             </li>
             {% endfor %}
         </ol>
