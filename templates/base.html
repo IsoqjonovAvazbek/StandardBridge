@@ -61,9 +61,10 @@
         .dark .bg-yellow-50               { background-color: #2d1f00 !important; }
     </style>
     <script>
-        /* Apply dark mode before render to avoid flash */
+        /* Apply dark mode before render to avoid flash — per-user key */
+        var SB_DARK_KEY = 'sb-dark-{{ user.pk|default:"guest" }}';
         (function(){
-            if(localStorage.getItem('sb-dark')==='1') document.documentElement.classList.add('dark');
+            if(localStorage.getItem(SB_DARK_KEY)==='1') document.documentElement.classList.add('dark');
         })();
     </script>
     {% block no_dark_override %}{% endblock %}
@@ -512,7 +513,7 @@ document.addEventListener('click', function (e) {
 function toggleDark(){
     var html = document.getElementById('html-root');
     var isDark = html.classList.toggle('dark');
-    localStorage.setItem('sb-dark', isDark ? '1' : '0');
+    localStorage.setItem(SB_DARK_KEY, isDark ? '1' : '0');
     syncDarkIcons();
 }
 function syncDarkIcons(){
