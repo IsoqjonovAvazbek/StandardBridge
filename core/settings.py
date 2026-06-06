@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
     'accounts',
     'analysis',
     'experts',
@@ -120,9 +122,22 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').exists() else []
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Cloudinary — production'da media fayllarni doimiy saqlash uchun
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', ''),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
+}
+
+_cloudinary_configured = bool(os.environ.get('CLOUDINARY_CLOUD_NAME'))
+
 # WhiteNoise — production'da statik fayllarni samarali uzatadi (siqilgan + keshlangan)
 STORAGES = {
-    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'default': (
+        {'BACKEND': 'cloudinary_storage.storage.RawMediaCloudinaryStorage'}
+        if _cloudinary_configured else
+        {'BACKEND': 'django.core.files.storage.FileSystemStorage'}
+    ),
     'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
 }
 
