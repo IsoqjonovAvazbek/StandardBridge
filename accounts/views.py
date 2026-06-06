@@ -13,20 +13,40 @@ from experts.emails import send_welcome_email, send_expert_verified
 
 @require_POST
 def set_language_view(request):
+    import re
+    from urllib.parse import urlparse
+    from django.utils.http import url_has_allowed_host_and_scheme
+
     lang = request.POST.get('lang', 'uz')
     if lang not in ('uz', 'ru', 'en'):
         lang = 'uz'
     request.session['lang'] = lang
     if request.user.is_authenticated:
         CustomUser.objects.filter(pk=request.user.pk).update(preferred_language=lang)
+
     next_url = request.POST.get('next', '')
-    # Faqat xavfsiz relative URL: / bilan boshlansin, // yoki \ bo'lmasin
-    from django.utils.http import url_has_allowed_host_and_scheme
     if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
         referer = request.META.get('HTTP_REFERER', '/')
-        from urllib.parse import urlparse
-        parsed = urlparse(referer)
-        next_url = parsed.path or '/'
+        next_url = urlparse(referer).path or '/'
+
+    # Blog detail sahifasida til o'zgartirsa — mos tildagi versiyaga o'tadi
+    m = re.match(r'^/blog/([^/]+)/$', next_url)
+    if m:
+        current_slug = m.group(1)
+        try:
+            from blog.models import BlogPost
+            current_post = BlogPost.objects.get(slug=current_slug, is_published=True)
+            if current_post.group_key:
+                translated = BlogPost.objects.filter(
+                    group_key=current_post.group_key,
+                    language=lang,
+                    is_published=True,
+                ).exclude(pk=current_post.pk).first()
+                if translated:
+                    next_url = f'/blog/{translated.slug}/'
+        except BlogPost.DoesNotExist:
+            pass
+
     return redirect(next_url)
 
 

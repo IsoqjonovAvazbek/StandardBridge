@@ -20,6 +20,7 @@ POSTS = [
     # ─────────────────────────────────────────────────────────────
     {
         'slug': 'iso-9001-2015-sertifikatsiya-qollanma-uz',
+        'group_key': 'iso-9001-2015-certification-guide',
         'language': 'uz',
         'category_slug': 'sertifikatsiya',
         'category_name': 'Sertifikatsiya',
@@ -134,6 +135,7 @@ ISO 9001:2015 — bu nafaqat sertifikat, balki korxonangizni tizimli va raqobatb
     # ─────────────────────────────────────────────────────────────
     {
         'slug': 'iso-9001-2015-sertifikatsiya-qollanma-ru',
+        'group_key': 'iso-9001-2015-certification-guide',
         'language': 'ru',
         'category_slug': 'sertifikatsiya',
         'category_name': 'Сертификация',
@@ -248,6 +250,7 @@ ISO 9001:2015 — это не просто сертификат, а систем
     # ─────────────────────────────────────────────────────────────
     {
         'slug': 'iso-9001-2015-certification-guide-en',
+        'group_key': 'iso-9001-2015-certification-guide',
         'language': 'en',
         'category_slug': 'sertifikatsiya',
         'category_name': 'Certification',
@@ -362,6 +365,7 @@ ISO 9001:2015 is not just a certificate — it is a systematic approach to runni
     # ─────────────────────────────────────────────────────────────
     {
         'slug': 'ce-belgisi-yevropa-bozori-uzbekiston-uz',
+        'group_key': 'ce-marking-european-market-guide',
         'language': 'uz',
         'category_slug': 'eksport',
         'category_name': 'Eksport',
@@ -479,6 +483,7 @@ CE belgisi — O'zbekiston ishlab chiqaruvchilari uchun 450 millionlik YeI bozor
     # ─────────────────────────────────────────────────────────────
     {
         'slug': 'ce-markirovka-evropeyskiy-rynok-ru',
+        'group_key': 'ce-marking-european-market-guide',
         'language': 'ru',
         'category_slug': 'eksport',
         'category_name': 'Экспорт',
@@ -596,6 +601,7 @@ CE belgisi — O'zbekiston ishlab chiqaruvchilari uchun 450 millionlik YeI bozor
     # ─────────────────────────────────────────────────────────────
     {
         'slug': 'ce-marking-european-market-uzbekistan-en',
+        'group_key': 'ce-marking-european-market-guide',
         'language': 'en',
         'category_slug': 'eksport',
         'category_name': 'Export',
@@ -734,17 +740,21 @@ class Command(BaseCommand):
                     'category': cat,
                     'cover_image': data['cover_image'],
                     'language': data['language'],
+                    'group_key': data.get('group_key', ''),
                     'is_published': True,
                     'is_featured': data['is_featured'],
                     'read_time': data['read_time'],
                 },
             )
 
-            if created:
+            if not created:
+                # Mavjud postga group_key ni yangilash (eski deploy uchun)
+                if post.group_key != data.get('group_key', ''):
+                    BlogPost.objects.filter(pk=post.pk).update(group_key=data.get('group_key', ''))
+                self.stdout.write(f'  [=] (mavjud) {data["slug"]}')
+            else:
                 created_count += 1
                 self.stdout.write(self.style.SUCCESS(f'  [+] {data["language"].upper()}: {data["title"][:60]}'))
-            else:
-                self.stdout.write(f'  [=] (mavjud) {data["slug"]}')
 
         self.stdout.write(self.style.SUCCESS(
             f'\nBlog maqolalari: {created_count} yangi yaratildi, {len(POSTS) - created_count} allaqachon mavjud.'

@@ -24,6 +24,8 @@ class BlogPost(models.Model):
     cover_image = models.URLField(blank=True, help_text='Rasm URL manzili')
     LANG_CHOICES = [('uz', 'O\'zbek'), ('ru', 'Русский'), ('en', 'English')]
     language = models.CharField(max_length=5, choices=LANG_CHOICES, default='uz')
+    group_key = models.SlugField(max_length=200, blank=True, db_index=True,
+                                 help_text='Bir xil maqolaning turli tillari uchun umumiy kalit')
     is_published = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False, help_text='Asosiy featured post sifatida ko\'rsatish')
     views_count = models.PositiveIntegerField(default=0)
