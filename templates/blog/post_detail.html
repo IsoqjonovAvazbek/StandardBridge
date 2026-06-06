@@ -22,7 +22,7 @@
         {% endif %}
         <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent"></div>
 
-        <div class="absolute bottom-0 left-0 right-0 max-w-4xl mx-auto px-4 sm:px-6 pb-8">
+        <div class="absolute bottom-0 left-0 right-0 max-w-7xl mx-auto px-4 sm:px-6 pb-8">
             <!-- Breadcrumb -->
             <div class="flex items-center gap-2 text-xs text-white/50 mb-4">
                 <a href="{% url 'blog_list' %}" class="hover:text-white/80 transition">{{ T.blog }}</a>
@@ -38,16 +38,53 @@
             </span>
             {% endif %}
 
-            <h1 class="text-2xl md:text-4xl font-bold text-white leading-tight">{{ post.title }}</h1>
+            <h1 class="text-2xl md:text-4xl font-bold text-white leading-tight max-w-3xl">{{ post.title }}</h1>
         </div>
     </div>
 
-    <!-- Main layout -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <div class="flex flex-col lg:flex-row gap-8">
+    <!-- ═══════════════════════════════════════════════════════
+         Main layout: LEFT TOC | CENTER Article | RIGHT Related
+         ═══════════════════════════════════════════════════════ -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
 
-            <!-- Article column -->
+            <!-- ── LEFT SIDEBAR: Table of Contents (sticky, desktop only) ── -->
+            <div class="hidden lg:block lg:w-52 flex-shrink-0" id="toc-sidebar">
+                <div class="sticky top-24 bg-white rounded-2xl border border-gray-100 p-5 shadow-sm" id="toc-card">
+                    <h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10M4 18h6"/>
+                        </svg>
+                        {{ T.blog_toc_title }}
+                    </h3>
+                    <nav id="toc-nav" class="text-sm space-y-1 text-gray-500 max-h-[calc(100vh-180px)] overflow-y-auto">
+                        <p class="text-gray-300 text-xs">...</p>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- ── CENTER: Article column ── -->
             <div class="flex-1 min-w-0">
+
+                <!-- Mobile: collapsible TOC -->
+                <div class="lg:hidden mb-4" id="mobile-toc-container">
+                    <button onclick="document.getElementById('mobile-toc-body').classList.toggle('hidden');
+                                     this.querySelector('svg').classList.toggle('rotate-180')"
+                        class="w-full flex items-center justify-between bg-white rounded-xl border border-gray-100 px-4 py-3 shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10M4 18h6"/>
+                            </svg>
+                            {{ T.blog_toc_title }}
+                        </span>
+                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div id="mobile-toc-body" class="hidden mt-2 bg-white rounded-xl border border-gray-100 px-4 py-3 shadow-sm">
+                        <nav id="toc-nav-mobile" class="text-sm space-y-1.5 text-gray-500"></nav>
+                    </div>
+                </div>
 
                 <!-- Meta bar -->
                 <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-6 flex flex-wrap items-center gap-4 shadow-sm">
@@ -112,7 +149,6 @@
 
                 <!-- Action bar: Like + Share -->
                 <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-6 flex items-center gap-4 shadow-sm flex-wrap">
-                    <!-- Like button -->
                     {% if user.is_authenticated %}
                     <button id="like-btn" onclick="toggleLike()"
                         class="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all {% if user_liked %}border-rose-400 bg-rose-50 text-rose-600{% else %}border-gray-200 bg-white text-gray-600 hover:border-rose-300 hover:text-rose-500{% endif %}">
@@ -130,7 +166,6 @@
                     </a>
                     {% endif %}
 
-                    <!-- Share button -->
                     <button onclick="sharePost()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-gray-200 text-sm font-semibold text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
                         <span id="share-text">{{ T.blog_share_btn }}</span>
@@ -142,6 +177,33 @@
                     </a>
                 </div>
 
+                <!-- Mobile: related posts (below article, only on small screens) -->
+                {% if related %}
+                <div class="lg:hidden bg-white rounded-2xl border border-gray-100 p-5 shadow-sm mb-6">
+                    <h3 class="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        {{ T.blog_related_title }}
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {% for r in related %}
+                        <a href="{% url 'blog_detail' r.slug %}" class="group flex gap-3 items-start">
+                            {% if r.cover_image %}
+                            <img src="{{ r.cover_image }}" alt="{{ r.title }}" class="w-14 h-14 rounded-xl object-cover flex-shrink-0">
+                            {% else %}
+                            <div class="w-14 h-14 gradient-bg rounded-xl flex-shrink-0 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition leading-snug">{{ r.title }}</h4>
+                                <p class="text-xs text-gray-400 mt-1">{{ r.created_at|date:"d.m.Y" }}</p>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- Comments -->
                 <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 shadow-sm">
                     <h2 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
@@ -150,7 +212,6 @@
                         <span class="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full" id="comments-count">{{ comments|length }}</span>
                     </h2>
 
-                    <!-- Add comment -->
                     {% if user.is_authenticated %}
                     <div class="mb-8 flex gap-3">
                         <div class="w-9 h-9 gradient-bg rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -181,7 +242,6 @@
                     </div>
                     {% endif %}
 
-                    <!-- Comments list -->
                     <div id="comments-list" class="space-y-5">
                         {% if comments %}
                         {% for comment in comments %}
@@ -215,25 +275,12 @@
                     </div>
                 </div>
 
-            </div><!-- /article col -->
+            </div><!-- /CENTER article col -->
 
-            <!-- Sidebar -->
-            <div class="lg:w-72 flex-shrink-0 space-y-6">
-
-                <!-- Table of Contents -->
-                <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm sticky top-24" id="toc-card">
-                    <h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10M4 18h6"/></svg>
-                        {{ T.blog_toc_title }}
-                    </h3>
-                    <nav id="toc-nav" class="text-sm space-y-1.5 text-gray-500">
-                        <p class="text-gray-300 text-xs">...</p>
-                    </nav>
-                </div>
-
-                <!-- Related posts -->
-                {% if related %}
-                <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+            <!-- ── RIGHT SIDEBAR: Related posts (sticky, desktop only) ── -->
+            {% if related %}
+            <div class="hidden lg:block lg:w-56 flex-shrink-0">
+                <div class="sticky top-24 bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
                     <h3 class="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
                         <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                         {{ T.blog_related_title }}
@@ -242,90 +289,132 @@
                         {% for r in related %}
                         <a href="{% url 'blog_detail' r.slug %}" class="group flex gap-3 items-start">
                             {% if r.cover_image %}
-                            <img src="{{ r.cover_image }}" alt="{{ r.title }}" class="w-14 h-14 rounded-xl object-cover flex-shrink-0">
+                            <img src="{{ r.cover_image }}" alt="{{ r.title }}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0">
                             {% else %}
-                            <div class="w-14 h-14 gradient-bg rounded-xl flex-shrink-0 flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <div class="w-12 h-12 gradient-bg rounded-xl flex-shrink-0 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             </div>
                             {% endif %}
                             <div>
-                                <h4 class="text-sm font-semibold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition leading-snug">{{ r.title }}</h4>
+                                <h4 class="text-sm font-semibold text-gray-800 line-clamp-3 group-hover:text-blue-600 transition leading-snug">{{ r.title }}</h4>
                                 <p class="text-xs text-gray-400 mt-1">{{ r.created_at|date:"d.m.Y" }} · {{ r.read_time }} {{ T.min_read }}</p>
                             </div>
                         </a>
+                        {% if not forloop.last %}<div class="border-t border-gray-50"></div>{% endif %}
                         {% endfor %}
                     </div>
                 </div>
-                {% endif %}
+            </div>
+            {% endif %}
 
-            </div><!-- /sidebar -->
-        </div>
-    </div>
+        </div><!-- /flex row -->
+    </div><!-- /max-w-7xl -->
 </div>
+
+<!-- Toast notification -->
+<div id="toast-msg" class="fixed bottom-5 right-5 z-50 hidden px-4 py-3 rounded-xl text-sm font-medium shadow-lg border transition-all duration-300"></div>
 
 <!-- Scripts -->
 <script>
-// Reading progress bar
+// ── Toast ──────────────────────────────────────────────────────
+function showToast(msg, type){
+    var t = document.getElementById('toast-msg');
+    if(!t) return;
+    t.textContent = msg;
+    t.className = 'fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl text-sm font-medium shadow-lg border transition-all duration-300 ' +
+        (type === 'ok'
+            ? 'bg-green-50 text-green-700 border-green-200'
+            : 'bg-red-50 text-red-700 border-red-200');
+    t.classList.remove('hidden');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function(){ t.classList.add('hidden'); }, 3500);
+}
+
+// ── Reading progress bar ───────────────────────────────────────
 (function(){
     var bar = document.getElementById('reading-progress');
     var body = document.documentElement;
     window.addEventListener('scroll', function(){
         var pct = (body.scrollTop / (body.scrollHeight - body.clientHeight)) * 100;
         if(bar) bar.style.width = Math.min(pct, 100) + '%';
-    });
+    }, {passive: true});
 })();
 
-// Auto-generate Table of Contents
+// ── Auto-generate Table of Contents ───────────────────────────
 (function(){
     var content = document.getElementById('article-content');
-    var nav = document.getElementById('toc-nav');
-    var card = document.getElementById('toc-card');
-    if(!content || !nav) return;
+    var navDesktop = document.getElementById('toc-nav');
+    var navMobile  = document.getElementById('toc-nav-mobile');
+    var tocCard    = document.getElementById('toc-card');
+    var mobileCont = document.getElementById('mobile-toc-container');
+
+    if(!content) return;
     var headings = content.querySelectorAll('h2, h3');
-    if(headings.length < 2){ card.style.display='none'; return; }
-    nav.innerHTML = '';
-    headings.forEach(function(h, i){
-        var id = 'heading-' + i;
-        h.id = id;
-        var a = document.createElement('a');
-        a.href = '#' + id;
-        a.textContent = h.textContent;
-        a.className = 'block py-1 px-2 rounded-lg transition-all hover:bg-blue-50 hover:text-blue-600 ' +
-            (h.tagName === 'H3' ? 'pl-5 text-xs text-gray-400' : 'text-sm font-medium text-gray-600');
-        nav.appendChild(a);
-    });
+
+    if(headings.length < 2){
+        if(tocCard) tocCard.style.display = 'none';
+        if(mobileCont) mobileCont.style.display = 'none';
+        return;
+    }
+
+    function buildNav(nav){
+        nav.innerHTML = '';
+        headings.forEach(function(h, i){
+            var id = 'heading-' + i;
+            h.id = id;
+            var a = document.createElement('a');
+            a.href = '#' + id;
+            a.textContent = h.textContent;
+            a.dataset.hid = id;
+            a.className = 'block py-1 px-2 rounded-lg transition-all hover:bg-blue-50 hover:text-blue-600 truncate ' +
+                (h.tagName === 'H3' ? 'pl-4 text-xs text-gray-400' : 'text-sm font-medium text-gray-600');
+            nav.appendChild(a);
+        });
+    }
+
+    if(navDesktop) buildNav(navDesktop);
+    if(navMobile)  buildNav(navMobile);
 
     // Highlight active heading on scroll
     window.addEventListener('scroll', function(){
-        var scrollY = window.scrollY + 120;
+        var scrollY = window.scrollY + 130;
         var active = null;
         headings.forEach(function(h){
             if(h.offsetTop <= scrollY) active = h.id;
         });
-        nav.querySelectorAll('a').forEach(function(a){
-            a.classList.toggle('bg-blue-50', a.hash === '#'+active);
-            a.classList.toggle('text-blue-600', a.hash === '#'+active);
+        [navDesktop, navMobile].forEach(function(nav){
+            if(!nav) return;
+            nav.querySelectorAll('a').forEach(function(a){
+                var on = (a.dataset.hid === active);
+                a.classList.toggle('bg-blue-50', on);
+                a.classList.toggle('text-blue-600', on);
+                if(on && a.tagName === 'A') a.classList.remove('text-gray-400', 'text-gray-600');
+            });
         });
-    });
+    }, {passive: true});
 })();
 
-// Like toggle
+// ── Like toggle ────────────────────────────────────────────────
 function toggleLike(){
     var btn = document.getElementById('like-btn');
-    if(!btn) return;
+    if(!btn || btn.disabled) return;
     btn.disabled = true;
+
     fetch("{% url 'blog_toggle_like' post.slug %}", {
         method: 'POST',
         headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json'}
     })
-    .then(function(r){ return r.json(); })
+    .then(function(r){
+        if(!r.ok) throw new Error(r.status);
+        return r.json();
+    })
     .then(function(d){
         var liked = d.liked;
         var count = d.count;
-        var icon = document.getElementById('like-icon');
-        var text = document.getElementById('like-text');
+        var icon    = document.getElementById('like-icon');
+        var text    = document.getElementById('like-text');
         var countEl = document.getElementById('like-count');
-        var topCount = document.getElementById('likes-count-top');
+        var topCnt  = document.getElementById('likes-count-top');
 
         if(liked){
             btn.classList.remove('border-gray-200','text-gray-600','hover:border-rose-300','hover:text-rose-500');
@@ -339,17 +428,19 @@ function toggleLike(){
             if(text) text.textContent = "{{ T.blog_like_btn }}";
         }
         if(countEl) countEl.textContent = count;
-        if(topCount) topCount.textContent = count;
+        if(topCnt)  topCnt.textContent  = count;
 
-        // heart animation
         icon.style.transform = 'scale(1.4)';
         setTimeout(function(){ icon.style.transform = 'scale(1)'; }, 200);
         btn.disabled = false;
     })
-    .catch(function(){ btn.disabled = false; });
+    .catch(function(e){
+        btn.disabled = false;
+        showToast('Xatolik yuz berdi. Qayta urinib ko\'ring.');
+    });
 }
 
-// Share
+// ── Share ──────────────────────────────────────────────────────
 function sharePost(){
     var url = window.location.href;
     var shareText = document.getElementById('share-text');
@@ -361,13 +452,13 @@ function sharePost(){
     }
 }
 
-// Submit comment
+// ── Submit comment ─────────────────────────────────────────────
 function submitComment(){
     var input = document.getElementById('comment-input');
-    var btn = document.getElementById('comment-submit');
+    var btn   = document.getElementById('comment-submit');
     if(!input) return;
     var text = input.value.trim();
-    if(!text) return;
+    if(!text){ showToast('Izoh matni bo\'sh bo\'lishi mumkin emas.'); return; }
     btn.disabled = true;
 
     var form = new FormData();
@@ -375,9 +466,13 @@ function submitComment(){
     form.append('csrfmiddlewaretoken', getCookie('csrftoken'));
 
     fetch("{% url 'blog_add_comment' post.slug %}", { method:'POST', body: form })
-    .then(function(r){ return r.json(); })
+    .then(function(r){
+        if(!r.ok) throw new Error(r.status);
+        return r.json();
+    })
     .then(function(d){
-        if(d.error){ btn.disabled=false; return; }
+        if(d.error){ btn.disabled=false; showToast('Xatolik: ' + d.error); return; }
+
         var noComments = document.getElementById('no-comments');
         if(noComments) noComments.remove();
 
@@ -386,49 +481,73 @@ function submitComment(){
         item.className = 'flex gap-3';
         item.id = 'comment-' + d.id;
 
-        var initial = d.initial || '?';
+        var initial    = escHtml(d.initial || '?');
         var safeAuthor = escHtml(d.author);
         var safeContent = escHtml(d.content);
-        var safeDate = escHtml(d.created_at);
+        var safeDate   = escHtml(d.created_at);
 
-        item.innerHTML = '<div class="w-9 h-9 gradient-bg rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-white text-sm font-bold">' + initial + '</span></div>' +
+        item.innerHTML =
+            '<div class="w-9 h-9 gradient-bg rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">' +
+                '<span class="text-white text-sm font-bold">' + initial + '</span></div>' +
             '<div class="flex-1 bg-gray-50 rounded-xl p-4">' +
-            '<div class="flex items-start justify-between gap-2 mb-1.5">' +
-            '<div><span class="text-sm font-semibold text-gray-800">' + safeAuthor + '</span>' +
-            '<span class="text-xs text-gray-400 ml-2">' + safeDate + '</span></div>' +
-            '<button onclick="deleteComment(' + d.id + ')" class="text-xs text-gray-300 hover:text-rose-500 transition">{{ T.blog_delete_comment }}</button>' +
-            '</div><p class="text-sm text-gray-700 leading-relaxed">' + safeContent + '</p></div>';
+                '<div class="flex items-start justify-between gap-2 mb-1.5">' +
+                    '<div><span class="text-sm font-semibold text-gray-800">' + safeAuthor + '</span>' +
+                    '<span class="text-xs text-gray-400 ml-2">' + safeDate + '</span></div>' +
+                    '<button onclick="deleteComment(' + d.id + ')" class="text-xs text-gray-300 hover:text-rose-500 transition">' +
+                    '{{ T.blog_delete_comment }}</button>' +
+                '</div>' +
+                '<p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">' + safeContent + '</p>' +
+            '</div>';
 
         list.appendChild(item);
         input.value = '';
-        document.getElementById('comment-chars').textContent = '0/1000';
+        var chars = document.getElementById('comment-chars');
+        if(chars) chars.textContent = '0/1000';
         btn.disabled = false;
 
-        // update count
         var cnt = document.getElementById('comments-count');
-        if(cnt) cnt.textContent = parseInt(cnt.textContent||0)+1;
+        if(cnt) cnt.textContent = parseInt(cnt.textContent || 0) + 1;
+
+        // scroll to new comment
+        item.scrollIntoView({behavior:'smooth', block:'nearest'});
     })
-    .catch(function(){ btn.disabled=false; });
+    .catch(function(e){
+        btn.disabled = false;
+        showToast('Izoh saqlanmadi. Tizimga kirganingizni tekshiring.');
+    });
 }
 
-// Delete comment
+// ── Delete comment ─────────────────────────────────────────────
 function deleteComment(pk){
     if(!confirm('{{ T.blog_delete_comment }}?')) return;
     var form = new FormData();
     form.append('csrfmiddlewaretoken', getCookie('csrftoken'));
     fetch('/blog/comment/' + pk + '/delete/', { method:'POST', body: form })
-    .then(function(r){ return r.json(); })
+    .then(function(r){
+        if(!r.ok) throw new Error(r.status);
+        return r.json();
+    })
     .then(function(d){
         if(d.deleted){
             var el = document.getElementById('comment-' + pk);
-            if(el){ el.style.opacity='0'; el.style.height='0'; el.style.overflow='hidden'; el.style.transition='all 0.3s'; setTimeout(function(){ el.remove(); }, 300); }
+            if(el){
+                el.style.transition = 'opacity 0.3s, max-height 0.3s';
+                el.style.opacity = '0';
+                el.style.overflow = 'hidden';
+                el.style.maxHeight = el.offsetHeight + 'px';
+                setTimeout(function(){ el.style.maxHeight = '0'; }, 10);
+                setTimeout(function(){ el.remove(); }, 320);
+            }
             var cnt = document.getElementById('comments-count');
-            if(cnt) cnt.textContent = Math.max(0, parseInt(cnt.textContent||0)-1);
+            if(cnt) cnt.textContent = Math.max(0, parseInt(cnt.textContent || 0) - 1);
         }
+    })
+    .catch(function(){
+        showToast('Xatolik yuz berdi.');
     });
 }
 
-// Char counter
+// ── Char counter ───────────────────────────────────────────────
 var cinput = document.getElementById('comment-input');
 if(cinput){
     cinput.addEventListener('input', function(){
@@ -437,13 +556,14 @@ if(cinput){
     });
 }
 
-// XSS-safe html escape
+// ── XSS-safe html escape ───────────────────────────────────────
 function escHtml(s){
     var d = document.createElement('div');
-    d.textContent = String(s||'');
+    d.textContent = String(s || '');
     return d.innerHTML;
 }
 
+// ── CSRF cookie helper ─────────────────────────────────────────
 function getCookie(name){
     var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
     return v ? v[2] : null;
