@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block no_dark_override %}<script>document.documentElement.classList.remove('dark');</script>{% endblock %}
 {% block title %}{{ T.login }} — StandartBridge{% endblock %}
 
 {% block content %}
