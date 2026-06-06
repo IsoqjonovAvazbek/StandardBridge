@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Allow: /blog/
+Disallow: /admin/
+Disallow: /admin-panel/
+Disallow: /analysis/
+Disallow: /experts/dashboard/
+Disallow: /experts/project/
+Disallow: /qms/
+Disallow: /expert-tools/
+Disallow: /accounts/api/
+Disallow: /media/
+
+Sitemap: https://standardbridge.up.railway.app/sitemap.xml

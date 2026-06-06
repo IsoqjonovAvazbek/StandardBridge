@@ -5,6 +5,30 @@
 {% block og_title %}{{ post.title }}{% endblock %}
 {% block og_description %}{% if post.excerpt %}{{ post.excerpt }}{% else %}{{ post.content|striptags|truncatechars:200 }}{% endif %}{% endblock %}
 
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ post.title|escapejs }}",
+  "description": "{% if post.excerpt %}{{ post.excerpt|escapejs }}{% else %}{{ post.content|striptags|truncatechars:160|escapejs }}{% endif %}",
+  "datePublished": "{{ post.created_at|date:'c' }}",
+  "dateModified": "{{ post.updated_at|date:'c' }}",
+  "author": {
+    "@type": "Person",
+    "name": "{% if post.author %}{{ post.author.get_full_name|escapejs }}{% else %}StandartBridge{% endif %}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "StandartBridge",
+    "url": "https://standardbridge.up.railway.app"
+  },
+  "url": "{{ request.build_absolute_uri|escapejs }}",
+  "inLanguage": "{{ post.language }}"
+}
+</script>
+{% endblock %}
+
 {% block content %}
 
 <!-- Reading progress bar -->

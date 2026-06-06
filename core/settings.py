@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     *(['cloudinary_storage', 'cloudinary'] if _CLOUDINARY_CLOUD_NAME else []),
     'accounts',
     'analysis',

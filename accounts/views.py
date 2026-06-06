@@ -427,14 +427,24 @@ def admin_panel(request):
 
 @login_required
 def referral_view(request):
+    from django.db.models import Sum
     user = request.user
     referrals = CustomUser.objects.filter(referred_by=user).order_by('-created_at')
     referral_link = request.build_absolute_uri(f'/register/?ref={user.referral_code}')
+    total_bonus = 0
+    try:
+        total_bonus = user.wallet.transactions.filter(
+            transaction_type='income',
+            description__startswith='Referral bonus'
+        ).aggregate(total=Sum('amount'))['total'] or 0
+    except Exception:
+        pass
     return render(request, 'accounts/referral.html', {
         'referral_code': user.referral_code,
         'referral_link': referral_link,
         'referrals': referrals,
         'total_referrals': referrals.count(),
+        'total_bonus': total_bonus,
     })
 
 

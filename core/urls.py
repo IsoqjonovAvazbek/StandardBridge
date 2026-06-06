@@ -4,7 +4,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse, FileResponse, Http404
 from django.contrib.auth.decorators import login_required
+from django.contrib.sitemaps.views import sitemap
+from django.views.generic import TemplateView
+from blog.sitemaps import BlogPostSitemap, StaticSitemap
 import os
+
+_sitemaps = {
+    'blog': BlogPostSitemap,
+    'static': StaticSitemap,
+}
 
 
 def health_check(request):
@@ -27,6 +35,8 @@ def protected_media(request, path):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('health/', health_check, name='health_check'),
+    path('sitemap.xml', sitemap, {'sitemaps': _sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
     path('', include('accounts.urls')),
     path('analysis/', include('analysis.urls')),
     path('experts/', include('experts.urls')),
