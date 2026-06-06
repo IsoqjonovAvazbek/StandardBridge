@@ -66,6 +66,7 @@
             if(localStorage.getItem('sb-dark')==='1') document.documentElement.classList.add('dark');
         })();
     </script>
+    {% block no_dark_override %}{% endblock %}
 </head>
 <body class="bg-gray-50">
 
