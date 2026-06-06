@@ -1,76 +1,452 @@
 {% extends 'base.html' %}
 {% block title %}{{ post.title }} — StandartBridge{% endblock %}
-{% block meta_description %}{{ post.content|striptags|truncatechars:160 }}{% endblock %}
+{% block meta_description %}{% if post.excerpt %}{{ post.excerpt }}{% else %}{{ post.content|striptags|truncatechars:160 }}{% endif %}{% endblock %}
 {% block og_title %}{{ post.title }}{% endblock %}
-{% block og_description %}{{ post.content|striptags|truncatechars:200 }}{% endblock %}
+{% block og_description %}{% if post.excerpt %}{{ post.excerpt }}{% else %}{{ post.content|striptags|truncatechars:200 }}{% endif %}{% endblock %}
 
 {% block content %}
-<div class="p-6 max-w-4xl mx-auto">
 
-    <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 text-sm text-gray-400 mb-6">
-        <a href="{% url 'blog_list' %}" class="hover:text-blue-600 transition">{{ T.back_to_blog }}</a>
-        {% if post.category %}
-        <span>/</span>
-        <a href="{% url 'blog_list' %}?category={{ post.category.slug }}" class="hover:text-blue-600 transition">{{ post.category.name }}</a>
-        {% endif %}
-        <span>/</span>
-        <span class="text-gray-600 truncate">{{ post.title|truncatechars:40 }}</span>
-    </div>
+<!-- Reading progress bar -->
+<div id="reading-progress" class="fixed top-0 left-0 h-1 gradient-bg z-50 transition-all duration-100" style="width:0%"></div>
 
-    <article class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+<div class="min-h-screen bg-gray-50">
+
+    <!-- Hero / Cover -->
+    <div class="relative {% if post.cover_image %}h-72 md:h-[420px]{% else %}h-40 md:h-56{% endif %} bg-gray-900 overflow-hidden">
         {% if post.cover_image %}
-        <img src="{{ post.cover_image }}" alt="{{ post.title }}" class="w-full h-64 object-cover">
+        <img src="{{ post.cover_image }}" alt="{{ post.title }}"
+            class="absolute inset-0 w-full h-full object-cover opacity-60">
+        {% else %}
+        <div class="absolute inset-0 gradient-bg opacity-90"></div>
         {% endif %}
+        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent"></div>
 
-        <div class="p-8">
+        <div class="absolute bottom-0 left-0 right-0 max-w-4xl mx-auto px-4 sm:px-6 pb-8">
+            <!-- Breadcrumb -->
+            <div class="flex items-center gap-2 text-xs text-white/50 mb-4">
+                <a href="{% url 'blog_list' %}" class="hover:text-white/80 transition">{{ T.blog }}</a>
+                {% if post.category %}
+                <span>/</span>
+                <a href="{% url 'blog_list' %}?category={{ post.category.slug }}" class="hover:text-white/80 transition">{{ post.category.name }}</a>
+                {% endif %}
+            </div>
+
             {% if post.category %}
-            <span class="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">{{ post.category.name }}</span>
+            <span class="inline-flex items-center text-xs font-semibold text-blue-300 bg-blue-500/20 border border-blue-400/30 px-3 py-1 rounded-full mb-3">
+                {% if post.category.icon %}{{ post.category.icon }} {% endif %}{{ post.category.name }}
+            </span>
             {% endif %}
 
-            <h1 class="text-3xl font-bold text-gray-900 mt-4 mb-4 leading-tight">{{ post.title }}</h1>
-
-            <div class="flex items-center gap-4 text-sm text-gray-400 mb-8 pb-6 border-b border-gray-100">
-                {% if post.author %}
-                <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 gradient-bg rounded-full flex items-center justify-center">
-                        <span class="text-white text-xs font-bold">{{ post.author.first_name|first }}</span>
-                    </div>
-                    <span>{{ post.author.get_full_name }}</span>
-                </div>
-                {% endif %}
-                <span>{{ post.created_at|date:"d F Y" }}</span>
-                <span>{{ post.read_time }} {{ T.min_read }}</span>
-                <span>{{ post.views_count }} {{ T.views_word }}</span>
-            </div>
-
-            <!-- Kontent -->
-            <div class="prose max-w-none text-gray-700 leading-relaxed space-y-4">
-                {{ post.content|linebreaks }}
-            </div>
-        </div>
-    </article>
-
-    <!-- Bog'liq maqolalar -->
-    {% if related %}
-    <div class="mt-10">
-        <h2 class="text-xl font-bold text-gray-900 mb-5">{{ T.blog }}</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {% for r in related %}
-            <a href="{% url 'blog_detail' r.slug %}"
-                class="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition card-hover block">
-                <h3 class="font-semibold text-gray-900 text-sm line-clamp-2 mb-2">{{ r.title }}</h3>
-                <div class="flex items-center gap-2 text-xs text-gray-400">
-                    <span>{{ r.created_at|date:"d.m.Y" }}</span>
-                    <span>·</span>
-                    <span>{{ r.read_time }} {{ T.min_read }}</span>
-                </div>
-                <div class="mt-2 text-blue-600 text-xs font-medium">{{ T.read_more_btn }} →</div>
-            </a>
-            {% endfor %}
+            <h1 class="text-2xl md:text-4xl font-bold text-white leading-tight">{{ post.title }}</h1>
         </div>
     </div>
-    {% endif %}
 
+    <!-- Main layout -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+
+            <!-- Article column -->
+            <div class="flex-1 min-w-0">
+
+                <!-- Meta bar -->
+                <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-6 flex flex-wrap items-center gap-4 shadow-sm">
+                    {% if post.author %}
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 gradient-bg rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-white text-sm font-bold">{{ post.author.first_name|first|upper }}</span>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-400">{{ T.blog_author_label }}</div>
+                            <div class="text-sm font-semibold text-gray-800">{{ post.author.get_full_name }}</div>
+                        </div>
+                    </div>
+                    <div class="w-px h-8 bg-gray-100"></div>
+                    {% endif %}
+                    <div>
+                        <div class="text-xs text-gray-400">{{ T.blog_published }}</div>
+                        <div class="text-sm font-medium text-gray-700">{{ post.created_at|date:"d F Y" }}</div>
+                    </div>
+                    <div class="w-px h-8 bg-gray-100 hidden sm:block"></div>
+                    <div class="flex items-center gap-4 text-sm text-gray-500 ml-auto">
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            {{ post.read_time }} {{ T.min_read }}
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            {{ post.views_count }} {{ T.views_word }}
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                            <span id="likes-count-top">{{ likes_count }}</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Article body -->
+                <article id="article-body" class="bg-white rounded-2xl border border-gray-100 p-6 md:p-10 shadow-sm mb-6">
+                    {% if post.excerpt %}
+                    <p class="text-lg text-gray-600 leading-relaxed border-l-4 border-blue-400 pl-4 mb-8 italic">{{ post.excerpt }}</p>
+                    {% endif %}
+
+                    <div id="article-content" class="prose prose-gray max-w-none
+                        text-gray-700 leading-8 text-[15px]
+                        [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:mt-10 [&_h2]:mb-4 [&_h2]:pb-2 [&_h2]:border-b [&_h2]:border-gray-100
+                        [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-gray-800 [&_h3]:mt-6 [&_h3]:mb-3
+                        [&_p]:mb-5
+                        [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-5 [&_ul_li]:mb-1.5
+                        [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-5 [&_ol_li]:mb-1.5
+                        [&_blockquote]:border-l-4 [&_blockquote]:border-blue-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-6 [&_blockquote]:bg-blue-50 [&_blockquote]:py-3 [&_blockquote]:rounded-r-lg
+                        [&_code]:bg-gray-100 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono [&_code]:text-pink-600
+                        [&_pre]:bg-gray-900 [&_pre]:text-green-300 [&_pre]:p-4 [&_pre]:rounded-xl [&_pre]:overflow-x-auto [&_pre]:text-sm [&_pre]:my-6
+                        [&_a]:text-blue-600 [&_a]:underline [&_a]:decoration-blue-200 [&_a]:underline-offset-2 hover:[&_a]:text-blue-800
+                        [&_img]:rounded-xl [&_img]:shadow-md [&_img]:my-6 [&_img]:max-w-full
+                        [&_table]:w-full [&_table]:border-collapse [&_table]:my-6
+                        [&_th]:bg-gray-50 [&_th]:border [&_th]:border-gray-200 [&_th]:px-4 [&_th]:py-2.5 [&_th]:text-left [&_th]:text-sm [&_th]:font-semibold [&_th]:text-gray-700
+                        [&_td]:border [&_td]:border-gray-200 [&_td]:px-4 [&_td]:py-2 [&_td]:text-sm [&_td]:text-gray-600
+                        [&_hr]:my-8 [&_hr]:border-gray-100">
+                        {{ post.content|linebreaks }}
+                    </div>
+                </article>
+
+                <!-- Action bar: Like + Share -->
+                <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-6 flex items-center gap-4 shadow-sm flex-wrap">
+                    <!-- Like button -->
+                    {% if user.is_authenticated %}
+                    <button id="like-btn" onclick="toggleLike()"
+                        class="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all {% if user_liked %}border-rose-400 bg-rose-50 text-rose-600{% else %}border-gray-200 bg-white text-gray-600 hover:border-rose-300 hover:text-rose-500{% endif %}">
+                        <svg id="like-icon" class="w-4 h-4 transition-transform" fill="{% if user_liked %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                        <span id="like-text">{% if user_liked %}{{ T.blog_liked_btn }}{% else %}{{ T.blog_like_btn }}{% endif %}</span>
+                        <span id="like-count" class="bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full font-bold ml-1">{{ likes_count }}</span>
+                    </button>
+                    {% else %}
+                    <a href="{% url 'login' %}?next={{ request.path }}"
+                        class="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-gray-200 text-sm font-semibold text-gray-500 hover:border-rose-300 hover:text-rose-500 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                        {{ T.blog_like_btn }} · {{ likes_count }}
+                    </a>
+                    {% endif %}
+
+                    <!-- Share button -->
+                    <button onclick="sharePost()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-gray-200 text-sm font-semibold text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                        <span id="share-text">{{ T.blog_share_btn }}</span>
+                    </button>
+
+                    <a href="{% url 'blog_list' %}" class="ml-auto text-sm text-gray-400 hover:text-blue-600 transition flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        {{ T.back_to_blog }}
+                    </a>
+                </div>
+
+                <!-- Comments -->
+                <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 shadow-sm">
+                    <h2 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                        {{ T.blog_comments_label }}
+                        <span class="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full" id="comments-count">{{ comments|length }}</span>
+                    </h2>
+
+                    <!-- Add comment -->
+                    {% if user.is_authenticated %}
+                    <div class="mb-8 flex gap-3">
+                        <div class="w-9 h-9 gradient-bg rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span class="text-white text-sm font-bold">{{ user.first_name|first|upper }}</span>
+                        </div>
+                        <div class="flex-1">
+                            <textarea id="comment-input" rows="3"
+                                placeholder="{{ T.blog_comment_ph }}"
+                                maxlength="1000"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition"></textarea>
+                            <div class="flex items-center justify-between mt-2">
+                                <span class="text-xs text-gray-400" id="comment-chars">0/1000</span>
+                                <button onclick="submitComment()" id="comment-submit"
+                                    class="gradient-bg text-white px-5 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                    {{ T.blog_comment_btn }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="mb-8 bg-gray-50 border border-gray-100 rounded-xl p-5 text-center">
+                        <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        <p class="text-sm text-gray-500">
+                            {{ T.blog_login_to_comment }}
+                            <a href="{% url 'login' %}?next={{ request.path }}" class="text-blue-600 font-semibold hover:underline">{{ T.blog_login_link }}</a>
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Comments list -->
+                    <div id="comments-list" class="space-y-5">
+                        {% if comments %}
+                        {% for comment in comments %}
+                        <div class="flex gap-3" id="comment-{{ comment.pk }}">
+                            <div class="w-9 h-9 gradient-bg rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-white text-sm font-bold">{{ comment.author.first_name|first|upper }}</span>
+                            </div>
+                            <div class="flex-1 bg-gray-50 rounded-xl p-4">
+                                <div class="flex items-start justify-between gap-2 mb-1.5">
+                                    <div>
+                                        <span class="text-sm font-semibold text-gray-800">{{ comment.author.get_full_name|default:comment.author.username }}</span>
+                                        <span class="text-xs text-gray-400 ml-2">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+                                    </div>
+                                    {% if user == comment.author or user.is_staff %}
+                                    <button onclick="deleteComment({{ comment.pk }})" class="text-xs text-gray-300 hover:text-rose-500 transition flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        {{ T.blog_delete_comment }}
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{{ comment.content }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div id="no-comments" class="text-center py-10 text-gray-400">
+                            <svg class="w-10 h-10 mx-auto mb-2 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                            <p class="text-sm">{{ T.blog_no_comments }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div><!-- /article col -->
+
+            <!-- Sidebar -->
+            <div class="lg:w-72 flex-shrink-0 space-y-6">
+
+                <!-- Table of Contents -->
+                <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm sticky top-24" id="toc-card">
+                    <h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10M4 18h6"/></svg>
+                        {{ T.blog_toc_title }}
+                    </h3>
+                    <nav id="toc-nav" class="text-sm space-y-1.5 text-gray-500">
+                        <p class="text-gray-300 text-xs">...</p>
+                    </nav>
+                </div>
+
+                <!-- Related posts -->
+                {% if related %}
+                <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                    <h3 class="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        {{ T.blog_related_title }}
+                    </h3>
+                    <div class="space-y-4">
+                        {% for r in related %}
+                        <a href="{% url 'blog_detail' r.slug %}" class="group flex gap-3 items-start">
+                            {% if r.cover_image %}
+                            <img src="{{ r.cover_image }}" alt="{{ r.title }}" class="w-14 h-14 rounded-xl object-cover flex-shrink-0">
+                            {% else %}
+                            <div class="w-14 h-14 gradient-bg rounded-xl flex-shrink-0 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition leading-snug">{{ r.title }}</h4>
+                                <p class="text-xs text-gray-400 mt-1">{{ r.created_at|date:"d.m.Y" }} · {{ r.read_time }} {{ T.min_read }}</p>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div><!-- /sidebar -->
+        </div>
+    </div>
 </div>
+
+<!-- Scripts -->
+<script>
+// Reading progress bar
+(function(){
+    var bar = document.getElementById('reading-progress');
+    var body = document.documentElement;
+    window.addEventListener('scroll', function(){
+        var pct = (body.scrollTop / (body.scrollHeight - body.clientHeight)) * 100;
+        if(bar) bar.style.width = Math.min(pct, 100) + '%';
+    });
+})();
+
+// Auto-generate Table of Contents
+(function(){
+    var content = document.getElementById('article-content');
+    var nav = document.getElementById('toc-nav');
+    var card = document.getElementById('toc-card');
+    if(!content || !nav) return;
+    var headings = content.querySelectorAll('h2, h3');
+    if(headings.length < 2){ card.style.display='none'; return; }
+    nav.innerHTML = '';
+    headings.forEach(function(h, i){
+        var id = 'heading-' + i;
+        h.id = id;
+        var a = document.createElement('a');
+        a.href = '#' + id;
+        a.textContent = h.textContent;
+        a.className = 'block py-1 px-2 rounded-lg transition-all hover:bg-blue-50 hover:text-blue-600 ' +
+            (h.tagName === 'H3' ? 'pl-5 text-xs text-gray-400' : 'text-sm font-medium text-gray-600');
+        nav.appendChild(a);
+    });
+
+    // Highlight active heading on scroll
+    window.addEventListener('scroll', function(){
+        var scrollY = window.scrollY + 120;
+        var active = null;
+        headings.forEach(function(h){
+            if(h.offsetTop <= scrollY) active = h.id;
+        });
+        nav.querySelectorAll('a').forEach(function(a){
+            a.classList.toggle('bg-blue-50', a.hash === '#'+active);
+            a.classList.toggle('text-blue-600', a.hash === '#'+active);
+        });
+    });
+})();
+
+// Like toggle
+function toggleLike(){
+    var btn = document.getElementById('like-btn');
+    if(!btn) return;
+    btn.disabled = true;
+    fetch("{% url 'blog_toggle_like' post.slug %}", {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json'}
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        var liked = d.liked;
+        var count = d.count;
+        var icon = document.getElementById('like-icon');
+        var text = document.getElementById('like-text');
+        var countEl = document.getElementById('like-count');
+        var topCount = document.getElementById('likes-count-top');
+
+        if(liked){
+            btn.classList.remove('border-gray-200','text-gray-600','hover:border-rose-300','hover:text-rose-500');
+            btn.classList.add('border-rose-400','bg-rose-50','text-rose-600');
+            icon.setAttribute('fill','currentColor');
+            if(text) text.textContent = "{{ T.blog_liked_btn }}";
+        } else {
+            btn.classList.add('border-gray-200','text-gray-600','hover:border-rose-300','hover:text-rose-500');
+            btn.classList.remove('border-rose-400','bg-rose-50','text-rose-600');
+            icon.setAttribute('fill','none');
+            if(text) text.textContent = "{{ T.blog_like_btn }}";
+        }
+        if(countEl) countEl.textContent = count;
+        if(topCount) topCount.textContent = count;
+
+        // heart animation
+        icon.style.transform = 'scale(1.4)';
+        setTimeout(function(){ icon.style.transform = 'scale(1)'; }, 200);
+        btn.disabled = false;
+    })
+    .catch(function(){ btn.disabled = false; });
+}
+
+// Share
+function sharePost(){
+    var url = window.location.href;
+    var shareText = document.getElementById('share-text');
+    if(navigator.clipboard){
+        navigator.clipboard.writeText(url).then(function(){
+            if(shareText) shareText.textContent = "{{ T.blog_share_copied }}";
+            setTimeout(function(){ if(shareText) shareText.textContent = "{{ T.blog_share_btn }}"; }, 2500);
+        });
+    }
+}
+
+// Submit comment
+function submitComment(){
+    var input = document.getElementById('comment-input');
+    var btn = document.getElementById('comment-submit');
+    if(!input) return;
+    var text = input.value.trim();
+    if(!text) return;
+    btn.disabled = true;
+
+    var form = new FormData();
+    form.append('content', text);
+    form.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+    fetch("{% url 'blog_add_comment' post.slug %}", { method:'POST', body: form })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if(d.error){ btn.disabled=false; return; }
+        var noComments = document.getElementById('no-comments');
+        if(noComments) noComments.remove();
+
+        var list = document.getElementById('comments-list');
+        var item = document.createElement('div');
+        item.className = 'flex gap-3';
+        item.id = 'comment-' + d.id;
+
+        var initial = d.initial || '?';
+        var safeAuthor = escHtml(d.author);
+        var safeContent = escHtml(d.content);
+        var safeDate = escHtml(d.created_at);
+
+        item.innerHTML = '<div class="w-9 h-9 gradient-bg rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-white text-sm font-bold">' + initial + '</span></div>' +
+            '<div class="flex-1 bg-gray-50 rounded-xl p-4">' +
+            '<div class="flex items-start justify-between gap-2 mb-1.5">' +
+            '<div><span class="text-sm font-semibold text-gray-800">' + safeAuthor + '</span>' +
+            '<span class="text-xs text-gray-400 ml-2">' + safeDate + '</span></div>' +
+            '<button onclick="deleteComment(' + d.id + ')" class="text-xs text-gray-300 hover:text-rose-500 transition">{{ T.blog_delete_comment }}</button>' +
+            '</div><p class="text-sm text-gray-700 leading-relaxed">' + safeContent + '</p></div>';
+
+        list.appendChild(item);
+        input.value = '';
+        document.getElementById('comment-chars').textContent = '0/1000';
+        btn.disabled = false;
+
+        // update count
+        var cnt = document.getElementById('comments-count');
+        if(cnt) cnt.textContent = parseInt(cnt.textContent||0)+1;
+    })
+    .catch(function(){ btn.disabled=false; });
+}
+
+// Delete comment
+function deleteComment(pk){
+    if(!confirm('{{ T.blog_delete_comment }}?')) return;
+    var form = new FormData();
+    form.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+    fetch('/blog/comment/' + pk + '/delete/', { method:'POST', body: form })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if(d.deleted){
+            var el = document.getElementById('comment-' + pk);
+            if(el){ el.style.opacity='0'; el.style.height='0'; el.style.overflow='hidden'; el.style.transition='all 0.3s'; setTimeout(function(){ el.remove(); }, 300); }
+            var cnt = document.getElementById('comments-count');
+            if(cnt) cnt.textContent = Math.max(0, parseInt(cnt.textContent||0)-1);
+        }
+    });
+}
+
+// Char counter
+var cinput = document.getElementById('comment-input');
+if(cinput){
+    cinput.addEventListener('input', function(){
+        var chars = document.getElementById('comment-chars');
+        if(chars) chars.textContent = cinput.value.length + '/1000';
+    });
+}
+
+// XSS-safe html escape
+function escHtml(s){
+    var d = document.createElement('div');
+    d.textContent = String(s||'');
+    return d.innerHTML;
+}
+
+function getCookie(name){
+    var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return v ? v[2] : null;
+}
+</script>
+
 {% endblock %}

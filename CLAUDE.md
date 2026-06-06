@@ -13,7 +13,7 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - `accounts` — foydalanuvchilar, rollar, admin panel, referral, til o'zgartirish
 - `analysis` — gap analysis, AI, roadmap, sanoat/standartlar
 - `experts` — loyihalar, to'lovlar, hamyon, reytinglar, bildirishnomalar
-- `blog` — maqolalar (Category + BlogPost)
+- `blog` — maqolalar (Category + BlogPost + BlogComment + BlogLike)
 - `qms` — QMS Tool: checklist, hujjatlar, nomuvofiqliklar, audit jadvali
 - `expert_tools` — Expert Tools: AI hujjat generatori, audit checklist, loyiha shablonlari, CRM
 
@@ -26,7 +26,9 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - `Roadmap` + `RoadmapStep`: is_completed toggle (AJAX)
 - `Project`: entrepreneur, expert, status (pending→negotiating→in_progress→review→completed), sla_hours/sla_deadline/sla_status
 - `Payment`: escrow (held→released), 20% platform fee, 80% expert
-- `BlogPost`: slug, content, is_published, views_count
+- `BlogPost`: slug, content, is_published, is_featured, views_count
+- `BlogComment`: post, author, content, is_approved
+- `BlogLike`: post, user (unique_together)
 - `Notification`: user, is_read (badge in sidebar)
 
 ## Key URLs
@@ -234,6 +236,19 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] Auditor mobile checklist tool — /audit/<pk>/mobile/ (kartadan karta, AJAX auto-save, real-time foiz)
 - [ ] Payme integratsiya (Click bor, Payme yo'q)
 - [x] Ko'p tillar uchun email shablonlar — CustomUser.preferred_language + 10 funksiya UZ/RU/EN
+
+### Blog to'liq qayta ishlandi (2026-06-06)
+- [x] BlogComment model (post, author, content, is_approved) + migration 0002
+- [x] BlogLike model (post, user, unique_together) — toggle like/unlike
+- [x] BlogPost.is_featured field — featured hero post
+- [x] Category.icon field — emoji icon
+- [x] blog/views.py: toggle_like, add_comment, delete_comment (AJAX JSON), post_list featured logic, related posts fallback
+- [x] blog/urls.py: 3 yangi endpoint (like, comment, delete_comment)
+- [x] blog/admin.py: BlogComment (moderation), BlogLike, is_featured/icon fields
+- [x] post_list.html: magazine-style layout (hero featured card, grid, kategori count, search result count, paginatsiya)
+- [x] post_detail.html: reading progress bar, auto-generated TOC (JS), like button (AJAX heart animation), share (copy link), comments section (AJAX submit/delete, char counter), related posts sidebar
+- [x] 28 yangi blog_* tarjima kaliti (UZ/RU/EN): blog_all_cat, blog_featured_label, blog_search_results, blog_no_results, blog_likes_word, blog_comments_label, blog_add_comment, blog_comment_ph, blog_comment_btn, blog_login_to_comment, blog_login_link, blog_no_comments, blog_delete_comment, blog_share_btn, blog_share_copied, blog_toc_title, blog_related_title, blog_prev_page, blog_next_page, blog_author_label, blog_published, blog_like_btn, blog_liked_btn
+- [x] 14 ta test yozildi — hammasi OK (74/74 jami)
 
 ### Oxirgi sessiyada bajarilganlar (2026-06-05)
 - [x] To'lov tugmasi bug: payment_page har doim Payment yaratadi (CLICK_SERVICE_ID bo'lsa ham bo'lmasa ham)
