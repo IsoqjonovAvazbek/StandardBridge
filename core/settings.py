@@ -37,6 +37,8 @@ if not DEBUG:
     # Railway/Render kabi reverse-proxy orqali kelgan HTTPS ni Django tan olishi uchun
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+_CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME', '')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,8 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cloudinary_storage',
-    'cloudinary',
+    *(['cloudinary_storage', 'cloudinary'] if _CLOUDINARY_CLOUD_NAME else []),
     'accounts',
     'analysis',
     'experts',
@@ -123,19 +124,18 @@ STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').exists() else 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Cloudinary — production'da media fayllarni doimiy saqlash uchun
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', ''),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
-}
-
-_cloudinary_configured = bool(os.environ.get('CLOUDINARY_CLOUD_NAME'))
+if _CLOUDINARY_CLOUD_NAME:
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': _CLOUDINARY_CLOUD_NAME,
+        'API_KEY': os.environ.get('CLOUDINARY_API_KEY', ''),
+        'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
+    }
 
 # WhiteNoise — production'da statik fayllarni samarali uzatadi (siqilgan + keshlangan)
 STORAGES = {
     'default': (
         {'BACKEND': 'cloudinary_storage.storage.RawMediaCloudinaryStorage'}
-        if _cloudinary_configured else
+        if _CLOUDINARY_CLOUD_NAME else
         {'BACKEND': 'django.core.files.storage.FileSystemStorage'}
     ),
     'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
