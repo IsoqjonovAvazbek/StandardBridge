@@ -837,7 +837,6 @@ def verify_email(request, token):
     return redirect('landing')
 
 
-@require_POST
 @login_required
 @require_POST
 def api_chatbot(request):
@@ -850,22 +849,81 @@ def api_chatbot(request):
         logger.warning('api_chatbot: GROQ_API_KEY sozlanmagan')
         return JsonResponse({'reply': "AI yordamchi hozir mavjud emas. Admin bilan bog'laning."})
 
+    u = request.user
+    role = getattr(u, 'role', 'entrepreneur')
+    full_name = u.get_full_name() or u.username
+
+    if role == 'expert':
+        user_ctx = (
+            f"Foydalanuvchi: {full_name} — MUTAXASSIS. "
+            "U platformada loyihalar qabul qiladi, taklif yuboradi, shartnoma imzolaydi va escrow orqali to'lov oladi."
+        )
+    elif role == 'admin':
+        user_ctx = f"Foydalanuvchi: {full_name} — ADMIN."
+    else:
+        user_ctx = (
+            f"Foydalanuvchi: {full_name} — TADBIRKOR. "
+            "U sertifikatlashtirish uchun gap-analiz o'tkazadi, mutaxassis izlaydi va loyiha boshqaradi."
+        )
+
+    system_prompt = f"""Sen StandartBridge platformasining rasmiy AI yordamchisisisan.
+Faqat platforma va sertifikatlashtirish mavzularida yordam ber.
+
+{user_ctx}
+
+=== STANDARTBRIDGE ===
+O'zbekistonda ISO, CE, EN sertifikatsiyasiga yordam beruvchi B2B platforma (standartbridge.uz).
+
+=== XIZMATLAR ===
+1. AI GAP-ANALIZ (bepul, 30-90 soniyada):
+   Korxonaning standartga tayyorligini aniqlaydi, bo'shliqlar va yo'l xaritasi beradi.
+   Dashboard → "Gap tahlil boshlash" → sohani va standartni tanlash → savollarga javob.
+
+2. MUTAXASSISLAR BOZORI:
+   Tekshirilgan sertifikatlashtirish mutaxassislari. Tadbirkor loyiha yaratadi, mutaxassislar taklif yuboradi.
+   Narx bo'yicha savdo (counter-offer) maksimum 3 marta mumkin.
+
+3. ESCROW TO'LOV (Click.uz):
+   Pul "ushlab turiladi" → ish tugagach tadbirkor tasdiqlaydi → mutaxassisga o'tkaziladi.
+   Platforma komissiyasi 20%, mutaxassisga 80%.
+
+4. QMS HUJJATLAR:
+   AI yordamida ISO 9001 bo'yicha sifat menejment hujjatlar avtomatik yaratiladi.
+
+5. AUDIT VOSITALARI (mutaxassislar uchun):
+   Audit checklisti, hisobotlar, gap-analizdan avtomatik audit yaratish.
+
+=== STANDARTLAR ===
+ISO 9001 (sifat), ISO 14001 (atrof-muhit), ISO 22000 (oziq-ovqat), ISO 45001 (mehnat xavfsizligi), CE marking, EN standartlari.
+
+=== TADBIRKOR: QODAM-QADAM ===
+1. Gap tahlil → natijani ko'r → bo'shliqlarni tushun
+2. Loyiha yarat → mutaxassis taklifini kut → tanlash
+3. Shartnoma + Click.uz to'lov → ish jarayonini kuz → tasdiqlash
+
+=== MUTAXASSIS: QODAM-QADAM ===
+1. Profil to'ldir → admin tasdiqlashini kut
+2. Loyihaga taklif yubor → shartnoma → ishni boshlash
+3. Bosqichlarni belgilashtir → "Bajarildi" → escrow to'lov
+
+=== QOIDALAR ===
+- Faqat platforma va sertifikatlashtirish mavzularida javob ber.
+- Boshqa mavzularda: "Bu savolga javob bera olmayman, faqat sertifikatlashtirish va platforma bo'yicha yordam bera olaman" de.
+- Savol tilida javob ber (o'zbek/rus/ingliz).
+- Qisqa va amaliy javob ber (3-5 gap yetarli).
+- Noaniq bo'lsa: "Qo'shimcha ma'lumot uchun support@standartbridge.uz ga murojaat qiling" de."""
+
     try:
         from groq import Groq
-        client = Groq(api_key=groq_key, timeout=20, max_retries=1)
+        client = Groq(api_key=groq_key, timeout=25, max_retries=1)
         resp = client.chat.completions.create(
             model='llama-3.3-70b-versatile',
             messages=[
-                {'role': 'system', 'content': (
-                    "Sen StandartBridge platformasining AI yordamchisisisan. "
-                    "Platforma O'zbekistonda ISO 9001, ISO 14001, ISO 22000, ISO 45001, CE sertifikatsiyasiga "
-                    "yordam beradi: AI gap-analiz (30-60 soniyada), tasdiqlangan mutaxassislar bozori, escrow to'lov. "
-                    "Foydalanuvchiga qisqa, aniq va foydali javob ber. "
-                    "Savol o'zbekcha bo'lsa o'zbekcha, ruscha bo'lsa ruscha, inglizcha bo'lsa inglizcha javob ber."
-                )},
+                {'role': 'system', 'content': system_prompt},
                 {'role': 'user', 'content': message},
             ],
-            max_tokens=400,
+            max_tokens=500,
+            temperature=0.4,
         )
         reply = resp.choices[0].message.content.strip()
         return JsonResponse({'reply': reply})
