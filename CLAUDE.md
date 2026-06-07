@@ -237,7 +237,18 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [ ] Payme integratsiya (Click bor, Payme yo'q)
 - [x] Ko'p tillar uchun email shablonlar — CustomUser.preferred_language + 10 funksiya UZ/RU/EN
 
-### Keng ko'lamli yaxshilanishlar (2026-06-07)
+### Keng ko'lamli yaxshilanishlar — 2-bosqich (2026-06-07, commit 2d1d77f)
+- [x] C7: Referral sahifasi pagination — Paginator(20/page), prev/next tugmalar, view + template yangilandi
+- [x] D1: Click.uz webhook IP whitelist — `_CLICK_ALLOWED_IPS` set, X-Forwarded-For dan IP olish, log warning
+- [x] D2: QMS update_checklist `item_id` `int()` validatsiya — harfli ID 400 qaytaradi (oldin Django crash edi)
+- [x] E1: SLA countdown timer formati — "Xk Ys" / "Xh YYm" / "Z min", 30s refresh (oldin fragile regex)
+- [x] E3: Admin panel oylik grafiklar — `timezone.localtime()` + o'zbekcha oy nomlari (UTC+5 to'g'ri)
+- [x] E4: Expert earnings chart — `timezone.localtime(p.paid_at)` — oy chegarasi UTC da xato emas
+- [x] F7: `analysis_retake` view + URL — mavjud tahlildan standart/soha pre-fill bilan yangi tahlil boshlash
+- [x] F7: `analysis_detail.html` — completed tahlilda "Yangi tahlil" tugmasi (retake linki)
+- [x] 74/74 test OK
+
+### Keng ko'lamli yaxshilanishlar — 1-bosqich (2026-06-07)
 - [x] N+1 fix: `entrepreneur_dashboard` — `all_projects.select_related('expert', 'analysis__local_standard', 'analysis__target_standard')`
 - [x] Blog `post_detail` double-query fix: `related.exists()` → `list() + if not related`
 - [x] Click webhook replay attack himoyasi: `sign_time` timestamp tekshiruvi (1 soatdan o'tgan so'rovlar rad etiladi), `click_prepare` va `click_complete` da
