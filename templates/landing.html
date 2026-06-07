@@ -5,439 +5,891 @@
 {% block og_title %}StandartBridge — ISO Sertifikatsiya Platformasi O'zbekiston{% endblock %}
 {% block og_description %}AI gap tahlil 30-60 soniyada, 40%+ xarajat tejamiyat, tasdiqlangan mutaxassislar. Bepul boshlang!{% endblock %}
 
-{% block content %}
+{% block extra_head %}
+<style>
+/* ── Reset & base ── */
+#landing-root * { box-sizing: border-box; }
+#landing-root { font-family: 'Inter', sans-serif; color: #0f172a; overflow-x: hidden; }
 
-<!-- Landing navbar -->
-<nav class="fixed top-0 left-0 right-0 z-50 bg-transparent">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                <span class="text-white font-bold text-sm">SB</span>
-            </div>
-            <span class="text-white font-bold text-lg">StandartBridge</span>
-        </div>
-        <div class="flex items-center gap-4">
-            <!-- Til switcher -->
-            <form method="post" action="{% url 'set_language' %}" class="flex items-center gap-1">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                <button type="submit" name="lang" value="uz"
-                    class="text-xs px-2.5 py-1 rounded-md font-medium transition
-                    {% if current_lang == 'uz' %}bg-white text-blue-700{% else %}text-white/70 hover:text-white hover:bg-white/10{% endif %}">UZ</button>
-                <button type="submit" name="lang" value="ru"
-                    class="text-xs px-2.5 py-1 rounded-md font-medium transition
-                    {% if current_lang == 'ru' %}bg-white text-blue-700{% else %}text-white/70 hover:text-white hover:bg-white/10{% endif %}">RU</button>
-                <button type="submit" name="lang" value="en"
-                    class="text-xs px-2.5 py-1 rounded-md font-medium transition
-                    {% if current_lang == 'en' %}bg-white text-blue-700{% else %}text-white/70 hover:text-white hover:bg-white/10{% endif %}">EN</button>
-            </form>
-            <a href="{% url 'login' %}" class="text-white/80 hover:text-white text-sm font-medium transition">
-                {{ T.hero_login }}
-            </a>
-            <a href="{% url 'register' %}" class="bg-white text-blue-700 px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-50 transition">
-                {{ T.register }}
-            </a>
-        </div>
+/* ── Animated mesh background ── */
+.mesh-bg {
+  position: relative;
+  background: #050d1a;
+  overflow: hidden;
+}
+.mesh-bg::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 20%, rgba(37,99,235,.45) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 80%, rgba(6,182,212,.30) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(99,102,241,.15) 0%, transparent 70%);
+  animation: meshMove 12s ease-in-out infinite alternate;
+}
+@keyframes meshMove {
+  0%   { transform: scale(1) rotate(0deg); }
+  50%  { transform: scale(1.08) rotate(1deg); }
+  100% { transform: scale(1.04) rotate(-1deg); }
+}
+
+/* Grid pattern overlay */
+.grid-overlay {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Floating orbs */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  animation: orbFloat 8s ease-in-out infinite;
+  pointer-events: none;
+}
+.orb-1 { width:500px;height:500px;background:rgba(37,99,235,.25);top:-100px;left:-100px;animation-delay:0s; }
+.orb-2 { width:400px;height:400px;background:rgba(6,182,212,.20);bottom:-50px;right:-50px;animation-delay:-3s; }
+.orb-3 { width:300px;height:300px;background:rgba(139,92,246,.18);top:50%;left:55%;animation-delay:-6s; }
+@keyframes orbFloat {
+  0%,100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-40px) scale(1.05); }
+}
+
+/* Particles */
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,.6);
+  animation: particleDrift linear infinite;
+  pointer-events: none;
+}
+@keyframes particleDrift {
+  0%   { transform: translateY(100vh) translateX(0); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: .4; }
+  100% { transform: translateY(-10vh) translateX(var(--drift)); opacity: 0; }
+}
+
+/* Glass card */
+.glass {
+  background: rgba(255,255,255,.07);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 20px;
+}
+.glass-dark {
+  background: rgba(0,0,0,.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+}
+
+/* Gradient text */
+.grad-text {
+  background: linear-gradient(135deg, #60a5fa, #a78bfa, #34d399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Scroll reveal */
+.reveal { opacity: 0; transform: translateY(32px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-left  { opacity: 0; transform: translateX(-40px); transition: opacity .7s ease, transform .7s ease; }
+.reveal-right { opacity: 0; transform: translateX(40px);  transition: opacity .7s ease, transform .7s ease; }
+.reveal-left.visible, .reveal-right.visible { opacity: 1; transform: none; }
+
+/* Glow button */
+.btn-glow {
+  position: relative;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #fff;
+  font-weight: 700;
+  padding: 16px 40px;
+  border-radius: 14px;
+  font-size: 16px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform .2s, box-shadow .2s;
+  box-shadow: 0 8px 32px rgba(37,99,235,.4);
+}
+.btn-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 48px rgba(37,99,235,.55);
+  color: #fff;
+}
+
+/* Feature card */
+.feat-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  border: 1px solid #e2e8f0;
+  transition: transform .3s, box-shadow .3s, border-color .3s;
+}
+.feat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 24px 60px rgba(37,99,235,.12);
+  border-color: #bfdbfe;
+}
+
+/* Step connector */
+.step-line {
+  position: absolute;
+  top: 32px; left: calc(50% + 32px);
+  width: calc(100% - 64px);
+  height: 2px;
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  opacity: .3;
+}
+
+/* Ticker marquee */
+.ticker-wrap { overflow: hidden; white-space: nowrap; }
+.ticker-inner { display: inline-flex; animation: ticker 20s linear infinite; }
+.ticker-inner:hover { animation-play-state: paused; }
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Counter number */
+.counter { font-variant-numeric: tabular-nums; }
+
+/* Gradient section */
+.section-grad {
+  background: linear-gradient(180deg, #f8faff 0%, #eef2ff 100%);
+}
+
+/* Floating badge */
+.float-badge {
+  animation: badgeFloat 4s ease-in-out infinite;
+}
+@keyframes badgeFloat {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+/* Shine effect on cards */
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+.shine::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -75%;
+  width: 50%; height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+  transform: skewX(-20deg);
+  transition: left .6s ease;
+}
+.shine:hover::after { left: 125%; }
+
+/* Pricing popular */
+.pricing-popular {
+  background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+  transform: scale(1.05);
+  box-shadow: 0 32px 80px rgba(37,99,235,.35);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #2563eb; border-radius: 3px; }
+
+/* Mobile tweaks */
+@media (max-width: 768px) {
+  .pricing-popular { transform: scale(1); }
+  .step-line { display: none; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="landing-root">
+
+<!-- ══════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════ -->
+<nav id="land-nav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" style="background:transparent;">
+  <div class="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2.5">
+      <img src="/static/icons/icon-96.png" alt="SB" class="w-8 h-8 rounded-lg">
+      <span class="font-bold text-white text-lg tracking-tight">StandartBridge</span>
+    </a>
+    <div class="flex items-center gap-3">
+      <!-- Lang -->
+      <form method="post" action="{% url 'set_language' %}" class="flex gap-1">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        {% for code, label in langs %}
+        <button type="submit" name="lang" value="{{ code }}"
+          class="text-xs px-2.5 py-1 rounded-md font-semibold transition
+          {% if current_lang == code %}bg-white text-blue-700{% else %}text-white/60 hover:text-white{% endif %}">
+          {{ code|upper }}
+        </button>
+        {% endfor %}
+      </form>
+      <a href="{% url 'login' %}" class="text-white/80 hover:text-white text-sm font-medium transition hidden sm:block">
+        {{ T.hero_login }}
+      </a>
+      <a href="{% url 'register' %}"
+         class="bg-white/15 hover:bg-white/25 text-white text-sm font-semibold px-4 py-2 rounded-xl border border-white/20 transition">
+        {{ T.register }}
+      </a>
     </div>
+  </div>
 </nav>
 
-<!-- Hero -->
-<section class="gradient-bg min-h-screen flex items-center relative overflow-hidden pt-16">
-    <div class="absolute inset-0 opacity-10">
-        <div class="absolute top-20 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
-        <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-300 rounded-full blur-3xl"></div>
-    </div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+<!-- ══════════════════════════════════════
+     HERO — animated mesh + glass card
+════════════════════════════════════════ -->
+<section class="mesh-bg min-h-screen flex items-center pt-16 relative" style="min-height:100svh;">
+  <div class="grid-overlay"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Particles -->
+  <div id="particles-container" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+
+  <div class="max-w-7xl mx-auto px-5 py-20 relative z-10 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
+
+      <!-- Left: copy -->
+      <div>
+        <div class="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-semibold text-cyan-300 mb-7 float-badge">
+          <span class="w-2 h-2 bg-emerald-400 rounded-full" style="animation:ping 1.5s cubic-bezier(0,0,.2,1) infinite;box-shadow:0 0 0 rgba(52,211,153,.5)"></span>
+          {{ T.hero_badge }}
+        </div>
+
+        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-[1.08] mb-7 tracking-tight">
+          {{ T.hero_h1_line1 }}<br>
+          <span class="grad-text">{{ T.hero_h1_line2 }}</span><br>
+          <span class="text-white/80">{{ T.hero_h1_line3 }}</span>
+        </h1>
+
+        <p class="text-blue-200/80 text-xl leading-relaxed mb-10 max-w-xl">
+          {{ T.hero_subtitle }}
+        </p>
+
+        <div class="flex flex-wrap gap-4 mb-14">
+          <a href="{% url 'register' %}" class="btn-glow">
+            {{ T.hero_cta }}
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </a>
+          <a href="{% url 'login' %}"
+             class="glass text-white px-8 py-4 rounded-xl font-semibold text-base hover:bg-white/15 transition inline-flex items-center gap-2">
+            {{ T.hero_login }}
+          </a>
+        </div>
+
+        <!-- Stats row -->
+        <div class="flex flex-wrap gap-8">
+          <div>
+            <div class="text-4xl font-black text-white counter" data-target="{{ user_count|default:120 }}">0</div>
+            <div class="text-blue-300/70 text-sm mt-1">{{ T.stat_standards }}</div>
+          </div>
+          <div class="w-px bg-white/15 hidden sm:block"></div>
+          <div>
+            <div class="text-4xl font-black text-white counter" data-target="{{ expert_count|default:15 }}">0</div>
+            <div class="text-blue-300/70 text-sm mt-1">{{ T.stat_faster }}</div>
+          </div>
+          <div class="w-px bg-white/15 hidden sm:block"></div>
+          <div>
+            <div class="text-4xl font-black text-white counter" data-target="{{ analysis_count|default:80 }}">0</div>
+            <div class="text-blue-300/70 text-sm mt-1">{{ T.stat_savings }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: AI demo card -->
+      <div class="hidden lg:block">
+        <div class="glass p-7 shadow-2xl relative shine">
+          <!-- Window chrome -->
+          <div class="flex items-center gap-2 mb-6">
+            <div class="w-3 h-3 rounded-full bg-red-400/80"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-400/80"></div>
+            <div class="w-3 h-3 rounded-full bg-emerald-400/80"></div>
+            <span class="text-white/40 text-xs ml-2 font-mono">StandartBridge AI · Gap Analysis</span>
+          </div>
+
+          <!-- Company info row -->
+          <div class="flex items-center gap-3 mb-5 bg-white/5 rounded-xl px-4 py-3">
+            <div class="w-9 h-9 rounded-lg bg-blue-500/30 flex items-center justify-center text-blue-300 font-bold text-sm">TX</div>
             <div>
-                <div class="inline-flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-full text-sm font-medium mb-6 border border-white/20">
-                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                    {{ T.hero_badge }}
-                </div>
-                <h1 class="text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-                    {{ T.hero_h1_line1 }}<br>
-                    <span class="text-blue-300">{{ T.hero_h1_line2 }}</span><br>
-                    {{ T.hero_h1_line3 }}
-                </h1>
-                <p class="text-blue-100 text-xl mb-8 leading-relaxed">
-                    {{ T.hero_subtitle }}
-                </p>
-                <div class="flex flex-wrap gap-4 mb-12">
-                    <a href="{% url 'register' %}" class="bg-white text-blue-700 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition shadow-lg">
-                        {{ T.hero_cta }}
-                    </a>
-                    <a href="{% url 'login' %}" class="border-2 border-white/40 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/10 transition">
-                        {{ T.hero_login }}
-                    </a>
-                </div>
-                <div class="flex gap-10">
-                    <div>
-                        <div class="text-4xl font-bold text-white">{{ user_count|default:"0" }}+</div>
-                        <div class="text-blue-200 text-sm mt-1">{{ T.stat_standards }}</div>
-                    </div>
-                    <div class="w-px bg-white/20"></div>
-                    <div>
-                        <div class="text-4xl font-bold text-white">{{ expert_count|default:"0" }}</div>
-                        <div class="text-blue-200 text-sm mt-1">{{ T.stat_faster }}</div>
-                    </div>
-                    <div class="w-px bg-white/20"></div>
-                    <div>
-                        <div class="text-4xl font-bold text-white">{{ analysis_count|default:"0" }}</div>
-                        <div class="text-blue-200 text-sm mt-1">{{ T.stat_savings }}</div>
-                    </div>
-                </div>
+              <p class="text-white/90 text-sm font-semibold">Toshkent Tekstil OAJ</p>
+              <p class="text-white/40 text-xs">ISO 9001:2015 → tahlil boshlandi</p>
             </div>
-            <div class="hidden lg:block">
-                <div class="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20 shadow-2xl">
-                    <div class="flex items-center gap-2 mb-5">
-                        <div class="w-3 h-3 rounded-full bg-red-400"></div>
-                        <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
-                        <div class="w-3 h-3 rounded-full bg-green-400"></div>
-                        <span class="text-white/50 text-sm ml-2">{{ T.ai_demo_label }}</span>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="bg-white/10 rounded-xl p-4 border border-red-400/30">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="text-white font-medium text-sm">{{ T.ai_gap1_title }}</span>
-                                <span class="bg-red-500/30 text-red-300 px-2 py-0.5 rounded text-xs font-medium">{{ T.priority_critical }}</span>
-                            </div>
-                            <p class="text-blue-200 text-xs">{{ T.ai_gap1_desc }}</p>
-                        </div>
-                        <div class="bg-white/10 rounded-xl p-4 border border-orange-400/30">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="text-white font-medium text-sm">{{ T.ai_gap2_title }}</span>
-                                <span class="bg-orange-500/30 text-orange-300 px-2 py-0.5 rounded text-xs font-medium">{{ T.priority_high }}</span>
-                            </div>
-                            <p class="text-blue-200 text-xs">{{ T.ai_gap2_desc }}</p>
-                        </div>
-                        <div class="bg-white/10 rounded-xl p-4 border border-yellow-400/30">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="text-white font-medium text-sm">{{ T.ai_gap3_title }}</span>
-                                <span class="bg-yellow-500/30 text-yellow-300 px-2 py-0.5 rounded text-xs font-medium">{{ T.priority_medium }}</span>
-                            </div>
-                            <p class="text-blue-200 text-xs">{{ T.ai_gap3_desc }}</p>
-                        </div>
-                    </div>
-                    <div class="mt-5 pt-5 border-t border-white/20 grid grid-cols-2 gap-4">
-                        <div class="bg-white/10 rounded-xl p-3 text-center">
-                            <div class="text-white font-bold text-lg">8 oy</div>
-                            <div class="text-blue-200 text-xs">{{ T.ai_est_time }}</div>
-                        </div>
-                        <div class="bg-white/10 rounded-xl p-3 text-center">
-                            <div class="text-white font-bold text-lg">$1,500</div>
-                            <div class="text-blue-200 text-xs">{{ T.ai_est_cost }}</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="ml-auto flex items-center gap-1.5">
+              <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+              <span class="text-emerald-400 text-xs font-medium">AI ishlamoqda</span>
             </div>
+          </div>
+
+          <!-- Gaps -->
+          <div class="space-y-3 mb-5">
+            <div class="glass-dark p-4 border border-red-500/20">
+              <div class="flex justify-between items-start mb-1.5">
+                <span class="text-white/90 font-semibold text-sm">{{ T.ai_gap1_title }}</span>
+                <span class="bg-red-500/20 text-red-300 px-2 py-0.5 rounded-md text-xs font-bold ml-2 flex-shrink-0">{{ T.priority_critical }}</span>
+              </div>
+              <p class="text-blue-200/60 text-xs leading-relaxed">{{ T.ai_gap1_desc }}</p>
+            </div>
+            <div class="glass-dark p-4 border border-orange-500/20">
+              <div class="flex justify-between items-start mb-1.5">
+                <span class="text-white/90 font-semibold text-sm">{{ T.ai_gap2_title }}</span>
+                <span class="bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded-md text-xs font-bold ml-2 flex-shrink-0">{{ T.priority_high }}</span>
+              </div>
+              <p class="text-blue-200/60 text-xs leading-relaxed">{{ T.ai_gap2_desc }}</p>
+            </div>
+            <div class="glass-dark p-4 border border-yellow-500/20">
+              <div class="flex justify-between items-start mb-1.5">
+                <span class="text-white/90 font-semibold text-sm">{{ T.ai_gap3_title }}</span>
+                <span class="bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded-md text-xs font-bold ml-2 flex-shrink-0">{{ T.priority_medium }}</span>
+              </div>
+              <p class="text-blue-200/60 text-xs leading-relaxed">{{ T.ai_gap3_desc }}</p>
+            </div>
+          </div>
+
+          <!-- Summary footer -->
+          <div class="grid grid-cols-3 gap-3 pt-5 border-t border-white/10">
+            <div class="glass-dark p-3 text-center">
+              <div class="text-cyan-400 font-black text-xl">89%</div>
+              <div class="text-white/40 text-xs mt-0.5">Tayyorlik</div>
+            </div>
+            <div class="glass-dark p-3 text-center">
+              <div class="text-violet-400 font-black text-xl">8 oy</div>
+              <div class="text-white/40 text-xs mt-0.5">{{ T.ai_est_time }}</div>
+            </div>
+            <div class="glass-dark p-3 text-center">
+              <div class="text-emerald-400 font-black text-xl">$1.5K</div>
+              <div class="text-white/40 text-xs mt-0.5">{{ T.ai_est_cost }}</div>
+            </div>
+          </div>
+
+          <!-- Floating badge -->
+          <div class="absolute -top-4 -right-4 bg-gradient-to-r from-emerald-400 to-cyan-400 text-gray-900 text-xs font-black px-3 py-1.5 rounded-xl shadow-lg float-badge">
+            ✨ AI Powered
+          </div>
         </div>
+      </div>
+
     </div>
+  </div>
+
+  <!-- Bottom wave -->
+  <div class="absolute bottom-0 left-0 right-0 overflow-hidden">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none" class="w-full h-16 sm:h-20" fill="white">
+      <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z"/>
+    </svg>
+  </div>
 </section>
 
-<!-- Qanday ishlaydi -->
-<section class="py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <span class="text-blue-600 font-semibold text-sm uppercase tracking-wide">{{ T.how_badge }}</span>
-            <h2 class="text-4xl font-bold text-gray-900 mt-2 mb-4">{{ T.how_title }}</h2>
-            <p class="text-gray-500 text-xl">{{ T.how_subtitle }}</p>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
-            <div class="hidden md:block absolute top-8 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-blue-200 to-blue-400 z-0"></div>
-            <div class="text-center relative z-10">
-                <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg">
-                    <span class="text-white text-2xl font-bold">1</span>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-2">{{ T.step1_title }}</h3>
-                <p class="text-gray-500 text-sm">{{ T.step1_desc }}</p>
-            </div>
-            <div class="text-center relative z-10">
-                <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg">
-                    <span class="text-white text-2xl font-bold">2</span>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-2">{{ T.step2_title }}</h3>
-                <p class="text-gray-500 text-sm">{{ T.step2_desc }}</p>
-            </div>
-            <div class="text-center relative z-10">
-                <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg">
-                    <span class="text-white text-2xl font-bold">3</span>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-2">{{ T.step3_title }}</h3>
-                <p class="text-gray-500 text-sm">{{ T.step3_desc }}</p>
-            </div>
-            <div class="text-center relative z-10">
-                <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg">
-                    <span class="text-white text-2xl font-bold">4</span>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-2">{{ T.step4_title }}</h3>
-                <p class="text-gray-500 text-sm">{{ T.step4_desc }}</p>
-            </div>
-        </div>
+<!-- ══════════════════════════════════════
+     TICKER — moving standards
+════════════════════════════════════════ -->
+<section class="bg-white py-5 overflow-hidden border-b border-gray-100">
+  <div class="ticker-wrap">
+    <div class="ticker-inner gap-8 px-4">
+      {% for std in standards_list %}
+      <span class="inline-flex items-center gap-2 text-gray-500 font-semibold text-sm mr-10">
+        <span class="w-2 h-2 bg-blue-500 rounded-full"></span>{{ std }}
+      </span>
+      {% endfor %}
+      {% for std in standards_list %}
+      <span class="inline-flex items-center gap-2 text-gray-500 font-semibold text-sm mr-10">
+        <span class="w-2 h-2 bg-blue-500 rounded-full"></span>{{ std }}
+      </span>
+      {% endfor %}
     </div>
+  </div>
 </section>
 
-<!-- Kim uchun -->
-<section class="py-24 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <span class="text-blue-600 font-semibold text-sm uppercase tracking-wide">{{ T.forwhom_badge }}</span>
-            <h2 class="text-4xl font-bold text-gray-900 mt-2 mb-4">{{ T.forwhom_title }}</h2>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            <div class="bg-white rounded-2xl p-8 border border-gray-200 card-hover">
-                <div class="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mb-5">
-                    <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-3">{{ T.entrepreneur_title }}</h3>
-                <p class="text-gray-600 mb-5">{{ T.entrepreneur_desc }}</p>
-                <ul class="space-y-3">
-                    <li class="flex items-center gap-3 text-gray-600">
-                        <span class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                        </span>
-                        {{ T.entrepreneur_feat1 }}
-                    </li>
-                    <li class="flex items-center gap-3 text-gray-600">
-                        <span class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                        </span>
-                        {{ T.entrepreneur_feat2 }}
-                    </li>
-                    <li class="flex items-center gap-3 text-gray-600">
-                        <span class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                        </span>
-                        {{ T.entrepreneur_feat3 }}
-                    </li>
-                    <li class="flex items-center gap-3 text-gray-600">
-                        <span class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                        </span>
-                        {{ T.entrepreneur_feat4 }}
-                    </li>
-                </ul>
-                <a href="{% url 'register' %}" class="mt-6 block text-center gradient-bg text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">
-                    {{ T.entrepreneur_cta }}
-                </a>
-            </div>
-            <div class="bg-white rounded-2xl p-8 border border-gray-200 card-hover">
-                <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-5">
-                    <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-3">{{ T.expert_title }}</h3>
-                <p class="text-gray-600 mb-5">{{ T.expert_desc }}</p>
-                <ul class="space-y-3">
-                    <li class="flex items-center gap-3 text-gray-600">
-                        <span class="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                        </span>
-                        {{ T.expert_feat1 }}
-                    </li>
-                    <li class="flex items-center gap-3 text-gray-600">
-                        <span class="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                        </span>
-                        {{ T.expert_feat2 }}
-                    </li>
-                    <li class="flex items-center gap-3 text-gray-600">
-                        <span class="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                        </span>
-                        {{ T.expert_feat3 }}
-                    </li>
-                    <li class="flex items-center gap-3 text-gray-600">
-                        <span class="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                        </span>
-                        {{ T.expert_feat4 }}
-                    </li>
-                </ul>
-                <a href="{% url 'register' %}" class="mt-6 block text-center border-2 border-blue-600 text-blue-600 py-3 rounded-xl font-semibold hover:bg-blue-50 transition">
-                    {{ T.expert_cta }}
-                </a>
-            </div>
-        </div>
+<!-- ══════════════════════════════════════
+     FEATURES — 6 card grid
+════════════════════════════════════════ -->
+<section class="py-28 bg-white">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="text-center mb-16 reveal">
+      <span class="text-blue-600 font-bold text-xs uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full">{{ T.how_badge }}</span>
+      <h2 class="text-5xl font-black text-gray-900 mt-4 mb-4 tracking-tight">{{ T.how_title }}</h2>
+      <p class="text-gray-500 text-xl max-w-2xl mx-auto">{{ T.how_subtitle }}</p>
     </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Feature 1 -->
+      <div class="feat-card reveal" style="transition-delay:.05s">
+        <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mb-5">
+          <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ T.step1_title }}</h3>
+        <p class="text-gray-500 leading-relaxed">{{ T.step1_desc }}</p>
+      </div>
+      <!-- Feature 2 -->
+      <div class="feat-card reveal" style="transition-delay:.10s">
+        <div class="w-14 h-14 rounded-2xl bg-violet-100 flex items-center justify-center mb-5">
+          <svg class="w-7 h-7 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ T.step2_title }}</h3>
+        <p class="text-gray-500 leading-relaxed">{{ T.step2_desc }}</p>
+      </div>
+      <!-- Feature 3 -->
+      <div class="feat-card reveal" style="transition-delay:.15s">
+        <div class="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center mb-5">
+          <svg class="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ T.step3_title }}</h3>
+        <p class="text-gray-500 leading-relaxed">{{ T.step3_desc }}</p>
+      </div>
+      <!-- Feature 4 -->
+      <div class="feat-card reveal" style="transition-delay:.20s">
+        <div class="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center mb-5">
+          <svg class="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ T.step4_title }}</h3>
+        <p class="text-gray-500 leading-relaxed">{{ T.step4_desc }}</p>
+      </div>
+      <!-- Feature 5 -->
+      <div class="feat-card reveal" style="transition-delay:.25s">
+        <div class="w-14 h-14 rounded-2xl bg-cyan-100 flex items-center justify-center mb-5">
+          <svg class="w-7 h-7 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ T.entrepreneur_feat1 }}</h3>
+        <p class="text-gray-500 leading-relaxed">{{ T.entrepreneur_feat2 }}</p>
+      </div>
+      <!-- Feature 6 -->
+      <div class="feat-card reveal" style="transition-delay:.30s">
+        <div class="w-14 h-14 rounded-2xl bg-pink-100 flex items-center justify-center mb-5">
+          <svg class="w-7 h-7 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ T.expert_feat1 }}</h3>
+        <p class="text-gray-500 leading-relaxed">{{ T.expert_feat2 }}</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- Sohalar -->
-<section class="py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <span class="text-blue-600 font-semibold text-sm uppercase tracking-wide">{{ T.industries_badge }}</span>
-            <h2 class="text-4xl font-bold text-gray-900 mt-2">{{ T.industries_title }}</h2>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {% for name, icon in industry_list %}
-            <div class="bg-gray-50 rounded-2xl p-5 text-center hover:bg-blue-50 hover:border-blue-200 border border-transparent transition card-hover">
-                <div class="text-3xl mb-3">{{ icon }}</div>
-                <p class="font-semibold text-gray-800 text-sm">{{ name }}</p>
-            </div>
+<!-- ══════════════════════════════════════
+     STATS — dark gradient bg
+════════════════════════════════════════ -->
+<section class="py-20 relative overflow-hidden" style="background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0c1a3a 100%);">
+  <div class="absolute inset-0" style="background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(37,99,235,.15),transparent)"></div>
+  <div class="max-w-6xl mx-auto px-5 relative z-10">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <div class="reveal">
+        <div class="text-6xl font-black text-white mb-2 counter" data-target="{{ user_count|default:120 }}" data-suffix="+">0</div>
+        <div class="text-blue-300/70">{{ T.stat_standards }}</div>
+      </div>
+      <div class="reveal" style="transition-delay:.1s">
+        <div class="text-6xl font-black text-white mb-2 counter" data-target="{{ expert_count|default:15 }}" data-suffix="+">0</div>
+        <div class="text-blue-300/70">{{ T.stat_faster }}</div>
+      </div>
+      <div class="reveal" style="transition-delay:.2s">
+        <div class="text-6xl font-black text-white mb-2 counter" data-target="{{ analysis_count|default:80 }}" data-suffix="+">0</div>
+        <div class="text-blue-300/70">{{ T.stat_savings }}</div>
+      </div>
+      <div class="reveal" style="transition-delay:.3s">
+        <div class="text-6xl font-black text-cyan-400 mb-2">40%</div>
+        <div class="text-blue-300/70">Xarajat tejamiyat</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     FOR WHO — 2 column cards
+════════════════════════════════════════ -->
+<section class="py-28 section-grad">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="text-center mb-16 reveal">
+      <span class="text-blue-600 font-bold text-xs uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full">{{ T.forwhom_badge }}</span>
+      <h2 class="text-5xl font-black text-gray-900 mt-4 tracking-tight">{{ T.forwhom_title }}</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Tadbirkor -->
+      <div class="rounded-3xl overflow-hidden relative shine reveal-left"
+           style="background:linear-gradient(135deg,#1d4ed8 0%,#0891b2 100%);">
+        <div class="absolute inset-0 opacity-10"
+             style="background-image:radial-gradient(circle,rgba(255,255,255,.5) 1px,transparent 1px);background-size:30px 30px;"></div>
+        <div class="relative z-10 p-10">
+          <div class="w-16 h-16 bg-white/15 rounded-2xl flex items-center justify-center mb-6">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+          </div>
+          <h3 class="text-3xl font-black text-white mb-3">{{ T.entrepreneur_title }}</h3>
+          <p class="text-blue-100/80 mb-7 text-lg leading-relaxed">{{ T.entrepreneur_desc }}</p>
+          <ul class="space-y-3 mb-8">
+            {% for feat in T.entrepreneur_feat1,T.entrepreneur_feat2,T.entrepreneur_feat3,T.entrepreneur_feat4 %}
+            <li class="flex items-center gap-3 text-white/90">
+              <div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              {{ feat }}
+            </li>
             {% endfor %}
+          </ul>
+          <a href="{% url 'register' %}"
+             class="inline-flex items-center gap-2 bg-white text-blue-700 font-bold px-6 py-3.5 rounded-xl hover:bg-blue-50 transition">
+            {{ T.entrepreneur_cta }}
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </a>
         </div>
-    </div>
-</section>
+      </div>
 
-<!-- Standartlar -->
-<section class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-10">
-            <h2 class="text-3xl font-bold text-gray-900">{{ T.standards_title }}</h2>
-        </div>
-        <div class="flex flex-wrap justify-center gap-3">
-            {% for std in standards_list %}
-            <span class="bg-white border border-gray-200 text-gray-700 px-5 py-2.5 rounded-full font-medium text-sm shadow-sm hover:border-blue-400 hover:text-blue-700 transition">
-                {{ std }}
-            </span>
+      <!-- Mutaxassis -->
+      <div class="rounded-3xl overflow-hidden relative shine reveal-right"
+           style="background:linear-gradient(135deg,#4c1d95 0%,#1e3a8a 100%);">
+        <div class="absolute inset-0 opacity-10"
+             style="background-image:radial-gradient(circle,rgba(255,255,255,.5) 1px,transparent 1px);background-size:30px 30px;"></div>
+        <div class="relative z-10 p-10">
+          <div class="w-16 h-16 bg-white/15 rounded-2xl flex items-center justify-center mb-6">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+            </svg>
+          </div>
+          <h3 class="text-3xl font-black text-white mb-3">{{ T.expert_title }}</h3>
+          <p class="text-purple-100/80 mb-7 text-lg leading-relaxed">{{ T.expert_desc }}</p>
+          <ul class="space-y-3 mb-8">
+            {% for feat in T.expert_feat1,T.expert_feat2,T.expert_feat3,T.expert_feat4 %}
+            <li class="flex items-center gap-3 text-white/90">
+              <div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              {{ feat }}
+            </li>
             {% endfor %}
+          </ul>
+          <a href="{% url 'register' %}"
+             class="inline-flex items-center gap-2 bg-white text-purple-700 font-bold px-6 py-3.5 rounded-xl hover:bg-purple-50 transition">
+            {{ T.expert_cta }}
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </a>
         </div>
+      </div>
     </div>
+  </div>
 </section>
 
-<!-- Narxlar -->
+<!-- ══════════════════════════════════════
+     INDUSTRIES
+════════════════════════════════════════ -->
 <section class="py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <span class="text-blue-600 font-semibold text-sm uppercase tracking-wide">{{ T.pricing_badge }}</span>
-            <h2 class="text-4xl font-bold text-gray-900 mt-2 mb-4">{{ T.pricing_title }}</h2>
-            <p class="text-gray-500 text-lg">{{ T.pricing_subtitle }}</p>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <!-- Starter -->
-            <div class="bg-white rounded-2xl p-8 border-2 border-gray-100 card-hover">
-                <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">{{ T.plan_starter }}</div>
-                <div class="text-4xl font-bold text-gray-900 mb-1">{{ T.plan_starter_price }}</div>
-                <p class="text-gray-400 text-sm mb-6">{{ T.plan_starter_for }}</p>
-                <ul class="space-y-3 mb-8 text-sm text-gray-600">
-                    <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> {{ T.plan_starter_f1 }}</li>
-                    <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> {{ T.plan_starter_f2 }}</li>
-                    <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> {{ T.plan_starter_f3 }}</li>
-                    <li class="flex items-center gap-2"><span class="text-gray-300 font-bold">✗</span> {{ T.plan_starter_f4_no }}</li>
-                </ul>
-                <a href="{% url 'register' %}" class="block text-center border-2 border-blue-600 text-blue-600 py-3 rounded-xl font-semibold hover:bg-blue-50 transition">{{ T.btn_start }}</a>
-            </div>
-            <!-- Professional -->
-            <div class="bg-gradient-to-b from-blue-600 to-blue-700 rounded-2xl p-8 card-hover relative shadow-xl">
-                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-orange-400 text-white px-4 py-1 rounded-full text-sm font-bold shadow">{{ T.plan_pro_badge }}</div>
-                <div class="text-sm font-semibold text-blue-200 uppercase tracking-wide mb-2">{{ T.plan_pro }}</div>
-                <div class="text-4xl font-bold text-white mb-1">{{ T.plan_pro_price }}<span class="text-lg text-blue-200"> {{ T.plan_pro_per }}</span></div>
-                <p class="text-blue-200 text-sm mb-6">{{ T.plan_pro_for }}</p>
-                <ul class="space-y-3 mb-8 text-sm text-white">
-                    <li class="flex items-center gap-2"><span class="text-green-300 font-bold">✓</span> {{ T.plan_pro_f1 }}</li>
-                    <li class="flex items-center gap-2"><span class="text-green-300 font-bold">✓</span> {{ T.plan_pro_f2 }}</li>
-                    <li class="flex items-center gap-2"><span class="text-green-300 font-bold">✓</span> {{ T.plan_pro_f3 }}</li>
-                    <li class="flex items-center gap-2"><span class="text-green-300 font-bold">✓</span> {{ T.plan_pro_f4 }}</li>
-                    <li class="flex items-center gap-2"><span class="text-green-300 font-bold">✓</span> {{ T.plan_pro_f5 }}</li>
-                </ul>
-                <a href="{% url 'register' %}" class="block text-center bg-white text-blue-700 py-3 rounded-xl font-bold hover:bg-blue-50 transition">{{ T.btn_start }}</a>
-            </div>
-            <!-- Enterprise -->
-            <div class="bg-white rounded-2xl p-8 border-2 border-gray-100 card-hover">
-                <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">{{ T.plan_enterprise }}</div>
-                <div class="text-4xl font-bold text-gray-900 mb-1">{{ T.plan_enterprise_price }}</div>
-                <p class="text-gray-400 text-sm mb-6">{{ T.plan_enterprise_for }}</p>
-                <ul class="space-y-3 mb-8 text-sm text-gray-600">
-                    <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> {{ T.plan_enterprise_f1 }}</li>
-                    <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> {{ T.plan_enterprise_f2 }}</li>
-                    <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> {{ T.plan_enterprise_f3 }}</li>
-                    <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> {{ T.plan_enterprise_f4 }}</li>
-                </ul>
-                <a href="mailto:info@standartbridge.uz" class="block text-center border-2 border-gray-300 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition">{{ T.btn_contact }}</a>
-            </div>
-        </div>
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="text-center mb-12 reveal">
+      <span class="text-blue-600 font-bold text-xs uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full">{{ T.industries_badge }}</span>
+      <h2 class="text-5xl font-black text-gray-900 mt-4 tracking-tight">{{ T.industries_title }}</h2>
     </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      {% for name, icon in industry_list %}
+      <div class="group bg-gray-50 hover:bg-blue-600 rounded-2xl p-6 text-center cursor-default transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/20 border border-transparent hover:border-blue-500 reveal"
+           style="transition-delay:{{ forloop.counter0 }}0ms">
+        <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">{{ icon }}</div>
+        <p class="font-semibold text-gray-700 group-hover:text-white text-sm transition-colors">{{ name }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
 </section>
 
-<!-- FAQ -->
-<section class="py-24 bg-gray-50">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <span class="text-blue-600 font-semibold text-sm uppercase tracking-wide">{{ T.faq_badge }}</span>
-            <h2 class="text-4xl font-bold text-gray-900 mt-2">{{ T.faq_title }}</h2>
-        </div>
-        <div class="space-y-4" id="faq">
-            {% for q, a in faq_list %}
-            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-                <button onclick="toggleFaq(this)"
-                    class="w-full flex items-center justify-between px-6 py-5 text-left font-semibold text-gray-900 hover:bg-gray-50 transition">
-                    <span>{{ q }}</span>
-                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </button>
-                <div class="faq-answer hidden px-6 pb-5">
-                    <p class="text-gray-600 leading-relaxed">{{ a }}</p>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+<!-- ══════════════════════════════════════
+     PRICING
+════════════════════════════════════════ -->
+<section class="py-28 section-grad">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="text-center mb-16 reveal">
+      <span class="text-blue-600 font-bold text-xs uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full">{{ T.pricing_badge }}</span>
+      <h2 class="text-5xl font-black text-gray-900 mt-4 mb-4 tracking-tight">{{ T.pricing_title }}</h2>
+      <p class="text-gray-500 text-xl">{{ T.pricing_subtitle }}</p>
     </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center max-w-5xl mx-auto">
+      <!-- Starter -->
+      <div class="bg-white rounded-3xl p-8 border border-gray-200 hover:shadow-xl transition-shadow reveal-left">
+        <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">{{ T.plan_starter }}</div>
+        <div class="text-5xl font-black text-gray-900 mb-1">{{ T.plan_starter_price }}</div>
+        <p class="text-gray-400 text-sm mb-7">{{ T.plan_starter_for }}</p>
+        <ul class="space-y-3 mb-8 text-sm text-gray-600">
+          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_starter_f1 }}</li>
+          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_starter_f2 }}</li>
+          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_starter_f3 }}</li>
+          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-gray-100 text-gray-300 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✗</span><span class="text-gray-300">{{ T.plan_starter_f4_no }}</span></li>
+        </ul>
+        <a href="{% url 'register' %}" class="block text-center border-2 border-blue-600 text-blue-600 py-3.5 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition">{{ T.btn_start }}</a>
+      </div>
+
+      <!-- Professional (popular) -->
+      <div class="pricing-popular rounded-3xl p-8 relative reveal" style="transition-delay:.1s">
+        <div class="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-400 to-pink-500 text-white text-xs font-black px-5 py-1.5 rounded-full shadow-lg whitespace-nowrap">
+          🔥 {{ T.plan_pro_badge }}
+        </div>
+        <div class="text-xs font-black uppercase tracking-widest text-blue-200 mb-3">{{ T.plan_pro }}</div>
+        <div class="text-5xl font-black text-white mb-1">{{ T.plan_pro_price }}<span class="text-lg text-blue-200 font-normal"> {{ T.plan_pro_per }}</span></div>
+        <p class="text-blue-200 text-sm mb-7">{{ T.plan_pro_for }}</p>
+        <ul class="space-y-3 mb-8 text-sm text-white">
+          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-white/20 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_pro_f1 }}</li>
+          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-white/20 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_pro_f2 }}</li>
+          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-white/20 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_pro_f3 }}</li>
+          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-white/20 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_pro_f4 }}</li>
+          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-white/20 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_pro_f5 }}</li>
+        </ul>
+        <a href="{% url 'register' %}" class="block text-center bg-white text-blue-700 py-3.5 rounded-xl font-black hover:bg-blue-50 transition shadow-lg">{{ T.btn_start }}</a>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="bg-white rounded-3xl p-8 border border-gray-200 hover:shadow-xl transition-shadow reveal-right">
+        <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">{{ T.plan_enterprise }}</div>
+        <div class="text-5xl font-black text-gray-900 mb-1">{{ T.plan_enterprise_price }}</div>
+        <p class="text-gray-400 text-sm mb-7">{{ T.plan_enterprise_for }}</p>
+        <ul class="space-y-3 mb-8 text-sm text-gray-600">
+          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_enterprise_f1 }}</li>
+          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_enterprise_f2 }}</li>
+          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_enterprise_f3 }}</li>
+          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_enterprise_f4 }}</li>
+        </ul>
+        <a href="mailto:isoqjonovavazbek@gmail.com" class="block text-center border-2 border-gray-200 text-gray-700 py-3.5 rounded-xl font-bold hover:border-gray-400 hover:bg-gray-50 transition">{{ T.btn_contact }}</a>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- CTA -->
-<section class="py-20 gradient-bg">
-    <div class="max-w-4xl mx-auto px-4 text-center">
-        <h2 class="text-4xl font-bold text-white mb-4">{{ T.cta_title }}</h2>
-        <p class="text-blue-100 text-xl mb-8">{{ T.cta_subtitle }}</p>
-        <a href="{% url 'register' %}"
-            class="inline-block bg-white text-blue-700 px-10 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition shadow-lg">
-            {{ T.cta_btn }}
-        </a>
+<!-- ══════════════════════════════════════
+     FAQ
+════════════════════════════════════════ -->
+<section class="py-24 bg-white">
+  <div class="max-w-3xl mx-auto px-5">
+    <div class="text-center mb-14 reveal">
+      <span class="text-blue-600 font-bold text-xs uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full">{{ T.faq_badge }}</span>
+      <h2 class="text-5xl font-black text-gray-900 mt-4 tracking-tight">{{ T.faq_title }}</h2>
     </div>
+    <div class="space-y-3" id="faq">
+      {% for q, a in faq_list %}
+      <div class="border border-gray-200 rounded-2xl overflow-hidden hover:border-blue-200 transition-colors reveal" style="transition-delay:{{ forloop.counter0 }}0ms">
+        <button onclick="toggleFaq(this)"
+          class="w-full flex items-center justify-between px-6 py-5 text-left font-bold text-gray-900 hover:bg-gray-50 transition gap-4">
+          <span>{{ q }}</span>
+          <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-blue-600 transition-transform duration-300 faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+        </button>
+        <div class="faq-answer hidden px-6 pb-6">
+          <p class="text-gray-500 leading-relaxed">{{ a }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
 </section>
 
-<!-- Footer -->
-<footer class="bg-gray-900 text-white py-14">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
-            <div class="md:col-span-2">
-                <div class="flex items-center gap-2 mb-4">
-                    <div class="w-9 h-9 rounded-xl gradient-bg flex items-center justify-center">
-                        <span class="text-white font-bold">SB</span>
-                    </div>
-                    <span class="font-bold text-xl">StandartBridge</span>
-                </div>
-                <p class="text-gray-400 text-sm leading-relaxed max-w-xs">
-                    {{ T.footer_desc }}
-                </p>
-            </div>
-            <div>
-                <h4 class="font-semibold text-sm uppercase tracking-wide text-gray-400 mb-4">{{ T.footer_platform }}</h4>
-                <ul class="space-y-2 text-sm text-gray-400">
-                    <li><a href="{% url 'register' %}" class="hover:text-white transition">{{ T.register }}</a></li>
-                    <li><a href="{% url 'login' %}" class="hover:text-white transition">{{ T.login }}</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-semibold text-sm uppercase tracking-wide text-gray-400 mb-4">{{ T.footer_contact }}</h4>
-                <ul class="space-y-2 text-sm text-gray-400">
-                    <li><a href="mailto:isoqjonovavazbek@gmail.com" class="hover:text-white transition">isoqjonovavazbek@gmail.com</a></li>
-                    <li><a href="tel:+998779701017" class="hover:text-white transition">+998 77 970 10 17</a></li>
-                    <li>Toshkent, O'zbekiston</li>
-                </ul>
-            </div>
-        </div>
-        <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-gray-500 text-sm">{{ T.footer_copyright }}</p>
-            <div class="flex gap-6 text-sm text-gray-500">
-                <a href="#" class="hover:text-white transition">{{ T.footer_privacy }}</a>
-                <a href="#" class="hover:text-white transition">{{ T.footer_terms }}</a>
-            </div>
-        </div>
+<!-- ══════════════════════════════════════
+     CTA — mesh background
+════════════════════════════════════════ -->
+<section class="py-28 mesh-bg relative overflow-hidden">
+  <div class="grid-overlay"></div>
+  <div class="orb orb-1" style="width:400px;height:400px;opacity:.6;"></div>
+  <div class="orb orb-2" style="width:300px;height:300px;opacity:.5;"></div>
+  <div class="max-w-4xl mx-auto px-5 text-center relative z-10 reveal">
+    <div class="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm text-cyan-300 font-semibold mb-8">
+      <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+      {{ T.hero_badge }}
     </div>
+    <h2 class="text-5xl sm:text-6xl font-black text-white mb-6 tracking-tight leading-tight">
+      {{ T.cta_title }}
+    </h2>
+    <p class="text-blue-200/80 text-xl mb-10 max-w-2xl mx-auto">{{ T.cta_subtitle }}</p>
+    <div class="flex flex-wrap gap-4 justify-center">
+      <a href="{% url 'register' %}" class="btn-glow text-lg px-10 py-5">
+        {{ T.cta_btn }}
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+        </svg>
+      </a>
+      <a href="{% url 'login' %}" class="glass text-white px-10 py-5 rounded-xl font-bold text-lg hover:bg-white/15 transition">
+        {{ T.hero_login }}
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     FOOTER
+════════════════════════════════════════ -->
+<footer style="background:#070d1a;" class="text-white py-16">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+      <div class="md:col-span-2">
+        <div class="flex items-center gap-2.5 mb-5">
+          <img src="/static/icons/icon-96.png" alt="SB" class="w-10 h-10 rounded-xl">
+          <span class="font-black text-2xl tracking-tight">StandartBridge</span>
+        </div>
+        <p class="text-gray-400 text-sm leading-relaxed max-w-xs mb-6">{{ T.footer_desc }}</p>
+        <!-- Social icons placeholder -->
+        <div class="flex gap-3">
+          <a href="https://t.me/standartbridge" target="_blank" rel="noopener"
+             class="w-9 h-9 rounded-lg bg-white/5 hover:bg-blue-600 flex items-center justify-center transition">
+            <svg class="w-4 h-4 text-gray-400 hover:text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M11.944 0A12 12 0 1 0 24 12 12 12 0 0 0 11.944 0zm5.37 8.317l-1.73 8.16c-.13.59-.48.73-.97.46l-2.68-1.97-1.29 1.24c-.14.14-.27.27-.55.27l.19-2.72 4.97-4.49c.22-.19-.05-.3-.33-.11L7.9 14.07l-2.63-.82c-.57-.18-.58-.57.12-.84l10.27-3.96c.48-.17.9.12.74.84z"/>
+            </svg>
+          </a>
+          <a href="mailto:isoqjonovavazbek@gmail.com"
+             class="w-9 h-9 rounded-lg bg-white/5 hover:bg-blue-600 flex items-center justify-center transition">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <h4 class="font-bold text-xs uppercase tracking-widest text-gray-500 mb-5">{{ T.footer_platform }}</h4>
+        <ul class="space-y-3 text-sm text-gray-400">
+          <li><a href="{% url 'register' %}" class="hover:text-white transition">{{ T.register }}</a></li>
+          <li><a href="{% url 'login' %}" class="hover:text-white transition">{{ T.login }}</a></li>
+          <li><a href="{% url 'blog_list' %}" class="hover:text-white transition">{{ T.blog }}</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold text-xs uppercase tracking-widest text-gray-500 mb-5">{{ T.footer_contact }}</h4>
+        <ul class="space-y-3 text-sm text-gray-400">
+          <li><a href="mailto:isoqjonovavazbek@gmail.com" class="hover:text-white transition">isoqjonovavazbek@gmail.com</a></li>
+          <li><a href="tel:+998779701017" class="hover:text-white transition">+998 77 970 10 17</a></li>
+          <li class="text-gray-500">Toshkent, O'zbekiston</li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-white/5 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <p class="text-gray-600 text-sm">{{ T.footer_copyright }}</p>
+      <div class="flex gap-6 text-sm text-gray-600">
+        <a href="#" class="hover:text-white transition">{{ T.footer_privacy }}</a>
+        <a href="#" class="hover:text-white transition">{{ T.footer_terms }}</a>
+      </div>
+    </div>
+  </div>
 </footer>
 
-<script>
-function toggleFaq(btn) {
-    const answer = btn.nextElementSibling;
-    const icon = btn.querySelector('.faq-icon');
-    answer.classList.toggle('hidden');
-    icon.style.transform = answer.classList.contains('hidden') ? '' : 'rotate(180deg)';
-}
-</script>
+</div><!-- #landing-root -->
 
+<script>
+/* ── Navbar scroll effect ── */
+window.addEventListener('scroll', function() {
+  var nav = document.getElementById('land-nav');
+  if (!nav) return;
+  if (window.scrollY > 40) {
+    nav.style.background = 'rgba(5,13,26,.92)';
+    nav.style.backdropFilter = 'blur(20px)';
+    nav.style.boxShadow = '0 1px 0 rgba(255,255,255,.05)';
+  } else {
+    nav.style.background = 'transparent';
+    nav.style.backdropFilter = '';
+    nav.style.boxShadow = '';
+  }
+}, { passive: true });
+
+/* ── Particles ── */
+(function() {
+  var container = document.getElementById('particles-container');
+  if (!container) return;
+  for (var i = 0; i < 28; i++) {
+    var p = document.createElement('div');
+    var size = Math.random() * 3 + 1;
+    var delay = Math.random() * 12;
+    var duration = Math.random() * 10 + 8;
+    var drift = (Math.random() - .5) * 200;
+    p.className = 'particle';
+    p.style.cssText =
+      'width:' + size + 'px;height:' + size + 'px;' +
+      'left:' + (Math.random() * 100) + '%;' +
+      'bottom:-20px;' +
+      '--drift:' + drift + 'px;' +
+      'animation-duration:' + duration + 's;' +
+      'animation-delay:' + delay + 's;' +
+      'opacity:.4;';
+    container.appendChild(p);
+  }
+})();
+
+/* ── Scroll reveal ── */
+var revealEls = document.querySelectorAll('.reveal,.reveal-left,.reveal-right');
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+revealEls.forEach(function(el) { observer.observe(el); });
+
+/* ── Animated counter ── */
+function animateCounter(el) {
+  var target = parseInt(el.getAttribute('data-target') || el.textContent);
+  var suffix = el.getAttribute('data-suffix') || '';
+  var duration = 1800;
+  var start = performance.now();
+  function step(now) {
+    var t = Math.min((now - start) / duration, 1);
+    var ease = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.round(ease * target) + suffix;
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+var counterObs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) {
+      animateCounter(e.target);
+      counterObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.counter').forEach(function(el) { counterObs.observe(el); });
+
+/* ── FAQ accordion ── */
+function toggleFaq(btn) {
+  var answer = btn.nextElementSibling;
+  var icon = btn.querySelector('.faq-icon');
+  var isOpen = !answer.classList.contains('hidden');
+  // Close all
+  document.querySelectorAll('.faq-answer').forEach(function(a) { a.classList.add('hidden'); });
+  document.querySelectorAll('.faq-icon').forEach(function(i) { i.style.transform = ''; });
+  if (!isOpen) {
+    answer.classList.remove('hidden');
+    icon.style.transform = 'rotate(180deg)';
+  }
+}
+
+/* ── Ping animation for online badge ── */
+var style = document.createElement('style');
+style.textContent = '@keyframes ping{75%,100%{transform:scale(2);opacity:0}}';
+document.head.appendChild(style);
+</script>
 {% endblock %}
