@@ -166,11 +166,23 @@
                             {{ T.expert_lbl }} {% if project.expert %}{{ project.expert.get_full_name }}{% endif %}
                         </p>
                     </div>
-                    <span class="px-3 py-1 rounded-full text-xs font-medium
-                        {% if project.status == 'review' %}bg-purple-100 text-purple-700
-                        {% else %}bg-orange-100 text-orange-700{% endif %}">
-                        {% label project.status %}
-                    </span>
+                    <div class="flex flex-col items-end gap-1">
+                        <span class="px-3 py-1 rounded-full text-xs font-medium
+                            {% if project.status == 'review' %}bg-purple-100 text-purple-700
+                            {% else %}bg-orange-100 text-orange-700{% endif %}">
+                            {% label project.status %}
+                        </span>
+                        {% if project.work_deadline and project.status == 'in_progress' %}
+                        {% with d=project.work_deadline|days_left %}
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full
+                            {% if d <= 0 %}bg-red-100 text-red-700
+                            {% elif d <= 3 %}bg-orange-100 text-orange-700
+                            {% else %}bg-gray-100 text-gray-600{% endif %}">
+                            {% if d <= 0 %}Muddat o'tdi{% else %}{{ d }} kun qoldi{% endif %}
+                        </span>
+                        {% endwith %}
+                        {% endif %}
+                    </div>
                 </div>
                 {% with last_update=project.updates.first %}
                 {% if last_update %}

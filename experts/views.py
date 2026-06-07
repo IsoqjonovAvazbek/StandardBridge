@@ -1218,6 +1218,15 @@ def click_prepare(request):
     sign_time = data.get('sign_time')
     sign_string = data.get('sign_string')
 
+    try:
+        ts_diff = abs(int(timezone.now().timestamp()) - int(sign_time or 0))
+        if ts_diff > 3600:
+            return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
+                                 'merchant_prepare_id': None, 'error': -1, 'error_note': 'Request expired'})
+    except (ValueError, TypeError):
+        return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
+                             'merchant_prepare_id': None, 'error': -1, 'error_note': 'Invalid sign_time'})
+
     if str(service_id) != str(settings.CLICK_SERVICE_ID):
         return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
                              'merchant_prepare_id': None, 'error': -1, 'error_note': 'Invalid service'})
@@ -1270,6 +1279,15 @@ def click_complete(request):
     sign_time = data.get('sign_time')
     sign_string = data.get('sign_string')
     error = int(data.get('error', 0))
+
+    try:
+        ts_diff = abs(int(timezone.now().timestamp()) - int(sign_time or 0))
+        if ts_diff > 3600:
+            return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
+                                 'merchant_confirm_id': None, 'error': -1, 'error_note': 'Request expired'})
+    except (ValueError, TypeError):
+        return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
+                             'merchant_confirm_id': None, 'error': -1, 'error_note': 'Invalid sign_time'})
 
     if str(service_id) != str(settings.CLICK_SERVICE_ID):
         return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,

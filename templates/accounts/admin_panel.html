@@ -128,6 +128,11 @@
                 <p class="text-gray-400 text-sm text-center py-4">{{ T.admin_all_verified }}</p>
                 {% endfor %}
             </div>
+            {% if stats.unverified_experts > pending_experts|length %}
+            <p class="text-xs text-gray-400 text-center mt-3">
+                +{{ stats.unverified_experts|add:"-20" }} ta ko'rsatilmagan — Django admin'dan ko'rish
+            </p>
+            {% endif %}
         </div>
 
         <!-- So'nggi to'lovlar -->

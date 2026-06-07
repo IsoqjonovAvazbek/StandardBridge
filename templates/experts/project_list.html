@@ -183,6 +183,9 @@
                 <div>
                     <h3 class="font-bold text-gray-900">{{ expert.user.get_full_name }}</h3>
                     <p class="text-gray-500 text-sm">{{ expert.region }}</p>
+                    {% if expert.user.last_login %}
+                    <p class="text-gray-400 text-xs mt-0.5">{{ expert.user.last_login|time_ago }}</p>
+                    {% endif %}
                 </div>
             </div>
             {% if expert.specializations %}

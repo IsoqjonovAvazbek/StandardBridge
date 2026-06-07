@@ -8,6 +8,7 @@ Ishlatish:
 """
 from django import template
 from django.utils.safestring import mark_safe
+from django.utils import timezone
 from core.translations import get_choice_label
 
 register = template.Library()
@@ -21,6 +22,48 @@ def label(context, code):
     if request is not None:
         lang = request.session.get('lang', 'uz')
     return get_choice_label(code, lang)
+
+
+@register.filter(name='time_ago')
+def time_ago(dt):
+    """{{ expert.user.last_login|time_ago }} → '3 kun oldin', '2 soat oldin', etc."""
+    if not dt:
+        return ''
+    now = timezone.now()
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt)
+    diff = now - dt
+    seconds = int(diff.total_seconds())
+    if seconds < 60:
+        return 'Hozirgina'
+    if seconds < 3600:
+        m = seconds // 60
+        return f'{m} daqiqa oldin'
+    if seconds < 86400:
+        h = seconds // 3600
+        return f'{h} soat oldin'
+    days = diff.days
+    if days < 7:
+        return f'{days} kun oldin'
+    if days < 30:
+        w = days // 7
+        return f'{w} hafta oldin'
+    if days < 365:
+        mo = days // 30
+        return f'{mo} oy oldin'
+    yr = days // 365
+    return f'{yr} yil oldin'
+
+
+@register.filter(name='days_left')
+def days_left(dt):
+    """{{ project.work_deadline|days_left }} → 5  (musbat = qolgan kunlar, manfiy = o'tgan)."""
+    if not dt:
+        return None
+    now = timezone.now()
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt)
+    return (dt - now).days
 
 
 @register.filter(name='render_md')

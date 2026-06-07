@@ -291,6 +291,8 @@ def entrepreneur_dashboard(request):
 
     all_projects = Project.objects.filter(
         entrepreneur=request.user
+    ).select_related(
+        'expert', 'analysis__local_standard', 'analysis__target_standard'
     ).order_by('-created_at')
 
     # IDs of analyses that have NON-completed, NON-cancelled projects (i.e. "active" projects)

@@ -35,6 +35,10 @@ class BlogPost(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['is_published', 'language'], name='blog_post_pub_lang_idx'),
+            models.Index(fields=['is_featured'], name='blog_post_featured_idx'),
+        ]
 
     def __str__(self):
         return self.title

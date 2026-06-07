@@ -53,18 +53,21 @@ def post_list(request):
 
 def post_detail(request, slug):
     post = get_object_or_404(BlogPost, slug=slug, is_published=True)
-    BlogPost.objects.filter(pk=post.pk).update(views_count=F('views_count') + 1)
-    post.refresh_from_db(fields=['views_count'])
+    viewed_key = f'viewed_post_{post.pk}'
+    if not request.session.get(viewed_key):
+        BlogPost.objects.filter(pk=post.pk).update(views_count=F('views_count') + 1)
+        post.refresh_from_db(fields=['views_count'])
+        request.session[viewed_key] = True
 
     lang = post.language
-    related = (
+    related = list(
         BlogPost.objects
         .filter(is_published=True, language=lang, category=post.category)
         .exclude(pk=post.pk)
         .select_related('category', 'author')[:3]
     )
-    if not related.exists():
-        related = (
+    if not related:
+        related = list(
             BlogPost.objects
             .filter(is_published=True, language=lang)
             .exclude(pk=post.pk)

@@ -89,10 +89,24 @@
             </div>
             {% endif %}
 
-            {% if expert_profile.certificates %}
+            {% if expert_profile.certificates or expert_profile.cert_number %}
             <div class="bg-white rounded-2xl p-6 border border-gray-100">
                 <h3 class="font-bold text-gray-900 mb-3">{{ T.certificates_lbl }}</h3>
+                {% if expert_profile.cert_number %}
+                <div class="flex items-start gap-3 mb-3 p-3 bg-blue-50 rounded-xl">
+                    <svg class="w-5 h-5 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-semibold text-blue-800">{{ expert_profile.cert_number }}</p>
+                        {% if expert_profile.issuing_body %}<p class="text-xs text-blue-600 mt-0.5">{{ expert_profile.issuing_body }}</p>{% endif %}
+                        {% if expert_profile.cert_expiry %}<p class="text-xs text-gray-500 mt-0.5">{{ T.admin_cert_expiry }} {{ expert_profile.cert_expiry|date:"d.m.Y" }}</p>{% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                {% if expert_profile.certificates %}
                 <p class="text-gray-600 whitespace-pre-line text-sm">{{ expert_profile.certificates }}</p>
+                {% endif %}
             </div>
             {% endif %}
             {% endif %}

@@ -50,11 +50,17 @@ def expert_required(view_func):
 
 @expert_required
 def expert_tools_dashboard(request):
+    from django.db.models import Count, Q, Sum as _Sum
     today = timezone.now().date()
+
+    client_stats = ClientCRM.objects.filter(expert=request.user).aggregate(
+        total=Count('id'),
+        active=Count('id', filter=Q(status='active')),
+    )
+    clients_count = client_stats['total']
+    active_clients = client_stats['active']
     docs_count = GeneratedDocument.objects.filter(expert=request.user).count()
     audits_count = AuditChecklist.objects.filter(expert=request.user).count()
-    clients_count = ClientCRM.objects.filter(expert=request.user).count()
-    active_clients = ClientCRM.objects.filter(expert=request.user, status='active').count()
     proposals_count = Proposal.objects.filter(expert=request.user).count()
 
     # Today's CRM follow-ups
@@ -75,18 +81,16 @@ def expert_tools_dashboard(request):
 
     # This month time logs
     month_start = today.replace(day=1)
-    month_hours = sum(
-        t.hours for t in TimeLog.objects.filter(expert=request.user, date__gte=month_start)
-    ) or Decimal('0')
+    month_hours = TimeLog.objects.filter(
+        expert=request.user, date__gte=month_start
+    ).aggregate(total=_Sum('hours'))['total'] or Decimal('0')
 
     # This month released earnings
-    month_earnings = sum(
-        p.expert_amount for p in Payment.objects.filter(
-            project__expert=request.user,
-            status='released',
-            paid_at__date__gte=month_start,
-        ) if p.expert_amount
-    ) or Decimal('0')
+    month_earnings = Payment.objects.filter(
+        project__expert=request.user,
+        status='released',
+        paid_at__date__gte=month_start,
+    ).aggregate(total=_Sum('expert_amount'))['total'] or Decimal('0')
 
     return render(request, 'expert_tools/dashboard.html', {
         'docs_count': docs_count,

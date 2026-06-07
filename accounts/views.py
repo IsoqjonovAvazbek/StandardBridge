@@ -439,7 +439,7 @@ def admin_panel(request):
         'stats': stats,
         'funnel': funnel,
         'project_stats': project_stats,
-        'pending_experts': expert_profiles.filter(is_verified=False).select_related('user')[:8],
+        'pending_experts': expert_profiles.filter(is_verified=False).select_related('user')[:20],
         'recent_payments': payments.order_by('-created_at').select_related('entrepreneur', 'project')[:8],
         'recent_users': CustomUser.objects.exclude(role='admin').order_by('-created_at')[:10],
         'chart_labels': _json.dumps([m['label'] for m in months_data]),

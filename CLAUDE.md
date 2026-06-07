@@ -237,6 +237,20 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [ ] Payme integratsiya (Click bor, Payme yo'q)
 - [x] Ko'p tillar uchun email shablonlar — CustomUser.preferred_language + 10 funksiya UZ/RU/EN
 
+### Keng ko'lamli yaxshilanishlar (2026-06-07)
+- [x] N+1 fix: `entrepreneur_dashboard` — `all_projects.select_related('expert', 'analysis__local_standard', 'analysis__target_standard')`
+- [x] Blog `post_detail` double-query fix: `related.exists()` → `list() + if not related`
+- [x] Click webhook replay attack himoyasi: `sign_time` timestamp tekshiruvi (1 soatdan o'tgan so'rovlar rad etiladi), `click_prepare` va `click_complete` da
+- [x] `expert_tools_dashboard` aggregate optimizatsiya: 5 ta `count()` → `aggregate(total=Count, active=Count(filter=Q))` + `Sum` aggregate (Python loop yo'q)
+- [x] Blog view deduplication: session-based (`viewed_post_{pk}`) — bir session bir marta ko'rishni oshiradi
+- [x] Blog DB indexes: `BlogPost.Meta.indexes` — `(is_published, language)` composite + `is_featured` index. Migration 0005
+- [x] `accounts/templatetags/labels.py`: `time_ago` filter (last_login → "3 kun oldin"), `days_left` filter (deadline → qolgan kunlar)
+- [x] Expert kartasida `last_login|time_ago` — "X kun/soat oldin faol" ko'rinadi
+- [x] Entrepreneur dashboard active projects: `work_deadline` countdown badge (yashil/sariq/qizil rang)
+- [x] Admin panel pending_experts limit: `[:8]` → `[:20]`, +overflow indicator
+- [x] Expert detail sahifasi: `cert_number/issuing_body/cert_expiry` strukturaviy ko'rinishi (ko'k karta)
+- [x] 74/74 test OK
+
 ### Blog to'liq qayta ishlandi (2026-06-06)
 - [x] BlogComment model (post, author, content, is_approved) + migration 0002
 - [x] BlogLike model (post, user, unique_together) — toggle like/unlike
