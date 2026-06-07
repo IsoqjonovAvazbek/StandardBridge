@@ -34,6 +34,7 @@ urlpatterns = [
         template_name='accounts/password_reset_complete.html',
     ), name='password_reset_complete'),
     # API endpoints
+    path('accounts/api/upload-avatar/', views.upload_avatar, name='upload_avatar'),
     path('accounts/api/notif-count/', views.api_notification_count, name='api_notification_count'),
     path('accounts/api/search/', views.global_search_api, name='global_search_api'),
     path('accounts/api/chat/', views.api_chatbot, name='api_chatbot'),

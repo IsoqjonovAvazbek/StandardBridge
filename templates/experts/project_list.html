@@ -225,9 +225,14 @@
         {% for expert in experts %}
         <div class="bg-white rounded-2xl p-6 border border-gray-100 card-hover">
             <div class="flex items-center gap-4 mb-4">
+                {% if expert.user.avatar %}
+                <img src="{{ expert.user.avatar.url }}" alt="{{ expert.user.get_full_name }}"
+                     class="w-14 h-14 rounded-full object-cover flex-shrink-0 border border-gray-200">
+                {% else %}
                 <div class="w-14 h-14 rounded-full gradient-bg flex items-center justify-center flex-shrink-0">
                     <span class="text-white font-bold text-lg">{{ expert.user.first_name|first }}{{ expert.user.last_name|first }}</span>
                 </div>
+                {% endif %}
                 <div>
                     <h3 class="font-bold text-gray-900">{{ expert.user.get_full_name }}</h3>
                     <p class="text-gray-500 text-sm">{{ expert.region }}</p>

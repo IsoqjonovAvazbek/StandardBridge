@@ -160,8 +160,26 @@
 
         <div class="p-5 border-b border-gray-100">
             <div class="flex items-center gap-3 mb-3">
-                <div class="w-11 h-11 rounded-full gradient-bg flex items-center justify-center flex-shrink-0">
-                    <span class="text-white font-bold">{{ user.first_name|first }}{{ user.last_name|first }}</span>
+                <div class="relative group w-11 h-11 flex-shrink-0">
+                    {% if user.avatar %}
+                    <img id="sidebar-avatar" src="{{ user.avatar.url }}" alt="avatar"
+                         class="w-11 h-11 rounded-full object-cover border-2 border-gray-100">
+                    {% else %}
+                    <div id="sidebar-avatar-initials" class="w-11 h-11 rounded-full gradient-bg flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">{{ user.first_name|first }}{{ user.last_name|first }}</span>
+                    </div>
+                    {% endif %}
+                    <label for="avatar-file-input"
+                        class="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center
+                               opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+                        title="Rasm o'zgartirish">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </label>
+                    <input type="file" id="avatar-file-input" accept="image/*" class="hidden" onchange="sbUploadAvatar(this)">
                 </div>
                 <div class="min-w-0">
                     <p class="font-bold text-gray-900 text-sm truncate">{{ user.get_full_name }}</p>
@@ -541,6 +559,87 @@ function syncDarkIcons(){
     if(sun)  sun.classList.toggle('hidden', !isDark);
 }
 document.addEventListener('DOMContentLoaded', syncDarkIcons);
+
+/* ── Avatar upload ── */
+function sbUploadAvatar(input) {
+    var file = input.files[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+        sbAvatarToast('Rasm 3 MB dan katta bo\'lmasligi kerak', true);
+        return;
+    }
+    var fd = new FormData();
+    fd.append('avatar', file);
+    var m = document.cookie.match(/csrftoken=([^;]+)/);
+    if (m) fd.append('csrfmiddlewaretoken', m[1]);
+    else {
+        var t = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (t) fd.append('csrfmiddlewaretoken', t.value);
+    }
+    // Oldindan ko'rsatish (preview)
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var img = document.getElementById('sidebar-avatar');
+        var initials = document.getElementById('sidebar-avatar-initials');
+        if (!img) {
+            // Initials div ni img bilan almashtirish
+            var newImg = document.createElement('img');
+            newImg.id = 'sidebar-avatar';
+            newImg.className = 'w-11 h-11 rounded-full object-cover border-2 border-gray-100';
+            newImg.alt = 'avatar';
+            if (initials) initials.replaceWith(newImg);
+            img = newImg;
+        }
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    fetch('/accounts/api/upload-avatar/', { method: 'POST', body: fd })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.ok) {
+                sbAvatarToast('Rasm saqlandi!');
+                // Navbar ikonkasini ham yangilash (agar img bo'lsa)
+                var navImg = document.getElementById('navbar-avatar');
+                if (navImg) navImg.src = d.url + '?t=' + Date.now();
+                var sideImg = document.getElementById('sidebar-avatar');
+                if (sideImg) sideImg.src = d.url + '?t=' + Date.now();
+            } else {
+                sbAvatarToast(d.error || 'Xatolik yuz berdi', true);
+            }
+        })
+        .catch(function() { sbAvatarToast('Xatolik yuz berdi', true); });
+}
+function sbSyncProfileAvatar(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var img = document.getElementById('profile-avatar-img');
+        var initials = document.getElementById('profile-avatar-initials');
+        if (!img) {
+            var newImg = document.createElement('img');
+            newImg.id = 'profile-avatar-img';
+            newImg.className = 'w-24 h-24 rounded-full object-cover border-2 border-gray-200';
+            newImg.alt = 'avatar';
+            if (initials) initials.replaceWith(newImg);
+            img = newImg;
+        }
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+function sbAvatarToast(msg, isError) {
+    var t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);' +
+        'background:' + (isError ? '#ef4444' : '#22c55e') + ';color:#fff;' +
+        'padding:10px 20px;border-radius:10px;font-size:13px;z-index:99999;' +
+        'box-shadow:0 4px 12px rgba(0,0,0,.2);';
+    document.body.appendChild(t);
+    setTimeout(function() { t.style.opacity='0'; t.style.transition='opacity .4s'; }, 2200);
+    setTimeout(function() { t.remove(); }, 2700);
+}
 
 /* ── PWA service worker ── */
 if('serviceWorker' in navigator){

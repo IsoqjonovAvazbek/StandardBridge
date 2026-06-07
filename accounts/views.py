@@ -743,6 +743,60 @@ def dashboard(request):
         return redirect('entrepreneur_dashboard')
 
 @login_required
+@require_POST
+def upload_avatar(request):
+    """AJAX: foydalanuvchi profil rasmini yuklash va qirqish."""
+    f = request.FILES.get('avatar')
+    if not f:
+        return JsonResponse({'ok': False, 'error': 'Fayl tanlanmadi'}, status=400)
+
+    # Hajm tekshiruvi: max 3 MB
+    if f.size > 3 * 1024 * 1024:
+        return JsonResponse({'ok': False, 'error': 'Rasm 3 MB dan katta bo\'lmasligi kerak'}, status=400)
+
+    # Tur tekshiruvi
+    if not f.content_type.startswith('image/'):
+        return JsonResponse({'ok': False, 'error': 'Faqat rasm fayllari qabul qilinadi'}, status=400)
+
+    try:
+        from PIL import Image
+        import io
+        from django.core.files.base import ContentFile
+
+        img = Image.open(f).convert('RGB')
+
+        # Kvadrat crop — markazdan
+        w, h = img.size
+        side = min(w, h)
+        left = (w - side) // 2
+        top = (h - side) // 2
+        img = img.crop((left, top, left + side, top + side))
+
+        # 400×400 ga resize
+        img = img.resize((400, 400), Image.LANCZOS)
+
+        buf = io.BytesIO()
+        img.save(buf, format='JPEG', quality=88, optimize=True)
+        buf.seek(0)
+
+        # Eski rasmni o'chirish
+        user = request.user
+        if user.avatar:
+            try:
+                user.avatar.delete(save=False)
+            except Exception:
+                pass
+
+        fname = f'avatar_{user.pk}.jpg'
+        user.avatar.save(fname, ContentFile(buf.read()), save=True)
+
+        return JsonResponse({'ok': True, 'url': user.avatar.url})
+    except Exception as e:
+        logger.exception('Avatar upload xatosi: %s', e)
+        return JsonResponse({'ok': False, 'error': 'Rasm saqlanmadi, qayta urinib ko\'ring'}, status=500)
+
+
+@login_required
 def api_notification_count(request):
     from experts.models import Notification
     count = Notification.objects.filter(user=request.user, is_read=False).count()

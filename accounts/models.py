@@ -21,6 +21,9 @@ class CustomUser(AbstractUser):
     preferred_language = models.CharField(max_length=5, choices=LANG_CHOICES, default='uz')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Avatar
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+
     # Email verification
     is_email_verified = models.BooleanField(default=True)
     email_verify_token = models.CharField(max_length=72, blank=True, db_index=True)

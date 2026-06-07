@@ -14,11 +14,16 @@
         <!-- Chap — mutaxassis info -->
         <div class="space-y-6">
             <div class="bg-white rounded-2xl p-6 border border-gray-100 text-center">
+                {% if expert_user.avatar %}
+                <img src="{{ expert_user.avatar.url }}" alt="{{ expert_user.get_full_name }}"
+                     class="w-20 h-20 rounded-full object-cover mx-auto mb-4 border-2 border-gray-200">
+                {% else %}
                 <div class="w-20 h-20 rounded-full gradient-bg flex items-center justify-center mx-auto mb-4">
                     <span class="text-white font-bold text-2xl">
                         {{ expert_user.first_name|first }}{{ expert_user.last_name|first }}
                     </span>
                 </div>
+                {% endif %}
                 <h2 class="font-bold text-gray-900 text-xl">{{ expert_user.get_full_name }}</h2>
                 {% if expert_profile %}
                 <p class="text-gray-500 text-sm mt-1">{{ expert_profile.get_region_display }}</p>
