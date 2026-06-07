@@ -370,6 +370,24 @@ def send_analysis_ready_email(analysis):
     _send(subject, body, user.email)
 
 
+def send_counter_offer_to_expert(project):
+    """Tadbirkor qarshi taklif yuborganda expertga email."""
+    expert = project.expert
+    if not expert or not expert.email:
+        return
+    url = f"{SITE_URL}/experts/projects/{project.pk}/"
+    subject = f"StandartBridge: Loyiha #{project.pk} — qarshi taklif"
+    body = (
+        f"Salom {expert.get_full_name()},\n\n"
+        f"Tadbirkor loyiha #{project.pk} uchun qarshi taklif yubordi:\n"
+        f"  Yangi narx taklifi: ${project.counter_price}\n"
+        f"  Izoh: {project.counter_message or '—'}\n\n"
+        f"Qabul qilish yoki rad etish uchun:\n{url}\n\n"
+        "StandartBridge jamoasi"
+    )
+    _send(subject, body, expert.email)
+
+
 def send_dispute_resolved(dispute, decision):
     project = dispute.project
     pk = project.pk

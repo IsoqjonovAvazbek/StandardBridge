@@ -56,6 +56,7 @@ class Project(models.Model):
     counter_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     counter_message = models.TextField(blank=True)
     counter_status = models.CharField(max_length=20, choices=COUNTER_STATUS_CHOICES, default='none')
+    counter_rounds = models.PositiveSmallIntegerField(default=0)
 
     def save(self, *args, **kwargs):
         if self.expert_price:

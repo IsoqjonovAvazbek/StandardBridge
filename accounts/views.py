@@ -530,6 +530,37 @@ def entrepreneur_profile_view(request):
 
 
 @login_required
+def bulk_verify_experts(request):
+    """Admin bir vaqtda bir nechta expertni tasdiqlaydi."""
+    if not (request.user.is_staff or request.user.is_admin()):
+        return redirect('dashboard')
+    if request.method == 'POST':
+        from django.utils import timezone as _tz
+        pks = request.POST.getlist('expert_pks')
+        action = request.POST.get('action', 'verify')
+        if not pks:
+            messages.warning(request, 'Hech bir expert tanlanmadi.')
+            return redirect('admin_panel')
+        profiles = ExpertProfile.objects.filter(pk__in=pks)
+        count = 0
+        for profile in profiles:
+            if action == 'verify' and not profile.is_verified:
+                profile.is_verified = True
+                profile.verified_at = _tz.now()
+                profile.save(update_fields=['is_verified', 'verified_at'])
+                send_expert_verified(profile.user)
+                count += 1
+            elif action == 'reject' and profile.is_verified:
+                profile.is_verified = False
+                profile.verified_at = None
+                profile.save(update_fields=['is_verified', 'verified_at'])
+                count += 1
+        action_word = 'tasdiqlandi' if action == 'verify' else 'tasdiq bekor qilindi'
+        messages.success(request, f'{count} ta expert {action_word}.')
+    return redirect('admin_panel')
+
+
+@login_required
 def verify_expert_action(request, pk):
     if not (request.user.is_staff or request.user.is_admin()):
         return redirect('dashboard')
@@ -715,6 +746,7 @@ def api_notification_count(request):
     return JsonResponse({'count': count})
 
 
+@login_required
 def global_search_api(request):
     q = request.GET.get('q', '').strip()
     if len(q) < 2:

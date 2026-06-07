@@ -6,7 +6,29 @@
 {% if is_expert %}
 
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-6">{{ T.my_projects_title }}</h1>
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">{{ T.my_projects_title }}</h1>
+    </div>
+    <!-- Filter va qidiruv -->
+    <form method="GET" class="flex flex-wrap gap-3 mb-6">
+        <input type="text" name="search" value="{{ ex_search }}"
+            placeholder="Tadbirkor nomi yoki standart..."
+            class="flex-1 min-w-[180px] px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+        <select name="status" onchange="this.form.submit()"
+            class="px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+            <option value="">Barcha statuslar</option>
+            <option value="pending" {% if ex_status == 'pending' %}selected{% endif %}>Kutilmoqda</option>
+            <option value="negotiating" {% if ex_status == 'negotiating' %}selected{% endif %}>Kelishuv</option>
+            <option value="in_progress" {% if ex_status == 'in_progress' %}selected{% endif %}>Jarayonda</option>
+            <option value="review" {% if ex_status == 'review' %}selected{% endif %}>Tekshiruvda</option>
+            <option value="completed" {% if ex_status == 'completed' %}selected{% endif %}>Bajarilgan</option>
+            <option value="cancelled" {% if ex_status == 'cancelled' %}selected{% endif %}>Bekor qilingan</option>
+        </select>
+        <button type="submit" class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90">Qidirish</button>
+        {% if ex_status or ex_search %}
+        <a href="{% url 'project_list' %}" class="px-4 py-2 border border-gray-300 text-gray-600 rounded-xl text-sm hover:bg-gray-50">Tozalash ✕</a>
+        {% endif %}
+    </form>
     <div class="space-y-4">
         {% for project in projects %}
         <div class="rounded-2xl p-6 card-hover border
@@ -67,6 +89,26 @@
         </div>
         {% endfor %}
     </div>
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-center items-center gap-2 mt-6">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&status={{ ex_status }}&search={{ ex_search }}"
+           class="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition">←</a>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-sm font-medium">{{ num }}</span>
+            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+            <a href="?page={{ num }}&status={{ ex_status }}&search={{ ex_search }}"
+               class="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&status={{ ex_status }}&search={{ ex_search }}"
+           class="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition">→</a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 
 {% else %}

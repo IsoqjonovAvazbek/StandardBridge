@@ -836,8 +836,12 @@ def gap_toggle_resolved(request, pk, gap_pk):
     if request.method == 'POST':
         gap.is_resolved = not gap.is_resolved
         gap.save(update_fields=['is_resolved'])
-        total = analysis.gaps.count()
-        resolved = analysis.gaps.filter(is_resolved=True).count()
+        from django.db.models import Count, Q as _Q
+        agg = analysis.gaps.aggregate(
+            total=Count('id'),
+            resolved=Count('id', filter=_Q(is_resolved=True))
+        )
+        total, resolved = agg['total'], agg['resolved']
         return JsonResponse({
             'is_resolved': gap.is_resolved,
             'resolved': resolved,

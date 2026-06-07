@@ -125,9 +125,12 @@ class ProjectLifecycleTests(TestCase):
         self.assertEqual(p.status, 'in_progress')  # yakunlanmadi
 
     def test_expert_can_complete_after_progress(self):
+        from experts.models import Payment
         p = self._project()
+        # To'lov held bo'lishi kerak (yangi guard)
+        Payment.objects.create(project=p, entrepreneur=self.ent, amount=100, status='held')
         rm = Roadmap.objects.create(analysis=self.analysis, total_days=10)
-        s = RoadmapStep.objects.create(roadmap=rm, title='Q1', order=1, duration_days=5, is_completed=True)
+        RoadmapStep.objects.create(roadmap=rm, title='Q1', order=1, duration_days=5, is_completed=True)
         self.client.force_login(self.exp)
         self.client.post(reverse('project_complete', args=[p.pk]))
         p.refresh_from_db()

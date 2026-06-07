@@ -74,7 +74,7 @@ def post_detail(request, slug):
             .select_related('category', 'author')[:3]
         )
 
-    comments = post.comments.filter(is_approved=True).select_related('author')
+    comments = post.comments.filter(is_approved=True).select_related('author').order_by('-created_at')[:50]
     likes_count = post.likes.count()
     user_liked = request.user.is_authenticated and post.likes.filter(user=request.user).exists()
 
@@ -121,7 +121,8 @@ def add_comment(request, slug):
 @require_POST
 def delete_comment(request, comment_pk):
     comment = get_object_or_404(BlogComment, pk=comment_pk)
-    if comment.author_id != request.user.pk and not request.user.is_staff:
+    is_moderator = request.user.is_staff or getattr(request.user, 'role', '') == 'admin'
+    if comment.author_id != request.user.pk and not is_moderator:
         return JsonResponse({'error': 'forbidden'}, status=403)
     comment.delete()
     return JsonResponse({'deleted': True})

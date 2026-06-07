@@ -21,6 +21,7 @@ from accounts.models import ExpertProfile
 from .emails import (
     send_project_to_expert, send_price_set_to_entrepreneur,
     send_payment_confirmed_to_expert, send_project_completed_to_entrepreneur,
+    send_counter_offer_to_expert,
 )
 
 
@@ -70,13 +71,33 @@ def project_list(request):
     from accounts.models import ExpertProfile
 
     if request.user.is_expert():
-        projects = Project.objects.filter(expert=request.user).order_by('-created_at')
+        from django.core.paginator import Paginator
+        from django.db.models import Q as _EQ
+        ex_status = request.GET.get('status', '')
+        ex_search = request.GET.get('search', '')
+        projects_qs = Project.objects.filter(expert=request.user).select_related(
+            'entrepreneur', 'analysis__local_standard', 'analysis__target_standard'
+        ).order_by('-created_at')
+        if ex_status:
+            projects_qs = projects_qs.filter(status=ex_status)
+        if ex_search:
+            projects_qs = projects_qs.filter(
+                _EQ(entrepreneur__first_name__icontains=ex_search) |
+                _EQ(entrepreneur__last_name__icontains=ex_search) |
+                _EQ(entrepreneur__company_name__icontains=ex_search) |
+                _EQ(analysis__target_standard__code__icontains=ex_search)
+            )
+        ex_paginator = Paginator(projects_qs, 15)
+        ex_page_obj = ex_paginator.get_page(request.GET.get('page', 1))
         return render(request, 'experts/project_list.html', {
-            'projects': projects,
+            'projects': ex_page_obj,
+            'page_obj': ex_page_obj,
             'experts': [],
             'region_choices': ExpertProfile.REGION_CHOICES,
             'selected_region': '',
             'is_expert': True,
+            'ex_status': ex_status,
+            'ex_search': ex_search,
             'latest_analysis': latest_analysis,
         })
 
@@ -286,6 +307,8 @@ def project_step_toggle(request, pk, step_pk):
     else:
         return JsonResponse({'error': 'forbidden'}, status=403)
 
+    if project.status == 'completed':
+        return JsonResponse({'error': 'Yakunlangan loyihada o\'zgartirish mumkin emas'}, status=403)
     if project.status not in ('in_progress', 'review'):
         return JsonResponse({'error': 'invalid status'}, status=400)
 
@@ -404,6 +427,10 @@ def project_counter_offer(request, pk):
         messages.warning(request, 'Oldingi qarshi taklifingiz hali ko\'rib chiqilmagan. Mutaxassis javobini kuting.')
         return redirect('project_detail', pk=pk)
 
+    if project.counter_rounds >= 3:
+        messages.error(request, 'Maksimal kelishuv (3 ta) turi tugadi. Narxni qabul qiling yoki loyihani bekor qiling.')
+        return redirect('project_detail', pk=pk)
+
     if request.method == 'POST':
         try:
             counter_price = Decimal(str(request.POST.get('counter_price', '0')))
@@ -422,6 +449,7 @@ def project_counter_offer(request, pk):
         project.counter_price = counter_price
         project.counter_message = request.POST.get('counter_message', '').strip()
         project.counter_status = 'pending'
+        project.counter_rounds = project.counter_rounds + 1
         project.save()
 
         Notification.objects.create(
@@ -429,6 +457,7 @@ def project_counter_offer(request, pk):
             title='Tadbirkor qarshi taklif yubordi!',
             message=f'{request.user.get_full_name()} loyiha #{project.pk} uchun ${counter_price} taklif qildi.'
         )
+        send_counter_offer_to_expert(project)
         messages.success(request, f'Qarshi taklif yuborildi: ${counter_price}. Mutaxassis javobini kuting.')
     return redirect('project_detail', pk=pk)
 
@@ -591,8 +620,17 @@ def project_complete(request, pk):
     project = get_object_or_404(Project, pk=pk, expert=request.user)
 
     if request.method == 'POST' and project.status == 'in_progress':
+        # Guard: to'lov held bo'lmasa yakunlash mumkin emas
+        try:
+            _pay = project.payment
+            if _pay.status not in ('held', 'released'):
+                messages.error(request, 'To\'lov escrowga kirmagan. Tadbirkor to\'lov qilishi kerak!')
+                return redirect('project_detail', pk=pk)
+        except Payment.DoesNotExist:
+            messages.error(request, 'To\'lov topilmadi. Tadbirkor avval to\'lov qilishi kerak!')
+            return redirect('project_detail', pk=pk)
+
         # Guard: agar roadmap bo'lsa, hech bo'lmasa bitta qadam bajarilgan bo'lsin
-        # (expert hech narsa qilmasdan "yakunladim" deya olmasligi uchun)
         from analysis.models import Roadmap
         try:
             roadmap = project.analysis.roadmap
@@ -719,13 +757,15 @@ def payment_page(request, project_pk):
     # Payment ob'ekti har doim yaratilishi kerak (Click yoki mock uchun)
     if project.status == 'accepted':
         if not payment:
-            payment = Payment.objects.create(
+            payment, _ = Payment.objects.get_or_create(
                 project=project,
-                entrepreneur=request.user,
-                amount=project.expert_price,
-                status='pending',
+                defaults={
+                    'entrepreneur': request.user,
+                    'amount': project.expert_price,
+                    'status': 'pending',
+                }
             )
-        elif payment.status == 'pending' and payment.amount != project.expert_price:
+        if payment.status == 'pending' and payment.amount != project.expert_price:
             payment.amount = project.expert_price
             payment.save(update_fields=['amount', 'platform_fee', 'expert_amount'])
 
@@ -756,6 +796,11 @@ def payment_confirm(request, project_pk):
     # Guard: only allow payment when status is 'accepted'
     if project.status != 'accepted':
         messages.warning(request, 'Loyiha to\'lov qilishga tayyor emas!')
+        return redirect('project_detail', pk=project_pk)
+
+    # Guard: expert tayinlanmagan bo'lsa to'lov qilinmaydi
+    if not project.expert:
+        messages.error(request, 'Mutaxassis tayinlanmagan. Admin bilan bog\'laning.')
         return redirect('project_detail', pk=project_pk)
 
     with transaction.atomic():
@@ -1110,12 +1155,12 @@ def expert_detail(request, expert_pk):
         from analysis.models import GapAnalysis
         analysis = get_object_or_404(GapAnalysis, pk=analysis_id, entrepreneur=request.user)
 
-        # Prevent sending the same analysis to the same expert twice
+        # Prevent sending the same analysis to the same expert twice (allow re-send only after completed)
         existing = Project.objects.filter(
             analysis=analysis,
             entrepreneur=request.user,
             expert=expert_user,
-        ).exclude(status='cancelled').first()
+        ).exclude(status__in=['cancelled', 'completed']).first()
         if existing:
             messages.warning(request, 'Bu tahlil allaqachon bu mutaxassisga yuborilgan!')
             return redirect('project_detail', pk=existing.pk)
@@ -1138,7 +1183,7 @@ def expert_detail(request, expert_pk):
         messages.success(request, 'Tahlil mutaxassisga yuborildi! Narx belgilanishini kuting.')
         return redirect('project_detail', pk=project.pk)
 
-    reviews = Review.objects.filter(expert=expert_user).order_by('-created_at')
+    reviews = Review.objects.filter(expert=expert_user).select_related('entrepreneur').order_by('-created_at')[:30]
 
     return render(request, 'experts/expert_detail.html', {
         'expert_user': expert_user,

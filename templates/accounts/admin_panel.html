@@ -97,10 +97,16 @@
                     {{ pending_experts|length }}
                 </span>
             </div>
+            {% if pending_experts %}
+            <form method="POST" action="{% url 'bulk_verify_experts' %}" id="bulk-verify-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="verify" id="bulk-action-val">
             <div class="space-y-3">
                 {% for profile in pending_experts %}
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                     <div class="flex items-center gap-3 min-w-0">
+                        <input type="checkbox" name="expert_pks" value="{{ profile.pk }}"
+                               class="bulk-check accent-blue-600 w-4 h-4 flex-shrink-0">
                         <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center flex-shrink-0">
                             <span class="text-white text-xs font-bold">{{ profile.user.first_name|first }}{{ profile.user.last_name|first }}</span>
                         </div>
@@ -124,10 +130,21 @@
                         </button>
                     </form>
                 </div>
-                {% empty %}
-                <p class="text-gray-400 text-sm text-center py-4">{{ T.admin_all_verified }}</p>
                 {% endfor %}
             </div>
+            <div class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                <label class="text-xs text-gray-500 flex items-center gap-1 cursor-pointer">
+                    <input type="checkbox" id="bulk-check-all" class="accent-blue-600"> Barchasini tanlash
+                </label>
+                <button type="submit" onclick="document.getElementById('bulk-action-val').value='verify'"
+                    class="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition ml-auto">
+                    Tanlanganlarni tasdiqlash
+                </button>
+            </div>
+            </form>
+            {% else %}
+            <p class="text-gray-400 text-sm text-center py-4">{{ T.admin_all_verified }}</p>
+            {% endif %}
             {% if stats.unverified_experts > pending_experts|length %}
             <p class="text-xs text-gray-400 text-center mt-3">
                 +{{ stats.unverified_experts|add:"-20" }} ta ko'rsatilmagan — Django admin'dan ko'rish
@@ -465,5 +482,15 @@ new Chart(document.getElementById('revenueChart'), {
         scales: { y: { beginAtZero: true } }
     }
 });
+
+// Bulk expert checkbox
+var checkAll = document.getElementById('bulk-check-all');
+if (checkAll) {
+    checkAll.addEventListener('change', function() {
+        document.querySelectorAll('.bulk-check').forEach(function(cb) {
+            cb.checked = checkAll.checked;
+        });
+    });
+}
 </script>
 {% endblock %}

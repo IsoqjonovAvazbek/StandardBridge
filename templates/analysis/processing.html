@@ -19,7 +19,7 @@
 
         <h1 class="text-3xl font-bold text-white mb-3">{{ T.ai_analyzing }}</h1>
         <p class="text-blue-200 text-lg mb-2">{{ T.ai_time_hint }}</p>
-        <p class="text-blue-300 text-sm mb-10"></p>
+        <p class="text-blue-300 text-sm mb-10" id="elapsed-timer">⏱ 0 soniya o'tdi...</p>
 
         <!-- Error / retry box -->
         <div id="error-box" class="max-w-sm mx-auto bg-white rounded-2xl p-6 shadow-xl {% if not has_error %}hidden{% endif %}">
@@ -65,6 +65,14 @@
 const statusUrl = "{% url 'analysis_status' analysis.pk %}";
 const detailUrl = "{% url 'analysis_detail' analysis.pk %}";
 let stepIndex = 1;
+
+// Elapsed timer
+var _startTime = Date.now();
+var _timerEl = document.getElementById('elapsed-timer');
+setInterval(function() {
+    var sec = Math.floor((Date.now() - _startTime) / 1000);
+    if (_timerEl) _timerEl.textContent = '⏱ ' + sec + ' soniya o\'tdi...';
+}, 1000);
 const stepTimings = [2000, 5000, 9000];
 
 function markStep(n) {
