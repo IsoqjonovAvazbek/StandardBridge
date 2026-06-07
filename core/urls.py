@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse, FileResponse, Http404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import cache_control
 from django.contrib.sitemaps.views import sitemap
 from django.views.generic import TemplateView
 from blog.sitemaps import BlogPostSitemap, StaticSitemap
@@ -17,6 +18,16 @@ _sitemaps = {
 
 def health_check(request):
     return JsonResponse({'status': 'ok'})
+
+
+@cache_control(no_cache=True, must_revalidate=True)
+def service_worker_view(request):
+    sw_path = os.path.join(settings.BASE_DIR, 'static', 'sw.js')
+    if not os.path.isfile(sw_path):
+        raise Http404
+    response = FileResponse(open(sw_path, 'rb'), content_type='application/javascript')
+    response['Service-Worker-Allowed'] = '/'
+    return response
 
 
 @login_required
@@ -35,6 +46,8 @@ def protected_media(request, path):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('health/', health_check, name='health_check'),
+    path('sw.js', service_worker_view, name='service_worker'),
+    path('offline/', TemplateView.as_view(template_name='pwa/offline.html'), name='pwa_offline'),
     path('sitemap.xml', sitemap, {'sitemaps': _sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
     path('', include('accounts.urls')),
