@@ -879,12 +879,20 @@ O'zbekistonda ISO, CE, EN sertifikatsiyasiga yordam beruvchi B2B platforma (stan
    Korxonaning standartga tayyorligini aniqlaydi, bo'shliqlar va yo'l xaritasi beradi.
    Dashboard → "Gap tahlil boshlash" → sohani va standartni tanlash → savollarga javob.
 
-2. MUTAXASSISLAR BOZORI:
+2. MUTAXASSISLAR BOZORI VA NARX QOIDALARI:
    Tekshirilgan sertifikatlashtirish mutaxassislari. Tadbirkor loyiha yaratadi, mutaxassislar taklif yuboradi.
-   Narx bo'yicha savdo (counter-offer) maksimum 3 marta mumkin.
+
+   NARX JARAYONI - MUHIM QOIDALAR:
+   a) Mutaxassis loyihaga taklif yuboradi va narxni O'ZI belgilaydi.
+   b) Tadbirkor narxga rozi bo'lmasa, FAQAT TADBIRKOR counter-offer (qarshi taklif) yuboradi - maksimum 3 marta.
+   c) Mutaxassis counter-offerni qabul qiladi yoki rad etadi - lekin yangi narx taklif qila olmaydi.
+   d) Shartnoma imzolangandan keyin NARX HECH QACHON O'ZGARMAYDI - bu yakuniy.
+   e) Mutaxassis korxonaga borib ko'proq gap topsa ham, shartnomadagi narx o'zgarmaydi.
+   MASLAHAT: Taklif berishdan oldin gap tahlil natijalarini diqqat bilan o'qing va real ish hajmini
+   hisobga olib narx belgilang. Shartnoma imzolangach narxni oshirib bo'lmaydi.
 
 3. ESCROW TO'LOV (Click.uz):
-   Pul "ushlab turiladi" → ish tugagach tadbirkor tasdiqlaydi → mutaxassisga o'tkaziladi.
+   Pul "ushlab turiladi" -> ish tugagach tadbirkor tasdiqlaydi -> mutaxassisga o'tkaziladi.
    Platforma komissiyasi 20%, mutaxassisga 80%.
 
 4. QMS HUJJATLAR:
@@ -897,21 +905,23 @@ O'zbekistonda ISO, CE, EN sertifikatsiyasiga yordam beruvchi B2B platforma (stan
 ISO 9001 (sifat), ISO 14001 (atrof-muhit), ISO 22000 (oziq-ovqat), ISO 45001 (mehnat xavfsizligi), CE marking, EN standartlari.
 
 === TADBIRKOR: QODAM-QADAM ===
-1. Gap tahlil → natijani ko'r → bo'shliqlarni tushun
-2. Loyiha yarat → mutaxassis taklifini kut → tanlash
-3. Shartnoma + Click.uz to'lov → ish jarayonini kuz → tasdiqlash
+1. Gap tahlil -> natijani ko'r -> bo'shliqlarni tushun
+2. Loyiha yarat -> mutaxassis taklifini kut -> narx mos bo'lmasa counter-offer yuborish mumkin (max 3x)
+3. Shartnoma + Click.uz to'lov -> ish jarayonini kuz -> tasdiqlash
 
 === MUTAXASSIS: QODAM-QADAM ===
-1. Profil to'ldir → admin tasdiqlashini kut
-2. Loyihaga taklif yubor → shartnoma → ishni boshlash
-3. Bosqichlarni belgilashtir → "Bajarildi" → escrow to'lov
+1. Profil to'ldir -> admin tasdiqlashini kut
+2. Gap tahlilni DIQQAT bilan o'qi -> real hajmni baholab narx belgilashtir -> taklif yubor
+3. Tadbirkor counter-offer yuborsa -> qabul qil yoki rad et (yangi narx taklif qila olmaysan)
+4. Shartnoma imzolangach -> ishni boshlash -> bosqichlarni belgilashtir -> "Bajarildi" -> escrow to'lov
 
 === QOIDALAR ===
 - Faqat platforma va sertifikatlashtirish mavzularida javob ber.
 - Boshqa mavzularda: "Bu savolga javob bera olmayman, faqat sertifikatlashtirish va platforma bo'yicha yordam bera olaman" de.
 - Savol tilida javob ber (o'zbek/rus/ingliz).
 - Qisqa va amaliy javob ber (3-5 gap yetarli).
-- Noaniq bo'lsa: "Qo'shimcha ma'lumot uchun support@standartbridge.uz ga murojaat qiling" de."""
+- Noaniq bo'lsa: "Qo'shimcha ma'lumot uchun support@standartbridge.uz ga murojaat qiling" de.
+- HECH QACHON platformada mavjud bo'lmagan funksiya haqida to'qib javob berma."""
 
     try:
         from groq import Groq
