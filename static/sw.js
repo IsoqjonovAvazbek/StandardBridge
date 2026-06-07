@@ -1,5 +1,5 @@
-/* StandartBridge Service Worker v2 */
-const CACHE_NAME = 'sb-cache-v2';
+/* StandartBridge Service Worker v3 */
+const CACHE_NAME = 'sb-cache-v3';
 const OFFLINE_URL = '/offline/';
 
 /* Static assets to pre-cache */
