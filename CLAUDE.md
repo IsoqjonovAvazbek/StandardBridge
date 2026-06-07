@@ -237,6 +237,24 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [ ] Payme integratsiya (Click bor, Payme yo'q)
 - [x] Ko'p tillar uchun email shablonlar — CustomUser.preferred_language + 10 funksiya UZ/RU/EN
 
+### Keng ko'lamli yaxshilanishlar — 3-bosqich (2026-06-07, commit ec62192)
+- [x] S1: global_search_api ga @login_required (avval anonim foydalanuvchi ma'lumot olardi)
+- [x] B1: payment_page — get_or_create (parallel so'rovda ikki Payment yaratilishini oldini oladi)
+- [x] B2: project_complete — payment.status='held' tekshiruvi (to'lovsiz yakunlash bloklanadi)
+- [x] B3: payment_confirm — project.expert=None bo'lsa to'lov bloklanadi
+- [x] Counter-offer: max 3 round limit + `counter_rounds` maydon (migration 0011)
+- [x] Counter-offer: expertga email (send_counter_offer_to_expert)
+- [x] Completed loyihadan keyin xuddi shu expertga qayta yuborish imkoni (avval blok edi)
+- [x] delete_comment: is_admin() tekshiruvi qo'shildi (avval faqat is_staff)
+- [x] roadmap step toggle: completed loyihada bloklash
+- [x] gap_toggle_resolved: aggregate() bilan 1 ta query (avval 2 ta count())
+- [x] expert_detail reviews: select_related + [:30] limit
+- [x] blog comments: [:50] limit + tartib
+- [x] Expert project_list: status filter + qidiruv (tadbirkor nomi/standart) + pagination
+- [x] Admin panel: bulk expert tasdiqlash (checkbox + "Barchasini tanlash")
+- [x] AI processing sahifasi: vaqt hisoblagich ("X soniya o'tdi...")
+- [x] 74/74 test OK
+
 ### Keng ko'lamli yaxshilanishlar — 2-bosqich (2026-06-07, commit 2d1d77f)
 - [x] C7: Referral sahifasi pagination — Paginator(20/page), prev/next tugmalar, view + template yangilandi
 - [x] D1: Click.uz webhook IP whitelist — `_CLICK_ALLOWED_IPS` set, X-Forwarded-For dan IP olish, log warning
