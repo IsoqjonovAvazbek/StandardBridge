@@ -169,7 +169,8 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = f'StandartBridge <{os.environ.get("EMAIL_HOST_USER", "noreply@standartbridge.uz")}>'
 
-# AI (Groq) — javob kutish vaqti (soniya). Sekin javobda cheksiz kutmaslik uchun.
+# AI (Groq)
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
 AI_TIMEOUT = int(os.environ.get('AI_TIMEOUT', '45'))
 
 # Karta raqamlarini shifrlash uchun Fernet kalit
