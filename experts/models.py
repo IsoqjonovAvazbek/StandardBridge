@@ -283,6 +283,28 @@ class WalletTransaction(models.Model):
         return f"{self.get_transaction_type_display()} ${self.amount} — {self.wallet.user.get_full_name()}"
 
 
+class ScopeRequest(models.Model):
+    """Expert sends additional scope request when real work is larger than analyzed gaps."""
+    STATUS_CHOICES = [
+        ('pending',  'Javob kutilmoqda'),
+        ('accepted', 'Qabul qilindi'),
+        ('rejected', 'Rad etildi'),
+    ]
+    project    = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='scope_requests')
+    expert     = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='sent_scope_requests')
+    reason     = models.TextField()
+    extra_price = models.DecimalField(max_digits=12, decimal_places=2)
+    status     = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"ScopeRequest #{self.pk} — Loyiha #{self.project_id} ({self.status})"
+
+
 class Dispute(models.Model):
     """Entrepreneur can open a dispute if they are not satisfied with the work."""
     STATUS_CHOICES = [

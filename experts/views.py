@@ -15,13 +15,14 @@ from decimal import Decimal, InvalidOperation
 logger = logging.getLogger('standardbridge')
 from .models import (
     Project, ProjectUpdate, Document, Notification, Payment,
-    Wallet, WalletTransaction, Review, WithdrawalRequest, Dispute,
+    Wallet, WalletTransaction, Review, WithdrawalRequest, Dispute, ScopeRequest,
 )
 from accounts.models import ExpertProfile
 from .emails import (
     send_project_to_expert, send_price_set_to_entrepreneur,
     send_payment_confirmed_to_expert, send_project_completed_to_entrepreneur,
     send_counter_offer_to_expert,
+    send_scope_request_to_entrepreneur, send_scope_request_response_to_expert,
 )
 
 
@@ -281,6 +282,9 @@ def project_detail(request, pk):
     project_steps = [(s, step_labels[s]) for s in STATUS_ORDER]
     project_done_steps = set(STATUS_ORDER[:current_idx])
 
+    scope_requests = project.scope_requests.all()
+    pending_scope_request = scope_requests.filter(status='pending').first()
+
     context = {
         'project': project,
         'updates': updates,
@@ -295,6 +299,8 @@ def project_detail(request, pk):
         'entrepreneur_profile': entrepreneur_profile,
         'project_steps': project_steps,
         'project_done_steps': project_done_steps,
+        'scope_requests': scope_requests,
+        'pending_scope_request': pending_scope_request,
     }
     return render(request, 'experts/project_detail.html', context)
 
@@ -1589,3 +1595,89 @@ def project_contract(request, pk):
         messages.error(request, 'Shartnoma faqat qabul qilingan loyihalar uchun mavjud.')
         return redirect('project_detail', pk=pk)
     return render(request, 'experts/contract_print.html', {'project': project})
+
+
+@login_required
+def scope_request_send(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+    if request.user != project.expert:
+        messages.error(request, 'Ruxsat yo\'q.')
+        return redirect('project_detail', pk=pk)
+    if project.status not in ('in_progress', 'review'):
+        messages.error(request, 'Faqat jarayondagi loyiha uchun mumkin.')
+        return redirect('project_detail', pk=pk)
+    if request.method != 'POST':
+        return redirect('project_detail', pk=pk)
+
+    reason = request.POST.get('reason', '').strip()
+    extra_price_raw = request.POST.get('extra_price', '').strip()
+    try:
+        extra_price = Decimal(extra_price_raw)
+        if extra_price <= 0:
+            raise ValueError
+    except (InvalidOperation, ValueError):
+        messages.error(request, "Narx noto'g'ri kiritildi.")
+        return redirect('project_detail', pk=pk)
+    if not reason:
+        messages.error(request, 'Sabab kiritish majburiy.')
+        return redirect('project_detail', pk=pk)
+
+    if project.scope_requests.filter(status='pending').exists():
+        messages.error(request, "Allaqachon javob kutilayotgan so'rov bor.")
+        return redirect('project_detail', pk=pk)
+
+    sr = ScopeRequest.objects.create(
+        project=project,
+        expert=request.user,
+        reason=reason,
+        extra_price=extra_price,
+    )
+    Notification.objects.create(
+        user=project.entrepreneur,
+        title=f"Loyiha #{project.pk} — qo'shimcha ish so'rovi",
+        message=f"Mutaxassis +${extra_price} qo'shimcha ish so'rovi yubordi: {reason[:100]}",
+        link=f"/experts/projects/{project.pk}/",
+    )
+    send_scope_request_to_entrepreneur(sr)
+    messages.success(request, "So'rov tadbirkorga yuborildi.")
+    return redirect('project_detail', pk=pk)
+
+
+@login_required
+def scope_request_respond(request, pk, sr_pk):
+    project = get_object_or_404(Project, pk=pk)
+    if request.user != project.entrepreneur:
+        messages.error(request, "Ruxsat yo'q.")
+        return redirect('project_detail', pk=pk)
+    sr = get_object_or_404(ScopeRequest, pk=sr_pk, project=project, status='pending')
+    if request.method != 'POST':
+        return redirect('project_detail', pk=pk)
+
+    action = request.POST.get('action')
+    if action not in ('accept', 'reject'):
+        messages.error(request, "Noto'g'ri amal.")
+        return redirect('project_detail', pk=pk)
+
+    sr.status = 'accepted' if action == 'accept' else 'rejected'
+    sr.responded_at = timezone.now()
+    sr.save(update_fields=['status', 'responded_at'])
+
+    if action == 'accept':
+        Notification.objects.create(
+            user=project.expert,
+            title=f"Loyiha #{project.pk} — so'rovingiz qabul qilindi",
+            message=f"Tadbirkor +${sr.extra_price} so'rovingizni qabul qildi.",
+            link=f"/experts/projects/{project.pk}/",
+        )
+        messages.success(request, f"So'rov qabul qilindi. Tadbirkor +${sr.extra_price} to'lov qiladi.")
+    else:
+        Notification.objects.create(
+            user=project.expert,
+            title=f"Loyiha #{project.pk} — so'rovingiz rad etildi",
+            message="Tadbirkor qo'shimcha ish so'rovini rad etdi.",
+            link=f"/experts/projects/{project.pk}/",
+        )
+        messages.info(request, "So'rov rad etildi.")
+
+    send_scope_request_response_to_expert(sr)
+    return redirect('project_detail', pk=pk)

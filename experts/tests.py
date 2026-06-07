@@ -388,3 +388,101 @@ class DisputeResolutionTests(TestCase):
         )
         self.payment.refresh_from_db()
         self.assertEqual(self.payment.status, 'held')
+
+
+class ScopeRequestTests(TestCase):
+    def setUp(self):
+        self.ent = CustomUser.objects.create_user(username='ent_sr', password='pass', role='entrepreneur')
+        self.exp = CustomUser.objects.create_user(username='exp_sr', password='pass', role='expert')
+        ind = Industry.objects.create(name='Test')
+        std = Standard.objects.create(code='ISO 9001', name='ISO 9001', type='international')
+        analysis = GapAnalysis.objects.create(
+            entrepreneur=self.ent, industry=ind,
+            target_standard=std, status='completed',
+        )
+        self.project = Project.objects.create(
+            analysis=analysis,
+            entrepreneur=self.ent,
+            expert=self.exp,
+            status='in_progress',
+            expert_price=Decimal('500'),
+        )
+        Payment.objects.create(
+            project=self.project,
+            entrepreneur=self.ent,
+            amount=Decimal('500'),
+            status='held',
+        )
+
+    def test_expert_can_send_scope_request(self):
+        self.client.force_login(self.exp)
+        url = reverse('scope_request_send', kwargs={'pk': self.project.pk})
+        resp = self.client.post(url, {'extra_price': '150', 'reason': 'Ko\'shimcha ish topildi'})
+        self.assertEqual(resp.status_code, 302)
+        from .models import ScopeRequest
+        self.assertEqual(ScopeRequest.objects.filter(project=self.project).count(), 1)
+        sr = ScopeRequest.objects.get(project=self.project)
+        self.assertEqual(sr.status, 'pending')
+        self.assertEqual(sr.extra_price, Decimal('150'))
+
+    def test_entrepreneur_cannot_send_scope_request(self):
+        self.client.force_login(self.ent)
+        url = reverse('scope_request_send', kwargs={'pk': self.project.pk})
+        resp = self.client.post(url, {'extra_price': '100', 'reason': 'test'})
+        # Redirect back with error (not expert)
+        self.assertEqual(resp.status_code, 302)
+        from .models import ScopeRequest
+        self.assertEqual(ScopeRequest.objects.count(), 0)
+
+    def test_duplicate_pending_request_blocked(self):
+        from .models import ScopeRequest
+        ScopeRequest.objects.create(
+            project=self.project, expert=self.exp,
+            reason='first', extra_price=Decimal('100'),
+        )
+        self.client.force_login(self.exp)
+        url = reverse('scope_request_send', kwargs={'pk': self.project.pk})
+        self.client.post(url, {'extra_price': '50', 'reason': 'second'})
+        self.assertEqual(ScopeRequest.objects.count(), 1)
+
+    def test_entrepreneur_can_accept_scope_request(self):
+        from .models import ScopeRequest
+        sr = ScopeRequest.objects.create(
+            project=self.project, expert=self.exp,
+            reason='Ko\'shimcha', extra_price=Decimal('200'),
+        )
+        self.client.force_login(self.ent)
+        url = reverse('scope_request_respond', kwargs={'pk': self.project.pk, 'sr_pk': sr.pk})
+        resp = self.client.post(url, {'action': 'accept'})
+        self.assertEqual(resp.status_code, 302)
+        sr.refresh_from_db()
+        self.assertEqual(sr.status, 'accepted')
+
+    def test_entrepreneur_can_reject_scope_request(self):
+        from .models import ScopeRequest
+        sr = ScopeRequest.objects.create(
+            project=self.project, expert=self.exp,
+            reason='Ko\'shimcha', extra_price=Decimal('200'),
+        )
+        self.client.force_login(self.ent)
+        url = reverse('scope_request_respond', kwargs={'pk': self.project.pk, 'sr_pk': sr.pk})
+        resp = self.client.post(url, {'action': 'reject'})
+        self.assertEqual(resp.status_code, 302)
+        sr.refresh_from_db()
+        self.assertEqual(sr.status, 'rejected')
+
+    def test_invalid_extra_price_rejected(self):
+        self.client.force_login(self.exp)
+        url = reverse('scope_request_send', kwargs={'pk': self.project.pk})
+        self.client.post(url, {'extra_price': '-50', 'reason': 'test'})
+        from .models import ScopeRequest
+        self.assertEqual(ScopeRequest.objects.count(), 0)
+
+    def test_wrong_status_project_blocked(self):
+        self.project.status = 'completed'
+        self.project.save()
+        self.client.force_login(self.exp)
+        url = reverse('scope_request_send', kwargs={'pk': self.project.pk})
+        self.client.post(url, {'extra_price': '100', 'reason': 'test'})
+        from .models import ScopeRequest
+        self.assertEqual(ScopeRequest.objects.count(), 0)

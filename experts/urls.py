@@ -37,4 +37,7 @@ urlpatterns = [
     path('projects/<int:pk>/step/<int:step_pk>/delete/', views.delete_roadmap_step, name='delete_roadmap_step'),
     path('projects/<int:pk>/step/<int:step_pk>/edit/', views.edit_roadmap_step, name='edit_roadmap_step'),
     path('projects/<int:pk>/contract/', views.project_contract, name='project_contract'),
+    # Qo'shimcha ish so'rovi (scope request)
+    path('projects/<int:pk>/scope-request/', views.scope_request_send, name='scope_request_send'),
+    path('projects/<int:pk>/scope-request/<int:sr_pk>/respond/', views.scope_request_respond, name='scope_request_respond'),
 ]

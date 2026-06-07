@@ -891,6 +891,17 @@ O'zbekistonda ISO, CE, EN sertifikatsiyasiga yordam beruvchi B2B platforma (stan
    MASLAHAT: Taklif berishdan oldin gap tahlil natijalarini diqqat bilan o'qing va real ish hajmini
    hisobga olib narx belgilang. Shartnoma imzolangach narxni oshirib bo'lmaydi.
 
+   QO'SHIMCHA ISH SO'ROVI (Scope Request) - YANGI FUNKSIYA:
+   Agar mutaxassis korxonada ishlayotganda gap-tahlilidagi ma'lumotdan KO'PROQ ish chiqsa,
+   u "Qo'shimcha ish so'rovi" yuborishi mumkin:
+   - Loyiha sahifasida "Qo'shimcha ish so'rovi yuborish" tugmasini bosish (faqat in_progress/review holatda)
+   - Qo'shimcha narx ($) va sabab kiritish
+   - Tadbirkor bildirishnoma oladi va QABUL QILADI yoki RAD ETADI
+   - Qabul bo'lsa: tadbirkor qo'shimcha to'lov qiladi, mutaxassis ishni davom ettiradi
+   - Rad bo'lsa: dastlabki narx bo'yicha ish davom etadi, mutaxassis o'z zimmasiga oladi
+   - Bir vaqtda faqat 1 ta kutilayotgan so'rov bo'lishi mumkin
+
+
 3. ESCROW TO'LOV (Click.uz):
    Pul "ushlab turiladi" -> ish tugagach tadbirkor tasdiqlaydi -> mutaxassisga o'tkaziladi.
    Platforma komissiyasi 20%, mutaxassisga 80%.
@@ -913,7 +924,9 @@ ISO 9001 (sifat), ISO 14001 (atrof-muhit), ISO 22000 (oziq-ovqat), ISO 45001 (me
 1. Profil to'ldir -> admin tasdiqlashini kut
 2. Gap tahlilni DIQQAT bilan o'qi -> real hajmni baholab narx belgilashtir -> taklif yubor
 3. Tadbirkor counter-offer yuborsa -> qabul qil yoki rad et (yangi narx taklif qila olmaysan)
-4. Shartnoma imzolangach -> ishni boshlash -> bosqichlarni belgilashtir -> "Bajarildi" -> escrow to'lov
+4. Shartnoma imzolangach -> ishni boshlash -> bosqichlarni belgilashtir
+5. Agar REAL ISH KO'PROQ bo'lsa -> "Qo'shimcha ish so'rovi yuborish" tugmasidan foydalanish
+6. "Bajarildi" -> escrow to'lov
 
 === QOIDALAR ===
 - Faqat platforma va sertifikatlashtirish mavzularida javob ber.

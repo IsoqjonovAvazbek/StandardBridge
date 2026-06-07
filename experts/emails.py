@@ -388,6 +388,50 @@ def send_counter_offer_to_expert(project):
     _send(subject, body, expert.email)
 
 
+def send_scope_request_to_entrepreneur(scope_req):
+    """Mutaxassis qo'shimcha ish so'rovi yuborganda tadbirkorga email."""
+    project = scope_req.project
+    ent = project.entrepreneur
+    if not ent or not ent.email:
+        return
+    url = f"{SITE_URL}/experts/projects/{project.pk}/"
+    subject = f"StandartBridge: Loyiha #{project.pk} — qo'shimcha ish so'rovi"
+    body = (
+        f"Salom {ent.get_full_name()},\n\n"
+        f"Mutaxassis {scope_req.expert.get_full_name()} loyiha #{project.pk} uchun "
+        f"qo'shimcha ish so'rovi yubordi:\n\n"
+        f"  Qo'shimcha narx: +${scope_req.extra_price}\n"
+        f"  Sabab: {scope_req.reason}\n\n"
+        f"Qabul qilish yoki rad etish uchun:\n{url}\n\n"
+        "StandartBridge jamoasi"
+    )
+    _send(subject, body, ent.email)
+
+
+def send_scope_request_response_to_expert(scope_req):
+    """Tadbirkor qo'shimcha so'rovga javob berganda mutaxassisga email."""
+    expert = scope_req.expert
+    if not expert or not expert.email:
+        return
+    project = scope_req.project
+    url = f"{SITE_URL}/experts/projects/{project.pk}/"
+    if scope_req.status == 'accepted':
+        status_text = "QABUL QILINDI ✓"
+        detail = f"Qo'shimcha ${scope_req.extra_price} escrow'ga qo'shilishi uchun tadbirkordan to'lov kutiladi."
+    else:
+        status_text = "RAD ETILDI ✗"
+        detail = "Dastlabki narx bo'yicha ishni davom ettiring."
+    subject = f"StandartBridge: Loyiha #{project.pk} — so'rovingizga javob"
+    body = (
+        f"Salom {expert.get_full_name()},\n\n"
+        f"Loyiha #{project.pk} bo'yicha qo'shimcha ish so'rovingiz: {status_text}\n\n"
+        f"{detail}\n\n"
+        f"Loyiha sahifasi:\n{url}\n\n"
+        "StandartBridge jamoasi"
+    )
+    _send(subject, body, expert.email)
+
+
 def send_dispute_resolved(dispute, decision):
     project = dispute.project
     pk = project.pk
