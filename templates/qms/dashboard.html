@@ -125,6 +125,28 @@
         </div>
     </div>
 
+    <!-- Onboarding guide — yangi foydalanuvchi -->
+    {% if no_qms_data %}
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 mb-6 text-white">
+        <h2 class="text-lg font-bold mb-1">QMS tizimini boshlash</h2>
+        <p class="text-blue-200 text-sm mb-4">ISO sertifikatsiyaga tayyorlanish uchun quyidagi qadamlarni bajaring:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <a href="{% url 'qms_checklist' %}" class="bg-white/15 hover:bg-white/25 rounded-xl p-4 transition">
+                <p class="font-semibold text-sm">1. Checklist to'ldirish</p>
+                <p class="text-blue-200 text-xs mt-1">ISO talablariga muvofiqligingizni baholang</p>
+            </a>
+            <a href="{% url 'qms_documents' %}" class="bg-white/15 hover:bg-white/25 rounded-xl p-4 transition">
+                <p class="font-semibold text-sm">2. Hujjat yuklash</p>
+                <p class="text-blue-200 text-xs mt-1">Mavjud siyosat va protseduralarni qo'shing</p>
+            </a>
+            <a href="{% url 'nonconformities' %}" class="bg-white/15 hover:bg-white/25 rounded-xl p-4 transition">
+                <p class="font-semibold text-sm">3. NC qayd etish</p>
+                <p class="text-blue-200 text-xs mt-1">Topilgan nomuvofiqliklarni kuzating</p>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Risk + Training mini-cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <a href="{% url 'risk_register' %}"

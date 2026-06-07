@@ -699,7 +699,11 @@ def create_proposal(request):
         messages.warning(request, 'AI vaqtincha ishlamadi. Taklifnomani qo\'lda to\'ldiring.')
 
     from datetime import date as _date, timedelta as _td
-    valid_until = _date.today() + _td(days=30)
+    try:
+        validity_days = max(7, min(365, int(request.POST.get('validity_days', 30) or 30)))
+    except (ValueError, TypeError):
+        validity_days = 30
+    valid_until = _date.today() + _td(days=validity_days)
 
     proposal = Proposal.objects.create(
         expert=request.user,
@@ -853,7 +857,8 @@ def earnings_dashboard(request):
     month_payments = [p for p in payments if p.paid_at and p.paid_at.date() >= month_start]
     month_earned = sum(p.expert_amount for p in month_payments if p.expert_amount) or Decimal('0')
 
-    # Last 6 months chart data
+    # Last 6 months chart data — use local time to avoid UTC month-boundary shift
+    _ET_MONTHS = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek']
     chart_labels = []
     chart_data = []
     for i in range(5, -1, -1):
@@ -863,13 +868,14 @@ def earnings_dashboard(request):
         else:
             m = today.month - i
             y = today.year
-        label = f"{y}-{m:02d}"
-        month_ps = [
-            p for p in payments
-            if p.paid_at and p.paid_at.year == y and p.paid_at.month == m
-        ]
+        month_ps = []
+        for p in payments:
+            if p.paid_at:
+                local_dt = timezone.localtime(p.paid_at) if timezone.is_aware(p.paid_at) else p.paid_at
+                if local_dt.year == y and local_dt.month == m:
+                    month_ps.append(p)
         amount = float(sum(p.expert_amount for p in month_ps if p.expert_amount) or 0)
-        chart_labels.append(f"{m:02d}/{y}")
+        chart_labels.append(_ET_MONTHS[m - 1] + ' ' + str(y))
         chart_data.append(amount)
 
     # Per-project breakdown

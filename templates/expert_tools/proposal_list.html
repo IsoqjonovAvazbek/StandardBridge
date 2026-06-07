@@ -52,6 +52,9 @@
                     {% else %}bg-gray-100 text-gray-600{% endif %}">
                     {% if p.status == 'accepted' %}{{ T.et_proposal_accepted }}{% elif p.status == 'rejected' %}{{ T.et_proposal_rejected }}{% elif p.status == 'sent' %}{{ T.et_proposal_sent }}{% else %}{{ T.et_proposal_draft }}{% endif %}
                 </span>
+                {% if p.is_expired and p.status in 'draft sent' %}
+                <span class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-medium">Muddati o'tgan</span>
+                {% endif %}
                 <a href="{% url 'proposal_detail' p.pk %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">{{ T.et_view }}</a>
                 <a href="{% url 'proposal_print' p.pk %}" target="_blank" class="text-gray-500 hover:text-gray-700 text-sm">PDF</a>
             </div>

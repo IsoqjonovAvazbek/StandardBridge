@@ -129,9 +129,19 @@ class RoadmapStep(models.Model):
     class Meta:
         ordering = ['order']
 
+    def clean_deliverables(self, value):
+        if not isinstance(value, list):
+            return []
+        return [str(d)[:200] for d in value if str(d).strip()][:10]
+
+    def save(self, *args, **kwargs):
+        if self.deliverables is not None:
+            self.deliverables = self.clean_deliverables(self.deliverables)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.order}. {self.title}"
-    
+
 class Question(models.Model):
     ANSWER_TYPE_CHOICES = [
         ('yes_no', 'Ha / Yo\'q'),

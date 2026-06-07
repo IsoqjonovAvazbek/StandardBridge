@@ -699,6 +699,19 @@ def analysis_retry(request, pk):
 
 
 @login_required
+def analysis_retake(request, pk):
+    """Start a brand-new analysis pre-filled with the same industry + standards."""
+    old = get_object_or_404(GapAnalysis, pk=pk, entrepreneur=request.user)
+    if not old.industry or not old.target_standard:
+        return redirect('select_industry')
+    request.session['target_ids'] = [old.target_standard.pk]
+    if old.local_standard:
+        request.session['local_ids'] = [old.local_standard.pk]
+    request.session.modified = True
+    return redirect('answer_questions', industry_id=old.industry.pk)
+
+
+@login_required
 def analysis_status(request, pk):
     analysis = get_object_or_404(GapAnalysis, pk=pk, entrepreneur=request.user)
     has_error = bool(analysis.status == 'pending' and analysis.ai_result and 'error' in analysis.ai_result)

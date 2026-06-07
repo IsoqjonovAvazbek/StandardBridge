@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from functools import cached_property
 import uuid
 
 
@@ -110,7 +111,7 @@ class ExpertProfile(models.Model):
         ('new',       0,  3,   20, 'Kulrang',  'gray'),
     ]
 
-    @property
+    @cached_property
     def tier_info(self):
         n = self.total_projects
         for key, min_p, max_p, commission, label_uz, color in self._TIERS:

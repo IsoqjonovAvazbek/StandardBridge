@@ -9,6 +9,7 @@ urlpatterns = [
     path('new/<int:industry_id>/analyze/', views.run_analysis, name='run_analysis'),
     path('<int:pk>/processing/', views.analysis_processing, name='analysis_processing'),
     path('<int:pk>/processing/retry/', views.analysis_retry, name='analysis_retry'),
+    path('<int:pk>/retake/', views.analysis_retake, name='analysis_retake'),
     path('<int:pk>/status/', views.analysis_status, name='analysis_status'),
     path('<int:pk>/', views.analysis_detail, name='analysis_detail'),
     path('<int:pk>/print/', views.analysis_print, name='analysis_print'),

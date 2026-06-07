@@ -36,7 +36,7 @@
             <div class="text-sm text-gray-500">{{ T.referrals_list }}</div>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center">
-            <div class="text-3xl font-bold text-green-600 mb-1">{{ referrals|length }}</div>
+            <div class="text-3xl font-bold text-green-600 mb-1">{{ page_obj.paginator.count }}</div>
             <div class="text-sm text-gray-500">{{ T.status_completed }}</div>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center">
@@ -75,6 +75,26 @@
         </div>
         {% endif %}
     </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-center items-center gap-2 mt-6">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}"
+           class="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition">←</a>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-sm font-medium">{{ num }}</span>
+            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+            <a href="?page={{ num }}" class="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}"
+           class="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition">→</a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 
 <script>

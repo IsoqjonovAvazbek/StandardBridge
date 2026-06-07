@@ -209,6 +209,17 @@ class Proposal(models.Model):
     def __str__(self):
         return f"{self.company_name} — {self.standard} [{self.status}]"
 
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        if not self.valid_until:
+            return False
+        return self.valid_until < timezone.now().date()
+
+    @property
+    def is_valid(self):
+        return self.status in ('draft', 'sent') and not self.is_expired
+
 
 class TimeLog(models.Model):
     expert = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='time_logs')

@@ -215,7 +215,10 @@ def update_checklist(request):
         except (json.JSONDecodeError, ValueError):
             return JsonResponse({'success': False, 'error': 'invalid json'}, status=400)
 
-        item_id = data.get('item_id')
+        try:
+            item_id = int(data.get('item_id'))
+        except (TypeError, ValueError):
+            return JsonResponse({'success': False, 'error': 'bad params'}, status=400)
         status = data.get('status')
         note = data.get('note', '')
 

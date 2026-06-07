@@ -216,6 +216,16 @@
                         <p class="text-gray-500 text-sm mt-1">
                             {{ project.analysis.local_standard.code }} → {{ project.analysis.target_standard.code }}
                         </p>
+                        {% if project.work_deadline and project.status == 'in_progress' %}
+                        {% with d=project.work_deadline|days_left %}
+                        <span class="inline-block mt-1 text-xs font-medium px-2 py-0.5 rounded-full
+                            {% if d <= 0 %}bg-red-100 text-red-700
+                            {% elif d <= 3 %}bg-orange-100 text-orange-700
+                            {% else %}bg-gray-100 text-gray-500{% endif %}">
+                            ⏰ {% if d <= 0 %}Muddat o'tdi!{% else %}{{ d }} kun qoldi{% endif %}
+                        </span>
+                        {% endwith %}
+                        {% endif %}
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="text-right">
@@ -243,32 +253,33 @@
 <!-- Live countdown script -->
 <script>
 (function () {
+    function fmtCountdown(ms) {
+        if (ms <= 0) return null;
+        var totalMin = Math.floor(ms / 60000);
+        var days = Math.floor(totalMin / 1440);
+        var hours = Math.floor((totalMin % 1440) / 60);
+        var mins = totalMin % 60;
+        if (days > 0) return days + 'k ' + hours + 's';
+        if (hours > 0) return hours + 's ' + String(mins).padStart(2, '0') + 'm';
+        return mins + ' min';
+    }
+
     function updateCountdowns() {
+        var now = new Date();
         document.querySelectorAll('.countdown-timer').forEach(function (el) {
             var deadline = new Date(el.dataset.deadline);
-            var now = new Date();
-            var diffMs = deadline - now;
-
-            if (diffMs <= 0) {
-                el.textContent = el.dataset.breachedText;
+            var text = fmtCountdown(deadline - now);
+            if (!text) {
+                el.textContent = el.dataset.breachedText || 'SLA buzildi';
                 el.classList.add('text-red-700');
-                return;
-            }
-
-            var totalMinutes = Math.floor(diffMs / 60000);
-            var hours = Math.floor(totalMinutes / 60);
-            var minutes = totalMinutes % 60;
-
-            if (hours > 0) {
-                el.textContent = hours + 'h ' + minutes + 'm ' + el.dataset.hoursText.replace(/\S+\s*$/, '').trim();
             } else {
-                el.textContent = minutes + ' min';
+                el.textContent = text;
             }
         });
     }
 
     updateCountdowns();
-    setInterval(updateCountdowns, 60000); // refresh every minute
+    setInterval(updateCountdowns, 30000);
 })();
 </script>
 {% endblock %}

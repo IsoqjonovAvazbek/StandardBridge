@@ -528,7 +528,7 @@ def project_update(request, pk):
                 file_ext = _os.path.splitext(chat_file.name)[1].lower()
                 if chat_file.size <= 10 * 1024 * 1024 and file_ext in allowed_exts:
                     upd.file = chat_file
-                    upd.file_name = chat_file.name
+                    upd.file_name = _os.path.basename(chat_file.name)
             upd.save()
             notify_user = project.entrepreneur if request.user.is_expert() else project.expert
             if notify_user:
@@ -688,8 +688,8 @@ def project_request_revision(request, pk):
             RoadmapStep.objects.filter(
                 roadmap=project.analysis.roadmap
             ).update(is_completed=False, completed_at=None)
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning('Roadmap reset qilinmadi (project_pk=%s): %s', pk, _e)
 
         ProjectUpdate.objects.create(
             project=project,
@@ -1204,10 +1204,28 @@ def _click_sign(click_trans_id, service_id, secret_key, merchant_trans_id, amoun
     return hashlib.md5(sign_string.encode()).hexdigest()
 
 
+_CLICK_ALLOWED_IPS = {
+    '91.204.239.44', '91.204.239.45', '91.204.239.46', '91.204.239.47',
+    '195.158.29.56', '195.158.29.57',
+}
+
+
+def _click_ip_ok(request):
+    forwarded = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    client_ip = forwarded.split(',')[0].strip() if forwarded else request.META.get('REMOTE_ADDR', '')
+    if not _CLICK_ALLOWED_IPS:
+        return True
+    return client_ip in _CLICK_ALLOWED_IPS
+
+
 @csrf_exempt
 def click_prepare(request):
     if request.method != 'POST':
         return JsonResponse({'error': -8, 'error_note': 'Bad request'})
+
+    if not _click_ip_ok(request):
+        logger.warning('Click prepare blocked: bad IP %s', request.META.get('REMOTE_ADDR'))
+        return JsonResponse({'error': -1, 'error_note': 'Forbidden'})
 
     data = request.POST
     click_trans_id = data.get('click_trans_id')
@@ -1269,6 +1287,10 @@ def click_complete(request):
     if request.method != 'POST':
         return JsonResponse({'error': -8, 'error_note': 'Bad request'})
 
+    if not _click_ip_ok(request):
+        logger.warning('Click complete blocked: bad IP %s', request.META.get('REMOTE_ADDR'))
+        return JsonResponse({'error': -1, 'error_note': 'Forbidden'})
+
     data = request.POST
     click_trans_id = data.get('click_trans_id')
     service_id = data.get('service_id')
@@ -1320,7 +1342,8 @@ def click_complete(request):
 
     with transaction.atomic():
         payment = Payment.objects.select_for_update().get(pk=payment.pk)
-        if payment.status == 'held':
+        click_tx_key = f'CLICK-{click_trans_id}'
+        if payment.status in ('held', 'released') or payment.payme_transaction_id == click_tx_key:
             # Already processed — idempotent response
             return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
                                  'merchant_confirm_id': payment.pk, 'error': 0, 'error_note': 'Success'})

@@ -412,11 +412,14 @@ def admin_panel(request):
     }
 
     import json as _json
+    _MONTH_NAMES = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek']
+    _now_local = timezone.localtime(timezone.now())
     months_data = []
     for i in range(5, -1, -1):
-        month_start = (timezone.now() - timedelta(days=30 * i)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        _ref = (_now_local.replace(day=1) - timedelta(days=30 * i))
+        month_start = _ref.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         month_end = (month_start + timedelta(days=32)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        month_label = month_start.strftime('%b %Y')
+        month_label = _MONTH_NAMES[month_start.month - 1] + ' ' + str(month_start.year)
         new_users = CustomUser.objects.filter(created_at__gte=month_start, created_at__lt=month_end).count()
         month_revenue = payments.filter(
             status='released', released_at__gte=month_start, released_at__lt=month_end
@@ -456,8 +459,11 @@ def admin_panel(request):
 @login_required
 def referral_view(request):
     from django.db.models import Sum
+    from django.core.paginator import Paginator
     user = request.user
-    referrals = CustomUser.objects.filter(referred_by=user).order_by('-created_at')
+    referrals_qs = CustomUser.objects.filter(referred_by=user).order_by('-created_at')
+    paginator = Paginator(referrals_qs, 20)
+    page_obj = paginator.get_page(request.GET.get('page', 1))
     referral_link = request.build_absolute_uri(f'/register/?ref={user.referral_code}')
     total_bonus = 0
     try:
@@ -470,8 +476,9 @@ def referral_view(request):
     return render(request, 'accounts/referral.html', {
         'referral_code': user.referral_code,
         'referral_link': referral_link,
-        'referrals': referrals,
-        'total_referrals': referrals.count(),
+        'referrals': page_obj,
+        'page_obj': page_obj,
+        'total_referrals': referrals_qs.count(),
         'total_bonus': total_bonus,
     })
 
