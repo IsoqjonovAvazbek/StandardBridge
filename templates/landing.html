@@ -1,883 +1,939 @@
 {% extends 'base.html' %}
 {% block no_dark_override %}<script>document.documentElement.classList.remove('dark');</script>{% endblock %}
 {% block title %}StandartBridge — ISO, CE, EN Sertifikatsiya Platformasi{% endblock %}
-{% block meta_description %}O'zbekistonda ISO 9001, ISO 14001, ISO 22000 va CE sertifikatsiyasiga o'tish uchun AI gap tahlil, tasdiqlangan mutaxassislar va escrow to'lov platformasi.{% endblock %}
-{% block og_title %}StandartBridge — ISO Sertifikatsiya Platformasi O'zbekiston{% endblock %}
-{% block og_description %}AI gap tahlil 30-60 soniyada, 40%+ xarajat tejamiyat, tasdiqlangan mutaxassislar. Bepul boshlang!{% endblock %}
+{% block meta_description %}O'zbekistonda ISO 9001, ISO 14001, ISO 22000 va CE sertifikatsiyasiga AI gap tahlil va tasdiqlangan mutaxassislar bilan.{% endblock %}
+{% block og_title %}StandartBridge — ISO Sertifikatsiya Platformasi{% endblock %}
+{% block og_description %}AI gap tahlil 30-60 soniyada. Tasdiqlangan mutaxassislar. Escrow to'lov. Bepul boshlang!{% endblock %}
 
 {% block extra_head %}
 <style>
-/* ── Reset & base ── */
-#landing-root * { box-sizing: border-box; }
-#landing-root { font-family: 'Inter', sans-serif; color: #0f172a; overflow-x: hidden; }
+*{box-sizing:border-box;margin:0;padding:0}
+#lr{font-family:'Inter',sans-serif;background:#050a14;color:#fff;overflow-x:hidden}
 
-/* ── Animated mesh background ── */
-.mesh-bg {
-  position: relative;
-  background: #050d1a;
-  overflow: hidden;
-}
-.mesh-bg::before {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 20% 20%, rgba(37,99,235,.45) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 80% at 80% 80%, rgba(6,182,212,.30) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(99,102,241,.15) 0%, transparent 70%);
-  animation: meshMove 12s ease-in-out infinite alternate;
-}
-@keyframes meshMove {
-  0%   { transform: scale(1) rotate(0deg); }
-  50%  { transform: scale(1.08) rotate(1deg); }
-  100% { transform: scale(1.04) rotate(-1deg); }
-}
+/* ── Noise texture ── */
+#lr::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.4}
 
-/* Grid pattern overlay */
-.grid-overlay {
-  position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-}
+/* ── Scroll progress bar ── */
+#prog{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,#3b82f6,#8b5cf6,#06b6d4);z-index:10000;transition:width .1s linear}
 
-/* Floating orbs */
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(70px);
-  animation: orbFloat 8s ease-in-out infinite;
-  pointer-events: none;
-}
-.orb-1 { width:500px;height:500px;background:rgba(37,99,235,.25);top:-100px;left:-100px;animation-delay:0s; }
-.orb-2 { width:400px;height:400px;background:rgba(6,182,212,.20);bottom:-50px;right:-50px;animation-delay:-3s; }
-.orb-3 { width:300px;height:300px;background:rgba(139,92,246,.18);top:50%;left:55%;animation-delay:-6s; }
-@keyframes orbFloat {
-  0%,100% { transform: translateY(0) scale(1); }
-  50%      { transform: translateY(-40px) scale(1.05); }
-}
+/* ── Navbar ── */
+#lnav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;transition:background .3s,backdrop-filter .3s}
+#lnav.scrolled{background:rgba(5,10,20,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo img{width:32px;height:32px;border-radius:8px}
+.nav-logo span{font-weight:800;font-size:18px;color:#fff;letter-spacing:-.5px}
+.nav-right{display:flex;align-items:center;gap:12px}
+.lang-btn{font-size:12px;padding:4px 10px;border-radius:6px;font-weight:700;border:none;cursor:pointer;transition:.2s}
+.lang-btn.active{background:#fff;color:#1d4ed8}
+.lang-btn:not(.active){background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)}
+.lang-btn:not(.active):hover{color:#fff;background:rgba(255,255,255,.15)}
+.nav-login{color:rgba(255,255,255,.7);text-decoration:none;font-size:14px;font-weight:500;transition:.2s}
+.nav-login:hover{color:#fff}
+.nav-cta{background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-weight:700;font-size:14px;padding:8px 20px;border-radius:10px;text-decoration:none;transition:.2s;box-shadow:0 4px 20px rgba(59,130,246,.3)}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(59,130,246,.45);color:#fff}
 
-/* Particles */
-.particle {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255,255,255,.6);
-  animation: particleDrift linear infinite;
-  pointer-events: none;
-}
-@keyframes particleDrift {
-  0%   { transform: translateY(100vh) translateX(0); opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: .4; }
-  100% { transform: translateY(-10vh) translateX(var(--drift)); opacity: 0; }
-}
+/* ── Hero ── */
+#hero{position:relative;min-height:100svh;display:flex;align-items:center;padding:80px 0 60px;overflow:hidden}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%}
+.hero-glow-1{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.18),transparent 70%);top:-200px;left:-100px;animation:glow1 8s ease-in-out infinite alternate;pointer-events:none}
+.hero-glow-2{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.14),transparent 70%);bottom:-150px;right:-50px;animation:glow1 10s ease-in-out infinite alternate-reverse;pointer-events:none}
+.hero-glow-3{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,.12),transparent 70%);top:40%;left:40%;animation:glow1 6s ease-in-out infinite alternate;pointer-events:none}
+@keyframes glow1{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.15) translate(30px,-20px)}}
+.hero-inner{max-width:1280px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:2}
+@media(max-width:900px){.hero-inner{grid-template-columns:1fr}.hero-right{display:none}}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:#60a5fa;padding:6px 16px;border-radius:100px;font-size:13px;font-weight:600;margin-bottom:28px}
+.hero-badge-dot{width:7px;height:7px;background:#4ade80;border-radius:50%;box-shadow:0 0 0 0 rgba(74,222,128,.5);animation:ripple 2s infinite}
+@keyframes ripple{0%{box-shadow:0 0 0 0 rgba(74,222,128,.5)}70%{box-shadow:0 0 0 8px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+.hero-h1{font-size:clamp(40px,5.5vw,72px);font-weight:900;line-height:1.06;letter-spacing:-2px;margin-bottom:24px}
+.hero-h1 .line-plain{color:#fff}
+.hero-h1 .line-grad{background:linear-gradient(135deg,#60a5fa 0%,#a78bfa 50%,#34d399 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-h1 .line-dim{color:rgba(255,255,255,.5)}
+.typewriter{border-right:3px solid #60a5fa;animation:blink .7s step-end infinite}
+@keyframes blink{0%,100%{border-color:#60a5fa}50%{border-color:transparent}}
+.hero-sub{color:rgba(255,255,255,.55);font-size:18px;line-height:1.7;margin-bottom:40px;max-width:480px}
+.hero-btns{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:56px}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-weight:800;font-size:16px;padding:16px 36px;border-radius:14px;text-decoration:none;transition:.25s;box-shadow:0 8px 32px rgba(37,99,235,.4),inset 0 1px 0 rgba(255,255,255,.15)}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 20px 50px rgba(37,99,235,.55),inset 0 1px 0 rgba(255,255,255,.15);color:#fff}
+.btn-primary svg{transition:transform .25s}
+.btn-primary:hover svg{transform:translateX(4px)}
+.btn-outline{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.8);font-weight:600;font-size:16px;padding:16px 32px;border-radius:14px;text-decoration:none;transition:.25s;backdrop-filter:blur(8px)}
+.btn-outline:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);color:#fff}
+.hero-stats{display:flex;gap:32px;flex-wrap:wrap}
+.stat-item{}
+.stat-num{font-size:42px;font-weight:900;color:#fff;line-height:1;letter-spacing:-1px}
+.stat-label{color:rgba(255,255,255,.4);font-size:13px;margin-top:4px}
+.stat-sep{width:1px;background:rgba(255,255,255,.1);align-self:stretch}
 
-/* Glass card */
-.glass {
-  background: rgba(255,255,255,.07);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 20px;
-}
-.glass-dark {
-  background: rgba(0,0,0,.25);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 16px;
-}
+/* Hero right — 3D tilt card */
+.hero-card-wrap{perspective:1000px}
+.hero-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:28px;backdrop-filter:blur(24px);transition:transform .1s ease-out;will-change:transform}
+.hc-top{display:flex;align-items:center;gap:8px;margin-bottom:20px}
+.hc-dot{width:10px;height:10px;border-radius:50%}
+.hc-title{color:rgba(255,255,255,.3);font-size:12px;font-family:monospace;margin-left:8px}
+.hc-company{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px 16px;margin-bottom:20px}
+.hc-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0}
+.hc-name{font-size:14px;font-weight:600;color:rgba(255,255,255,.9)}
+.hc-sub{font-size:12px;color:rgba(255,255,255,.35);margin-top:2px}
+.hc-ai-badge{margin-left:auto;display:flex;align-items:center;gap:6px;color:#4ade80;font-size:12px;font-weight:600}
+.hc-gap{background:rgba(255,255,255,.03);border-radius:12px;padding:14px 16px;margin-bottom:10px;border-left:3px solid}
+.hc-gap.critical{border-left-color:#ef4444}
+.hc-gap.high{border-left-color:#f97316}
+.hc-gap.medium{border-left-color:#eab308}
+.hc-gap-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.hc-gap-title{font-size:13px;font-weight:600;color:rgba(255,255,255,.85)}
+.hc-badge{font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px}
+.hc-badge.critical{background:rgba(239,68,68,.2);color:#fca5a5}
+.hc-badge.high{background:rgba(249,115,22,.2);color:#fdba74}
+.hc-badge.medium{background:rgba(234,179,8,.2);color:#fde047}
+.hc-gap-desc{font-size:11px;color:rgba(255,255,255,.35);line-height:1.5}
+.hc-footer{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;border-top:1px solid rgba(255,255,255,.06);padding-top:18px;margin-top:8px}
+.hc-stat{background:rgba(255,255,255,.04);border-radius:10px;padding:12px;text-align:center}
+.hc-stat-num{font-size:20px;font-weight:900}
+.hc-stat-label{font-size:10px;color:rgba(255,255,255,.3);margin-top:2px}
+.hc-float{position:absolute;top:-16px;right:-16px;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;font-size:11px;font-weight:800;padding:6px 14px;border-radius:10px;box-shadow:0 8px 24px rgba(16,185,129,.4);animation:floatY 3s ease-in-out infinite}
+@keyframes floatY{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
 
-/* Gradient text */
-.grad-text {
-  background: linear-gradient(135deg, #60a5fa, #a78bfa, #34d399);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* ── Video section ── */
+#video-section{position:relative;overflow:hidden;padding:0}
+.video-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,#050a14 0%,rgba(5,10,20,.3) 30%,rgba(5,10,20,.3) 70%,#050a14 100%);z-index:1}
+#video-section video,.yt-iframe{width:100%;height:520px;object-fit:cover;display:block}
+.yt-iframe{border:none;filter:brightness(.55) saturate(.8)}
+.video-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;text-align:center;width:90%;max-width:700px}
+.video-text h2{font-size:clamp(28px,4vw,52px);font-weight:900;color:#fff;letter-spacing:-1.5px;text-shadow:0 4px 30px rgba(0,0,0,.5);margin-bottom:16px}
+.video-text p{color:rgba(255,255,255,.7);font-size:18px;text-shadow:0 2px 10px rgba(0,0,0,.5)}
 
-/* Scroll reveal */
-.reveal { opacity: 0; transform: translateY(32px); transition: opacity .7s ease, transform .7s ease; }
-.reveal.visible { opacity: 1; transform: none; }
-.reveal-left  { opacity: 0; transform: translateX(-40px); transition: opacity .7s ease, transform .7s ease; }
-.reveal-right { opacity: 0; transform: translateX(40px);  transition: opacity .7s ease, transform .7s ease; }
-.reveal-left.visible, .reveal-right.visible { opacity: 1; transform: none; }
+/* ── Marquee ── */
+.marquee-wrap{background:rgba(255,255,255,.03);border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05);padding:18px 0;overflow:hidden}
+.marquee-track{display:flex;animation:marquee 25s linear infinite;white-space:nowrap}
+.marquee-track-rev{animation-direction:reverse;animation-duration:30s}
+.marquee-item{display:inline-flex;align-items:center;gap:8px;margin-right:48px;color:rgba(255,255,255,.35);font-size:13px;font-weight:600;letter-spacing:.5px}
+.marquee-item span{width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);flex-shrink:0}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
-/* Glow button */
-.btn-glow {
-  position: relative;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
-  color: #fff;
-  font-weight: 700;
-  padding: 16px 40px;
-  border-radius: 14px;
-  font-size: 16px;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: transform .2s, box-shadow .2s;
-  box-shadow: 0 8px 32px rgba(37,99,235,.4);
-}
-.btn-glow:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 48px rgba(37,99,235,.55);
-  color: #fff;
-}
+/* ── Section commons ── */
+.section{padding:120px 0}
+.container{max-width:1280px;margin:0 auto;padding:0 24px}
+.section-label{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#60a5fa;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);padding:6px 16px;border-radius:100px;margin-bottom:20px}
+.section-h2{font-size:clamp(32px,4vw,54px);font-weight:900;letter-spacing:-1.5px;color:#fff;margin-bottom:16px;line-height:1.1}
+.section-sub{color:rgba(255,255,255,.4);font-size:18px;max-width:560px;line-height:1.7}
 
-/* Feature card */
-.feat-card {
-  background: #fff;
-  border-radius: 20px;
-  padding: 32px;
-  border: 1px solid #e2e8f0;
-  transition: transform .3s, box-shadow .3s, border-color .3s;
-}
-.feat-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 24px 60px rgba(37,99,235,.12);
-  border-color: #bfdbfe;
-}
+/* ── Bento grid ── */
+.bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){.bento{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.bento{grid-template-columns:1fr}}
+.bento-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:24px;padding:32px;transition:.3s;position:relative;overflow:hidden}
+.bento-card:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);transform:translateY(-4px)}
+.bento-card.featured{grid-column:span 2}
+.bento-card.tall{grid-row:span 2}
+/* Gradient border on hover */
+.bento-card::before{content:'';position:absolute;inset:0;border-radius:24px;padding:1px;background:linear-gradient(135deg,rgba(59,130,246,.4),rgba(139,92,246,.4),rgba(6,182,212,.4));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:.3s}
+.bento-card:hover::before{opacity:1}
+.bento-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:24px}
+.bento-h3{font-size:20px;font-weight:800;color:#fff;margin-bottom:10px;letter-spacing:-.5px}
+.bento-p{color:rgba(255,255,255,.45);font-size:14px;line-height:1.7}
 
-/* Step connector */
-.step-line {
-  position: absolute;
-  top: 32px; left: calc(50% + 32px);
-  width: calc(100% - 64px);
-  height: 2px;
-  background: linear-gradient(90deg, #2563eb, #7c3aed);
-  opacity: .3;
-}
+/* AI animation inside bento */
+.ai-lines{margin-top:20px;display:flex;flex-direction:column;gap:8px}
+.ai-line{height:8px;border-radius:100px;background:rgba(255,255,255,.08);position:relative;overflow:hidden}
+.ai-line::after{content:'';position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,#3b82f6,#8b5cf6);border-radius:100px;animation:aiScan 2s ease-in-out infinite}
+.ai-line:nth-child(1)::after{width:85%;animation-delay:0s}
+.ai-line:nth-child(2)::after{width:62%;animation-delay:.3s}
+.ai-line:nth-child(3)::after{width:91%;animation-delay:.6s}
+.ai-line:nth-child(4)::after{width:45%;animation-delay:.9s}
+@keyframes aiScan{0%{clip-path:inset(0 100% 0 0)}60%,100%{clip-path:inset(0 0% 0 0)}}
 
-/* Ticker marquee */
-.ticker-wrap { overflow: hidden; white-space: nowrap; }
-.ticker-inner { display: inline-flex; animation: ticker 20s linear infinite; }
-.ticker-inner:hover { animation-play-state: paused; }
-@keyframes ticker {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
+/* Speed gauge */
+.gauge-wrap{margin-top:20px;display:flex;align-items:center;gap:16px}
+.gauge-circle{width:80px;height:80px;border-radius:50%;background:conic-gradient(from -90deg,#10b981 0% 85%,rgba(255,255,255,.1) 85%);display:flex;align-items:center;justify-content:center;position:relative}
+.gauge-circle::before{content:'';position:absolute;inset:8px;background:#050a14;border-radius:50%}
+.gauge-num{position:relative;z-index:1;font-size:18px;font-weight:900;color:#10b981}
 
-/* Counter number */
-.counter { font-variant-numeric: tabular-nums; }
+/* Security shield pulse */
+.shield-wrap{margin-top:20px;display:flex;justify-content:center}
+.shield{width:80px;height:90px;background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(139,92,246,.2));clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;animation:pulse-shield 2s ease-in-out infinite}
+@keyframes pulse-shield{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.1);filter:brightness(1.4)}}
 
-/* Gradient section */
-.section-grad {
-  background: linear-gradient(180deg, #f8faff 0%, #eef2ff 100%);
-}
+/* Escrow flow */
+.flow{display:flex;align-items:center;gap:8px;margin-top:20px;flex-wrap:wrap}
+.flow-node{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;color:rgba(255,255,255,.7)}
+.flow-arrow{color:rgba(255,255,255,.3);font-size:18px}
+.flow-node.active{background:rgba(59,130,246,.2);border-color:rgba(59,130,246,.4);color:#93c5fd}
 
-/* Floating badge */
-.float-badge {
-  animation: badgeFloat 4s ease-in-out infinite;
-}
-@keyframes badgeFloat {
-  0%,100% { transform: translateY(0); }
-  50%      { transform: translateY(-8px); }
-}
+/* ── For Who — split ── */
+#forwho{background:linear-gradient(180deg,#050a14 0%,#080e1d 100%)}
+.forwho-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:768px){.forwho-grid{grid-template-columns:1fr}}
+.fw-card{border-radius:28px;padding:48px;position:relative;overflow:hidden;min-height:520px;display:flex;flex-direction:column}
+.fw-card-ent{background:linear-gradient(140deg,#0f2460 0%,#1e3a8a 50%,#0891b2 100%)}
+.fw-card-exp{background:linear-gradient(140deg,#2d1050 0%,#4c1d95 50%,#1e3a8a 100%)}
+.fw-card-pattern{position:absolute;inset:0;opacity:.06;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.3) 0,rgba(255,255,255,.3) 1px,transparent 0,transparent 50%);background-size:20px 20px}
+.fw-card-glow{position:absolute;width:300px;height:300px;border-radius:50%;filter:blur(80px);opacity:.25;top:-50px;right:-50px;pointer-events:none}
+.fw-icon{width:64px;height:64px;background:rgba(255,255,255,.15);border-radius:20px;display:flex;align-items:center;justify-content:center;margin-bottom:28px;position:relative;z-index:1;backdrop-filter:blur(10px)}
+.fw-h3{font-size:32px;font-weight:900;color:#fff;margin-bottom:12px;letter-spacing:-.8px;position:relative;z-index:1}
+.fw-p{color:rgba(255,255,255,.65);font-size:16px;line-height:1.7;margin-bottom:28px;position:relative;z-index:1}
+.fw-list{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:36px;flex:1;position:relative;z-index:1}
+.fw-list li{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.85);font-size:15px}
+.fw-check{width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:900}
+.fw-btn-ent{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1d4ed8;font-weight:800;padding:14px 28px;border-radius:12px;text-decoration:none;font-size:15px;transition:.2s;position:relative;z-index:1;align-self:flex-start}
+.fw-btn-ent:hover{background:#eff6ff;transform:translateY(-2px)}
+.fw-btn-exp{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#6d28d9;font-weight:800;padding:14px 28px;border-radius:12px;text-decoration:none;font-size:15px;transition:.2s;position:relative;z-index:1;align-self:flex-start}
+.fw-btn-exp:hover{background:#f5f3ff;transform:translateY(-2px)}
 
-/* Shine effect on cards */
-.shine {
-  position: relative;
-  overflow: hidden;
-}
-.shine::after {
-  content: '';
-  position: absolute;
-  top: -50%; left: -75%;
-  width: 50%; height: 200%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
-  transform: skewX(-20deg);
-  transition: left .6s ease;
-}
-.shine:hover::after { left: 125%; }
+/* ── Dark stats ── */
+#stats-section{background:linear-gradient(135deg,#080e1d,#0d1530)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+@media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-box{text-align:center;padding:48px 24px;border:1px solid rgba(255,255,255,.05);transition:.3s}
+.stat-box:hover{background:rgba(255,255,255,.03)}
+.stat-big{font-size:clamp(48px,5vw,72px);font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:8px}
+.stat-big.blue{background:linear-gradient(135deg,#60a5fa,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-big.cyan{background:linear-gradient(135deg,#34d399,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-big.violet{background:linear-gradient(135deg,#a78bfa,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-big.white{color:#fff}
+.stat-desc{color:rgba(255,255,255,.35);font-size:14px;font-weight:500}
 
-/* Pricing popular */
-.pricing-popular {
-  background: linear-gradient(135deg, #1d4ed8, #7c3aed);
-  transform: scale(1.05);
-  box-shadow: 0 32px 80px rgba(37,99,235,.35);
-}
+/* ── Industries ── */
+#industries{background:#050a14}
+.ind-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:900px){.ind-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.ind-grid{grid-template-columns:repeat(2,1fr)}}
+.ind-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:28px 20px;text-align:center;cursor:default;transition:.35s;position:relative;overflow:hidden}
+.ind-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(139,92,246,.15));opacity:0;transition:.35s}
+.ind-card:hover{border-color:rgba(59,130,246,.3);transform:translateY(-6px);box-shadow:0 20px 50px rgba(59,130,246,.1)}
+.ind-card:hover::after{opacity:1}
+.ind-icon{font-size:40px;margin-bottom:12px;display:block;position:relative;z-index:1;transition:.35s}
+.ind-card:hover .ind-icon{transform:scale(1.2)}
+.ind-name{font-size:13px;font-weight:600;color:rgba(255,255,255,.55);position:relative;z-index:1;transition:.35s}
+.ind-card:hover .ind-name{color:rgba(255,255,255,.9)}
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #2563eb; border-radius: 3px; }
+/* ── Pricing ── */
+#pricing{background:linear-gradient(180deg,#050a14,#080e1d)}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:center}
+@media(max-width:768px){.pricing-grid{grid-template-columns:1fr}}
+.price-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:24px;padding:36px;transition:.3s}
+.price-card:hover{background:rgba(255,255,255,.07);transform:translateY(-4px)}
+.price-card.popular{background:linear-gradient(140deg,#1d3a8a,#4c1d95);border-color:rgba(139,92,246,.4);transform:scale(1.06);box-shadow:0 40px 100px rgba(124,58,237,.25),0 0 0 1px rgba(139,92,246,.3)}
+@media(max-width:768px){.price-card.popular{transform:scale(1)}}
+.plan-label{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:12px}
+.popular .plan-label{color:rgba(167,139,250,.8)}
+.plan-badge{display:inline-block;background:linear-gradient(135deg,#f97316,#ec4899);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:100px;margin-bottom:16px}
+.plan-price{font-size:52px;font-weight:900;color:#fff;letter-spacing:-2px;line-height:1;margin-bottom:4px}
+.plan-period{font-size:15px;font-weight:400;color:rgba(255,255,255,.4)}
+.plan-desc{color:rgba(255,255,255,.4);font-size:14px;margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid rgba(255,255,255,.06)}
+.plan-features{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+.plan-features li{display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,.7)}
+.plan-features li.no{color:rgba(255,255,255,.25);text-decoration:line-through}
+.feat-check{color:#4ade80;font-weight:900;font-size:13px}
+.feat-no{color:rgba(255,255,255,.2)}
+.plan-btn{display:block;text-align:center;padding:14px;border-radius:12px;font-weight:700;font-size:15px;text-decoration:none;transition:.2s}
+.plan-btn-outline{border:1px solid rgba(255,255,255,.15);color:#fff}
+.plan-btn-outline:hover{background:rgba(255,255,255,.08);color:#fff}
+.plan-btn-solid{background:#fff;color:#4c1d95;font-weight:900}
+.plan-btn-solid:hover{background:#ede9fe}
 
-/* Mobile tweaks */
-@media (max-width: 768px) {
-  .pricing-popular { transform: scale(1); }
-  .step-line { display: none; }
-}
+/* ── FAQ ── */
+#faq-section{background:#050a14}
+.faq-item{border-bottom:1px solid rgba(255,255,255,.06)}
+.faq-btn{width:100%;display:flex;justify-content:space-between;align-items:center;padding:24px 0;background:none;border:none;color:#fff;font-size:17px;font-weight:700;cursor:pointer;text-align:left;gap:16px;transition:.2s}
+.faq-btn:hover{color:#60a5fa}
+.faq-icon{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.3s}
+.faq-btn.open .faq-icon{background:rgba(59,130,246,.2);transform:rotate(180deg)}
+.faq-answer{display:none;padding-bottom:24px;color:rgba(255,255,255,.5);line-height:1.8;font-size:15px}
+.faq-answer.open{display:block}
+
+/* ── CTA ── */
+#cta-section{position:relative;padding:160px 0;overflow:hidden;background:linear-gradient(135deg,#0a0f1e,#1a0a2e,#0a1428)}
+.cta-orb-1{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.2),transparent 70%);top:-200px;left:-100px;animation:glow1 8s ease-in-out infinite alternate;pointer-events:none}
+.cta-orb-2{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.18),transparent 70%);bottom:-150px;right:-50px;animation:glow1 10s ease-in-out infinite alternate-reverse;pointer-events:none}
+#cta-section .container{position:relative;z-index:2;text-align:center}
+.cta-h2{font-size:clamp(36px,5vw,68px);font-weight:900;letter-spacing:-2px;color:#fff;margin-bottom:20px;line-height:1.05}
+.cta-sub{color:rgba(255,255,255,.5);font-size:20px;max-width:560px;margin:0 auto 48px;line-height:1.6}
+.cta-btns{display:flex;flex-wrap:wrap;gap:16px;justify-content:center}
+
+/* ── Footer ── */
+#footer{background:#030711;border-top:1px solid rgba(255,255,255,.05);padding:80px 0 40px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px;margin-bottom:60px}
+@media(max-width:768px){.footer-grid{grid-template-columns:1fr}}
+.footer-logo{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.footer-logo img{width:36px;height:36px;border-radius:10px}
+.footer-logo span{font-size:20px;font-weight:900;color:#fff;letter-spacing:-.5px}
+.footer-desc{color:rgba(255,255,255,.3);font-size:14px;line-height:1.7;max-width:300px;margin-bottom:24px}
+.footer-socials{display:flex;gap:10px}
+.social-btn{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;transition:.2s;text-decoration:none}
+.social-btn:hover{background:rgba(59,130,246,.2);border-color:rgba(59,130,246,.4)}
+.footer-col-title{font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:20px}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:12px}
+.footer-links a{color:rgba(255,255,255,.4);text-decoration:none;font-size:14px;transition:.2s}
+.footer-links a:hover{color:#fff}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.05);padding-top:32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-copy{color:rgba(255,255,255,.2);font-size:13px}
+.footer-legal{display:flex;gap:24px}
+.footer-legal a{color:rgba(255,255,255,.2);text-decoration:none;font-size:13px;transition:.2s}
+.footer-legal a:hover{color:rgba(255,255,255,.6)}
+
+/* ── Scroll reveal ── */
+.sr{opacity:0;transform:translateY(40px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.sr.visible{opacity:1;transform:none}
+.sr-l{opacity:0;transform:translateX(-50px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.sr-r{opacity:0;transform:translateX(50px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.sr-l.visible,.sr-r.visible{opacity:1;transform:none}
 </style>
 {% endblock %}
 
 {% block content %}
-<div id="landing-root">
+<div id="lr">
 
-<!-- ══════════════════════════════════════
-     NAVBAR
-════════════════════════════════════════ -->
-<nav id="land-nav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" style="background:transparent;">
-  <div class="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-2.5">
-      <img src="/static/icons/icon-96.png" alt="SB" class="w-8 h-8 rounded-lg">
-      <span class="font-bold text-white text-lg tracking-tight">StandartBridge</span>
-    </a>
-    <div class="flex items-center gap-3">
-      <!-- Lang -->
-      <form method="post" action="{% url 'set_language' %}" class="flex gap-1">
-        {% csrf_token %}
-        <input type="hidden" name="next" value="{{ request.get_full_path }}">
-        {% for code, label in langs %}
-        <button type="submit" name="lang" value="{{ code }}"
-          class="text-xs px-2.5 py-1 rounded-md font-semibold transition
-          {% if current_lang == code %}bg-white text-blue-700{% else %}text-white/60 hover:text-white{% endif %}">
-          {{ code|upper }}
-        </button>
-        {% endfor %}
-      </form>
-      <a href="{% url 'login' %}" class="text-white/80 hover:text-white text-sm font-medium transition hidden sm:block">
-        {{ T.hero_login }}
-      </a>
-      <a href="{% url 'register' %}"
-         class="bg-white/15 hover:bg-white/25 text-white text-sm font-semibold px-4 py-2 rounded-xl border border-white/20 transition">
-        {{ T.register }}
-      </a>
-    </div>
+<!-- Progress bar -->
+<div id="prog"></div>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav id="lnav">
+  <a href="/" class="nav-logo">
+    <img src="/static/icons/icon-96.png" alt="SB">
+    <span>StandartBridge</span>
+  </a>
+  <div class="nav-right">
+    <form method="post" action="{% url 'set_language' %}" style="display:flex;gap:4px;align-items:center">
+      {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+      {% for code, label in langs %}
+      <button type="submit" name="lang" value="{{ code }}" class="lang-btn {% if current_lang == code %}active{% endif %}">{{ code|upper }}</button>
+      {% endfor %}
+    </form>
+    <a href="{% url 'login' %}" class="nav-login" style="display:none" id="nav-login-btn">{{ T.hero_login }}</a>
+    <a href="{% url 'register' %}" class="nav-cta">{{ T.register }}</a>
   </div>
 </nav>
 
-<!-- ══════════════════════════════════════
-     HERO — animated mesh + glass card
-════════════════════════════════════════ -->
-<section class="mesh-bg min-h-screen flex items-center pt-16 relative" style="min-height:100svh;">
-  <div class="grid-overlay"></div>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
+<!-- ═══════════════ HERO ═══════════════ -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-glow-1"></div>
+  <div class="hero-glow-2"></div>
+  <div class="hero-glow-3"></div>
 
-  <!-- Particles -->
-  <div id="particles-container" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
-
-  <div class="max-w-7xl mx-auto px-5 py-20 relative z-10 w-full">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
-
-      <!-- Left: copy -->
-      <div>
-        <div class="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm font-semibold text-cyan-300 mb-7 float-badge">
-          <span class="w-2 h-2 bg-emerald-400 rounded-full" style="animation:ping 1.5s cubic-bezier(0,0,.2,1) infinite;box-shadow:0 0 0 rgba(52,211,153,.5)"></span>
-          {{ T.hero_badge }}
+  <div class="hero-inner">
+    <!-- Left -->
+    <div>
+      <div class="hero-badge">
+        <div class="hero-badge-dot"></div>
+        {{ T.hero_badge }}
+      </div>
+      <h1 class="hero-h1">
+        <span class="line-plain">{{ T.hero_h1_line1 }}</span><br>
+        <span class="line-grad" id="typewriter-target">{{ T.hero_h1_line2 }}</span><br>
+        <span class="line-dim">{{ T.hero_h1_line3 }}</span>
+      </h1>
+      <p class="hero-sub">{{ T.hero_subtitle }}</p>
+      <div class="hero-btns">
+        <a href="{% url 'register' %}" class="btn-primary">
+          {{ T.hero_cta }}
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
+        <a href="{% url 'login' %}" class="btn-outline">{{ T.hero_login }}</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num counter" data-target="{{ user_count|default:120 }}">0</div>
+          <div class="stat-label">{{ T.stat_standards }}</div>
         </div>
-
-        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-[1.08] mb-7 tracking-tight">
-          {{ T.hero_h1_line1 }}<br>
-          <span class="grad-text">{{ T.hero_h1_line2 }}</span><br>
-          <span class="text-white/80">{{ T.hero_h1_line3 }}</span>
-        </h1>
-
-        <p class="text-blue-200/80 text-xl leading-relaxed mb-10 max-w-xl">
-          {{ T.hero_subtitle }}
-        </p>
-
-        <div class="flex flex-wrap gap-4 mb-14">
-          <a href="{% url 'register' %}" class="btn-glow">
-            {{ T.hero_cta }}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-            </svg>
-          </a>
-          <a href="{% url 'login' %}"
-             class="glass text-white px-8 py-4 rounded-xl font-semibold text-base hover:bg-white/15 transition inline-flex items-center gap-2">
-            {{ T.hero_login }}
-          </a>
+        <div class="stat-sep"></div>
+        <div class="stat-item">
+          <div class="stat-num counter" data-target="{{ expert_count|default:15 }}">0</div>
+          <div class="stat-label">{{ T.stat_faster }}</div>
         </div>
-
-        <!-- Stats row -->
-        <div class="flex flex-wrap gap-8">
-          <div>
-            <div class="text-4xl font-black text-white counter" data-target="{{ user_count|default:120 }}">0</div>
-            <div class="text-blue-300/70 text-sm mt-1">{{ T.stat_standards }}</div>
-          </div>
-          <div class="w-px bg-white/15 hidden sm:block"></div>
-          <div>
-            <div class="text-4xl font-black text-white counter" data-target="{{ expert_count|default:15 }}">0</div>
-            <div class="text-blue-300/70 text-sm mt-1">{{ T.stat_faster }}</div>
-          </div>
-          <div class="w-px bg-white/15 hidden sm:block"></div>
-          <div>
-            <div class="text-4xl font-black text-white counter" data-target="{{ analysis_count|default:80 }}">0</div>
-            <div class="text-blue-300/70 text-sm mt-1">{{ T.stat_savings }}</div>
-          </div>
+        <div class="stat-sep"></div>
+        <div class="stat-item">
+          <div class="stat-num counter" data-target="{{ analysis_count|default:80 }}">0</div>
+          <div class="stat-label">{{ T.stat_savings }}</div>
         </div>
       </div>
+    </div>
 
-      <!-- Right: AI demo card -->
-      <div class="hidden lg:block">
-        <div class="glass p-7 shadow-2xl relative shine">
-          <!-- Window chrome -->
-          <div class="flex items-center gap-2 mb-6">
-            <div class="w-3 h-3 rounded-full bg-red-400/80"></div>
-            <div class="w-3 h-3 rounded-full bg-yellow-400/80"></div>
-            <div class="w-3 h-3 rounded-full bg-emerald-400/80"></div>
-            <span class="text-white/40 text-xs ml-2 font-mono">StandartBridge AI · Gap Analysis</span>
+    <!-- Right: 3D tilt card -->
+    <div class="hero-right">
+      <div class="hero-card-wrap" id="tilt-wrap">
+        <div class="hero-card" id="tilt-card" style="position:relative">
+          <div class="hc-float">✨ AI Powered</div>
+          <div class="hc-top">
+            <div class="hc-dot" style="background:#ef4444"></div>
+            <div class="hc-dot" style="background:#f59e0b"></div>
+            <div class="hc-dot" style="background:#10b981"></div>
+            <span class="hc-title">standartbridge.ai · gap-analysis</span>
           </div>
-
-          <!-- Company info row -->
-          <div class="flex items-center gap-3 mb-5 bg-white/5 rounded-xl px-4 py-3">
-            <div class="w-9 h-9 rounded-lg bg-blue-500/30 flex items-center justify-center text-blue-300 font-bold text-sm">TX</div>
+          <div class="hc-company">
+            <div class="hc-avatar">TX</div>
             <div>
-              <p class="text-white/90 text-sm font-semibold">Toshkent Tekstil OAJ</p>
-              <p class="text-white/40 text-xs">ISO 9001:2015 → tahlil boshlandi</p>
+              <div class="hc-name">Toshkent Tekstil OAJ</div>
+              <div class="hc-sub">ISO 9001:2015 → tahlil boshlandi</div>
             </div>
-            <div class="ml-auto flex items-center gap-1.5">
-              <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-              <span class="text-emerald-400 text-xs font-medium">AI ishlamoqda</span>
-            </div>
-          </div>
-
-          <!-- Gaps -->
-          <div class="space-y-3 mb-5">
-            <div class="glass-dark p-4 border border-red-500/20">
-              <div class="flex justify-between items-start mb-1.5">
-                <span class="text-white/90 font-semibold text-sm">{{ T.ai_gap1_title }}</span>
-                <span class="bg-red-500/20 text-red-300 px-2 py-0.5 rounded-md text-xs font-bold ml-2 flex-shrink-0">{{ T.priority_critical }}</span>
-              </div>
-              <p class="text-blue-200/60 text-xs leading-relaxed">{{ T.ai_gap1_desc }}</p>
-            </div>
-            <div class="glass-dark p-4 border border-orange-500/20">
-              <div class="flex justify-between items-start mb-1.5">
-                <span class="text-white/90 font-semibold text-sm">{{ T.ai_gap2_title }}</span>
-                <span class="bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded-md text-xs font-bold ml-2 flex-shrink-0">{{ T.priority_high }}</span>
-              </div>
-              <p class="text-blue-200/60 text-xs leading-relaxed">{{ T.ai_gap2_desc }}</p>
-            </div>
-            <div class="glass-dark p-4 border border-yellow-500/20">
-              <div class="flex justify-between items-start mb-1.5">
-                <span class="text-white/90 font-semibold text-sm">{{ T.ai_gap3_title }}</span>
-                <span class="bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded-md text-xs font-bold ml-2 flex-shrink-0">{{ T.priority_medium }}</span>
-              </div>
-              <p class="text-blue-200/60 text-xs leading-relaxed">{{ T.ai_gap3_desc }}</p>
+            <div class="hc-ai-badge">
+              <div style="width:6px;height:6px;background:#4ade80;border-radius:50%;animation:ripple 2s infinite"></div>
+              AI ishlamoqda
             </div>
           </div>
-
-          <!-- Summary footer -->
-          <div class="grid grid-cols-3 gap-3 pt-5 border-t border-white/10">
-            <div class="glass-dark p-3 text-center">
-              <div class="text-cyan-400 font-black text-xl">89%</div>
-              <div class="text-white/40 text-xs mt-0.5">Tayyorlik</div>
+          <div class="hc-gap critical">
+            <div class="hc-gap-row">
+              <span class="hc-gap-title">{{ T.ai_gap1_title }}</span>
+              <span class="hc-badge critical">{{ T.priority_critical }}</span>
             </div>
-            <div class="glass-dark p-3 text-center">
-              <div class="text-violet-400 font-black text-xl">8 oy</div>
-              <div class="text-white/40 text-xs mt-0.5">{{ T.ai_est_time }}</div>
-            </div>
-            <div class="glass-dark p-3 text-center">
-              <div class="text-emerald-400 font-black text-xl">$1.5K</div>
-              <div class="text-white/40 text-xs mt-0.5">{{ T.ai_est_cost }}</div>
-            </div>
+            <div class="hc-gap-desc">{{ T.ai_gap1_desc }}</div>
           </div>
-
-          <!-- Floating badge -->
-          <div class="absolute -top-4 -right-4 bg-gradient-to-r from-emerald-400 to-cyan-400 text-gray-900 text-xs font-black px-3 py-1.5 rounded-xl shadow-lg float-badge">
-            ✨ AI Powered
+          <div class="hc-gap high">
+            <div class="hc-gap-row">
+              <span class="hc-gap-title">{{ T.ai_gap2_title }}</span>
+              <span class="hc-badge high">{{ T.priority_high }}</span>
+            </div>
+            <div class="hc-gap-desc">{{ T.ai_gap2_desc }}</div>
+          </div>
+          <div class="hc-gap medium">
+            <div class="hc-gap-row">
+              <span class="hc-gap-title">{{ T.ai_gap3_title }}</span>
+              <span class="hc-badge medium">{{ T.priority_medium }}</span>
+            </div>
+            <div class="hc-gap-desc">{{ T.ai_gap3_desc }}</div>
+          </div>
+          <div class="hc-footer">
+            <div class="hc-stat"><div class="hc-stat-num" style="color:#60a5fa">89%</div><div class="hc-stat-label">Tayyorlik</div></div>
+            <div class="hc-stat"><div class="hc-stat-num" style="color:#a78bfa">8 oy</div><div class="hc-stat-label">{{ T.ai_est_time }}</div></div>
+            <div class="hc-stat"><div class="hc-stat-num" style="color:#34d399">$1.5K</div><div class="hc-stat-label">{{ T.ai_est_cost }}</div></div>
           </div>
         </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Bottom wave -->
-  <div class="absolute bottom-0 left-0 right-0 overflow-hidden">
-    <svg viewBox="0 0 1440 80" preserveAspectRatio="none" class="w-full h-16 sm:h-20" fill="white">
-      <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z"/>
-    </svg>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════
-     TICKER — moving standards
-════════════════════════════════════════ -->
-<section class="bg-white py-5 overflow-hidden border-b border-gray-100">
-  <div class="ticker-wrap">
-    <div class="ticker-inner gap-8 px-4">
-      {% for std in standards_list %}
-      <span class="inline-flex items-center gap-2 text-gray-500 font-semibold text-sm mr-10">
-        <span class="w-2 h-2 bg-blue-500 rounded-full"></span>{{ std }}
-      </span>
-      {% endfor %}
-      {% for std in standards_list %}
-      <span class="inline-flex items-center gap-2 text-gray-500 font-semibold text-sm mr-10">
-        <span class="w-2 h-2 bg-blue-500 rounded-full"></span>{{ std }}
-      </span>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════
-     FEATURES — 6 card grid
-════════════════════════════════════════ -->
-<section class="py-28 bg-white">
-  <div class="max-w-7xl mx-auto px-5">
-    <div class="text-center mb-16 reveal">
-      <span class="text-blue-600 font-bold text-xs uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full">{{ T.how_badge }}</span>
-      <h2 class="text-5xl font-black text-gray-900 mt-4 mb-4 tracking-tight">{{ T.how_title }}</h2>
-      <p class="text-gray-500 text-xl max-w-2xl mx-auto">{{ T.how_subtitle }}</p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <!-- Feature 1 -->
-      <div class="feat-card reveal" style="transition-delay:.05s">
-        <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mb-5">
-          <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-          </svg>
-        </div>
-        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ T.step1_title }}</h3>
-        <p class="text-gray-500 leading-relaxed">{{ T.step1_desc }}</p>
-      </div>
-      <!-- Feature 2 -->
-      <div class="feat-card reveal" style="transition-delay:.10s">
-        <div class="w-14 h-14 rounded-2xl bg-violet-100 flex items-center justify-center mb-5">
-          <svg class="w-7 h-7 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-          </svg>
-        </div>
-        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ T.step2_title }}</h3>
-        <p class="text-gray-500 leading-relaxed">{{ T.step2_desc }}</p>
-      </div>
-      <!-- Feature 3 -->
-      <div class="feat-card reveal" style="transition-delay:.15s">
-        <div class="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center mb-5">
-          <svg class="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-          </svg>
-        </div>
-        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ T.step3_title }}</h3>
-        <p class="text-gray-500 leading-relaxed">{{ T.step3_desc }}</p>
-      </div>
-      <!-- Feature 4 -->
-      <div class="feat-card reveal" style="transition-delay:.20s">
-        <div class="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center mb-5">
-          <svg class="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-          </svg>
-        </div>
-        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ T.step4_title }}</h3>
-        <p class="text-gray-500 leading-relaxed">{{ T.step4_desc }}</p>
-      </div>
-      <!-- Feature 5 -->
-      <div class="feat-card reveal" style="transition-delay:.25s">
-        <div class="w-14 h-14 rounded-2xl bg-cyan-100 flex items-center justify-center mb-5">
-          <svg class="w-7 h-7 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-          </svg>
-        </div>
-        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ T.entrepreneur_feat1 }}</h3>
-        <p class="text-gray-500 leading-relaxed">{{ T.entrepreneur_feat2 }}</p>
-      </div>
-      <!-- Feature 6 -->
-      <div class="feat-card reveal" style="transition-delay:.30s">
-        <div class="w-14 h-14 rounded-2xl bg-pink-100 flex items-center justify-center mb-5">
-          <svg class="w-7 h-7 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-          </svg>
-        </div>
-        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ T.expert_feat1 }}</h3>
-        <p class="text-gray-500 leading-relaxed">{{ T.expert_feat2 }}</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════
-     STATS — dark gradient bg
-════════════════════════════════════════ -->
-<section class="py-20 relative overflow-hidden" style="background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0c1a3a 100%);">
-  <div class="absolute inset-0" style="background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(37,99,235,.15),transparent)"></div>
-  <div class="max-w-6xl mx-auto px-5 relative z-10">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-      <div class="reveal">
-        <div class="text-6xl font-black text-white mb-2 counter" data-target="{{ user_count|default:120 }}" data-suffix="+">0</div>
-        <div class="text-blue-300/70">{{ T.stat_standards }}</div>
+<!-- ═══════════════ VIDEO ═══════════════ -->
+<section id="video-section">
+  <div class="video-overlay"></div>
+  <iframe class="yt-iframe"
+    src="https://www.youtube.com/embed/sTnQgGrpAZ4?autoplay=1&mute=1&loop=1&playlist=sTnQgGrpAZ4&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
+    allow="autoplay; encrypted-media" allowfullscreen title="ISO certification"></iframe>
+  <div class="video-text sr">
+    <h2>ISO Sertifikatsiya — Endi <span style="background:linear-gradient(135deg,#60a5fa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Oson</span></h2>
+    <p>AI texnologiyasi bilan gap tahlildan sertifikatgacha bir platformada</p>
+  </div>
+</section>
+
+<!-- ═══════════════ MARQUEE ═══════════════ -->
+<div class="marquee-wrap" style="padding-top:12px">
+  <div class="marquee-track">
+    {% for std in standards_list %}<div class="marquee-item"><span></span>{{ std }}</div>{% endfor %}
+    {% for std in standards_list %}<div class="marquee-item"><span></span>{{ std }}</div>{% endfor %}
+    {% for std in standards_list %}<div class="marquee-item"><span></span>{{ std }}</div>{% endfor %}
+  </div>
+</div>
+<div class="marquee-wrap" style="padding-bottom:12px">
+  <div class="marquee-track marquee-track-rev">
+    {% for name, icon in industry_list %}<div class="marquee-item"><span style="background:linear-gradient(135deg,#34d399,#06b6d4)"></span>{{ icon }} {{ name }}</div>{% endfor %}
+    {% for name, icon in industry_list %}<div class="marquee-item"><span style="background:linear-gradient(135deg,#34d399,#06b6d4)"></span>{{ icon }} {{ name }}</div>{% endfor %}
+    {% for name, icon in industry_list %}<div class="marquee-item"><span style="background:linear-gradient(135deg,#34d399,#06b6d4)"></span>{{ icon }} {{ name }}</div>{% endfor %}
+  </div>
+</div>
+
+<!-- ═══════════════ BENTO FEATURES ═══════════════ -->
+<section class="section" id="features" style="background:linear-gradient(180deg,#050a14,#080e1d)">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:64px" class="sr">
+      <div class="section-label">{{ T.how_badge }}</div>
+      <h2 class="section-h2">{{ T.how_title }}</h2>
+      <p class="section-sub" style="margin:0 auto">{{ T.how_subtitle }}</p>
+    </div>
+    <div class="bento">
+      <!-- Featured: AI -->
+      <div class="bento-card featured sr" style="transition-delay:.05s">
+        <div class="bento-icon" style="background:rgba(59,130,246,.15)">🤖</div>
+        <h3 class="bento-h3">{{ T.step1_title }}</h3>
+        <p class="bento-p">{{ T.step1_desc }}</p>
+        <div class="ai-lines">
+          <div class="ai-line"></div>
+          <div class="ai-line"></div>
+          <div class="ai-line"></div>
+          <div class="ai-line"></div>
+        </div>
+        <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap">
+          <span style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.2);color:#fca5a5;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700">Critical</span>
+          <span style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.2);color:#fdba74;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700">High</span>
+          <span style="background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.2);color:#fde047;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700">Medium</span>
+          <span style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.2);color:#86efac;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700">Low</span>
+        </div>
       </div>
-      <div class="reveal" style="transition-delay:.1s">
-        <div class="text-6xl font-black text-white mb-2 counter" data-target="{{ expert_count|default:15 }}" data-suffix="+">0</div>
-        <div class="text-blue-300/70">{{ T.stat_faster }}</div>
+      <!-- Speed -->
+      <div class="bento-card sr" style="transition-delay:.1s">
+        <div class="bento-icon" style="background:rgba(6,182,212,.15)">⚡</div>
+        <h3 class="bento-h3">{{ T.step2_title }}</h3>
+        <p class="bento-p">{{ T.step2_desc }}</p>
+        <div class="gauge-wrap">
+          <div class="gauge-circle"><div class="gauge-num">85%</div></div>
+          <div>
+            <div style="color:#fff;font-size:14px;font-weight:700;margin-bottom:4px">Tayyorlik darajasi</div>
+            <div style="color:rgba(255,255,255,.4);font-size:12px">30 soniyada aniqlanadi</div>
+          </div>
+        </div>
       </div>
-      <div class="reveal" style="transition-delay:.2s">
-        <div class="text-6xl font-black text-white mb-2 counter" data-target="{{ analysis_count|default:80 }}" data-suffix="+">0</div>
-        <div class="text-blue-300/70">{{ T.stat_savings }}</div>
+      <!-- Experts -->
+      <div class="bento-card sr" style="transition-delay:.15s">
+        <div class="bento-icon" style="background:rgba(139,92,246,.15)">🏆</div>
+        <h3 class="bento-h3">{{ T.step3_title }}</h3>
+        <p class="bento-p">{{ T.step3_desc }}</p>
+        <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px">
+          {% for i in "123" %}<div style="display:flex;align-items:center;gap:10px">
+            <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,rgba(139,92,246,.3),rgba(59,130,246,.3));flex-shrink:0"></div>
+            <div style="flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,#8b5cf6,#3b82f6);border-radius:4px;width:{% if forloop.first %}78%{% elif forloop.last %}91%{% else %}65%{% endif %}"></div></div>
+          </div>{% endfor %}
+        </div>
       </div>
-      <div class="reveal" style="transition-delay:.3s">
-        <div class="text-6xl font-black text-cyan-400 mb-2">40%</div>
-        <div class="text-blue-300/70">Xarajat tejamiyat</div>
+      <!-- Security -->
+      <div class="bento-card sr" style="transition-delay:.20s">
+        <div class="bento-icon" style="background:rgba(16,185,129,.15)">🔒</div>
+        <h3 class="bento-h3">{{ T.step4_title }}</h3>
+        <p class="bento-p">{{ T.step4_desc }}</p>
+        <div class="flow">
+          <div class="flow-node">Tadbirkor</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node active">Escrow</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">Mutaxassis</div>
+        </div>
+      </div>
+      <!-- Multilang -->
+      <div class="bento-card sr" style="transition-delay:.25s">
+        <div class="bento-icon" style="background:rgba(236,72,153,.15)">🌐</div>
+        <h3 class="bento-h3">Ko'p tilli platforma</h3>
+        <p class="bento-p">O'zbek, Rus va Ingliz tillarida to'liq qo'llab-quvvatlash</p>
+        <div style="margin-top:20px;display:flex;gap:8px">
+          <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:20px;margin-bottom:4px">🇺🇿</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:700">UZ</div>
+          </div>
+          <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:20px;margin-bottom:4px">🇷🇺</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:700">RU</div>
+          </div>
+          <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:20px;margin-bottom:4px">🇺🇸</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:700">EN</div>
+          </div>
+        </div>
+      </div>
+      <!-- QMS -->
+      <div class="bento-card sr" style="transition-delay:.30s">
+        <div class="bento-icon" style="background:rgba(234,179,8,.15)">📊</div>
+        <h3 class="bento-h3">QMS Tool</h3>
+        <p class="bento-p">Sifat boshqaruv tizimi: checklist, hujjatlar, audit jadvali</p>
+        <div style="margin-top:16px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,#eab308,#f97316);border-radius:3px;width:75%"></div></div><span style="color:rgba(255,255,255,.3);font-size:11px;min-width:28px">75%</span></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,#eab308,#f97316);border-radius:3px;width:55%"></div></div><span style="color:rgba(255,255,255,.3);font-size:11px;min-width:28px">55%</span></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,#eab308,#f97316);border-radius:3px;width:90%"></div></div><span style="color:rgba(255,255,255,.3);font-size:11px;min-width:28px">90%</span></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,#eab308,#f97316);border-radius:3px;width:40%"></div></div><span style="color:rgba(255,255,255,.3);font-size:11px;min-width:28px">40%</span></div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════
-     FOR WHO — 2 column cards
-════════════════════════════════════════ -->
-<section class="py-28 section-grad">
-  <div class="max-w-7xl mx-auto px-5">
-    <div class="text-center mb-16 reveal">
-      <span class="text-blue-600 font-bold text-xs uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full">{{ T.forwhom_badge }}</span>
-      <h2 class="text-5xl font-black text-gray-900 mt-4 tracking-tight">{{ T.forwhom_title }}</h2>
+<!-- ═══════════════ STATS ═══════════════ -->
+<section id="stats-section">
+  <div class="stats-grid">
+    <div class="stat-box sr">
+      <div class="stat-big blue counter" data-target="{{ user_count|default:120 }}" data-suffix="+">0</div>
+      <div class="stat-desc">{{ T.stat_standards }}</div>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="stat-box sr" style="transition-delay:.1s">
+      <div class="stat-big cyan counter" data-target="{{ expert_count|default:15 }}" data-suffix="+">0</div>
+      <div class="stat-desc">{{ T.stat_faster }}</div>
+    </div>
+    <div class="stat-box sr" style="transition-delay:.2s">
+      <div class="stat-big violet counter" data-target="{{ analysis_count|default:80 }}" data-suffix="+">0</div>
+      <div class="stat-desc">{{ T.stat_savings }}</div>
+    </div>
+    <div class="stat-box sr" style="transition-delay:.3s">
+      <div class="stat-big white">40%</div>
+      <div class="stat-desc">Xarajat tejamiyat</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOR WHO ═══════════════ -->
+<section class="section" id="forwho">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:64px" class="sr">
+      <div class="section-label">{{ T.forwhom_badge }}</div>
+      <h2 class="section-h2">{{ T.forwhom_title }}</h2>
+    </div>
+    <div class="forwho-grid">
       <!-- Tadbirkor -->
-      <div class="rounded-3xl overflow-hidden relative shine reveal-left"
-           style="background:linear-gradient(135deg,#1d4ed8 0%,#0891b2 100%);">
-        <div class="absolute inset-0 opacity-10"
-             style="background-image:radial-gradient(circle,rgba(255,255,255,.5) 1px,transparent 1px);background-size:30px 30px;"></div>
-        <div class="relative z-10 p-10">
-          <div class="w-16 h-16 bg-white/15 rounded-2xl flex items-center justify-center mb-6">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-            </svg>
-          </div>
-          <h3 class="text-3xl font-black text-white mb-3">{{ T.entrepreneur_title }}</h3>
-          <p class="text-blue-100/80 mb-7 text-lg leading-relaxed">{{ T.entrepreneur_desc }}</p>
-          <ul class="space-y-3 mb-8">
-            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.entrepreneur_feat1 }}</li>
-            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.entrepreneur_feat2 }}</li>
-            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.entrepreneur_feat3 }}</li>
-            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.entrepreneur_feat4 }}</li>
-          </ul>
-          <a href="{% url 'register' %}"
-             class="inline-flex items-center gap-2 bg-white text-blue-700 font-bold px-6 py-3.5 rounded-xl hover:bg-blue-50 transition">
-            {{ T.entrepreneur_cta }}
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-            </svg>
-          </a>
+      <div class="fw-card fw-card-ent sr-l">
+        <div class="fw-card-pattern"></div>
+        <div class="fw-card-glow" style="background:rgba(6,182,212,.4)"></div>
+        <div class="fw-icon">
+          <svg width="32" height="32" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
         </div>
+        <h3 class="fw-h3">{{ T.entrepreneur_title }}</h3>
+        <p class="fw-p">{{ T.entrepreneur_desc }}</p>
+        <ul class="fw-list">
+          <li><div class="fw-check">✓</div>{{ T.entrepreneur_feat1 }}</li>
+          <li><div class="fw-check">✓</div>{{ T.entrepreneur_feat2 }}</li>
+          <li><div class="fw-check">✓</div>{{ T.entrepreneur_feat3 }}</li>
+          <li><div class="fw-check">✓</div>{{ T.entrepreneur_feat4 }}</li>
+        </ul>
+        <a href="{% url 'register' %}" class="fw-btn-ent">
+          {{ T.entrepreneur_cta }}
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
       </div>
-
       <!-- Mutaxassis -->
-      <div class="rounded-3xl overflow-hidden relative shine reveal-right"
-           style="background:linear-gradient(135deg,#4c1d95 0%,#1e3a8a 100%);">
-        <div class="absolute inset-0 opacity-10"
-             style="background-image:radial-gradient(circle,rgba(255,255,255,.5) 1px,transparent 1px);background-size:30px 30px;"></div>
-        <div class="relative z-10 p-10">
-          <div class="w-16 h-16 bg-white/15 rounded-2xl flex items-center justify-center mb-6">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-            </svg>
-          </div>
-          <h3 class="text-3xl font-black text-white mb-3">{{ T.expert_title }}</h3>
-          <p class="text-purple-100/80 mb-7 text-lg leading-relaxed">{{ T.expert_desc }}</p>
-          <ul class="space-y-3 mb-8">
-            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.expert_feat1 }}</li>
-            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.expert_feat2 }}</li>
-            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.expert_feat3 }}</li>
-            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.expert_feat4 }}</li>
-          </ul>
-          <a href="{% url 'register' %}"
-             class="inline-flex items-center gap-2 bg-white text-purple-700 font-bold px-6 py-3.5 rounded-xl hover:bg-purple-50 transition">
-            {{ T.expert_cta }}
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-            </svg>
-          </a>
+      <div class="fw-card fw-card-exp sr-r">
+        <div class="fw-card-pattern"></div>
+        <div class="fw-card-glow" style="background:rgba(167,139,250,.4)"></div>
+        <div class="fw-icon">
+          <svg width="32" height="32" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
         </div>
+        <h3 class="fw-h3">{{ T.expert_title }}</h3>
+        <p class="fw-p">{{ T.expert_desc }}</p>
+        <ul class="fw-list">
+          <li><div class="fw-check" style="background:rgba(255,255,255,.15)">✓</div>{{ T.expert_feat1 }}</li>
+          <li><div class="fw-check" style="background:rgba(255,255,255,.15)">✓</div>{{ T.expert_feat2 }}</li>
+          <li><div class="fw-check" style="background:rgba(255,255,255,.15)">✓</div>{{ T.expert_feat3 }}</li>
+          <li><div class="fw-check" style="background:rgba(255,255,255,.15)">✓</div>{{ T.expert_feat4 }}</li>
+        </ul>
+        <a href="{% url 'register' %}" class="fw-btn-exp">
+          {{ T.expert_cta }}
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════
-     INDUSTRIES
-════════════════════════════════════════ -->
-<section class="py-24 bg-white">
-  <div class="max-w-7xl mx-auto px-5">
-    <div class="text-center mb-12 reveal">
-      <span class="text-blue-600 font-bold text-xs uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full">{{ T.industries_badge }}</span>
-      <h2 class="text-5xl font-black text-gray-900 mt-4 tracking-tight">{{ T.industries_title }}</h2>
+<!-- ═══════════════ INDUSTRIES ═══════════════ -->
+<section class="section" id="industries" style="padding-top:80px;padding-bottom:80px">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:48px" class="sr">
+      <div class="section-label">{{ T.industries_badge }}</div>
+      <h2 class="section-h2">{{ T.industries_title }}</h2>
     </div>
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+    <div class="ind-grid">
       {% for name, icon in industry_list %}
-      <div class="group bg-gray-50 hover:bg-blue-600 rounded-2xl p-6 text-center cursor-default transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/20 border border-transparent hover:border-blue-500 reveal"
-           style="transition-delay:{{ forloop.counter0 }}0ms">
-        <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">{{ icon }}</div>
-        <p class="font-semibold text-gray-700 group-hover:text-white text-sm transition-colors">{{ name }}</p>
+      <div class="ind-card sr" style="transition-delay:{{ forloop.counter0 }}0ms">
+        <span class="ind-icon">{{ icon }}</span>
+        <p class="ind-name">{{ name }}</p>
       </div>
       {% endfor %}
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════
-     PRICING
-════════════════════════════════════════ -->
-<section class="py-28 section-grad">
-  <div class="max-w-7xl mx-auto px-5">
-    <div class="text-center mb-16 reveal">
-      <span class="text-blue-600 font-bold text-xs uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full">{{ T.pricing_badge }}</span>
-      <h2 class="text-5xl font-black text-gray-900 mt-4 mb-4 tracking-tight">{{ T.pricing_title }}</h2>
-      <p class="text-gray-500 text-xl">{{ T.pricing_subtitle }}</p>
+<!-- ═══════════════ PRICING ═══════════════ -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:64px" class="sr">
+      <div class="section-label">{{ T.pricing_badge }}</div>
+      <h2 class="section-h2">{{ T.pricing_title }}</h2>
+      <p class="section-sub" style="margin:0 auto">{{ T.pricing_subtitle }}</p>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center max-w-5xl mx-auto">
+    <div class="pricing-grid">
       <!-- Starter -->
-      <div class="bg-white rounded-3xl p-8 border border-gray-200 hover:shadow-xl transition-shadow reveal-left">
-        <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">{{ T.plan_starter }}</div>
-        <div class="text-5xl font-black text-gray-900 mb-1">{{ T.plan_starter_price }}</div>
-        <p class="text-gray-400 text-sm mb-7">{{ T.plan_starter_for }}</p>
-        <ul class="space-y-3 mb-8 text-sm text-gray-600">
-          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_starter_f1 }}</li>
-          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_starter_f2 }}</li>
-          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_starter_f3 }}</li>
-          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-gray-100 text-gray-300 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✗</span><span class="text-gray-300">{{ T.plan_starter_f4_no }}</span></li>
+      <div class="price-card sr-l">
+        <p class="plan-label">{{ T.plan_starter }}</p>
+        <p class="plan-price">{{ T.plan_starter_price }}</p>
+        <p class="plan-desc">{{ T.plan_starter_for }}</p>
+        <ul class="plan-features">
+          <li><span class="feat-check">✓</span>{{ T.plan_starter_f1 }}</li>
+          <li><span class="feat-check">✓</span>{{ T.plan_starter_f2 }}</li>
+          <li><span class="feat-check">✓</span>{{ T.plan_starter_f3 }}</li>
+          <li class="no"><span class="feat-no">✗</span>{{ T.plan_starter_f4_no }}</li>
         </ul>
-        <a href="{% url 'register' %}" class="block text-center border-2 border-blue-600 text-blue-600 py-3.5 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition">{{ T.btn_start }}</a>
+        <a href="{% url 'register' %}" class="plan-btn plan-btn-outline">{{ T.btn_start }}</a>
       </div>
-
-      <!-- Professional (popular) -->
-      <div class="pricing-popular rounded-3xl p-8 relative reveal" style="transition-delay:.1s">
-        <div class="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-400 to-pink-500 text-white text-xs font-black px-5 py-1.5 rounded-full shadow-lg whitespace-nowrap">
-          🔥 {{ T.plan_pro_badge }}
-        </div>
-        <div class="text-xs font-black uppercase tracking-widest text-blue-200 mb-3">{{ T.plan_pro }}</div>
-        <div class="text-5xl font-black text-white mb-1">{{ T.plan_pro_price }}<span class="text-lg text-blue-200 font-normal"> {{ T.plan_pro_per }}</span></div>
-        <p class="text-blue-200 text-sm mb-7">{{ T.plan_pro_for }}</p>
-        <ul class="space-y-3 mb-8 text-sm text-white">
-          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-white/20 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_pro_f1 }}</li>
-          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-white/20 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_pro_f2 }}</li>
-          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-white/20 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_pro_f3 }}</li>
-          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-white/20 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_pro_f4 }}</li>
-          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-white/20 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_pro_f5 }}</li>
+      <!-- Pro (popular) -->
+      <div class="price-card popular sr">
+        <p class="plan-label">{{ T.plan_pro }}</p>
+        <div class="plan-badge">🔥 {{ T.plan_pro_badge }}</div>
+        <p class="plan-price">{{ T.plan_pro_price }}<span class="plan-period"> {{ T.plan_pro_per }}</span></p>
+        <p class="plan-desc" style="border-color:rgba(255,255,255,.1)">{{ T.plan_pro_for }}</p>
+        <ul class="plan-features">
+          <li><span class="feat-check">✓</span>{{ T.plan_pro_f1 }}</li>
+          <li><span class="feat-check">✓</span>{{ T.plan_pro_f2 }}</li>
+          <li><span class="feat-check">✓</span>{{ T.plan_pro_f3 }}</li>
+          <li><span class="feat-check">✓</span>{{ T.plan_pro_f4 }}</li>
+          <li><span class="feat-check">✓</span>{{ T.plan_pro_f5 }}</li>
         </ul>
-        <a href="{% url 'register' %}" class="block text-center bg-white text-blue-700 py-3.5 rounded-xl font-black hover:bg-blue-50 transition shadow-lg">{{ T.btn_start }}</a>
+        <a href="{% url 'register' %}" class="plan-btn plan-btn-solid">{{ T.btn_start }}</a>
       </div>
-
       <!-- Enterprise -->
-      <div class="bg-white rounded-3xl p-8 border border-gray-200 hover:shadow-xl transition-shadow reveal-right">
-        <div class="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">{{ T.plan_enterprise }}</div>
-        <div class="text-5xl font-black text-gray-900 mb-1">{{ T.plan_enterprise_price }}</div>
-        <p class="text-gray-400 text-sm mb-7">{{ T.plan_enterprise_for }}</p>
-        <ul class="space-y-3 mb-8 text-sm text-gray-600">
-          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_enterprise_f1 }}</li>
-          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_enterprise_f2 }}</li>
-          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_enterprise_f3 }}</li>
-          <li class="flex items-center gap-2.5"><span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>{{ T.plan_enterprise_f4 }}</li>
+      <div class="price-card sr-r">
+        <p class="plan-label">{{ T.plan_enterprise }}</p>
+        <p class="plan-price">{{ T.plan_enterprise_price }}</p>
+        <p class="plan-desc">{{ T.plan_enterprise_for }}</p>
+        <ul class="plan-features">
+          <li><span class="feat-check">✓</span>{{ T.plan_enterprise_f1 }}</li>
+          <li><span class="feat-check">✓</span>{{ T.plan_enterprise_f2 }}</li>
+          <li><span class="feat-check">✓</span>{{ T.plan_enterprise_f3 }}</li>
+          <li><span class="feat-check">✓</span>{{ T.plan_enterprise_f4 }}</li>
         </ul>
-        <a href="mailto:isoqjonovavazbek@gmail.com" class="block text-center border-2 border-gray-200 text-gray-700 py-3.5 rounded-xl font-bold hover:border-gray-400 hover:bg-gray-50 transition">{{ T.btn_contact }}</a>
+        <a href="mailto:isoqjonovavazbek@gmail.com" class="plan-btn plan-btn-outline">{{ T.btn_contact }}</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════
-     FAQ
-════════════════════════════════════════ -->
-<section class="py-24 bg-white">
-  <div class="max-w-3xl mx-auto px-5">
-    <div class="text-center mb-14 reveal">
-      <span class="text-blue-600 font-bold text-xs uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full">{{ T.faq_badge }}</span>
-      <h2 class="text-5xl font-black text-gray-900 mt-4 tracking-tight">{{ T.faq_title }}</h2>
+<!-- ═══════════════ FAQ ═══════════════ -->
+<section class="section" id="faq-section" style="padding-top:80px">
+  <div class="container" style="max-width:760px">
+    <div style="text-align:center;margin-bottom:56px" class="sr">
+      <div class="section-label">{{ T.faq_badge }}</div>
+      <h2 class="section-h2">{{ T.faq_title }}</h2>
     </div>
-    <div class="space-y-3" id="faq">
+    <div>
       {% for q, a in faq_list %}
-      <div class="border border-gray-200 rounded-2xl overflow-hidden hover:border-blue-200 transition-colors reveal" style="transition-delay:{{ forloop.counter0 }}0ms">
-        <button onclick="toggleFaq(this)"
-          class="w-full flex items-center justify-between px-6 py-5 text-left font-bold text-gray-900 hover:bg-gray-50 transition gap-4">
+      <div class="faq-item sr" style="transition-delay:{{ forloop.counter0 }}0ms">
+        <button class="faq-btn" onclick="toggleFaq(this)">
           <span>{{ q }}</span>
-          <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-            <svg class="w-4 h-4 text-blue-600 transition-transform duration-300 faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
-            </svg>
+          <div class="faq-icon">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
           </div>
         </button>
-        <div class="faq-answer hidden px-6 pb-6">
-          <p class="text-gray-500 leading-relaxed">{{ a }}</p>
-        </div>
+        <div class="faq-answer">{{ a }}</div>
       </div>
       {% endfor %}
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════
-     CTA — mesh background
-════════════════════════════════════════ -->
-<section class="py-28 mesh-bg relative overflow-hidden">
-  <div class="grid-overlay"></div>
-  <div class="orb orb-1" style="width:400px;height:400px;opacity:.6;"></div>
-  <div class="orb orb-2" style="width:300px;height:300px;opacity:.5;"></div>
-  <div class="max-w-4xl mx-auto px-5 text-center relative z-10 reveal">
-    <div class="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-sm text-cyan-300 font-semibold mb-8">
-      <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-      {{ T.hero_badge }}
-    </div>
-    <h2 class="text-5xl sm:text-6xl font-black text-white mb-6 tracking-tight leading-tight">
-      {{ T.cta_title }}
-    </h2>
-    <p class="text-blue-200/80 text-xl mb-10 max-w-2xl mx-auto">{{ T.cta_subtitle }}</p>
-    <div class="flex flex-wrap gap-4 justify-center">
-      <a href="{% url 'register' %}" class="btn-glow text-lg px-10 py-5">
+<!-- ═══════════════ CTA ═══════════════ -->
+<section id="cta-section">
+  <div class="cta-orb-1"></div>
+  <div class="cta-orb-2"></div>
+  <div class="container sr">
+    <div class="section-label" style="margin-bottom:28px">{{ T.hero_badge }}</div>
+    <h2 class="cta-h2">{{ T.cta_title }}</h2>
+    <p class="cta-sub">{{ T.cta_subtitle }}</p>
+    <div class="cta-btns">
+      <a href="{% url 'register' %}" class="btn-primary" style="font-size:18px;padding:20px 48px">
         {{ T.cta_btn }}
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-        </svg>
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
       </a>
-      <a href="{% url 'login' %}" class="glass text-white px-10 py-5 rounded-xl font-bold text-lg hover:bg-white/15 transition">
+      <a href="{% url 'login' %}" class="btn-outline" style="font-size:18px;padding:20px 40px">
         {{ T.hero_login }}
       </a>
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════
-     FOOTER
-════════════════════════════════════════ -->
-<footer style="background:#070d1a;" class="text-white py-16">
-  <div class="max-w-7xl mx-auto px-5">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
-      <div class="md:col-span-2">
-        <div class="flex items-center gap-2.5 mb-5">
-          <img src="/static/icons/icon-96.png" alt="SB" class="w-10 h-10 rounded-xl">
-          <span class="font-black text-2xl tracking-tight">StandartBridge</span>
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer id="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">
+          <img src="/static/icons/icon-96.png" alt="SB">
+          <span>StandartBridge</span>
         </div>
-        <p class="text-gray-400 text-sm leading-relaxed max-w-xs mb-6">{{ T.footer_desc }}</p>
-        <!-- Social icons placeholder -->
-        <div class="flex gap-3">
-          <a href="https://t.me/standartbridge" target="_blank" rel="noopener"
-             class="w-9 h-9 rounded-lg bg-white/5 hover:bg-blue-600 flex items-center justify-center transition">
-            <svg class="w-4 h-4 text-gray-400 hover:text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M11.944 0A12 12 0 1 0 24 12 12 12 0 0 0 11.944 0zm5.37 8.317l-1.73 8.16c-.13.59-.48.73-.97.46l-2.68-1.97-1.29 1.24c-.14.14-.27.27-.55.27l.19-2.72 4.97-4.49c.22-.19-.05-.3-.33-.11L7.9 14.07l-2.63-.82c-.57-.18-.58-.57.12-.84l10.27-3.96c.48-.17.9.12.74.84z"/>
-            </svg>
+        <p class="footer-desc">{{ T.footer_desc }}</p>
+        <div class="footer-socials">
+          <a href="https://t.me/standartbridge" target="_blank" rel="noopener" class="social-btn">
+            <svg width="16" height="16" fill="rgba(255,255,255,.5)" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 1 0 24 12 12 12 0 0 0 11.944 0zm5.37 8.317l-1.73 8.16c-.13.59-.48.73-.97.46l-2.68-1.97-1.29 1.24c-.14.14-.27.27-.55.27l.19-2.72 4.97-4.49c.22-.19-.05-.3-.33-.11L7.9 14.07l-2.63-.82c-.57-.18-.58-.57.12-.84l10.27-3.96c.48-.17.9.12.74.84z"/></svg>
           </a>
-          <a href="mailto:isoqjonovavazbek@gmail.com"
-             class="w-9 h-9 rounded-lg bg-white/5 hover:bg-blue-600 flex items-center justify-center transition">
-            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
+          <a href="mailto:isoqjonovavazbek@gmail.com" class="social-btn">
+            <svg width="16" height="16" fill="none" stroke="rgba(255,255,255,.5)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
           </a>
         </div>
       </div>
       <div>
-        <h4 class="font-bold text-xs uppercase tracking-widest text-gray-500 mb-5">{{ T.footer_platform }}</h4>
-        <ul class="space-y-3 text-sm text-gray-400">
-          <li><a href="{% url 'register' %}" class="hover:text-white transition">{{ T.register }}</a></li>
-          <li><a href="{% url 'login' %}" class="hover:text-white transition">{{ T.login }}</a></li>
-          <li><a href="{% url 'blog_list' %}" class="hover:text-white transition">{{ T.blog }}</a></li>
+        <p class="footer-col-title">{{ T.footer_platform }}</p>
+        <ul class="footer-links">
+          <li><a href="{% url 'register' %}">{{ T.register }}</a></li>
+          <li><a href="{% url 'login' %}">{{ T.login }}</a></li>
+          <li><a href="{% url 'blog_list' %}">{{ T.blog }}</a></li>
         </ul>
       </div>
       <div>
-        <h4 class="font-bold text-xs uppercase tracking-widest text-gray-500 mb-5">{{ T.footer_contact }}</h4>
-        <ul class="space-y-3 text-sm text-gray-400">
-          <li><a href="mailto:isoqjonovavazbek@gmail.com" class="hover:text-white transition">isoqjonovavazbek@gmail.com</a></li>
-          <li><a href="tel:+998779701017" class="hover:text-white transition">+998 77 970 10 17</a></li>
-          <li class="text-gray-500">Toshkent, O'zbekiston</li>
+        <p class="footer-col-title">{{ T.footer_contact }}</p>
+        <ul class="footer-links">
+          <li><a href="mailto:isoqjonovavazbek@gmail.com">isoqjonovavazbek@gmail.com</a></li>
+          <li><a href="tel:+998779701017">+998 77 970 10 17</a></li>
+          <li><span style="color:rgba(255,255,255,.25)">Toshkent, O'zbekiston</span></li>
         </ul>
       </div>
     </div>
-    <div class="border-t border-white/5 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <p class="text-gray-600 text-sm">{{ T.footer_copyright }}</p>
-      <div class="flex gap-6 text-sm text-gray-600">
-        <a href="#" class="hover:text-white transition">{{ T.footer_privacy }}</a>
-        <a href="#" class="hover:text-white transition">{{ T.footer_terms }}</a>
+    <div class="footer-bottom">
+      <p class="footer-copy">{{ T.footer_copyright }}</p>
+      <div class="footer-legal">
+        <a href="#">{{ T.footer_privacy }}</a>
+        <a href="#">{{ T.footer_terms }}</a>
       </div>
     </div>
   </div>
 </footer>
 
-</div><!-- #landing-root -->
+</div><!-- #lr -->
 
 <script>
-/* ── Navbar scroll effect ── */
-window.addEventListener('scroll', function() {
-  var nav = document.getElementById('land-nav');
-  if (!nav) return;
-  if (window.scrollY > 40) {
-    nav.style.background = 'rgba(5,13,26,.92)';
-    nav.style.backdropFilter = 'blur(20px)';
-    nav.style.boxShadow = '0 1px 0 rgba(255,255,255,.05)';
-  } else {
-    nav.style.background = 'transparent';
-    nav.style.backdropFilter = '';
-    nav.style.boxShadow = '';
-  }
-}, { passive: true });
+/* ── Scroll progress ── */
+window.addEventListener('scroll',function(){
+  var p=document.getElementById('prog');
+  if(!p)return;
+  var s=document.documentElement.scrollTop||document.body.scrollTop;
+  var h=document.documentElement.scrollHeight-window.innerHeight;
+  p.style.width=(h>0?s/h*100:0)+'%';
+},{passive:true});
 
-/* ── Particles ── */
-(function() {
-  var container = document.getElementById('particles-container');
-  if (!container) return;
-  for (var i = 0; i < 28; i++) {
-    var p = document.createElement('div');
-    var size = Math.random() * 3 + 1;
-    var delay = Math.random() * 12;
-    var duration = Math.random() * 10 + 8;
-    var drift = (Math.random() - .5) * 200;
-    p.className = 'particle';
-    p.style.cssText =
-      'width:' + size + 'px;height:' + size + 'px;' +
-      'left:' + (Math.random() * 100) + '%;' +
-      'bottom:-20px;' +
-      '--drift:' + drift + 'px;' +
-      'animation-duration:' + duration + 's;' +
-      'animation-delay:' + delay + 's;' +
-      'opacity:.4;';
-    container.appendChild(p);
+/* ── Navbar scroll ── */
+window.addEventListener('scroll',function(){
+  var n=document.getElementById('lnav');
+  if(!n)return;
+  n.classList.toggle('scrolled',window.scrollY>50);
+  // Show login link after scroll
+  var l=document.getElementById('nav-login-btn');
+  if(l)l.style.display=window.scrollY>200?'block':'none';
+},{passive:true});
+
+/* ── Canvas particle network ── */
+(function(){
+  var c=document.getElementById('hero-canvas');
+  if(!c)return;
+  var ctx=c.getContext('2d');
+  var W,H,pts=[];
+  var mouse={x:-9999,y:-9999};
+
+  function resize(){
+    W=c.width=c.offsetWidth;
+    H=c.height=c.offsetHeight;
   }
+  resize();
+  window.addEventListener('resize',resize);
+  c.parentElement.addEventListener('mousemove',function(e){
+    var r=c.getBoundingClientRect();
+    mouse.x=e.clientX-r.left;
+    mouse.y=e.clientY-r.top;
+  });
+
+  for(var i=0;i<90;i++){
+    pts.push({
+      x:Math.random()*1400,y:Math.random()*700,
+      vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,
+      r:Math.random()*2+.5
+    });
+  }
+
+  function draw(){
+    requestAnimationFrame(draw);
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(function(p){
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>W)p.vx*=-1;
+      if(p.y<0||p.y>H)p.vy*=-1;
+    });
+    // Mouse repulsion
+    pts.forEach(function(p){
+      var dx=p.x-mouse.x,dy=p.y-mouse.y;
+      var d=Math.sqrt(dx*dx+dy*dy);
+      if(d<120){var f=(120-d)/120*.5;p.vx+=dx/d*f;p.vy+=dy/d*f;}
+      var spd=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+      if(spd>.8){p.vx=p.vx/spd*.8;p.vy=p.vy/spd*.8;}
+    });
+    // Draw connections
+    for(var i=0;i<pts.length;i++){
+      for(var j=i+1;j<pts.length;j++){
+        var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y;
+        var d=Math.sqrt(dx*dx+dy*dy);
+        if(d<140){
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x,pts[i].y);
+          ctx.lineTo(pts[j].x,pts[j].y);
+          ctx.strokeStyle='rgba(99,155,255,'+(1-d/140)*.18+')';
+          ctx.lineWidth=.8;
+          ctx.stroke();
+        }
+      }
+    }
+    // Draw dots
+    pts.forEach(function(p){
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(147,197,253,.55)';
+      ctx.fill();
+    });
+  }
+  draw();
+})();
+
+/* ── 3D tilt on hero card ── */
+(function(){
+  var wrap=document.getElementById('tilt-wrap');
+  var card=document.getElementById('tilt-card');
+  if(!wrap||!card)return;
+  wrap.addEventListener('mousemove',function(e){
+    var r=wrap.getBoundingClientRect();
+    var x=(e.clientX-r.left)/r.width-.5;
+    var y=(e.clientY-r.top)/r.height-.5;
+    card.style.transform='perspective(800px) rotateY('+x*16+'deg) rotateX('+(-y*10)+'deg) scale3d(1.02,1.02,1.02)';
+  });
+  wrap.addEventListener('mouseleave',function(){
+    card.style.transform='perspective(800px) rotateY(0) rotateX(0) scale3d(1,1,1)';
+  });
 })();
 
 /* ── Scroll reveal ── */
-var revealEls = document.querySelectorAll('.reveal,.reveal-left,.reveal-right');
-var observer = new IntersectionObserver(function(entries) {
-  entries.forEach(function(e) {
-    if (e.isIntersecting) {
-      e.target.classList.add('visible');
-      observer.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-revealEls.forEach(function(el) { observer.observe(el); });
+(function(){
+  var els=document.querySelectorAll('.sr,.sr-l,.sr-r');
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}
+    });
+  },{threshold:.1,rootMargin:'0px 0px -30px 0px'});
+  els.forEach(function(el){io.observe(el);});
+})();
 
-/* ── Animated counter ── */
-function animateCounter(el) {
-  var target = parseInt(el.getAttribute('data-target') || el.textContent);
-  var suffix = el.getAttribute('data-suffix') || '';
-  var duration = 1800;
-  var start = performance.now();
-  function step(now) {
-    var t = Math.min((now - start) / duration, 1);
-    var ease = 1 - Math.pow(1 - t, 3);
-    el.textContent = Math.round(ease * target) + suffix;
-    if (t < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-var counterObs = new IntersectionObserver(function(entries) {
-  entries.forEach(function(e) {
-    if (e.isIntersecting) {
-      animateCounter(e.target);
-      counterObs.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.5 });
-document.querySelectorAll('.counter').forEach(function(el) { counterObs.observe(el); });
+/* ── Animated counters ── */
+(function(){
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting)return;
+      var el=e.target;
+      var t=parseInt(el.getAttribute('data-target')||'0');
+      var s=el.getAttribute('data-suffix')||'';
+      var dur=1600,start=performance.now();
+      (function step(now){
+        var p=Math.min((now-start)/dur,1);
+        var ease=1-Math.pow(1-p,3);
+        el.textContent=Math.round(ease*t)+s;
+        if(p<1)requestAnimationFrame(step);
+      })(start);
+      io.unobserve(el);
+    });
+  },{threshold:.5});
+  document.querySelectorAll('.counter').forEach(function(el){io.observe(el);});
+})();
 
-/* ── FAQ accordion ── */
-function toggleFaq(btn) {
-  var answer = btn.nextElementSibling;
-  var icon = btn.querySelector('.faq-icon');
-  var isOpen = !answer.classList.contains('hidden');
-  // Close all
-  document.querySelectorAll('.faq-answer').forEach(function(a) { a.classList.add('hidden'); });
-  document.querySelectorAll('.faq-icon').forEach(function(i) { i.style.transform = ''; });
-  if (!isOpen) {
-    answer.classList.remove('hidden');
-    icon.style.transform = 'rotate(180deg)';
-  }
+/* ── FAQ ── */
+function toggleFaq(btn){
+  var ans=btn.nextElementSibling;
+  var isOpen=ans.classList.contains('open');
+  document.querySelectorAll('.faq-answer').forEach(function(a){a.classList.remove('open');});
+  document.querySelectorAll('.faq-btn').forEach(function(b){b.classList.remove('open');});
+  if(!isOpen){ans.classList.add('open');btn.classList.add('open');}
 }
 
-/* ── Ping animation for online badge ── */
-var style = document.createElement('style');
-style.textContent = '@keyframes ping{75%,100%{transform:scale(2);opacity:0}}';
-document.head.appendChild(style);
+/* ── Typewriter ── */
+(function(){
+  var el=document.getElementById('typewriter-target');
+  if(!el)return;
+  var text=el.textContent;
+  el.textContent='';
+  el.classList.add('typewriter');
+  var i=0;
+  function type(){
+    if(i<=text.length){
+      el.textContent=text.slice(0,i);
+      i++;
+      setTimeout(type,i===text.length?800:60);
+    } else {
+      el.classList.remove('typewriter');
+    }
+  }
+  setTimeout(type,800);
+})();
 </script>
 {% endblock %}
