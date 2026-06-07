@@ -8,6 +8,9 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.conf import settings
 from datetime import timedelta
+import logging
+
+logger = logging.getLogger('standardbridge')
 from .models import CustomUser, ExpertProfile, EntrepreneurProfile
 from experts.emails import send_welcome_email, send_expert_verified
 
@@ -835,13 +838,21 @@ def verify_email(request, token):
 
 
 @require_POST
+@login_required
+@require_POST
 def api_chatbot(request):
     message = request.POST.get('message', '').strip()[:500]
     if not message:
         return JsonResponse({'error': 'empty'}, status=400)
+
+    groq_key = getattr(settings, 'GROQ_API_KEY', '')
+    if not groq_key:
+        logger.warning('api_chatbot: GROQ_API_KEY sozlanmagan')
+        return JsonResponse({'reply': "AI yordamchi hozir mavjud emas. Admin bilan bog'laning."})
+
     try:
         from groq import Groq
-        client = Groq(api_key=settings.GROQ_API_KEY, timeout=20, max_retries=1)
+        client = Groq(api_key=groq_key, timeout=20, max_retries=1)
         resp = client.chat.completions.create(
             model='llama-3.3-70b-versatile',
             messages=[
@@ -858,5 +869,6 @@ def api_chatbot(request):
         )
         reply = resp.choices[0].message.content.strip()
         return JsonResponse({'reply': reply})
-    except Exception:
+    except Exception as e:
+        logger.exception('api_chatbot xatolik: %s', e)
         return JsonResponse({'reply': "Uzr, hozir javob bera olmayapman. Keyinroq urinib ko'ring."})
