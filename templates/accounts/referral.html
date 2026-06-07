@@ -97,16 +97,21 @@
     {% endif %}
 </div>
 
+<div id="copy-toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-5 py-2.5 rounded-xl shadow-lg z-50 transition-all">
+    ✓ Nusxa olindi!
+</div>
 <script>
+function showCopyToast(msg) {
+    var t = document.getElementById('copy-toast');
+    t.textContent = '✓ ' + (msg || 'Nusxa olindi!');
+    t.classList.remove('hidden');
+    setTimeout(function(){ t.classList.add('hidden'); }, 2000);
+}
 function copyCode(code) {
-    navigator.clipboard.writeText(code).then(() => {
-        alert('{{ T.copied_msg }} ' + code);
-    });
+    navigator.clipboard.writeText(code).then(() => showCopyToast(code + ' nusxa olindi'));
 }
 function copyLink(link) {
-    navigator.clipboard.writeText(link).then(() => {
-        alert('{{ T.copied_msg }}');
-    });
+    navigator.clipboard.writeText(link).then(() => showCopyToast('Havola nusxa olindi'));
 }
 </script>
 {% endblock %}

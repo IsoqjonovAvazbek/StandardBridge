@@ -84,8 +84,14 @@
             </div>
         </div>
         {% empty %}
-        <div class="bg-white rounded-2xl p-12 border border-gray-100 text-center text-gray-400">
-            <p>{{ T.no_projects_text }}</p>
+        <div class="col-span-full bg-white rounded-2xl border border-gray-100 p-12 text-center">
+            <div class="text-5xl mb-4">📋</div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Hali loyiha yo'q</h3>
+            <p class="text-gray-500 mb-4">Tadbirkorlar gap-tahlilni tugatgach sizga loyiha yuboradilar.</p>
+            <p class="text-sm text-gray-400">Profilingiz to'liq bo'lsa ko'proq loyiha olasiz.</p>
+            <a href="{% url 'expert_profile_edit' %}" class="inline-block mt-4 border border-blue-300 text-blue-600 px-6 py-2.5 rounded-xl font-medium hover:bg-blue-50 transition text-sm">
+                Profilni to'ldirish →
+            </a>
         </div>
         {% endfor %}
     </div>

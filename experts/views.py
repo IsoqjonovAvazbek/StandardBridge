@@ -685,6 +685,17 @@ def project_decline(request, pk):
             message=f'{request.user.get_full_name()} loyihangizni qabul qilmadi. Boshqa mutaxassis tanlang.',
             link=reverse('entrepreneur_dashboard'),
         )
+        from .emails import _send
+        from .emails import SITE_URL
+        if project.entrepreneur.email:
+            _send(
+                f"Loyiha #{project.pk} rad etildi — StandartBridge",
+                (f"Salom {project.entrepreneur.get_full_name()},\n\n"
+                 f"Mutaxassis {request.user.get_full_name()} loyiha #{project.pk}ni rad etdi.\n\n"
+                 f"Boshqa mutaxassis tanlash uchun:\n{SITE_URL}/dashboard/\n\n"
+                 "StandartBridge jamoasi"),
+                project.entrepreneur.email
+            )
         messages.info(request, 'Loyiha rad etildi.')
         return redirect('expert_dashboard')
     return redirect('project_detail', pk=pk)
@@ -910,6 +921,17 @@ def payment_release(request, project_pk):
                         link=reverse('wallet'),
                     )
                     send_project_completed_to_entrepreneur(project, payment)
+                    from .emails import _send, SITE_URL
+                    if project.expert.email:
+                        _send(
+                            f"${payment.expert_amount} hamyoningizga tushdi — StandartBridge",
+                            (f"Salom {project.expert.get_full_name()},\n\n"
+                             f"Loyiha #{project.pk} muvaffaqiyatli yakunlandi!\n\n"
+                             f"  To'lov: ${payment.expert_amount} hamyoningizga o'tkazildi.\n\n"
+                             f"Hamyon: {SITE_URL}/experts/wallet/\n\n"
+                             "StandartBridge jamoasi"),
+                            project.expert.email
+                        )
 
                 # F-12: Referral bonus — faqat birinchi loyihada
                 referrer = project.entrepreneur.referred_by
@@ -1044,28 +1066,53 @@ def wallet(request):
                         )
                         messages.success(request, f'${amount:.2f} yechish so\'rovi yuborildi! 1-3 ish kuni ichida kartangizga o\'tkaziladi.')
 
-    transactions = user_wallet.transactions.all()[:20]
+    from django.core.paginator import Paginator as _Pag
+    tx_qs = user_wallet.transactions.all()
+    tx_paginator = _Pag(tx_qs, 20)
+    tx_page = tx_paginator.get_page(request.GET.get('page'))
     withdrawal_requests = user_wallet.withdrawal_requests.all()[:10]
+
+    # CSV export
+    if request.GET.get('export') == 'csv':
+        import csv
+        from django.http import HttpResponse
+        resp = HttpResponse(content_type='text/csv')
+        resp['Content-Disposition'] = 'attachment; filename="wallet_transactions.csv"'
+        writer = csv.writer(resp)
+        writer.writerow(['Sana', 'Turi', 'Miqdor ($)', 'Izoh'])
+        for tx in tx_qs:
+            writer.writerow([
+                tx.created_at.strftime('%d.%m.%Y %H:%M'),
+                tx.get_transaction_type_display(),
+                tx.amount,
+                tx.description,
+            ])
+        return resp
 
     return render(request, 'experts/wallet.html', {
         'wallet': user_wallet,
-        'transactions': transactions,
+        'transactions': tx_page,
+        'tx_page_obj': tx_page,
         'withdrawal_requests': withdrawal_requests,
     })
 
 
 @login_required
 def notifications(request):
-    notifs = Notification.objects.filter(user=request.user)
-    notifs.filter(is_read=False).update(is_read=True)
-    
+    from django.core.paginator import Paginator
+    notifs_qs = Notification.objects.filter(user=request.user)
+    notifs_qs.filter(is_read=False).update(is_read=True)
+    paginator = Paginator(notifs_qs, 20)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
     try:
         wallet = request.user.wallet
     except Wallet.DoesNotExist:
         wallet = None
-    
+
     return render(request, 'experts/notifications.html', {
-        'notifications': notifs,
+        'notifications': page_obj,
+        'page_obj': page_obj,
         'wallet': wallet,
     })
 @login_required
