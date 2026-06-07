@@ -93,14 +93,40 @@
 .hc-float{position:absolute;top:-16px;right:-16px;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;font-size:11px;font-weight:800;padding:6px 14px;border-radius:10px;box-shadow:0 8px 24px rgba(16,185,129,.4);animation:floatY 3s ease-in-out infinite}
 @keyframes floatY{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
 
-/* ── Video section ── */
-#video-section{position:relative;overflow:hidden;padding:0}
-.video-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,#050a14 0%,rgba(5,10,20,.3) 30%,rgba(5,10,20,.3) 70%,#050a14 100%);z-index:1}
-#video-section video,.yt-iframe{width:100%;height:520px;object-fit:cover;display:block}
-.yt-iframe{border:none;filter:brightness(.55) saturate(.8)}
-.video-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;text-align:center;width:90%;max-width:700px}
-.video-text h2{font-size:clamp(28px,4vw,52px);font-weight:900;color:#fff;letter-spacing:-1.5px;text-shadow:0 4px 30px rgba(0,0,0,.5);margin-bottom:16px}
-.video-text p{color:rgba(255,255,255,.7);font-size:18px;text-shadow:0 2px 10px rgba(0,0,0,.5)}
+/* ── Cinematic section (video replacement) ── */
+#cinematic{position:relative;overflow:hidden;height:500px;background:#060d20}
+.cin-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.07) 1px,transparent 1px);background-size:80px 80px;animation:gridPan 20s linear infinite}
+@keyframes gridPan{0%{background-position:0 0}100%{background-position:80px 80px}}
+.cin-orb-a{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.22),transparent 65%);top:-200px;left:-100px;animation:oFloat 9s ease-in-out infinite alternate}
+.cin-orb-b{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.18),transparent 65%);bottom:-150px;right:-50px;animation:oFloat 12s ease-in-out infinite alternate-reverse}
+.cin-orb-c{position:absolute;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,.14),transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);animation:oFloat 7s ease-in-out infinite alternate}
+@keyframes oFloat{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.2) translate(30px,-20px)}}
+.cin-top-fade{position:absolute;inset:0 0 auto;height:120px;background:linear-gradient(#050a14,transparent);z-index:2}
+.cin-bot-fade{position:absolute;inset:auto 0 0;height:120px;background:linear-gradient(transparent,#050a14);z-index:2}
+.cin-content{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;gap:80px;padding:0 40px}
+@media(max-width:900px){.cin-content{flex-direction:column;gap:32px;padding:80px 24px}}
+.cin-text{max-width:480px}
+.cin-text h2{font-size:clamp(28px,3.5vw,50px);font-weight:900;color:#fff;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px}
+.cin-text h2 em{font-style:normal;background:linear-gradient(135deg,#60a5fa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cin-text p{color:rgba(255,255,255,.5);font-size:17px;line-height:1.7;margin-bottom:28px}
+.cin-steps{display:flex;flex-direction:column;gap:12px}
+.cin-step{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.7);font-size:15px}
+.cin-step-n{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0}
+/* AI demo card in cinematic */
+.cin-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:24px;backdrop-filter:blur(20px);width:340px;flex-shrink:0;position:relative;overflow:hidden}
+@media(max-width:900px){.cin-card{width:100%;max-width:340px}}
+.cin-card::after{content:'';position:absolute;left:0;top:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,#3b82f6,#8b5cf6,transparent);animation:scanLine 2.5s linear infinite}
+@keyframes scanLine{0%{top:-2px}100%{top:calc(100% + 2px)}}
+.cin-card-title{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:16px}
+.cin-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cin-label{font-size:13px;color:rgba(255,255,255,.6);font-weight:500}
+.cin-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:3px;margin:0 12px;overflow:hidden}
+.cin-bar{height:100%;border-radius:3px;animation:barFill 2.5s ease-out infinite}
+@keyframes barFill{0%{clip-path:inset(0 100% 0 0)}70%,100%{clip-path:inset(0 0 0 0)}}
+.cin-pct{font-size:12px;font-weight:700;min-width:28px;text-align:right}
+.cin-result{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:10px 14px;margin-top:16px;display:flex;align-items:center;gap:8px}
+.cin-result-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;animation:ripple 2s infinite;flex-shrink:0}
+.cin-result-text{font-size:12px;color:#93c5fd;font-weight:600}
 
 /* ── Marquee ── */
 .marquee-wrap{background:rgba(255,255,255,.03);border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05);padding:18px 0;overflow:hidden}
@@ -117,47 +143,35 @@
 .section-h2{font-size:clamp(32px,4vw,54px);font-weight:900;letter-spacing:-1.5px;color:#fff;margin-bottom:16px;line-height:1.1}
 .section-sub{color:rgba(255,255,255,.4);font-size:18px;max-width:560px;line-height:1.7}
 
-/* ── Bento grid ── */
-.bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-@media(max-width:900px){.bento{grid-template-columns:1fr 1fr}}
-@media(max-width:600px){.bento{grid-template-columns:1fr}}
-.bento-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:24px;padding:32px;transition:.3s;position:relative;overflow:hidden}
-.bento-card:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);transform:translateY(-4px)}
-.bento-card.featured{grid-column:span 2}
-.bento-card.tall{grid-row:span 2}
-/* Gradient border on hover */
-.bento-card::before{content:'';position:absolute;inset:0;border-radius:24px;padding:1px;background:linear-gradient(135deg,rgba(59,130,246,.4),rgba(139,92,246,.4),rgba(6,182,212,.4));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:.3s}
-.bento-card:hover::before{opacity:1}
-.bento-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:24px}
-.bento-h3{font-size:20px;font-weight:800;color:#fff;margin-bottom:10px;letter-spacing:-.5px}
-.bento-p{color:rgba(255,255,255,.45);font-size:14px;line-height:1.7}
-
-/* AI animation inside bento */
-.ai-lines{margin-top:20px;display:flex;flex-direction:column;gap:8px}
-.ai-line{height:8px;border-radius:100px;background:rgba(255,255,255,.08);position:relative;overflow:hidden}
-.ai-line::after{content:'';position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,#3b82f6,#8b5cf6);border-radius:100px;animation:aiScan 2s ease-in-out infinite}
-.ai-line:nth-child(1)::after{width:85%;animation-delay:0s}
-.ai-line:nth-child(2)::after{width:62%;animation-delay:.3s}
-.ai-line:nth-child(3)::after{width:91%;animation-delay:.6s}
-.ai-line:nth-child(4)::after{width:45%;animation-delay:.9s}
-@keyframes aiScan{0%{clip-path:inset(0 100% 0 0)}60%,100%{clip-path:inset(0 0% 0 0)}}
-
-/* Speed gauge */
-.gauge-wrap{margin-top:20px;display:flex;align-items:center;gap:16px}
-.gauge-circle{width:80px;height:80px;border-radius:50%;background:conic-gradient(from -90deg,#10b981 0% 85%,rgba(255,255,255,.1) 85%);display:flex;align-items:center;justify-content:center;position:relative}
-.gauge-circle::before{content:'';position:absolute;inset:8px;background:#050a14;border-radius:50%}
-.gauge-num{position:relative;z-index:1;font-size:18px;font-weight:900;color:#10b981}
-
-/* Security shield pulse */
-.shield-wrap{margin-top:20px;display:flex;justify-content:center}
-.shield{width:80px;height:90px;background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(139,92,246,.2));clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;animation:pulse-shield 2s ease-in-out infinite}
-@keyframes pulse-shield{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.1);filter:brightness(1.4)}}
-
+/* ── Steps ── */
+.steps-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+@media(max-width:900px){.steps-row{grid-template-columns:1fr 1fr;gap:24px}}
+@media(max-width:560px){.steps-row{grid-template-columns:1fr}}
+.steps-connector{position:absolute;top:36px;left:calc(12.5% + 20px);right:calc(12.5% + 20px);height:2px;background:linear-gradient(90deg,rgba(59,130,246,.4),rgba(139,92,246,.4),rgba(6,182,212,.4));z-index:0}
+@media(max-width:900px){.steps-connector{display:none}}
+.step-card{position:relative;z-index:1;padding:0 16px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.step-circle{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;margin-bottom:20px;position:relative;flex-shrink:0}
+.step-circle::before{content:'';position:absolute;inset:-3px;border-radius:50%;background:linear-gradient(135deg,rgba(59,130,246,.5),rgba(139,92,246,.5));z-index:-1;opacity:0;transition:.3s}
+.step-card:hover .step-circle::before{opacity:1}
+.step-card-h3{font-size:17px;font-weight:800;color:#fff;margin-bottom:10px;letter-spacing:-.3px}
+.step-card-p{color:rgba(255,255,255,.4);font-size:14px;line-height:1.7}
+/* Animated scan bars */
+.scan-bars{display:flex;flex-direction:column;gap:7px;margin-top:16px;width:100%}
+.scan-bar{height:7px;border-radius:4px;background:rgba(255,255,255,.07);overflow:hidden;position:relative}
+.scan-bar-fill{position:absolute;left:0;top:0;height:100%;border-radius:4px;animation:scanFill 2.2s ease-out infinite}
+@keyframes scanFill{0%{clip-path:inset(0 100% 0 0);opacity:.5}55%,100%{clip-path:inset(0 0 0 0);opacity:1}}
 /* Escrow flow */
-.flow{display:flex;align-items:center;gap:8px;margin-top:20px;flex-wrap:wrap}
-.flow-node{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;color:rgba(255,255,255,.7)}
-.flow-arrow{color:rgba(255,255,255,.3);font-size:18px}
+.flow{display:flex;align-items:center;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center}
+.flow-node{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600;color:rgba(255,255,255,.7)}
+.flow-arrow{color:rgba(255,255,255,.3);font-size:16px}
 .flow-node.active{background:rgba(59,130,246,.2);border-color:rgba(59,130,246,.4);color:#93c5fd}
+/* Experts mini-card */
+.exp-mini{display:flex;flex-direction:column;gap:8px;margin-top:16px;width:100%}
+.exp-row{display:flex;align-items:center;gap:8px}
+.exp-av{width:28px;height:28px;border-radius:8px;flex-shrink:0}
+.exp-bar{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.exp-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#8b5cf6,#3b82f6);animation:scanFill 1.8s ease-out infinite}
+.exp-stars{font-size:10px;color:#fbbf24;letter-spacing:1px}
 
 /* ── For Who — split ── */
 #forwho{background:linear-gradient(180deg,#050a14 0%,#080e1d 100%)}
@@ -180,17 +194,8 @@
 .fw-btn-exp:hover{background:#f5f3ff;transform:translateY(-2px)}
 
 /* ── Dark stats ── */
-#stats-section{background:linear-gradient(135deg,#080e1d,#0d1530)}
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
-@media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
-.stat-box{text-align:center;padding:48px 24px;border:1px solid rgba(255,255,255,.05);transition:.3s}
-.stat-box:hover{background:rgba(255,255,255,.03)}
-.stat-big{font-size:clamp(48px,5vw,72px);font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:8px}
-.stat-big.blue{background:linear-gradient(135deg,#60a5fa,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.stat-big.cyan{background:linear-gradient(135deg,#34d399,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.stat-big.violet{background:linear-gradient(135deg,#a78bfa,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.stat-big.white{color:#fff}
-.stat-desc{color:rgba(255,255,255,.35);font-size:14px;font-weight:500}
+#stats-section{}
+@media(max-width:768px){#stats-section .container>div{grid-template-columns:repeat(2,1fr)!important}}
 
 /* ── Industries ── */
 #industries{background:#050a14}
@@ -360,16 +365,10 @@
             <div class="hc-dot" style="background:#10b981"></div>
             <span class="hc-title">standartbridge.ai · gap-analysis</span>
           </div>
-          <div class="hc-company">
-            <div class="hc-avatar">TX</div>
-            <div>
-              <div class="hc-name">Toshkent Tekstil OAJ</div>
-              <div class="hc-sub">ISO 9001:2015 → tahlil boshlandi</div>
-            </div>
-            <div class="hc-ai-badge">
-              <div style="width:6px;height:6px;background:#4ade80;border-radius:50%;animation:ripple 2s infinite"></div>
-              AI ishlamoqda
-            </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.15);border-radius:12px;padding:10px 14px">
+            <div style="width:7px;height:7px;background:#4ade80;border-radius:50%;flex-shrink:0;animation:ripple 2s infinite"></div>
+            <span style="font-size:12px;font-weight:700;color:#4ade80;letter-spacing:.5px">ISO 9001:2015 · AI Tahlil</span>
+            <span style="margin-left:auto;font-size:12px;font-weight:600;color:rgba(255,255,255,.4)">89% tayyor</span>
           </div>
           <div class="hc-gap critical">
             <div class="hc-gap-row">
@@ -403,15 +402,52 @@
   </div>
 </section>
 
-<!-- ═══════════════ VIDEO ═══════════════ -->
-<section id="video-section">
-  <div class="video-overlay"></div>
-  <iframe class="yt-iframe"
-    src="https://www.youtube.com/embed/sTnQgGrpAZ4?autoplay=1&mute=1&loop=1&playlist=sTnQgGrpAZ4&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
-    allow="autoplay; encrypted-media" allowfullscreen title="ISO certification"></iframe>
-  <div class="video-text sr">
-    <h2>ISO Sertifikatsiya — Endi <span style="background:linear-gradient(135deg,#60a5fa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Oson</span></h2>
-    <p>AI texnologiyasi bilan gap tahlildan sertifikatgacha bir platformada</p>
+<!-- ═══════════════ CINEMATIC ═══════════════ -->
+<section id="cinematic">
+  <div class="cin-grid"></div>
+  <div class="cin-orb-a"></div>
+  <div class="cin-orb-b"></div>
+  <div class="cin-orb-c"></div>
+  <div class="cin-top-fade"></div>
+  <div class="cin-bot-fade"></div>
+  <div class="cin-content">
+    <div class="cin-text sr-l">
+      <h2>ISO Sertifikatsiya —<br>Endi <em>Oson</em></h2>
+      <p>AI texnologiyasi bilan gap tahlildan sertifikatgacha bir platformada</p>
+      <div class="cin-steps">
+        <div class="cin-step"><div class="cin-step-n">1</div>Hujjatlarni yuklang → AI tahlil qiladi</div>
+        <div class="cin-step"><div class="cin-step-n">2</div>Gap hisobotini ko'ring, prioritet aniqlang</div>
+        <div class="cin-step"><div class="cin-step-n">3</div>Mutaxassis tanlang, escrow orqali to'lang</div>
+      </div>
+    </div>
+    <!-- Live AI demo card -->
+    <div class="cin-card sr-r">
+      <div class="cin-card-title">AI Gap Tahlil · Natija</div>
+      <div class="cin-row">
+        <span class="cin-label">Hujjatlashtirish</span>
+        <div class="cin-bar-wrap"><div class="cin-bar" style="width:85%;background:linear-gradient(90deg,#ef4444,#f97316);animation-delay:0s"></div></div>
+        <span class="cin-pct" style="color:#fca5a5">85%</span>
+      </div>
+      <div class="cin-row">
+        <span class="cin-label">Ichki audit</span>
+        <div class="cin-bar-wrap"><div class="cin-bar" style="width:62%;background:linear-gradient(90deg,#f97316,#eab308);animation-delay:.4s"></div></div>
+        <span class="cin-pct" style="color:#fdba74">62%</span>
+      </div>
+      <div class="cin-row">
+        <span class="cin-label">Xodim malakasi</span>
+        <div class="cin-bar-wrap"><div class="cin-bar" style="width:91%;background:linear-gradient(90deg,#10b981,#06b6d4);animation-delay:.8s"></div></div>
+        <span class="cin-pct" style="color:#6ee7b7">91%</span>
+      </div>
+      <div class="cin-row">
+        <span class="cin-label">Jarayonlar</span>
+        <div class="cin-bar-wrap"><div class="cin-bar" style="width:47%;background:linear-gradient(90deg,#eab308,#84cc16);animation-delay:1.2s"></div></div>
+        <span class="cin-pct" style="color:#fde047">47%</span>
+      </div>
+      <div class="cin-result">
+        <div class="cin-result-dot"></div>
+        <div class="cin-result-text">3 ta gap topildi · Tayyorlik: 89%</div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -431,125 +467,122 @@
   </div>
 </div>
 
-<!-- ═══════════════ BENTO FEATURES ═══════════════ -->
-<section class="section" id="features" style="background:linear-gradient(180deg,#050a14,#080e1d)">
+<!-- ═══════════════ HOW IT WORKS ═══════════════ -->
+<section class="section" id="features" style="background:linear-gradient(180deg,#050a14 0%,#0a1628 50%,#050a14 100%)">
   <div class="container">
-    <div style="text-align:center;margin-bottom:64px" class="sr">
+    <div style="text-align:center;margin-bottom:72px" class="sr">
       <div class="section-label">{{ T.how_badge }}</div>
       <h2 class="section-h2">{{ T.how_title }}</h2>
       <p class="section-sub" style="margin:0 auto">{{ T.how_subtitle }}</p>
     </div>
-    <div class="bento">
-      <!-- Featured: AI -->
-      <div class="bento-card featured sr" style="transition-delay:.05s">
-        <div class="bento-icon" style="background:rgba(59,130,246,.15)">🤖</div>
-        <h3 class="bento-h3">{{ T.step1_title }}</h3>
-        <p class="bento-p">{{ T.step1_desc }}</p>
-        <div class="ai-lines">
-          <div class="ai-line"></div>
-          <div class="ai-line"></div>
-          <div class="ai-line"></div>
-          <div class="ai-line"></div>
-        </div>
-        <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap">
-          <span style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.2);color:#fca5a5;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700">Critical</span>
-          <span style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.2);color:#fdba74;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700">High</span>
-          <span style="background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.2);color:#fde047;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700">Medium</span>
-          <span style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.2);color:#86efac;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700">Low</span>
-        </div>
-      </div>
-      <!-- Speed -->
-      <div class="bento-card sr" style="transition-delay:.1s">
-        <div class="bento-icon" style="background:rgba(6,182,212,.15)">⚡</div>
-        <h3 class="bento-h3">{{ T.step2_title }}</h3>
-        <p class="bento-p">{{ T.step2_desc }}</p>
-        <div class="gauge-wrap">
-          <div class="gauge-circle"><div class="gauge-num">85%</div></div>
-          <div>
-            <div style="color:#fff;font-size:14px;font-weight:700;margin-bottom:4px">Tayyorlik darajasi</div>
-            <div style="color:rgba(255,255,255,.4);font-size:12px">30 soniyada aniqlanadi</div>
+    <div style="position:relative">
+      <div class="steps-connector"></div>
+      <div class="steps-row">
+
+        <!-- Step 1 -->
+        <div class="step-card sr" style="transition-delay:.05s">
+          <div class="step-circle" style="background:linear-gradient(135deg,rgba(37,99,235,.25),rgba(124,58,237,.25));border:1.5px solid rgba(59,130,246,.3)">
+            <span style="font-size:20px">🤖</span>
+          </div>
+          <h3 class="step-card-h3">{{ T.step1_title }}</h3>
+          <p class="step-card-p">{{ T.step1_desc }}</p>
+          <div class="scan-bars">
+            <div class="scan-bar"><div class="scan-bar-fill" style="width:85%;background:linear-gradient(90deg,#ef4444,#f97316);animation-delay:0s"></div></div>
+            <div class="scan-bar"><div class="scan-bar-fill" style="width:62%;background:linear-gradient(90deg,#f97316,#eab308);animation-delay:.3s"></div></div>
+            <div class="scan-bar"><div class="scan-bar-fill" style="width:91%;background:linear-gradient(90deg,#10b981,#06b6d4);animation-delay:.6s"></div></div>
+            <div class="scan-bar"><div class="scan-bar-fill" style="width:47%;background:linear-gradient(90deg,#eab308,#84cc16);animation-delay:.9s"></div></div>
           </div>
         </div>
-      </div>
-      <!-- Experts -->
-      <div class="bento-card sr" style="transition-delay:.15s">
-        <div class="bento-icon" style="background:rgba(139,92,246,.15)">🏆</div>
-        <h3 class="bento-h3">{{ T.step3_title }}</h3>
-        <p class="bento-p">{{ T.step3_desc }}</p>
-        <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px">
-          {% for i in "123" %}<div style="display:flex;align-items:center;gap:10px">
-            <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,rgba(139,92,246,.3),rgba(59,130,246,.3));flex-shrink:0"></div>
-            <div style="flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,#8b5cf6,#3b82f6);border-radius:4px;width:{% if forloop.first %}78%{% elif forloop.last %}91%{% else %}65%{% endif %}"></div></div>
-          </div>{% endfor %}
-        </div>
-      </div>
-      <!-- Security -->
-      <div class="bento-card sr" style="transition-delay:.20s">
-        <div class="bento-icon" style="background:rgba(16,185,129,.15)">🔒</div>
-        <h3 class="bento-h3">{{ T.step4_title }}</h3>
-        <p class="bento-p">{{ T.step4_desc }}</p>
-        <div class="flow">
-          <div class="flow-node">Tadbirkor</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-node active">Escrow</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-node">Mutaxassis</div>
-        </div>
-      </div>
-      <!-- Multilang -->
-      <div class="bento-card sr" style="transition-delay:.25s">
-        <div class="bento-icon" style="background:rgba(236,72,153,.15)">🌐</div>
-        <h3 class="bento-h3">Ko'p tilli platforma</h3>
-        <p class="bento-p">O'zbek, Rus va Ingliz tillarida to'liq qo'llab-quvvatlash</p>
-        <div style="margin-top:20px;display:flex;gap:8px">
-          <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;text-align:center">
-            <div style="font-size:20px;margin-bottom:4px">🇺🇿</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:700">UZ</div>
+
+        <!-- Step 2 -->
+        <div class="step-card sr" style="transition-delay:.15s">
+          <div class="step-circle" style="background:linear-gradient(135deg,rgba(6,182,212,.25),rgba(16,185,129,.25));border:1.5px solid rgba(6,182,212,.3)">
+            <span style="font-size:20px">📊</span>
           </div>
-          <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;text-align:center">
-            <div style="font-size:20px;margin-bottom:4px">🇷🇺</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:700">RU</div>
-          </div>
-          <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;text-align:center">
-            <div style="font-size:20px;margin-bottom:4px">🇺🇸</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:700">EN</div>
+          <h3 class="step-card-h3">{{ T.step2_title }}</h3>
+          <p class="step-card-p">{{ T.step2_desc }}</p>
+          <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+            <span style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.2);color:#fca5a5;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800">Kritik</span>
+            <span style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.2);color:#fdba74;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800">Yuqori</span>
+            <span style="background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.2);color:#fde047;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800">O'rta</span>
+            <span style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.2);color:#86efac;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800">Past</span>
           </div>
         </div>
-      </div>
-      <!-- QMS -->
-      <div class="bento-card sr" style="transition-delay:.30s">
-        <div class="bento-icon" style="background:rgba(234,179,8,.15)">📊</div>
-        <h3 class="bento-h3">QMS Tool</h3>
-        <p class="bento-p">Sifat boshqaruv tizimi: checklist, hujjatlar, audit jadvali</p>
-        <div style="margin-top:16px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,#eab308,#f97316);border-radius:3px;width:75%"></div></div><span style="color:rgba(255,255,255,.3);font-size:11px;min-width:28px">75%</span></div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,#eab308,#f97316);border-radius:3px;width:55%"></div></div><span style="color:rgba(255,255,255,.3);font-size:11px;min-width:28px">55%</span></div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,#eab308,#f97316);border-radius:3px;width:90%"></div></div><span style="color:rgba(255,255,255,.3);font-size:11px;min-width:28px">90%</span></div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,#eab308,#f97316);border-radius:3px;width:40%"></div></div><span style="color:rgba(255,255,255,.3);font-size:11px;min-width:28px">40%</span></div>
+
+        <!-- Step 3 -->
+        <div class="step-card sr" style="transition-delay:.25s">
+          <div class="step-circle" style="background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(236,72,153,.25));border:1.5px solid rgba(139,92,246,.3)">
+            <span style="font-size:20px">🏆</span>
+          </div>
+          <h3 class="step-card-h3">{{ T.step3_title }}</h3>
+          <p class="step-card-p">{{ T.step3_desc }}</p>
+          <div class="exp-mini">
+            <div class="exp-row">
+              <div class="exp-av" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)"></div>
+              <div class="exp-bar"><div class="exp-bar-fill" style="width:92%;animation-delay:0s"></div></div>
+              <span class="exp-stars">★★★★★</span>
+            </div>
+            <div class="exp-row">
+              <div class="exp-av" style="background:linear-gradient(135deg,#10b981,#06b6d4)"></div>
+              <div class="exp-bar"><div class="exp-bar-fill" style="width:78%;animation-delay:.4s"></div></div>
+              <span class="exp-stars">★★★★☆</span>
+            </div>
+            <div class="exp-row">
+              <div class="exp-av" style="background:linear-gradient(135deg,#f97316,#ec4899)"></div>
+              <div class="exp-bar"><div class="exp-bar-fill" style="width:85%;animation-delay:.8s"></div></div>
+              <span class="exp-stars">★★★★★</span>
+            </div>
+          </div>
         </div>
+
+        <!-- Step 4 -->
+        <div class="step-card sr" style="transition-delay:.35s">
+          <div class="step-circle" style="background:linear-gradient(135deg,rgba(16,185,129,.25),rgba(6,182,212,.25));border:1.5px solid rgba(16,185,129,.3)">
+            <span style="font-size:20px">🔒</span>
+          </div>
+          <h3 class="step-card-h3">{{ T.step4_title }}</h3>
+          <p class="step-card-p">{{ T.step4_desc }}</p>
+          <div class="flow">
+            <div class="flow-node">Tadbirkor</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node active">Escrow</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node">Mutaxassis</div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 </section>
 
 <!-- ═══════════════ STATS ═══════════════ -->
-<section id="stats-section">
-  <div class="stats-grid">
-    <div class="stat-box sr">
-      <div class="stat-big blue counter" data-target="{{ user_count|default:120 }}" data-suffix="+">0</div>
-      <div class="stat-desc">{{ T.stat_standards }}</div>
-    </div>
-    <div class="stat-box sr" style="transition-delay:.1s">
-      <div class="stat-big cyan counter" data-target="{{ expert_count|default:15 }}" data-suffix="+">0</div>
-      <div class="stat-desc">{{ T.stat_faster }}</div>
-    </div>
-    <div class="stat-box sr" style="transition-delay:.2s">
-      <div class="stat-big violet counter" data-target="{{ analysis_count|default:80 }}" data-suffix="+">0</div>
-      <div class="stat-desc">{{ T.stat_savings }}</div>
-    </div>
-    <div class="stat-box sr" style="transition-delay:.3s">
-      <div class="stat-big white">40%</div>
-      <div class="stat-desc">Xarajat tejamiyat</div>
+<section id="stats-section" style="background:linear-gradient(135deg,#080e1d,#0d1530,#080e1d);position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);background-size:48px 48px"></div>
+  <div style="position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.08),transparent 70%);top:-200px;left:-100px;pointer-events:none"></div>
+  <div style="position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.07),transparent 70%);bottom:-150px;right:-50px;pointer-events:none"></div>
+  <div class="container" style="position:relative;z-index:1;padding-top:80px;padding-bottom:80px">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px">
+      <div class="sr" style="text-align:center;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:24px;padding:36px 20px;transition:.3s" onmouseenter="this.style.transform='translateY(-6px)'" onmouseleave="this.style.transform=''">
+        <div style="font-size:36px;margin-bottom:12px">🏢</div>
+        <div style="font-size:56px;font-weight:900;letter-spacing:-2px;line-height:1;background:linear-gradient(135deg,#60a5fa,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" class="counter" data-target="{{ user_count|default:120 }}" data-suffix="+">0</div>
+        <div style="color:rgba(255,255,255,.4);font-size:14px;margin-top:8px">{{ T.stat_standards }}</div>
+      </div>
+      <div class="sr" style="transition-delay:.1s;text-align:center;background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.15);border-radius:24px;padding:36px 20px;transition:.3s" onmouseenter="this.style.transform='translateY(-6px)'" onmouseleave="this.style.transform=''">
+        <div style="font-size:36px;margin-bottom:12px">👨‍💼</div>
+        <div style="font-size:56px;font-weight:900;letter-spacing:-2px;line-height:1;background:linear-gradient(135deg,#34d399,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" class="counter" data-target="{{ expert_count|default:15 }}" data-suffix="+">0</div>
+        <div style="color:rgba(255,255,255,.4);font-size:14px;margin-top:8px">{{ T.stat_faster }}</div>
+      </div>
+      <div class="sr" style="transition-delay:.2s;text-align:center;background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.15);border-radius:24px;padding:36px 20px;transition:.3s" onmouseenter="this.style.transform='translateY(-6px)'" onmouseleave="this.style.transform=''">
+        <div style="font-size:36px;margin-bottom:12px">📊</div>
+        <div style="font-size:56px;font-weight:900;letter-spacing:-2px;line-height:1;background:linear-gradient(135deg,#a78bfa,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" class="counter" data-target="{{ analysis_count|default:80 }}" data-suffix="+">0</div>
+        <div style="color:rgba(255,255,255,.4);font-size:14px;margin-top:8px">{{ T.stat_savings }}</div>
+      </div>
+      <div class="sr" style="transition-delay:.3s;text-align:center;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:24px;padding:36px 20px;transition:.3s" onmouseenter="this.style.transform='translateY(-6px)'" onmouseleave="this.style.transform=''">
+        <div style="font-size:36px;margin-bottom:12px">💰</div>
+        <div style="font-size:56px;font-weight:900;letter-spacing:-2px;line-height:1;background:linear-gradient(135deg,#34d399,#84cc16);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">40%</div>
+        <div style="color:rgba(255,255,255,.4);font-size:14px;margin-top:8px">Xarajat tejamiyat</div>
+      </div>
     </div>
   </div>
 </section>
@@ -702,21 +735,56 @@
 </section>
 
 <!-- ═══════════════ CTA ═══════════════ -->
-<section id="cta-section">
-  <div class="cta-orb-1"></div>
-  <div class="cta-orb-2"></div>
-  <div class="container sr">
-    <div class="section-label" style="margin-bottom:28px">{{ T.hero_badge }}</div>
-    <h2 class="cta-h2">{{ T.cta_title }}</h2>
-    <p class="cta-sub">{{ T.cta_subtitle }}</p>
-    <div class="cta-btns">
-      <a href="{% url 'register' %}" class="btn-primary" style="font-size:18px;padding:20px 48px">
-        {{ T.cta_btn }}
-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-      </a>
-      <a href="{% url 'login' %}" class="btn-outline" style="font-size:18px;padding:20px 40px">
-        {{ T.hero_login }}
-      </a>
+<section id="cta-section" style="padding:100px 0;background:linear-gradient(135deg,#050a14,#0d1530,#050a14);position:relative;overflow:hidden">
+  <!-- Animated grid -->
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.05) 1px,transparent 1px);background-size:60px 60px"></div>
+  <!-- Glow orbs (subtle, not animating in/out) -->
+  <div style="position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.12),transparent 65%);top:-250px;left:-150px;pointer-events:none"></div>
+  <div style="position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.1),transparent 65%);bottom:-200px;right:-100px;pointer-events:none"></div>
+
+  <div class="container" style="position:relative;z-index:1">
+    <div style="max-width:840px;margin:0 auto">
+      <!-- Social proof row -->
+      <div class="sr" style="display:flex;align-items:center;gap:12px;margin-bottom:32px">
+        <div style="display:flex">
+          {% for c in "ABCDE" %}
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,{% if forloop.first %}#3b82f6,#8b5cf6{% elif forloop.counter == 2 %}#10b981,#06b6d4{% elif forloop.counter == 3 %}#f97316,#ec4899{% elif forloop.counter == 4 %}#eab308,#84cc16{% else %}#8b5cf6,#3b82f6{% endif %});border:2px solid #050a14;margin-right:-8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff">{{ c }}</div>
+          {% endfor %}
+        </div>
+        <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:100px;padding:6px 16px;display:inline-flex;align-items:center;gap:8px">
+          <div style="width:7px;height:7px;border-radius:50%;background:#4ade80;animation:ripple 2s infinite"></div>
+          <span style="color:rgba(255,255,255,.6);font-size:13px;font-weight:600">{{ user_count|default:120 }}+ korxona allaqachon ro'yxatdan o'tgan</span>
+        </div>
+      </div>
+
+      <h2 class="cta-h2 sr">{{ T.cta_title }}</h2>
+      <p class="cta-sub sr" style="text-align:left;margin:0 0 40px">{{ T.cta_subtitle }}</p>
+
+      <div class="cta-btns sr" style="justify-content:flex-start">
+        <a href="{% url 'register' %}" class="btn-primary" style="font-size:17px;padding:18px 44px">
+          {{ T.cta_btn }}
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
+        <a href="{% url 'login' %}" class="btn-outline" style="font-size:17px;padding:18px 36px">
+          {{ T.hero_login }}
+        </a>
+      </div>
+
+      <!-- Trust badges -->
+      <div class="sr" style="display:flex;flex-wrap:wrap;gap:16px;margin-top:40px">
+        <div style="display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.35);font-size:13px">
+          <svg width="16" height="16" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          Ro'yxatdan o'tish bepul
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.35);font-size:13px">
+          <svg width="16" height="16" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          Kredit karta talab qilinmaydi
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.35);font-size:13px">
+          <svg width="16" height="16" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          AI gap tahlil — bepul, cheksiz
+        </div>
+      </div>
     </div>
   </div>
 </section>

@@ -1,246 +1,316 @@
 {% extends 'base.html' %}
 {% block no_dark_override %}<script>document.documentElement.classList.remove('dark');</script>{% endblock %}
 {% block title %}{{ T.register }} — StandartBridge{% endblock %}
+{% block extra_head %}
+<style>
+#auth-page{min-height:100svh;background:#050a14;display:flex;align-items:stretch;padding-top:64px;font-family:'Inter',sans-serif}
+/* Left panel */
+.auth-left{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;padding:60px 56px;min-width:0}
+@media(max-width:1000px){.auth-left{display:none}}
+.al-bg{position:absolute;inset:0;background:linear-gradient(135deg,#060c1c 0%,#110a2e 50%,#060c1c 100%)}
+.al-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(139,92,246,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.05) 1px,transparent 1px);background-size:60px 60px}
+.al-orb1{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.14),transparent 70%);top:-100px;left:-100px;animation:oFloat 9s ease-in-out infinite alternate}
+.al-orb2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.12),transparent 70%);bottom:-80px;right:-50px;animation:oFloat 12s ease-in-out infinite alternate-reverse}
+@keyframes oFloat{0%{transform:translate(0,0) scale(1)}100%{transform:translate(40px,-30px) scale(1.1)}}
+.al-content{position:relative;z-index:2}
+.al-logo{display:flex;align-items:center;gap:12px;margin-bottom:48px}
+.al-logo img{width:40px;height:40px;border-radius:10px}
+.al-logo-text{font-size:20px;font-weight:900;color:#fff;letter-spacing:-.5px}
+.al-title{font-size:38px;font-weight:900;color:#fff;letter-spacing:-1.5px;line-height:1.1;margin-bottom:12px}
+.al-title span{background:linear-gradient(135deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.al-subtitle{color:rgba(255,255,255,.4);font-size:16px;margin-bottom:48px;line-height:1.6}
+/* 3-step progress */
+.steps-title{font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:24px}
+.steps-list{display:flex;flex-direction:column;gap:0}
+.step-item{display:flex;gap:16px;padding-bottom:28px;position:relative;animation:badgeIn .6s ease-out both}
+.step-item:nth-child(1){animation-delay:.1s}
+.step-item:nth-child(2){animation-delay:.25s}
+.step-item:nth-child(3){animation-delay:.4s}
+.step-item:last-child{padding-bottom:0}
+@keyframes badgeIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:none}}
+.step-num{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;flex-shrink:0;position:relative;z-index:1}
+.step-num.done{background:linear-gradient(135deg,#3b82f6,#7c3aed);color:#fff}
+.step-num.active{background:rgba(255,255,255,.08);border:2px solid #7c3aed;color:#a78bfa}
+.step-num.todo{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3)}
+.step-line{position:absolute;left:17px;top:36px;bottom:0;width:2px;background:linear-gradient(180deg,rgba(124,58,237,.5),transparent)}
+.step-item:last-child .step-line{display:none}
+.step-body{padding-top:6px}
+.step-heading{font-size:15px;font-weight:700;color:rgba(255,255,255,.85)}
+.step-desc{font-size:13px;color:rgba(255,255,255,.35);margin-top:3px}
+/* Benefits */
+.benefits{margin-top:48px;display:flex;flex-direction:column;gap:12px}
+.benefit{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.5);font-size:14px}
+.benefit svg{flex-shrink:0}
+/* Right panel */
+.auth-right{width:520px;flex-shrink:0;overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:48px 56px 80px;background:rgba(255,255,255,.02);border-left:1px solid rgba(255,255,255,.05)}
+@media(max-width:1000px){.auth-right{width:100%;padding:48px 24px 80px;border-left:none}}
+.form-box{width:100%;max-width:420px}
+.form-tagline{font-size:28px;font-weight:900;color:#fff;letter-spacing:-.8px;margin-bottom:8px}
+.form-sub{color:rgba(255,255,255,.35);font-size:14px;margin-bottom:24px}
+/* Lang switcher */
+.lang-row{display:flex;gap:6px;margin-bottom:28px}
+.lb{font-size:12px;font-weight:700;padding:5px 12px;border-radius:8px;border:none;cursor:pointer;transition:.2s}
+.lb.on{background:#fff;color:#1d4ed8}
+.lb.off{background:rgba(255,255,255,.07);color:rgba(255,255,255,.5)}
+.lb.off:hover{background:rgba(255,255,255,.12);color:#fff}
+/* Role selector */
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+.role-opt{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 14px;text-align:center;cursor:pointer;transition:.25s}
+.role-opt:hover{background:rgba(255,255,255,.07)}
+.role-opt.selected{background:rgba(124,58,237,.15);border-color:rgba(124,58,237,.5)}
+.role-opt.ent.selected{background:rgba(37,99,235,.15);border-color:rgba(37,99,235,.5)}
+.role-icon{font-size:28px;margin-bottom:8px}
+.role-name{font-size:14px;font-weight:700;color:rgba(255,255,255,.8)}
+.role-desc{font-size:11px;color:rgba(255,255,255,.3);margin-top:3px}
+/* Fields */
+.field{margin-bottom:16px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:600;color:rgba(255,255,255,.45);margin-bottom:7px;letter-spacing:.3px}
+.dark-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:13px 15px;color:#fff;font-size:14px;outline:none;transition:.25s;-webkit-appearance:none}
+.dark-input:focus{border-color:#7c3aed;background:rgba(124,58,237,.08);box-shadow:0 0 0 4px rgba(124,58,237,.1)}
+.dark-input::placeholder{color:rgba(255,255,255,.2)}
+select.dark-input option{background:#1a1a2e;color:#fff}
+.hint-text{font-size:11px;color:rgba(255,255,255,.25);margin-top:5px}
+/* Error / ok */
+.err-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;border-radius:12px;padding:12px 16px;font-size:14px;margin-bottom:16px}
+/* Section separator */
+.field-sep{border:none;border-top:1px solid rgba(255,255,255,.06);margin:20px 0}
+/* Submit */
+.submit-btn{width:100%;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-weight:800;font-size:16px;padding:15px;border-radius:12px;border:none;cursor:pointer;transition:.25s;box-shadow:0 8px 28px rgba(124,58,237,.3);display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(124,58,237,.45)}
+.form-footer{text-align:center;margin-top:24px;color:rgba(255,255,255,.3);font-size:14px}
+.form-footer a{color:#a78bfa;font-weight:600;text-decoration:none}
+.form-footer a:hover{color:#c4b5fd}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="min-h-screen gradient-bg flex items-center justify-center py-12 px-4">
-    <div class="max-w-lg w-full">
-        <div class="text-center mb-8">
-            <div class="flex justify-between items-center mb-6">
-                <a href="{% url 'landing' %}" class="inline-flex items-center gap-2">
-                    <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                        <span class="text-white font-bold">SB</span>
-                    </div>
-                    <span class="text-white font-bold text-xl">StandartBridge</span>
-                </a>
-                <form method="post" action="{% url 'set_language' %}" class="flex gap-1">
-                    {% csrf_token %}
-                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                    <button type="submit" name="lang" value="uz" class="text-xs px-2 py-1 rounded font-medium {% if current_lang == 'uz' %}bg-white text-blue-700{% else %}text-white/70 hover:bg-white/10{% endif %}">UZ</button>
-                    <button type="submit" name="lang" value="ru" class="text-xs px-2 py-1 rounded font-medium {% if current_lang == 'ru' %}bg-white text-blue-700{% else %}text-white/70 hover:bg-white/10{% endif %}">RU</button>
-                    <button type="submit" name="lang" value="en" class="text-xs px-2 py-1 rounded font-medium {% if current_lang == 'en' %}bg-white text-blue-700{% else %}text-white/70 hover:bg-white/10{% endif %}">EN</button>
-                </form>
-            </div>
-            <h1 class="text-3xl font-bold text-white mb-2">{{ T.register_title }}</h1>
-            <p class="text-blue-200">{{ T.register_subtitle }}</p>
+<div id="auth-page">
+  <!-- LEFT PANEL -->
+  <div class="auth-left">
+    <div class="al-bg"></div>
+    <div class="al-grid"></div>
+    <div class="al-orb1"></div>
+    <div class="al-orb2"></div>
+    <div class="al-content">
+      <div class="al-logo">
+        <img src="/static/icons/icon-96.png" alt="SB">
+        <span class="al-logo-text">StandartBridge</span>
+      </div>
+      <h2 class="al-title">3 ta qadam bilan<br><span>sertifikat oling</span></h2>
+      <p class="al-subtitle">O'zbekistondagi birinchi AI-powered<br>ISO sertifikatsiya platformasi</p>
+
+      <p class="steps-title">Sizni nimalar kutmoqda</p>
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-line"></div>
+          <div class="step-num active">1</div>
+          <div class="step-body">
+            <div class="step-heading">Ro'yxatdan o'ting</div>
+            <div class="step-desc">1 daqiqa ichida — hozir</div>
+          </div>
         </div>
-
-        <div class="bg-white rounded-2xl p-8 shadow-2xl">
-
-            <!-- Rol tanlash -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-3">{{ T.login_role_label }}</label>
-                <div class="grid grid-cols-2 gap-3">
-                    <label class="cursor-pointer">
-                        <input type="radio" name="role_select" value="entrepreneur"
-                            class="hidden" checked onchange="setRole('entrepreneur')">
-                        <div id="btn-entrepreneur"
-                            class="border-2 border-blue-600 bg-blue-50 rounded-xl p-4 text-center transition">
-                            <div class="text-2xl mb-1">🏭</div>
-                            <div class="font-semibold text-gray-900 text-sm">{{ T.login_entrepreneur }}</div>
-                            <div class="text-gray-500 text-xs">ISO sertifikat olmoqchiman</div>
-                        </div>
-                    </label>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="role_select" value="expert"
-                            class="hidden" onchange="setRole('expert')">
-                        <div id="btn-expert"
-                            class="border-2 border-gray-200 rounded-xl p-4 text-center transition">
-                            <div class="text-2xl mb-1">👨‍💼</div>
-                            <div class="font-semibold text-gray-900 text-sm">{{ T.login_expert }}</div>
-                            <div class="text-gray-500 text-xs">Mijozlarga yordam beraman</div>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <form method="POST" id="registerForm">
-                {% csrf_token %}
-                <input type="hidden" name="role" id="roleInput" value="entrepreneur">
-
-                <!-- Ism familiya -->
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.first_name }}</label>
-                        <input type="text" name="first_name" required value="{{ form_data.first_name }}"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
-                            placeholder="Sardor">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.last_name }}</label>
-                        <input type="text" name="last_name" required value="{{ form_data.last_name }}"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
-                            placeholder="Karimov">
-                    </div>
-                </div>
-
-                <!-- Tadbirkor maydonlari -->
-                <div id="entrepreneur-fields">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.company_name }}</label>
-                        <input type="text" name="company_name"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
-                            placeholder="Karimov Textile LLC">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Viloyat</label>
-                            <select name="region"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
-                                <option value="">Tanlang</option>
-                                <option value="Toshkent">Toshkent</option>
-                                <option value="Farg'ona">Farg'ona</option>
-                                <option value="Samarqand">Samarqand</option>
-                                <option value="Buxoro">Buxoro</option>
-                                <option value="Andijon">Andijon</option>
-                                <option value="Namangan">Namangan</option>
-                                <option value="Qashqadaryo">Qashqadaryo</option>
-                                <option value="Surxondaryo">Surxondaryo</option>
-                                <option value="Xorazm">Xorazm</option>
-                                <option value="Navoiy">Navoiy</option>
-                                <option value="Jizzax">Jizzax</option>
-                                <option value="Sirdaryo">Sirdaryo</option>
-                                <option value="Qoraqalpog'iston">Qoraqalpog'iston</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Soha</label>
-                            <select name="industry"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
-                                <option value="">Tanlang</option>
-                                <option value="To'qimachilik">To'qimachilik</option>
-                                <option value="Oziq-ovqat">Oziq-ovqat</option>
-                                <option value="Kimyo">Kimyo</option>
-                                <option value="Mashinasozlik">Mashinasozlik</option>
-                                <option value="Qurilish">Qurilish</option>
-                                <option value="Farmatsevtika">Farmatsevtika</option>
-                                <option value="Boshqa">Boshqa</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mutaxassis maydonlari -->
-                <div id="expert-fields" class="hidden">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Ixtisoslik</label>
-                        <input type="text" name="specializations"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
-                            placeholder="ISO9001 ISO22000 ISO14001">
-                        <p class="text-gray-400 text-xs mt-1">Bo'sh joy bilan ajrating</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Viloyat</label>
-                            <select name="expert_region"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
-                                <option value="">Tanlang</option>
-                                <option value="toshkent">Toshkent</option>
-                                <option value="fargona">Farg'ona</option>
-                                <option value="samarqand">Samarqand</option>
-                                <option value="buxoro">Buxoro</option>
-                                <option value="andijon">Andijon</option>
-                                <option value="namangan">Namangan</option>
-                                <option value="qashqadaryo">Qashqadaryo</option>
-                                <option value="surxondaryo">Surxondaryo</option>
-                                <option value="xorazm">Xorazm</option>
-                                <option value="navoiy">Navoiy</option>
-                                <option value="jizzax">Jizzax</option>
-                                <option value="sirdaryo">Sirdaryo</option>
-                                <option value="qoraqalpogiston">Qoraqalpog'iston</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Tajriba (yil)</label>
-                            <input type="number" name="experience_years" min="0" max="50"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
-                                placeholder="5">
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.phone }}</label>
-                        <input type="text" name="phone"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
-                            placeholder="+998901234567">
-                    </div>
-                </div>
-
-                <!-- Email, username, parol -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.email }}</label>
-                    <input type="email" name="email" required value="{{ form_data.email }}"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
-                        placeholder="sardor@company.uz">
-                </div>
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.username }}</label>
-                        <input type="text" name="username" required value="{{ form_data.username }}"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
-                            placeholder="sardor123">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.password }}</label>
-                        <input type="password" name="password" required minlength="8"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
-                            placeholder="••••••••">
-                        <p class="text-xs text-gray-400 mt-1">{{ T.password_hint }}</p>
-                    </div>
-                </div>
-
-                <!-- Parolni tasdiqlash -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ T.password_confirm }}</label>
-                    <input type="password" name="password2" required minlength="8"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
-                        placeholder="••••••••">
-                </div>
-
-                <!-- Referral kodi -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        {{ T.referral_code_label }} <span class="text-gray-400 font-normal">{{ T.referral_code_optional }}</span>
-                    </label>
-                    <input type="text" name="referral_code"
-                        value="{% if request.GET.ref %}{{ request.GET.ref }}{% endif %}"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition uppercase"
-                        placeholder="AB12CD34" maxlength="12">
-                </div>
-
-                <button type="submit"
-                    class="w-full gradient-bg text-white py-3 rounded-xl font-semibold text-lg hover:opacity-90 transition">
-                    {{ T.register_btn }}
-                </button>
-            </form>
-
-            <p class="text-center text-gray-600 mt-6">
-                {{ T.register_have_account }}
-                <a href="{% url 'login' %}" class="text-blue-600 font-semibold hover:underline">{{ T.register_login_link }}</a>
-            </p>
+        <div class="step-item">
+          <div class="step-line"></div>
+          <div class="step-num todo">2</div>
+          <div class="step-body">
+            <div class="step-heading">AI gap tahlil qiling</div>
+            <div class="step-desc">30 soniyada prioritetlar aniqlanadi</div>
+          </div>
         </div>
+        <div class="step-item">
+          <div class="step-num todo">3</div>
+          <div class="step-body">
+            <div class="step-heading">Mutaxassis bilan ishlang</div>
+            <div class="step-desc">Escrow orqali xavfsiz to'lov</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="benefits">
+        <div class="benefit"><svg width="16" height="16" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>AI gap tahlil — bepul</div>
+        <div class="benefit"><svg width="16" height="16" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Tasdiqlangan mutaxassislar</div>
+        <div class="benefit"><svg width="16" height="16" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Escrow — pul xavfsiz</div>
+        <div class="benefit"><svg width="16" height="16" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>40% arzon — an'anaviy yo'ldan</div>
+      </div>
     </div>
+  </div>
+
+  <!-- RIGHT PANEL (form) -->
+  <div class="auth-right">
+    <div class="form-box">
+      <div class="lang-row">
+        <form method="post" action="{% url 'set_language' %}" style="display:contents">
+          {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+          {% for code, label in langs %}
+          <button type="submit" name="lang" value="{{ code }}" class="lb {% if current_lang == code %}on{% else %}off{% endif %}">{{ code|upper }}</button>
+          {% endfor %}
+        </form>
+      </div>
+
+      <h1 class="form-tagline">{{ T.register_title }}</h1>
+      <p class="form-sub">{{ T.register_subtitle }}</p>
+
+      {% if messages %}{% for message in messages %}
+      <div class="err-box">⚠️ {{ message }}</div>
+      {% endfor %}{% endif %}
+
+      <!-- Role selector -->
+      <label style="display:block;font-size:13px;font-weight:600;color:rgba(255,255,255,.45);margin-bottom:10px">{{ T.login_role_label }}</label>
+      <div class="role-grid" id="roleGrid">
+        <div class="role-opt ent selected" id="btn-entrepreneur" onclick="setRole('entrepreneur')">
+          <div class="role-icon">🏭</div>
+          <div class="role-name">{{ T.login_entrepreneur }}</div>
+          <div class="role-desc">ISO sertifikat olmoqchiman</div>
+        </div>
+        <div class="role-opt" id="btn-expert" onclick="setRole('expert')">
+          <div class="role-icon">👨‍💼</div>
+          <div class="role-name">{{ T.login_expert }}</div>
+          <div class="role-desc">Mijozlarga yordam beraman</div>
+        </div>
+      </div>
+
+      <form method="POST" id="registerForm">
+        {% csrf_token %}
+        <input type="hidden" name="role" id="roleInput" value="{{ form_data.role|default:'entrepreneur' }}">
+
+        <div class="field-row">
+          <div>
+            <label>{{ T.first_name }}</label>
+            <input class="dark-input" type="text" name="first_name" required value="{{ form_data.first_name }}" placeholder="Sardor">
+          </div>
+          <div>
+            <label>{{ T.last_name }}</label>
+            <input class="dark-input" type="text" name="last_name" required value="{{ form_data.last_name }}" placeholder="Karimov">
+          </div>
+        </div>
+
+        <!-- Tadbirkor -->
+        <div id="entrepreneur-fields">
+          <div class="field">
+            <label>{{ T.company_name }}</label>
+            <input class="dark-input" type="text" name="company_name" placeholder="Karimov Textile LLC">
+          </div>
+          <div class="field-row">
+            <div>
+              <label>Viloyat</label>
+              <select name="region" class="dark-input">
+                <option value="">Tanlang</option>
+                <option>Toshkent</option><option>Farg'ona</option><option>Samarqand</option>
+                <option>Buxoro</option><option>Andijon</option><option>Namangan</option>
+                <option>Qashqadaryo</option><option>Surxondaryo</option><option>Xorazm</option>
+                <option>Navoiy</option><option>Jizzax</option><option>Sirdaryo</option>
+                <option>Qoraqalpog'iston</option>
+              </select>
+            </div>
+            <div>
+              <label>Soha</label>
+              <select name="industry" class="dark-input">
+                <option value="">Tanlang</option>
+                <option>To'qimachilik</option><option>Oziq-ovqat</option><option>Kimyo</option>
+                <option>Mashinasozlik</option><option>Qurilish</option><option>Farmatsevtika</option>
+                <option>Boshqa</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mutaxassis -->
+        <div id="expert-fields" class="hidden" style="display:none">
+          <div class="field">
+            <label>Ixtisoslik</label>
+            <input class="dark-input" type="text" name="specializations" placeholder="ISO9001 ISO22000 ISO14001">
+            <p class="hint-text">Bo'sh joy bilan ajrating</p>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>Viloyat</label>
+              <select name="expert_region" class="dark-input">
+                <option value="">Tanlang</option>
+                <option value="toshkent">Toshkent</option><option value="fargona">Farg'ona</option>
+                <option value="samarqand">Samarqand</option><option value="buxoro">Buxoro</option>
+                <option value="andijon">Andijon</option><option value="namangan">Namangan</option>
+                <option value="qashqadaryo">Qashqadaryo</option><option value="surxondaryo">Surxondaryo</option>
+                <option value="xorazm">Xorazm</option><option value="navoiy">Navoiy</option>
+                <option value="jizzax">Jizzax</option><option value="sirdaryo">Sirdaryo</option>
+                <option value="qoraqalpogiston">Qoraqalpog'iston</option>
+              </select>
+            </div>
+            <div>
+              <label>Tajriba (yil)</label>
+              <input class="dark-input" type="number" name="experience_years" min="0" max="50" placeholder="5">
+            </div>
+          </div>
+          <div class="field">
+            <label>{{ T.phone }}</label>
+            <input class="dark-input" type="text" name="phone" placeholder="+998901234567">
+          </div>
+        </div>
+
+        <hr class="field-sep">
+
+        <div class="field">
+          <label>{{ T.email }}</label>
+          <input class="dark-input" type="email" name="email" required value="{{ form_data.email }}" placeholder="sardor@company.uz">
+        </div>
+        <div class="field-row">
+          <div>
+            <label>{{ T.username }}</label>
+            <input class="dark-input" type="text" name="username" required value="{{ form_data.username }}" placeholder="sardor123">
+          </div>
+          <div>
+            <label>{{ T.password }}</label>
+            <input class="dark-input" type="password" name="password" required minlength="8" placeholder="••••••••">
+            <p class="hint-text">{{ T.password_hint }}</p>
+          </div>
+        </div>
+        <div class="field">
+          <label>{{ T.password_confirm }}</label>
+          <input class="dark-input" type="password" name="password2" required minlength="8" placeholder="••••••••">
+        </div>
+        <div class="field">
+          <label>{{ T.referral_code_label }} <span style="color:rgba(255,255,255,.2);font-weight:400">{{ T.referral_code_optional }}</span></label>
+          <input class="dark-input" type="text" name="referral_code" value="{% if request.GET.ref %}{{ request.GET.ref }}{% endif %}" placeholder="AB12CD34" maxlength="12" style="text-transform:uppercase">
+        </div>
+
+        <button type="submit" class="submit-btn">
+          {{ T.register_btn }}
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </button>
+      </form>
+      <p class="form-footer">
+        {{ T.register_have_account }}
+        <a href="{% url 'login' %}">{{ T.register_login_link }}</a>
+      </p>
+      <p style="text-align:center;margin-top:12px">
+        <a href="{% url 'landing' %}" style="color:rgba(255,255,255,.15);font-size:13px;text-decoration:none">← Bosh sahifaga qaytish</a>
+      </p>
+    </div>
+  </div>
 </div>
 
 <script>
+var currentRole = '{{ form_data.role|default:"entrepreneur" }}';
 function setRole(role) {
-    document.getElementById('roleInput').value = role;
-
-    var btnE = document.getElementById('btn-entrepreneur');
-    var btnX = document.getElementById('btn-expert');
-    var fieldsE = document.getElementById('entrepreneur-fields');
-    var fieldsX = document.getElementById('expert-fields');
-
-    if (role === 'entrepreneur') {
-        btnE.className = 'border-2 border-blue-600 bg-blue-50 rounded-xl p-4 text-center transition';
-        btnX.className = 'border-2 border-gray-200 rounded-xl p-4 text-center transition';
-        fieldsE.classList.remove('hidden');
-        fieldsX.classList.add('hidden');
-    } else {
-        btnX.className = 'border-2 border-blue-600 bg-blue-50 rounded-xl p-4 text-center transition';
-        btnE.className = 'border-2 border-gray-200 rounded-xl p-4 text-center transition';
-        fieldsX.classList.remove('hidden');
-        fieldsE.classList.add('hidden');
-    }
+  currentRole = role;
+  document.getElementById('roleInput').value = role;
+  var bE = document.getElementById('btn-entrepreneur');
+  var bX = document.getElementById('btn-expert');
+  var fE = document.getElementById('entrepreneur-fields');
+  var fX = document.getElementById('expert-fields');
+  if (role === 'entrepreneur') {
+    bE.className = 'role-opt ent selected';
+    bX.className = 'role-opt';
+    fE.style.display = '';
+    fX.style.display = 'none';
+  } else {
+    bX.className = 'role-opt selected';
+    bE.className = 'role-opt ent';
+    fX.style.display = '';
+    fE.style.display = 'none';
+  }
 }
+// Apply saved role on load
+if (currentRole === 'expert') setRole('expert');
 </script>
 {% endblock %}
