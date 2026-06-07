@@ -541,16 +541,10 @@
           <h3 class="text-3xl font-black text-white mb-3">{{ T.entrepreneur_title }}</h3>
           <p class="text-blue-100/80 mb-7 text-lg leading-relaxed">{{ T.entrepreneur_desc }}</p>
           <ul class="space-y-3 mb-8">
-            {% for feat in T.entrepreneur_feat1,T.entrepreneur_feat2,T.entrepreneur_feat3,T.entrepreneur_feat4 %}
-            <li class="flex items-center gap-3 text-white/90">
-              <div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                </svg>
-              </div>
-              {{ feat }}
-            </li>
-            {% endfor %}
+            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.entrepreneur_feat1 }}</li>
+            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.entrepreneur_feat2 }}</li>
+            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.entrepreneur_feat3 }}</li>
+            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.entrepreneur_feat4 }}</li>
           </ul>
           <a href="{% url 'register' %}"
              class="inline-flex items-center gap-2 bg-white text-blue-700 font-bold px-6 py-3.5 rounded-xl hover:bg-blue-50 transition">
@@ -576,16 +570,10 @@
           <h3 class="text-3xl font-black text-white mb-3">{{ T.expert_title }}</h3>
           <p class="text-purple-100/80 mb-7 text-lg leading-relaxed">{{ T.expert_desc }}</p>
           <ul class="space-y-3 mb-8">
-            {% for feat in T.expert_feat1,T.expert_feat2,T.expert_feat3,T.expert_feat4 %}
-            <li class="flex items-center gap-3 text-white/90">
-              <div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                </svg>
-              </div>
-              {{ feat }}
-            </li>
-            {% endfor %}
+            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.expert_feat1 }}</li>
+            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.expert_feat2 }}</li>
+            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.expert_feat3 }}</li>
+            <li class="flex items-center gap-3 text-white/90"><div class="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>{{ T.expert_feat4 }}</li>
           </ul>
           <a href="{% url 'register' %}"
              class="inline-flex items-center gap-2 bg-white text-purple-700 font-bold px-6 py-3.5 rounded-xl hover:bg-purple-50 transition">
