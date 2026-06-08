@@ -884,7 +884,7 @@ def resend_verification(request):
 def telegram_connect_view(request):
     """Telegram bog'lash uchun oraliq sahifa — deep link orqali ilova ochiladi."""
     import secrets
-    bot_username = settings.TELEGRAM_BOT_USERNAME
+    bot_username = settings.TELEGRAM_BOT_USERNAME.lstrip('@')
     if not bot_username:
         messages.error(request, 'Telegram bot hali sozlanmagan.')
         return redirect(request.META.get('HTTP_REFERER', '/dashboard/'))

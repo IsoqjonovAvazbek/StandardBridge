@@ -10,7 +10,7 @@ class Command(BaseCommand):
     help = 'Telegram bot webhook URL ni Telegram serveriga ro\'yxatdan o\'tkazadi'
 
     def handle(self, *args, **options):
-        token = getattr(settings, 'TELEGRAM_BOT_TOKEN', '')
+        token = getattr(settings, 'TELEGRAM_BOT_TOKEN', '').strip()
         secret = getattr(settings, 'TELEGRAM_WEBHOOK_SECRET', '')
 
         if not token:
