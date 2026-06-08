@@ -136,20 +136,13 @@
             </div>
             {% else %}
             <p class="text-sm text-gray-500 mb-4">{{ T.tg_connect_desc }}</p>
-            <div id="tg-link-area" class="hidden mb-3">
-                <p class="text-sm text-gray-600 mb-2">{{ T.tg_link_instruction }}</p>
-                <a id="tg-link" href="#" target="_blank" rel="noopener"
-                   class="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.613c-.15.676-.543.84-1.1.523l-3.04-2.24-1.468 1.413c-.162.162-.298.298-.61.298l.218-3.085 5.624-5.08c.245-.218-.053-.338-.378-.12L7.44 14.42l-2.98-.93c-.648-.202-.66-.648.135-.96l11.637-4.487c.54-.195 1.013.12.33.205z"/>
-                    </svg>
-                    {{ T.tg_open_tg }}
-                </a>
-            </div>
-            <button id="tg-connect-btn" type="button" onclick="sbTelegramConnect()"
-                class="inline-flex items-center gap-2 border border-blue-300 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-xl text-sm font-medium transition">
+            <a href="{% url 'telegram_connect' %}"
+               class="inline-flex items-center gap-2 border border-blue-300 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-xl text-sm font-medium transition">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.613c-.15.676-.543.84-1.1.523l-3.04-2.24-1.468 1.413c-.162.162-.298.298-.61.298l.218-3.085 5.624-5.08c.245-.218-.053-.338-.378-.12L7.44 14.42l-2.98-.93c-.648-.202-.66-.648.135-.96l11.637-4.487c.54-.195 1.013.12.33.205z"/>
+                </svg>
                 {{ T.tg_connect_btn }}
-            </button>
+            </a>
             {% endif %}
         </div>
 
@@ -167,29 +160,4 @@
 </div>
 {% endblock %}
 
-{% block extra_js %}
-<script>
-function sbTelegramConnect() {
-    const btn = document.getElementById('tg-connect-btn');
-    btn.disabled = true;
-    btn.textContent = '...';
-    fetch('{% url "telegram_connect" %}')
-        .then(r => r.json())
-        .then(data => {
-            if (data.ok) {
-                document.getElementById('tg-link').href = data.link;
-                document.getElementById('tg-link-area').classList.remove('hidden');
-                btn.classList.add('hidden');
-            } else {
-                btn.disabled = false;
-                btn.textContent = '{{ T.tg_connect_btn }}';
-                alert(data.error || 'Xato yuz berdi');
-            }
-        })
-        .catch(() => {
-            btn.disabled = false;
-            btn.textContent = '{{ T.tg_connect_btn }}';
-        });
-}
-</script>
 {% endblock %}

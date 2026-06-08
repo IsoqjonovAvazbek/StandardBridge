@@ -873,16 +873,17 @@ def resend_verification(request):
 @login_required
 @require_http_methods(['GET'])
 def telegram_connect_view(request):
-    """Telegram bog'lash uchun bir martalik token generatsiya qiladi."""
+    """Telegram bog'lash uchun bir martalik token generatsiya qilib Telegram ga redirect qiladi."""
     import secrets
     bot_username = settings.TELEGRAM_BOT_USERNAME
     if not bot_username:
-        return JsonResponse({'ok': False, 'error': 'Bot sozlanmagan'}, status=503)
+        messages.error(request, 'Telegram bot hali sozlanmagan.')
+        return redirect(request.META.get('HTTP_REFERER', '/dashboard/'))
     token = secrets.token_urlsafe(32)
     request.user.telegram_link_token = token
     request.user.save(update_fields=['telegram_link_token'])
     link = f'https://t.me/{bot_username}?start={token}'
-    return JsonResponse({'ok': True, 'link': link})
+    return redirect(link)
 
 
 @login_required
