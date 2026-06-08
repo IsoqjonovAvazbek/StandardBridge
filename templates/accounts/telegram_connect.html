@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Telegram ga ulash — StandartBridge{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-lg max-w-md w-full p-8 text-center">
+
+        <!-- Telegram icon -->
+        <div class="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <svg class="w-11 h-11 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.613c-.15.676-.543.84-1.1.523l-3.04-2.24-1.468 1.413c-.162.162-.298.298-.61.298l.218-3.085 5.624-5.08c.245-.218-.053-.338-.378-.12L7.44 14.42l-2.98-.93c-.648-.202-.66-.648.135-.96l11.637-4.487c.54-.195 1.013.12.33.205z"/>
+            </svg>
+        </div>
+
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Telegram ga ulash</h1>
+        <p class="text-gray-500 mb-8">Bildirishnomalarni Telegram orqali olish uchun botni ishga tushiring</p>
+
+        <!-- Asosiy tugma: deep link -->
+        <a id="open-app-btn" href="{{ deep_link }}"
+           class="block w-full gradient-bg text-white py-4 rounded-xl font-bold text-lg hover:opacity-90 transition mb-4 flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.613c-.15.676-.543.84-1.1.523l-3.04-2.24-1.468 1.413c-.162.162-.298.298-.61.298l.218-3.085 5.624-5.08c.245-.218-.053-.338-.378-.12L7.44 14.42l-2.98-.93c-.648-.202-.66-.648.135-.96l11.637-4.487c.54-.195 1.013.12.33.205z"/>
+            </svg>
+            Telegram ilovasida ochish
+        </a>
+
+        <!-- Zaxira: web link -->
+        <a href="{{ web_link }}" target="_blank" rel="noopener"
+           class="block w-full border-2 border-blue-200 text-blue-600 py-3.5 rounded-xl font-semibold hover:bg-blue-50 transition mb-6">
+            Brauzerde ochish (t.me)
+        </a>
+
+        <!-- Qo'lda: bot username -->
+        <div class="bg-gray-50 rounded-xl p-4 mb-6 text-left">
+            <p class="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wide">Qo'lda ulash uchun:</p>
+            <p class="text-sm text-gray-600 mb-1">1. Telegram'da qidiruv orqali botni toping:</p>
+            <code class="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-blue-700 font-mono text-sm block mb-2 select-all">@{{ bot_username }}</code>
+            <p class="text-sm text-gray-600">2. Botga <strong>/start</strong> yuboring</p>
+        </div>
+
+        <a href="{% url 'dashboard' %}" class="text-sm text-gray-400 hover:text-gray-600 transition">
+            ← Dashboard ga qaytish
+        </a>
+    </div>
+</div>
+
+<script>
+    // Sahifa ochilganda avtomatik tg:// deep link urinishi
+    window.addEventListener('DOMContentLoaded', function () {
+        var deepLink = "{{ deep_link }}";
+        var webLink = "{{ web_link }}";
+
+        // Mobile: tg:// ni sinab ko'r, 1.5s ichida app ochilmasa web linkni taklif et
+        var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+            var btn = document.getElementById('open-app-btn');
+            btn.textContent = '';
+            btn.innerHTML = '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.613c-.15.676-.543.84-1.1.523l-3.04-2.24-1.468 1.413c-.162.162-.298.298-.61.298l.218-3.085 5.624-5.08c.245-.218-.053-.338-.378-.12L7.44 14.42l-2.98-.93c-.648-.202-.66-.648.135-.96l11.637-4.487c.54-.195 1.013.12.33.205z"/></svg> Telegram ilovasida ochish';
+
+            // Auto-attempt after 800ms
+            setTimeout(function () {
+                window.location.href = deepLink;
+            }, 800);
+        }
+    });
+</script>
+{% endblock %}

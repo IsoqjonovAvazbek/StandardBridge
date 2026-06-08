@@ -882,7 +882,7 @@ def resend_verification(request):
 @login_required
 @require_http_methods(['GET'])
 def telegram_connect_view(request):
-    """Telegram bog'lash uchun bir martalik token generatsiya qilib Telegram ga redirect qiladi."""
+    """Telegram bog'lash uchun oraliq sahifa — deep link orqali ilova ochiladi."""
     import secrets
     bot_username = settings.TELEGRAM_BOT_USERNAME
     if not bot_username:
@@ -891,8 +891,13 @@ def telegram_connect_view(request):
     token = secrets.token_urlsafe(32)
     request.user.telegram_link_token = token
     request.user.save(update_fields=['telegram_link_token'])
-    link = f'https://t.me/{bot_username}?start={token}'
-    return redirect(link)
+    deep_link = f'tg://resolve?domain={bot_username}&start={token}'
+    web_link = f'https://t.me/{bot_username}?start={token}'
+    return render(request, 'accounts/telegram_connect.html', {
+        'deep_link': deep_link,
+        'web_link': web_link,
+        'bot_username': bot_username,
+    })
 
 
 @login_required
