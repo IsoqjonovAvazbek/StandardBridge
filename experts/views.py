@@ -23,6 +23,7 @@ from .emails import (
     send_payment_confirmed_to_expert, send_project_completed_to_entrepreneur,
     send_counter_offer_to_expert,
     send_scope_request_to_entrepreneur, send_scope_request_response_to_expert,
+    _tg, _e,
 )
 
 
@@ -480,6 +481,12 @@ def project_counter_offer(request, pk):
             message=f'{request.user.get_full_name()} loyiha #{project.pk} uchun ${counter_price} taklif qildi.'
         )
         send_counter_offer_to_expert(project)
+        _tg(project.expert, (
+            f"🔄 <b>Yangi qarshi taklif!</b>\n\n"
+            f"Tadbirkor <b>{_e(request.user.get_full_name())}</b> loyiha #{project.pk} uchun "
+            f"<b>${counter_price}</b> taklif qildi.\n\n"
+            f"Platforma: https://standardbridge.up.railway.app/experts/project/{project.pk}/"
+        ))
         messages.success(request, f'Qarshi taklif yuborildi: ${counter_price}. Mutaxassis javobini kuting.')
     return redirect('project_detail', pk=pk)
 

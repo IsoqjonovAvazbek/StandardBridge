@@ -118,20 +118,28 @@
         </div>
 
         <!-- Docs card -->
-        <div class="bg-white rounded-2xl border {% if expiring_docs > 0 %}border-yellow-200{% else %}border-gray-100{% endif %} p-5 card-hover">
+        <div class="bg-white rounded-2xl border {% if expired_docs > 0 %}border-red-200{% elif expiring_docs > 0 %}border-yellow-200{% else %}border-gray-100{% endif %} p-5 card-hover">
             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">{{ T.qms_docs_card }}</p>
-            <div class="flex items-end gap-3 mb-4">
+            <div class="flex items-end gap-3 mb-4 flex-wrap">
                 <div>
                     <p class="text-3xl font-bold text-gray-900">{{ total_docs }}</p>
                     <p class="text-xs text-gray-500">{{ T.qms_total_docs }}</p>
                 </div>
-                {% if expiring_docs > 0 %}
+                {% if expired_docs > 0 %}
+                <div class="border-l border-gray-200 pl-3">
+                    <p class="text-3xl font-bold text-red-600">{{ expired_docs }}</p>
+                    <p class="text-xs text-gray-500">Muddati tugagan</p>
+                </div>
+                {% elif expiring_docs > 0 %}
                 <div class="border-l border-gray-200 pl-3">
                     <p class="text-3xl font-bold text-yellow-500">{{ expiring_docs }}</p>
                     <p class="text-xs text-gray-500">{{ T.qms_expiring_docs }}</p>
                 </div>
                 {% endif %}
             </div>
+            {% if expired_docs > 0 %}
+            <p class="text-xs text-red-600 font-medium mb-2">⚠ {{ expired_docs }} ta hujjat yangilanishi kerak</p>
+            {% endif %}
             <a href="{% url 'qms_documents' %}" class="text-blue-600 text-sm font-medium hover:underline">{{ T.qms_go_docs }}</a>
         </div>
 

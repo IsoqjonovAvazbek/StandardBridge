@@ -143,10 +143,12 @@ def qms_dashboard(request):
         'recent_docs': recent_docs,
         'total_risks': total_risks,
         'open_risks': open_risks,
+        'critical_risks': critical_risks,
         'total_trainings': total_trainings,
         'expiring_trainings': expiring_trainings,
         'health_score': health_score,
         'no_qms_data': no_qms_data,
+        'expired_docs': expired_docs,
     })
 
 
@@ -375,7 +377,7 @@ def add_nonconformity(request):
         due_raw = request.POST.get('due_date', '').strip()
 
         if title and description:
-            NonConformity.objects.create(
+            nc = NonConformity.objects.create(
                 company=request.user,
                 code=_next_nc_code(request.user),
                 title=title[:300],
@@ -383,6 +385,13 @@ def add_nonconformity(request):
                 severity=severity,
                 assigned_to=assigned_to,
                 due_date=_parse_date(due_raw),
+            )
+            from experts.models import Notification
+            Notification.objects.create(
+                user=request.user,
+                title=f'Yangi nomuvofiqlik: {nc.code}',
+                message=f'"{title[:80]}" nomuvofiqlik QMS tizimiga qo\'shildi. Holat: Ochiq.',
+                link='/qms/nc/',
             )
             messages.success(request, 'Nomuvofiqlik qo\'shildi.')
         else:

@@ -97,6 +97,14 @@ def toggle_like(request, slug):
         liked = False
     else:
         liked = True
+        if post.author and post.author != request.user:
+            from experts.models import Notification
+            Notification.objects.create(
+                user=post.author,
+                title='Maqolangizga like bosildi',
+                message=f'{request.user.get_full_name()} "{post.title[:60]}" maqolangizni yoqtirdi.',
+                link=f'/blog/{post.slug}/',
+            )
     return JsonResponse({'liked': liked, 'count': post.likes.count()})
 
 

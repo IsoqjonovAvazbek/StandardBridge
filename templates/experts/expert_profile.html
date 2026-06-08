@@ -21,16 +21,22 @@
         <!-- Asosiy info -->
         <div class="lg:col-span-1">
             <div class="bg-white rounded-2xl p-6 border border-gray-100 text-center mb-6">
-                {% if request.user.avatar %}
-                <img src="{{ request.user.avatar.url }}" alt="{{ request.user.get_full_name }}"
-                     class="w-20 h-20 rounded-full object-cover mx-auto mb-4 border-2 border-gray-200">
-                {% else %}
-                <div class="w-20 h-20 rounded-full gradient-bg flex items-center justify-center mx-auto mb-4">
-                    <span class="text-white font-bold text-2xl">
-                        {{ request.user.first_name|first }}{{ request.user.last_name|first }}
-                    </span>
-                </div>
-                {% endif %}
+                <a href="{% url 'expert_profile_edit' %}" class="relative inline-block group mx-auto mb-4">
+                    {% if request.user.avatar %}
+                    <img src="{{ request.user.avatar.url }}" alt="{{ request.user.get_full_name }}"
+                         class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+                    {% else %}
+                    <div class="w-20 h-20 rounded-full gradient-bg flex items-center justify-center">
+                        <span class="text-white font-bold text-2xl">
+                            {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+                        </span>
+                    </div>
+                    {% endif %}
+                    <div class="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center
+                                opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <span class="text-white text-xs font-medium">Tahrirlash</span>
+                    </div>
+                </a>
                 <h2 class="font-bold text-gray-900 text-xl">{{ request.user.get_full_name }}</h2>
                 <p class="text-gray-500 text-sm mt-1">{{ profile.get_region_display }}</p>
                 <div class="mt-3">
@@ -104,6 +110,18 @@
                 <p class="text-gray-400 italic">{{ T.no_specs }}</p>
                 {% endif %}
             </div>
+
+            <!-- Ishlaydigan standartlar -->
+            {% if profile.standard_tags %}
+            <div class="bg-white rounded-2xl p-6 border border-gray-100">
+                <h3 class="font-bold text-gray-900 mb-3">Ishlaydigan standartlar</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for tag in profile.standard_tags %}
+                    <span class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-sm font-semibold">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Sertifikatlar -->
             <div class="bg-white rounded-2xl p-6 border border-gray-100">

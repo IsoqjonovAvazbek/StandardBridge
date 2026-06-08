@@ -47,9 +47,9 @@
     <div class="px-6 py-4 border-b border-gray-100">
       <h2 class="font-semibold text-gray-900">{{ T.et_audit_items }}</h2>
     </div>
-    <div class="divide-y divide-gray-50">
+    <div class="divide-y divide-gray-50 sm:divide-y sm:divide-gray-50">
       {% for item in items %}
-      <div class="p-5 audit-item" data-item-id="{{ item.pk }}">
+      <div class="p-4 sm:p-5 audit-item" data-item-id="{{ item.pk }}">
         <div class="flex flex-col sm:flex-row sm:items-start gap-3">
           <!-- Clause + Question -->
           <div class="flex-1">
@@ -73,15 +73,15 @@
           <div class="flex flex-col gap-2 sm:w-72 flex-shrink-0">
             <div class="flex gap-1">
               <button onclick="setStatus({{ item.pk }}, 'compliant')"
-                      class="status-btn flex-1 text-xs py-1.5 rounded-lg border transition font-medium
+                      class="status-btn flex-1 text-xs py-2 sm:py-1.5 rounded-lg border transition font-medium active:scale-95
                         {% if item.status == 'compliant' %}bg-green-500 text-white border-green-500{% else %}border-gray-200 text-gray-600 hover:bg-green-50{% endif %}"
                       data-value="compliant">{{ T.et_compliant }}</button>
               <button onclick="setStatus({{ item.pk }}, 'partial')"
-                      class="status-btn flex-1 text-xs py-1.5 rounded-lg border transition font-medium
+                      class="status-btn flex-1 text-xs py-2 sm:py-1.5 rounded-lg border transition font-medium active:scale-95
                         {% if item.status == 'partial' %}bg-yellow-500 text-white border-yellow-500{% else %}border-gray-200 text-gray-600 hover:bg-yellow-50{% endif %}"
                       data-value="partial">{{ T.et_partial }}</button>
               <button onclick="setStatus({{ item.pk }}, 'non_compliant')"
-                      class="status-btn flex-1 text-xs py-1.5 rounded-lg border transition font-medium
+                      class="status-btn flex-1 text-xs py-2 sm:py-1.5 rounded-lg border transition font-medium active:scale-95
                         {% if item.status == 'non_compliant' %}bg-red-500 text-white border-red-500{% else %}border-gray-200 text-gray-600 hover:bg-red-50{% endif %}"
                       data-value="non_compliant">{{ T.et_non_compliant }}</button>
             </div>
@@ -108,7 +108,7 @@
 
   <!-- Mobile mode banner -->
   {% if not audit.is_completed %}
-  <div class="sm:hidden bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-4 flex items-center justify-between">
+  <div class="sm:hidden bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-4 flex items-center justify-between mt-4">
       <div>
           <p class="text-sm font-semibold text-blue-800">📱 Mobil rejim</p>
           <p class="text-xs text-blue-600">Sahada tezroq to'ldiring</p>

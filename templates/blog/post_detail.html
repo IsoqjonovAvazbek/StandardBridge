@@ -174,8 +174,10 @@
                 <!-- Action bar: Like + Share -->
                 <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-6 flex items-center gap-4 shadow-sm flex-wrap">
                     {% if user.is_authenticated %}
-                    <button id="like-btn" onclick="toggleLike()"
-                        class="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all {% if user_liked %}border-rose-400 bg-rose-50 text-rose-600{% else %}border-gray-200 bg-white text-gray-600 hover:border-rose-300 hover:text-rose-500{% endif %}">
+                    <button id="like-btn" onclick="toggleLike()" tabindex="0"
+                        onkeypress="if(event.key==='Enter'||event.key===' '){toggleLike();event.preventDefault();}"
+                        aria-label="{% if user_liked %}{{ T.blog_liked_btn }}{% else %}{{ T.blog_like_btn }}{% endif %}"
+                        class="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-rose-300 {% if user_liked %}border-rose-400 bg-rose-50 text-rose-600{% else %}border-gray-200 bg-white text-gray-600 hover:border-rose-300 hover:text-rose-500{% endif %}">
                         <svg id="like-icon" class="w-4 h-4 transition-transform" fill="{% if user_liked %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                         </svg>
@@ -250,8 +252,9 @@
                                 <span class="text-xs text-gray-400" id="comment-chars">0/1000</span>
                                 <button onclick="submitComment()" id="comment-submit"
                                     class="gradient-bg text-white px-5 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                    {{ T.blog_comment_btn }}
+                                    <svg id="comment-send-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                    <svg id="comment-spinner" class="w-4 h-4 animate-spin hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                    <span id="comment-btn-text">{{ T.blog_comment_btn }}</span>
                                 </button>
                             </div>
                         </div>
@@ -484,6 +487,12 @@ function submitComment(){
     var text = input.value.trim();
     if(!text){ showToast('Izoh matni bo\'sh bo\'lishi mumkin emas.'); return; }
     btn.disabled = true;
+    var spinner = document.getElementById('comment-spinner');
+    var sendIcon = document.getElementById('comment-send-icon');
+    var btnText = document.getElementById('comment-btn-text');
+    if(spinner){ spinner.classList.remove('hidden'); }
+    if(sendIcon){ sendIcon.classList.add('hidden'); }
+    if(btnText){ btnText.textContent = 'Yuborilmoqda...'; }
 
     var form = new FormData();
     form.append('content', text);
@@ -495,6 +504,9 @@ function submitComment(){
         return r.json();
     })
     .then(function(d){
+        if(spinner){ spinner.classList.add('hidden'); }
+        if(sendIcon){ sendIcon.classList.remove('hidden'); }
+        if(btnText){ btnText.textContent = "{{ T.blog_comment_btn }}"; }
         if(d.error){ btn.disabled=false; showToast('Xatolik: ' + d.error); return; }
 
         var noComments = document.getElementById('no-comments');
@@ -537,6 +549,9 @@ function submitComment(){
     })
     .catch(function(e){
         btn.disabled = false;
+        if(spinner){ spinner.classList.add('hidden'); }
+        if(sendIcon){ sendIcon.classList.remove('hidden'); }
+        if(btnText){ btnText.textContent = "{{ T.blog_comment_btn }}"; }
         showToast('Izoh saqlanmadi. Tizimga kirganingizni tekshiring.');
     });
 }

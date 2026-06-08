@@ -171,13 +171,14 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         </div>
         <div>
           <label>{{ T.password }}</label>
-          <input class="fi" type="password" name="password" required minlength="8" placeholder="••••••••">
-          <p class="hint">{{ T.password_hint }}</p>
+          <input class="fi" type="password" name="password" id="pw1" required minlength="8" placeholder="••••••••" oninput="checkPw()">
+          <p class="hint" id="pw1-hint">{{ T.password_hint }}</p>
         </div>
       </div>
       <div class="field">
         <label>{{ T.password_confirm }}</label>
-        <input class="fi" type="password" name="password2" required placeholder="••••••••">
+        <input class="fi" type="password" name="password2" id="pw2" required placeholder="••••••••" oninput="checkPw()">
+        <p class="hint" id="pw2-hint" style="display:none"></p>
       </div>
       <div class="field">
         <label>{{ T.referral_code_label }} <span style="color:#9ca3af;font-weight:400">{{ T.referral_code_optional }}</span></label>
@@ -214,5 +215,36 @@ function setRole(role) {
 }
 var savedRole = '{{ form_data.role|default:"entrepreneur" }}';
 if (savedRole === 'expert') setRole('expert');
+
+function checkPw() {
+  var p1 = document.getElementById('pw1');
+  var p2 = document.getElementById('pw2');
+  var h1 = document.getElementById('pw1-hint');
+  var h2 = document.getElementById('pw2-hint');
+  if (!p1 || !p2) return;
+  var len = p1.value.length;
+  if (len > 0 && len < 8) {
+    h1.textContent = '⚠ Kamida 8 ta belgi kerak (' + len + '/8)';
+    h1.style.color = '#f59e0b';
+  } else if (len >= 8) {
+    h1.textContent = '✓ Parol uzunligi yetarli';
+    h1.style.color = '#22c55e';
+  } else {
+    h1.textContent = '{{ T.password_hint }}';
+    h1.style.color = '#9ca3af';
+  }
+  if (p2.value.length > 0) {
+    h2.style.display = '';
+    if (p1.value === p2.value) {
+      h2.textContent = '✓ Parollar mos';
+      h2.style.color = '#22c55e';
+    } else {
+      h2.textContent = '✗ Parollar mos emas';
+      h2.style.color = '#ef4444';
+    }
+  } else {
+    h2.style.display = 'none';
+  }
+}
 </script>
 {% endblock %}
