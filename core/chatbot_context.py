@@ -25,9 +25,11 @@ _INJECTION_SIGNALS = [
 
 
 def is_injection_attempt(text: str) -> bool:
-    """Obvious prompt injection urinishlarini aniqlaydi."""
-    lower = text.lower()
-    return any(sig in lower for sig in _INJECTION_SIGNALS)
+    """Obvious prompt injection urinishlarini aniqlaydi (unicode normalizatsiya bilan)."""
+    import unicodedata
+    normalized = unicodedata.normalize('NFKD', text.lower())
+    normalized = normalized.encode('ascii', 'ignore').decode('ascii')
+    return any(sig in normalized for sig in _INJECTION_SIGNALS)
 
 
 # ── Xavfsizlik qoidalari (promptga har doim kiritiladi) ──────────────────────

@@ -773,7 +773,7 @@ def payment_page(request, project_pk):
 
     # Payment ob'ekti har doim yaratilishi kerak (Click yoki mock uchun)
     if project.status == 'accepted':
-        if not payment:
+        with transaction.atomic():
             payment, _ = Payment.objects.get_or_create(
                 project=project,
                 defaults={
@@ -782,9 +782,9 @@ def payment_page(request, project_pk):
                     'status': 'pending',
                 }
             )
-        if payment.status == 'pending' and payment.amount != project.expert_price:
-            payment.amount = project.expert_price
-            payment.save(update_fields=['amount', 'platform_fee', 'expert_amount'])
+            if payment.status == 'pending' and payment.amount != project.expert_price:
+                payment.amount = project.expert_price
+                payment.save(update_fields=['amount', 'platform_fee', 'expert_amount'])
 
     click_return_url = request.build_absolute_uri(
         reverse('project_detail', args=[project.pk])
@@ -1010,7 +1010,7 @@ def wallet(request):
                         exp_month, exp_year = int(card_expiry[:2]), int(card_expiry[3:]) + 2000
                         if not (1 <= exp_month <= 12):
                             errors.append('Oy 01-12 oralig\'ida bo\'lishi kerak!')
-                        elif _date(exp_year, exp_month, 1) < _date.today().replace(day=1):
+                        elif _date(exp_year, exp_month, 1) < timezone.now().date().replace(day=1):
                             errors.append('Kartaning amal qilish muddati o\'tib ketgan!')
                     except ValueError:
                         errors.append('Amal qilish muddati noto\'g\'ri!')
@@ -1327,13 +1327,23 @@ def click_prepare(request):
         return JsonResponse({'error': -1, 'error_note': 'Forbidden'})
 
     data = request.POST
-    click_trans_id = data.get('click_trans_id')
-    service_id = data.get('service_id')
-    merchant_trans_id = data.get('merchant_trans_id')
-    amount = data.get('amount')
-    action = data.get('action')
-    sign_time = data.get('sign_time')
-    sign_string = data.get('sign_string')
+    click_trans_id = data.get('click_trans_id', '')
+    service_id = data.get('service_id', '')
+    merchant_trans_id = data.get('merchant_trans_id', '')
+    amount = data.get('amount', '')
+    action = data.get('action', '')
+    sign_time = data.get('sign_time', '')
+    sign_string = data.get('sign_string', '')
+
+    # Basic type/length guards to prevent abuse
+    if len(click_trans_id) > 64 or len(merchant_trans_id) > 64:
+        return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
+                             'merchant_prepare_id': None, 'error': -8, 'error_note': 'Invalid request'})
+    try:
+        Decimal(amount)
+    except (InvalidOperation, ValueError, TypeError):
+        return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
+                             'merchant_prepare_id': None, 'error': -8, 'error_note': 'Invalid amount'})
 
     try:
         ts_diff = abs(int(timezone.now().timestamp()) - int(sign_time or 0))
@@ -1391,15 +1401,27 @@ def click_complete(request):
         return JsonResponse({'error': -1, 'error_note': 'Forbidden'})
 
     data = request.POST
-    click_trans_id = data.get('click_trans_id')
-    service_id = data.get('service_id')
-    merchant_trans_id = data.get('merchant_trans_id')
-    merchant_prepare_id = data.get('merchant_prepare_id')
-    amount = data.get('amount')
-    action = data.get('action')
-    sign_time = data.get('sign_time')
-    sign_string = data.get('sign_string')
-    error = int(data.get('error', 0))
+    click_trans_id = data.get('click_trans_id', '')
+    service_id = data.get('service_id', '')
+    merchant_trans_id = data.get('merchant_trans_id', '')
+    merchant_prepare_id = data.get('merchant_prepare_id', '')
+    amount = data.get('amount', '')
+    action = data.get('action', '')
+    sign_time = data.get('sign_time', '')
+    sign_string = data.get('sign_string', '')
+    try:
+        error = int(data.get('error', 0))
+    except (ValueError, TypeError):
+        error = 0
+
+    if len(click_trans_id) > 64 or len(merchant_trans_id) > 64:
+        return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
+                             'merchant_confirm_id': None, 'error': -8, 'error_note': 'Invalid request'})
+    try:
+        Decimal(amount)
+    except (InvalidOperation, ValueError, TypeError):
+        return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
+                             'merchant_confirm_id': None, 'error': -8, 'error_note': 'Invalid amount'})
 
     try:
         ts_diff = abs(int(timezone.now().timestamp()) - int(sign_time or 0))

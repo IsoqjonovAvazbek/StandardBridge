@@ -105,9 +105,11 @@ def toggle_like(request, slug):
 def add_comment(request, slug):
     post = get_object_or_404(BlogPost, slug=slug, is_published=True)
     content = request.POST.get('content', '').strip()
-    if not content:
-        return JsonResponse({'error': 'empty'}, status=400)
-    comment = BlogComment.objects.create(post=post, author=request.user, content=content[:1000])
+    if not content or len(content) < 2:
+        return JsonResponse({'error': 'Izoh juda qisqa!'}, status=400)
+    if len(content) > 1000:
+        return JsonResponse({'error': 'Izoh 1000 belgidan oshmasligi kerak!'}, status=400)
+    comment = BlogComment.objects.create(post=post, author=request.user, content=content)
     return JsonResponse({
         'id': comment.pk,
         'author': request.user.get_full_name() or request.user.username,

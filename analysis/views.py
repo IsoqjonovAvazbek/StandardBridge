@@ -632,9 +632,17 @@ def run_analysis(request, industry_id):
 def _sanitize_for_prompt(text: str, max_len: int = 200) -> str:
     """Strip prompt-injection markers from user-supplied text before embedding in AI prompt."""
     import re
-    text = str(text).strip()[:max_len]
-    # Remove lines that start with common LLM instruction markers
-    text = re.sub(r'(?i)(ignore|forget|disregard|override|system:|###|===|---)\s', ' ', text)
+    import unicodedata
+    # Unicode normalizatsiya — unicode trick bilan bypass'ni oldini oladi
+    text = unicodedata.normalize('NFKD', str(text).strip())
+    text = text.encode('ascii', 'ignore').decode('ascii')
+    text = text[:max_len]
+    # Remove common injection markers including variations with spaces/chars between letters
+    text = re.sub(
+        r'(?i)\b(ignore|forget|disregard|override|jailbreak|dan\s*mode|system\s*prompt)\b',
+        '[filtered]', text
+    )
+    text = re.sub(r'(?i)(#{2,}|={2,}|-{2,}|system\s*:)', '', text)
     # Collapse newlines so user can't inject multi-line instructions
     text = ' '.join(text.splitlines())
     return text.strip()
