@@ -103,16 +103,21 @@
         <div class="space-y-3">
             {% for project in pending_projects %}
             <div class="bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 flex items-center justify-between">
-                <div>
-                    <p class="font-medium text-gray-900 text-sm">
-                        {{ project.analysis.local_standard.code }} → {{ project.analysis.target_standard.code }}
-                    </p>
-                    <p class="text-gray-500 text-xs mt-0.5">
-                        {{ T.expert_lbl }} {% if project.expert %}{{ project.expert.get_full_name }}{% else %}—{% endif %}
-                    </p>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                        <div class="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900 text-sm">
+                            {{ project.analysis.local_standard.code }} → {{ project.analysis.target_standard.code }}
+                        </p>
+                        <p class="text-gray-500 text-xs mt-0.5">
+                            {{ T.expert_lbl }} {% if project.expert %}{{ project.expert.get_full_name }}{% else %}—{% endif %}
+                            <span class="ml-2 text-gray-400">• {{ project.created_at|time_ago }}</span>
+                        </p>
+                    </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span class="text-xs text-gray-400">{{ project.created_at|date:"d.m.Y" }}</span>
                     <a href="{% url 'project_detail' project.pk %}" class="text-xs text-blue-600 hover:underline">{{ T.et_view }}</a>
                     <form method="post" action="{% url 'project_cancel' project.pk %}" class="inline">
                         {% csrf_token %}
@@ -276,6 +281,19 @@
                         <p class="text-gray-500 text-sm mt-1">{{ analysis.created_at|date:"d.m.Y H:i" }}</p>
                     </div>
                     <div class="flex items-center gap-3">
+                        {% if analysis.ai_result.readiness is not None %}
+                        {% with r=analysis.ai_result.readiness %}
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-20 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full {% if r >= 70 %}bg-green-500{% elif r >= 40 %}bg-yellow-500{% else %}bg-red-400{% endif %}"
+                                     style="width:{{ r }}%"></div>
+                            </div>
+                            <span class="text-xs font-semibold {% if r >= 70 %}text-green-600{% elif r >= 40 %}text-yellow-600{% else %}text-red-500{% endif %}">
+                                {{ r }}%
+                            </span>
+                        </div>
+                        {% endwith %}
+                        {% endif %}
                         <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
                             {{ analysis.gaps.count }} gap
                         </span>

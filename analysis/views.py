@@ -498,6 +498,8 @@ def _ai_background_task(analysis_id, local_ids, target_ids, industry_name, weak_
             company_context=company_context, readiness=readiness, language=language,
         )
 
+        if readiness is not None:
+            ai_result['readiness'] = readiness
         analysis.ai_result = ai_result
         analysis.status = 'completed'
         analysis.save()

@@ -219,7 +219,12 @@
 
     <!-- Faol loyihalar -->
     <div>
-        <h2 class="text-xl font-bold text-gray-900 mb-4">{{ T.active_projects_label }}</h2>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-900">{{ T.active_projects_label }}
+                {% if in_progress > 0 %}<span class="ml-2 bg-orange-100 text-orange-700 text-sm font-semibold px-2.5 py-0.5 rounded-full">{{ in_progress }}</span>{% endif %}
+            </h2>
+            {% if projects %}<a href="{% url 'project_list' %}" class="text-sm text-blue-600 hover:underline">Barchasi →</a>{% endif %}
+        </div>
         <div class="space-y-4">
             {% for project in projects %}
             {% if project.status == 'in_progress' or project.status == 'review' %}
@@ -260,6 +265,17 @@
             </div>
             {% endif %}
             {% endfor %}
+            {% if in_progress == 0 %}
+            <div class="bg-white rounded-2xl p-10 border border-gray-100 text-center">
+                <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                </div>
+                <p class="text-gray-500 font-medium mb-1">Hozircha faol loyiha yo'q</p>
+                <p class="text-gray-400 text-sm">Yangi takliflar kelganda bu yerda ko'rinadi</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
