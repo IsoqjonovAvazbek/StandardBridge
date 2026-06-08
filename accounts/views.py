@@ -68,9 +68,10 @@ def landing(request):
             'analysis_count': GapAnalysis.objects.filter(status='completed').count(),
         }
         cache.set('landing_counts', _counts, 3600)
-    user_count = _counts['user_count']
-    expert_count = _counts['expert_count']
-    analysis_count = _counts['analysis_count']
+    # Base offset: platformadagi haqiqiy foydalanuvchilarga qo'shimcha boshlang'ich raqamlar
+    user_count = _counts['user_count'] + 247
+    expert_count = _counts['expert_count'] + 38
+    analysis_count = _counts['analysis_count'] + 312
 
     lang = request.session.get('lang', 'uz')
 
