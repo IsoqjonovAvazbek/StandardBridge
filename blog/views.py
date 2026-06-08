@@ -121,7 +121,7 @@ def add_comment(request, slug):
 @require_POST
 def delete_comment(request, comment_pk):
     comment = get_object_or_404(BlogComment, pk=comment_pk)
-    is_moderator = request.user.is_staff or getattr(request.user, 'role', '') == 'admin'
+    is_moderator = request.user.is_staff or request.user.is_admin()
     if comment.author_id != request.user.pk and not is_moderator:
         return JsonResponse({'error': 'forbidden'}, status=403)
     comment.delete()

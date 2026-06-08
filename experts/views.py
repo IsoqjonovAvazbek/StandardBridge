@@ -1184,7 +1184,8 @@ def expert_detail(request, expert_pk):
     from accounts.models import CustomUser, ExpertProfile
     from analysis.models import GapAnalysis
 
-    expert_user = get_object_or_404(CustomUser, pk=expert_pk, role='expert')
+    expert_user = get_object_or_404(CustomUser, pk=expert_pk, role='expert',
+                                    expert_profile__is_verified=True)
     try:
         expert_profile = expert_user.expert_profile
     except ExpertProfile.DoesNotExist:

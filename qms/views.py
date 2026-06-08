@@ -158,9 +158,14 @@ STANDARD_LABELS = {
 }
 
 
+_VALID_STANDARDS = {'iso9001', 'iso14001', 'iso45001', 'iso22000'}
+
+
 @_entrepreneur_required
 def qms_checklist(request):
     standard = request.GET.get('standard', 'iso9001')
+    if standard not in _VALID_STANDARDS:
+        standard = 'iso9001'
     items = ChecklistItem.objects.filter(standard=standard, is_active=True)
 
     # Build a dict of existing responses keyed by item pk
@@ -425,6 +430,8 @@ def audit_schedule(request):
 def checklist_print(request):
     """Print-friendly checklist report page."""
     standard = request.GET.get('standard', 'iso9001')
+    if standard not in _VALID_STANDARDS:
+        standard = 'iso9001'
     items = ChecklistItem.objects.filter(standard=standard, is_active=True)
     responses = {r.item_id: r for r in ChecklistResponse.objects.filter(company=request.user)}
     items_with_response = [
@@ -629,7 +636,7 @@ def risk_register(request):
     risks = RiskItem.objects.filter(company=request.user)
     standard_filter = request.GET.get('standard', '')
     status_filter = request.GET.get('status', '')
-    if standard_filter:
+    if standard_filter and standard_filter in _VALID_STANDARDS:
         risks = risks.filter(standard=standard_filter)
     if status_filter:
         risks = risks.filter(status=status_filter)
@@ -835,6 +842,8 @@ def _csv_response(filename):
 @_entrepreneur_required
 def export_checklist_csv(request):
     standard = request.GET.get('standard', 'iso9001')
+    if standard not in _VALID_STANDARDS:
+        standard = 'iso9001'
     items = ChecklistItem.objects.filter(standard=standard, is_active=True)
     responses = {r.item_id: r for r in ChecklistResponse.objects.filter(company=request.user)}
     resp = _csv_response(f'checklist_{standard}.csv')

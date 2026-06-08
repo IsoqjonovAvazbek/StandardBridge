@@ -629,19 +629,30 @@ def run_analysis(request, industry_id):
     return redirect('analysis_processing', pk=analysis.pk)
 
 
+def _sanitize_for_prompt(text: str, max_len: int = 200) -> str:
+    """Strip prompt-injection markers from user-supplied text before embedding in AI prompt."""
+    import re
+    text = str(text).strip()[:max_len]
+    # Remove lines that start with common LLM instruction markers
+    text = re.sub(r'(?i)(ignore|forget|disregard|override|system:|###|===|---)\s', ' ', text)
+    # Collapse newlines so user can't inject multi-line instructions
+    text = ' '.join(text.splitlines())
+    return text.strip()
+
+
 def _build_company_context(user, ctx):
     """Build a human-readable company context block from profile + form input."""
     parts = []
     if user.company_name:
-        parts.append(f"Korxona: {user.company_name}")
+        parts.append(f"Korxona: {_sanitize_for_prompt(user.company_name)}")
     if ctx.get('employee_count'):
         parts.append(f"Xodimlar soni: {ctx['employee_count']}")
     if ctx.get('current_state'):
-        parts.append(f"Hozirgi holat: {ctx['current_state']}")
+        parts.append(f"Hozirgi holat: {_sanitize_for_prompt(ctx['current_state'])}")
     if ctx.get('export_markets'):
-        parts.append(f"Eksport bozorlari: {ctx['export_markets']}")
+        parts.append(f"Eksport bozorlari: {_sanitize_for_prompt(ctx['export_markets'])}")
     if ctx.get('existing_certs'):
-        parts.append(f"Mavjud sertifikatlar: {ctx['existing_certs']}")
+        parts.append(f"Mavjud sertifikatlar: {_sanitize_for_prompt(ctx['existing_certs'])}")
     return '\n'.join(parts)
 
 

@@ -61,7 +61,7 @@
                         <span class="text-gray-500 text-sm">{{ T.rating_lbl }}</span>
                         <span class="font-medium text-yellow-500">{{ expert_profile.rating }} ⭐</span>
                     </div>
-                    {% if expert_profile.phone %}
+                    {% if expert_profile.phone and request.user.is_authenticated %}
                     <div class="flex justify-between">
                         <span class="text-gray-500 text-sm">{{ T.phone_lbl }}</span>
                         <span class="font-medium text-blue-600">{{ expert_profile.phone }}</span>
