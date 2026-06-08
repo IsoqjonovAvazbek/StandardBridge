@@ -236,6 +236,7 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] Auditor mobile checklist tool — /audit/<pk>/mobile/ (kartadan karta, AJAX auto-save, real-time foiz)
 - [ ] Payme integratsiya (Click bor, Payme yo'q)
 - [x] Ko'p tillar uchun email shablonlar — CustomUser.preferred_language + 10 funksiya UZ/RU/EN
+- [x] Telegram bildirishnoma tizimi (2026-06-08): CustomUser.telegram_chat_id/telegram_link_token, migration 0010, send_telegram()+_tg() experts/emails.py, 3 ta view (telegram_connect/disconnect/webhook), profil sahifalarida "Telegram'ga ulash" karta (UZ/RU/EN), .env.example yangilandi. 47 test OK.
 
 ### Keng ko'lamli yaxshilanishlar — 3-bosqich (2026-06-07, commit ec62192)
 - [x] S1: global_search_api ga @login_required (avval anonim foydalanuvchi ma'lumot olardi)
@@ -315,6 +316,15 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] Global qidiruv: navbar search icon → dropdown (expert/standart/blog — AJAX /accounts/api/search/), Escape bilan yopiladi
 - [x] Email tasdiqlash: CustomUser.is_email_verified/email_verify_token, migration 0008, ro'yxatdan o'tishda email yuboriladi (fon thread), verify/resend view'lar, base.html sariq banner
 
+### Landing page to'liq qayta ishlandi (2026-06-08, commit 20a5803)
+- [x] YouTube iframe olib tashlandi → CSS animated cinematic section (grid pan + floating orbs + AI demo card, tashqi resurs yo'q)
+- [x] Hero kartadan "Toshkent Tekstil OAJ" sarlavhasi olib tashlandi → toza ISO 9001:2015 badge + ripple dot
+- [x] "Qanday ishlaydi" 4 ta numbered steps: AI Skanerlash → Gap Hisobot → Expert Tayinlash → Sertifikat (connector chiziq bilan)
+- [x] Stats section: rang-barang icon kartalar, hover lift, gradient borders (ko'k/yashil/binafsha/siyan)
+- [x] CTA section: static grid bg + social proof avatar row + trust badges (animatsiya yo'q, qotmaydi)
+- [x] login.html: toza minimal — oq karta, #f8fafc fon, hech qanday animatsiya, max-width 400px
+- [x] register.html: toza minimal — oq karta, #f8fafc fon, rol tanlash highlight bilan, max-width 480px
+
 ---
 
 ## HALI BAJARILMAGAN (PENDING)
@@ -331,7 +341,8 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
    - `payment_confirm` MOCK transaction yaratadi — production da ishlamaydi
    - Click.uz da biznes ro'yxatdan o'tish kerak (1-2 kun)
 
----
+3. **Payme integratsiya**
+   - Hali amalga oshirilmagan (Click bor, Payme yo'q)
 
 ---
 
@@ -347,8 +358,14 @@ CLICK_SECRET_KEY= (bo'sh)
 CLICK_RETURN_URL=http://127.0.0.1:8000
 ```
 
+## Muhim texnik eslatmalar
+- Django template `{% for x in "a b c" %}` string ni BOSh JOY bo'yicha emas, BELGI bo'yicha iteratsiya qiladi — progress bar widthlarini statik yozing
+- Railway auto-deploy: GitHub main branchga push → avtomatik deploy
+- Email jo'natish background thread da (`threading.Thread`) — SMTP bloklanishi yo'q
+- `templates/landing.html` juda katta (800+ qator) — o'qishdan oldin limit bering
+
 ## Context window tugaganda davom etish
 1. `/compact` buyrug'ini ishlatish
 2. Yangi sessiyada: "CLAUDE.md ni o'qi va [qaysi task] dan davom et"
 3. Yoki: "PENDING bo'limidagi birinchi taskdan boshlаgin"
- va har bir o'zgarishdan keyin claude.md file ga ham o'zgarishlarni yozib qoy
+4. Har bir o'zgarishdan keyin CLAUDE.md ga ham yozib qo'y

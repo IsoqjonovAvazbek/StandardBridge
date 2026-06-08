@@ -41,4 +41,8 @@ urlpatterns = [
     # Email tasdiqlash
     path('accounts/verify-email/<str:token>/', views.verify_email, name='verify_email'),
     path('accounts/resend-verification/', views.resend_verification, name='resend_verification'),
+    # Telegram
+    path('accounts/telegram/connect/', views.telegram_connect_view, name='telegram_connect'),
+    path('accounts/telegram/disconnect/', views.telegram_disconnect_view, name='telegram_disconnect'),
+    path('accounts/telegram/webhook/', views.telegram_webhook_view, name='telegram_webhook'),
 ]

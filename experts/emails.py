@@ -1,11 +1,46 @@
 import threading
 import logging
+import html as _html
 from django.core.mail import send_mail
 from django.conf import settings
 
 logger = logging.getLogger('standardbridge')
 
-SITE_URL = 'http://standardbridge.up.railway.app'
+
+def _e(value) -> str:
+    """HTML entity escape — user-supplied string'larni Telegram HTML modeda himoyalaydi."""
+    return _html.escape(str(value))
+
+
+def send_telegram(chat_id: str, text: str) -> None:
+    """Telegram orqali xabar yuboradi (fon thread, xato bo'lsa loglaydi)."""
+    if not chat_id:
+        return
+    token = getattr(settings, 'TELEGRAM_BOT_TOKEN', '')
+    if not token:
+        return
+
+    def _send_tg():
+        try:
+            import requests as _req
+            _req.post(
+                f'https://api.telegram.org/bot{token}/sendMessage',
+                json={'chat_id': chat_id, 'text': text, 'parse_mode': 'HTML'},
+                timeout=8,
+            )
+        except Exception as e:
+            logger.warning('Telegram xabar yuborilmadi (%s): %s', chat_id, e)
+
+    threading.Thread(target=_send_tg, daemon=True).start()
+
+
+def _tg(user, text: str) -> None:
+    """User'ga Telegram xabari yuborish — chat_id mavjud bo'lsa."""
+    chat_id = getattr(user, 'telegram_chat_id', '')
+    if chat_id:
+        send_telegram(chat_id, text)
+
+SITE_URL = 'https://standardbridge.up.railway.app'
 
 # Email content by language
 _CONTENT = {
@@ -253,6 +288,12 @@ def send_project_to_expert(project):
         url=f"{SITE_URL}/experts/projects/{project.pk}/price/",
     )
     _send(subject, body, expert.email)
+    _tg(expert, (
+        f"📋 <b>Yangi loyiha #{project.pk}!</b>\n"
+        f"👤 {_e(entrepreneur.get_full_name())} ({_e(entrepreneur.company_name or entrepreneur.username)})\n"
+        f"📌 {_e(project.analysis.industry)} · {_e(project.analysis.target_standard)}\n"
+        f"🔗 {SITE_URL}/experts/projects/{project.pk}/price/"
+    ))
 
 
 def send_price_set_to_entrepreneur(project):
@@ -267,6 +308,12 @@ def send_price_set_to_entrepreneur(project):
         url=f"{SITE_URL}/experts/projects/{project.pk}/",
     )
     _send(subject, body, entrepreneur.email)
+    _tg(entrepreneur, (
+        f"💰 <b>Mutaxassis narx belgiladi — Loyiha #{project.pk}</b>\n"
+        f"👤 {_e(project.expert.get_full_name())}\n"
+        f"💵 ${_e(project.expert_price)} · {_e(project.expert_days)} kun\n"
+        f"🔗 {SITE_URL}/experts/projects/{project.pk}/"
+    ))
 
 
 def send_payment_confirmed_to_expert(project, payment):
@@ -279,6 +326,12 @@ def send_payment_confirmed_to_expert(project, payment):
         url=f"{SITE_URL}/experts/projects/{project.pk}/",
     )
     _send(subject, body, expert.email)
+    _tg(expert, (
+        f"✅ <b>To'lov amalga oshirildi — Loyiha #{project.pk}</b>\n"
+        f"💵 Jami: ${_e(payment.amount)} · Sizga (80%): ${_e(payment.expert_amount)}\n"
+        f"🚀 Ish boshlashingiz mumkin!\n"
+        f"🔗 {SITE_URL}/experts/projects/{project.pk}/"
+    ))
 
 
 def send_project_completed_to_entrepreneur(project, payment):
@@ -291,6 +344,12 @@ def send_project_completed_to_entrepreneur(project, payment):
         url=f"{SITE_URL}/experts/projects/{project.pk}/review/",
     )
     _send(subject, body, entrepreneur.email)
+    _tg(entrepreneur, (
+        f"🎉 <b>Loyiha #{project.pk} yakunlandi!</b>\n"
+        f"👤 Mutaxassis: {_e(project.expert.get_full_name())}\n"
+        f"💵 To'langan: ${_e(payment.amount)}\n"
+        f"⭐ Iltimos, baho bering:\n{SITE_URL}/experts/projects/{project.pk}/review/"
+    ))
 
 
 def send_expert_verified(expert_user):
@@ -299,6 +358,11 @@ def send_expert_verified(expert_user):
         url=f"{SITE_URL}/experts/profile/",
     )
     _send(subject, body, expert_user.email)
+    _tg(expert_user, (
+        f"✅ <b>Profilingiz tasdiqlandi!</b>\n"
+        f"Endi siz StandartBridge platformasida ko'rinasiz va loyihalar qabul qila olasiz.\n"
+        f"🔗 {SITE_URL}/experts/profile/"
+    ))
 
 
 def send_withdrawal_approved(wr):
@@ -316,6 +380,12 @@ def send_withdrawal_approved(wr):
         url=f"{SITE_URL}/experts/wallet/",
     )
     _send(subject, body, user.email)
+    last4 = plain[-4:] if plain and len(plain) >= 4 else '??'
+    _tg(user, (
+        f"✅ <b>Pul yechish tasdiqlandi!</b>\n"
+        f"💵 ${_e(wr.amount)} kartangizga o'tkazildi (*{_e(last4)})\n"
+        f"🔗 {SITE_URL}/experts/wallet/"
+    ))
 
 
 def send_withdrawal_rejected(wr):
@@ -329,6 +399,12 @@ def send_withdrawal_rejected(wr):
         url=f"{SITE_URL}/experts/wallet/",
     )
     _send(subject, body, user.email)
+    _tg(user, (
+        f"❌ <b>Pul yechish rad etildi</b>\n"
+        f"💵 ${_e(wr.amount)} hamyoningizga qaytarildi.\n"
+        f"📝 Sabab: {_e(wr.admin_note or no_reason)}\n"
+        f"🔗 {SITE_URL}/experts/wallet/"
+    ))
 
 
 def send_dispute_opened(dispute):
@@ -343,6 +419,13 @@ def send_dispute_opened(dispute):
         url=f"{SITE_URL}/experts/projects/{project.pk}/",
     )
     _send(subject, body, project.expert.email)
+    _tg(project.expert, (
+        f"⚠️ <b>Loyiha #{project.pk} bo'yicha nizo ochildi</b>\n"
+        f"👤 {_e(dispute.opened_by.get_full_name())}\n"
+        f"📝 Sabab: {_e(dispute.reason[:120])}\n"
+        f"Admin ko'rib chiqadi.\n"
+        f"🔗 {SITE_URL}/experts/projects/{project.pk}/"
+    ))
 
 
 def send_analysis_ready_email(analysis):
@@ -368,6 +451,12 @@ def send_analysis_ready_email(analysis):
         url=f"{SITE_URL}/analysis/{analysis.pk}/",
     )
     _send(subject, body, user.email)
+    _tg(user, (
+        f"🤖 <b>Gap-tahlil tayyor — {_e(std)}</b>\n"
+        f"📊 Aniqlangan bo'shliqlar: {_e(gap_count)} ta"
+        + (f" · {_e(total_days)} kun" if total_days else "") + "\n"
+        f"🔗 {SITE_URL}/analysis/{analysis.pk}/"
+    ))
 
 
 def send_counter_offer_to_expert(project):
@@ -386,6 +475,12 @@ def send_counter_offer_to_expert(project):
         "StandartBridge jamoasi"
     )
     _send(subject, body, expert.email)
+    _tg(expert, (
+        f"🔄 <b>Qarshi taklif — Loyiha #{project.pk}</b>\n"
+        f"💵 Yangi taklif: ${_e(project.counter_price)}\n"
+        f"💬 {_e(project.counter_message or '—')}\n"
+        f"🔗 {url}"
+    ))
 
 
 def send_scope_request_to_entrepreneur(scope_req):
@@ -406,6 +501,12 @@ def send_scope_request_to_entrepreneur(scope_req):
         "StandartBridge jamoasi"
     )
     _send(subject, body, ent.email)
+    _tg(ent, (
+        f"➕ <b>Qo'shimcha ish so'rovi — Loyiha #{project.pk}</b>\n"
+        f"👤 {_e(scope_req.expert.get_full_name())}\n"
+        f"💵 +${_e(scope_req.extra_price)} · {_e(scope_req.reason[:100])}\n"
+        f"🔗 {url}"
+    ))
 
 
 def send_scope_request_response_to_expert(scope_req):
@@ -430,6 +531,21 @@ def send_scope_request_response_to_expert(scope_req):
         "StandartBridge jamoasi"
     )
     _send(subject, body, expert.email)
+    if scope_req.status == 'accepted':
+        _tg_icon, _tg_status, _tg_detail = (
+            "✅", "qabul qilindi",
+            "💵 Tadbirkordan qoʻshimcha toʻlov keladi."
+        )
+    else:
+        _tg_icon, _tg_status, _tg_detail = (
+            "❌", "rad etildi",
+            "📌 Dastlabki narx boʻyicha davom eting."
+        )
+    _tg(expert, (
+        f"{_tg_icon} <b>Qoʻshimcha soʻrovi {_tg_status} — Loyiha #{project.pk}</b>\n"
+        f"{_tg_detail}\n"
+        f"🔗 {url}"
+    ))
 
 
 def send_dispute_resolved(dispute, decision):
@@ -447,3 +563,8 @@ def send_dispute_resolved(dispute, decision):
             url=project_url,
         )
         _send(subject, body, recipient.email)
+        _tg(recipient, (
+            f"⚖️ <b>Nizo hal qilindi — Loyiha #{pk}</b>\n"
+            f"📝 Admin qarori: {_e(decision[:150])}\n"
+            f"🔗 {project_url}"
+        ))

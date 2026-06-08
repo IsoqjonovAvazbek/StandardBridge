@@ -193,6 +193,11 @@ else:
         FERNET_KEY = _Fernet.generate_key().decode()
         _key_file.write_text(FERNET_KEY)
 
+# Telegram bot
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+TELEGRAM_BOT_USERNAME = os.environ.get('TELEGRAM_BOT_USERNAME', '')
+TELEGRAM_WEBHOOK_SECRET = os.environ.get('TELEGRAM_WEBHOOK_SECRET', '')
+
 # Click payment
 CLICK_SERVICE_ID = os.environ.get('CLICK_SERVICE_ID', '')
 CLICK_MERCHANT_ID = os.environ.get('CLICK_MERCHANT_ID', '')

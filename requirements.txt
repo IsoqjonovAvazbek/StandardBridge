@@ -14,3 +14,4 @@ cryptography==48.0.0
 cloudinary==1.44.0
 django-cloudinary-storage==0.3.0
 markdown==3.8
+requests==2.32.3

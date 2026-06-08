@@ -28,6 +28,10 @@ class CustomUser(AbstractUser):
     is_email_verified = models.BooleanField(default=True)
     email_verify_token = models.CharField(max_length=72, blank=True, db_index=True)
 
+    # Telegram
+    telegram_chat_id = models.CharField(max_length=20, blank=True, db_index=True)
+    telegram_link_token = models.CharField(max_length=64, blank=True, db_index=True)
+
     # Referral
     referral_code = models.CharField(max_length=12, unique=True, blank=True)
     referred_by = models.ForeignKey(

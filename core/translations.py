@@ -696,6 +696,16 @@ TRANSLATIONS = {
         'select_placeholder': 'Tanlang',
         'cancel_btn': 'Bekor qilish',
 
+        # === TELEGRAM ===
+        'tg_section_title': 'Telegram bildirishnomalari',
+        'tg_linked': 'Telegram ulangan',
+        'tg_not_linked': 'Telegram ulanmagan',
+        'tg_connect_btn': "Telegram'ga ulash",
+        'tg_disconnect_btn': 'Uzish',
+        'tg_connect_desc': "Bildirishnomalarni Telegram orqali oling — bepul va tezkor (SMS o'rniga)",
+        'tg_link_instruction': "Quyidagi tugmani bosib botni oching, keyin «Start» ni bosing:",
+        'tg_open_tg': 'Telegramda ochish',
+
         # === EXPERT DETAIL ===
         'expert_profile_title': 'Mutaxassis profili',
         'send_analysis_title': 'Tahlilni yuborish',
@@ -1734,6 +1744,17 @@ TRANSLATIONS = {
         'region_field': 'Регион',
         'select_placeholder': 'Выбрать',
         'cancel_btn': 'Отмена',
+
+        # === TELEGRAM ===
+        'tg_section_title': 'Уведомления в Telegram',
+        'tg_linked': 'Telegram подключён',
+        'tg_not_linked': 'Telegram не подключён',
+        'tg_connect_btn': 'Подключить Telegram',
+        'tg_disconnect_btn': 'Отключить',
+        'tg_connect_desc': 'Получайте уведомления в Telegram — бесплатно и быстро (вместо SMS)',
+        'tg_link_instruction': 'Нажмите кнопку ниже, откройте бота и нажмите «Start»:',
+        'tg_open_tg': 'Открыть в Telegram',
+
         'expert_profile_title': 'Профиль эксперта',
         'send_analysis_title': 'Отправить анализ',
         'send_analysis_sub': 'Эксперт рассмотрит анализ и установит цену и сроки. Оплата производится после вашего подтверждения.',
@@ -2534,6 +2555,16 @@ TRANSLATIONS = {
         'region_field': 'Region',
         'select_placeholder': 'Select',
         'cancel_btn': 'Cancel',
+
+        # === TELEGRAM ===
+        'tg_section_title': 'Telegram Notifications',
+        'tg_linked': 'Telegram connected',
+        'tg_not_linked': 'Telegram not connected',
+        'tg_connect_btn': 'Connect Telegram',
+        'tg_disconnect_btn': 'Disconnect',
+        'tg_connect_desc': 'Get notifications via Telegram — free and instant (instead of SMS)',
+        'tg_link_instruction': 'Click the button below, open the bot and press «Start»:',
+        'tg_open_tg': 'Open in Telegram',
 
         # === EXPERT DETAIL ===
         'expert_profile_title': 'Expert profile',

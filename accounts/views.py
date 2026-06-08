@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.contrib import messages
 from django.db.models import Sum, Count, Q
 from django.http import JsonResponse
@@ -868,6 +868,97 @@ def resend_verification(request):
     _send(_SUBJ.get(lang, _SUBJ['uz']), _BODY.get(lang, _BODY['uz']), request.user.email)
     messages.success(request, 'Tasdiqlash xati yuborildi!' if lang == 'uz' else ('Письмо отправлено!' if lang == 'ru' else 'Verification email sent!'))
     return redirect(request.META.get('HTTP_REFERER', '/dashboard/'))
+
+
+@login_required
+@require_http_methods(['GET'])
+def telegram_connect_view(request):
+    """Telegram bog'lash uchun bir martalik token generatsiya qiladi."""
+    import secrets
+    bot_username = settings.TELEGRAM_BOT_USERNAME
+    if not bot_username:
+        return JsonResponse({'ok': False, 'error': 'Bot sozlanmagan'}, status=503)
+    token = secrets.token_urlsafe(32)
+    request.user.telegram_link_token = token
+    request.user.save(update_fields=['telegram_link_token'])
+    link = f'https://t.me/{bot_username}?start={token}'
+    return JsonResponse({'ok': True, 'link': link})
+
+
+@login_required
+@require_POST
+def telegram_disconnect_view(request):
+    """Telegram ulanishini uzadi."""
+    request.user.telegram_chat_id = ''
+    request.user.telegram_link_token = ''
+    request.user.save(update_fields=['telegram_chat_id', 'telegram_link_token'])
+    messages.success(request, 'Telegram uzildi.')
+    return redirect(request.META.get('HTTP_REFERER', '/dashboard/'))
+
+
+from django.views.decorators.csrf import csrf_exempt as _csrf_exempt
+
+
+@_csrf_exempt
+def telegram_webhook_view(request):
+    """Telegram bot webhook — /start TOKEN komandani qayta ishlaydi."""
+    if request.method != 'POST':
+        return JsonResponse({'ok': False}, status=405)
+
+    expected_secret = settings.TELEGRAM_WEBHOOK_SECRET
+    if expected_secret:
+        incoming = request.headers.get('X-Telegram-Bot-Api-Secret-Token', '')
+        if incoming != expected_secret:
+            return JsonResponse({'ok': False}, status=403)
+
+    try:
+        import json as _json
+        data = _json.loads(request.body)
+    except Exception:
+        return JsonResponse({'ok': False}, status=400)
+
+    message = data.get('message', {})
+    text = (message.get('text') or '').strip()
+    chat = message.get('chat', {})
+    chat_id = str(chat.get('id', ''))
+    from_user = message.get('from', {})
+    first_name = from_user.get('first_name', 'Foydalanuvchi')
+
+    if not text.startswith('/start'):
+        return JsonResponse({'ok': True})
+
+    parts = text.split(maxsplit=1)
+    token = parts[1].strip() if len(parts) > 1 else ''
+
+    from experts.emails import send_telegram
+    if token:
+        try:
+            user = CustomUser.objects.get(telegram_link_token=token)
+            user.telegram_chat_id = chat_id
+            user.telegram_link_token = ''
+            user.save(update_fields=['telegram_chat_id', 'telegram_link_token'])
+            import html as _html
+            send_telegram(chat_id, (
+                f"🎉 <b>Salom, {_html.escape(first_name)}!</b>\n\n"
+                f"StandartBridge bildirishnomalari endi Telegram orqali yuboriladi.\n\n"
+                f"Yangi loyiha, to'lov, tahlil tayyorligi kabi barcha muhim xabarlarni shu yerda olasiz.\n\n"
+                f"🔗 <a href='https://standardbridge.up.railway.app'>Platformaga o'tish</a>"
+            ))
+            logger.info('Telegram ulandi: user_id=%s, chat_id=%s', user.pk, chat_id)
+        except CustomUser.DoesNotExist:
+            send_telegram(chat_id, "❌ Havola topilmadi yoki muddati o'tgan.\n\nProfil sahifasidan yangi havola oling.")
+        except Exception as e:
+            logger.exception('Telegram webhook xatosi: %s', e)
+    else:
+        import html as _html
+        send_telegram(chat_id, (
+            f"Salom, {_html.escape(first_name)}! 👋\n\n"
+            "Bu StandartBridge rasmiy boti.\n"
+            "Ulanish uchun platforma profil sahifasidagi havoladan foydalaning:\n"
+            "🔗 https://standardbridge.up.railway.app"
+        ))
+
+    return JsonResponse({'ok': True})
 
 
 def verify_email(request, token):
