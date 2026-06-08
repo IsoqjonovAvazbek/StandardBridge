@@ -144,7 +144,7 @@
                             {{ project.analysis.local_standard.code }} → {{ project.analysis.target_standard.code }}
                         </h3>
                         <p class="text-gray-600 text-sm mt-1">
-                            {{ T.expert_lbl }} <span class="font-medium">{% if project.expert %}{{ project.expert.get_full_name }}{% endif %}</span>
+                            {{ T.expert_lbl }} <span class="font-medium">{% if project.expert %}<a href="{% url 'expert_detail' project.expert.pk %}" class="text-blue-600 hover:underline">{{ project.expert.get_full_name }}</a>{% endif %}</span>
                         </p>
                     </div>
                     <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-medium">
@@ -205,7 +205,7 @@
                             {{ project.analysis.local_standard.code }} → {{ project.analysis.target_standard.code }}
                         </h3>
                         <p class="text-gray-500 text-sm mt-1">
-                            {{ T.expert_lbl }} {% if project.expert %}{{ project.expert.get_full_name }}{% endif %}
+                            {{ T.expert_lbl }} {% if project.expert %}<a href="{% url 'expert_detail' project.expert.pk %}" class="text-blue-600 hover:underline font-medium">{{ project.expert.get_full_name }}</a>{% endif %}
                         </p>
                     </div>
                     <div class="flex flex-col items-end gap-1">
@@ -278,9 +278,9 @@
                         <h3 class="font-bold text-gray-900">
                             {{ analysis.local_standard.code }} → {{ analysis.target_standard.code }}
                         </h3>
-                        <p class="text-gray-500 text-sm mt-1">{{ analysis.created_at|date:"d.m.Y H:i" }}</p>
+                        <p class="text-gray-500 text-sm mt-1">{{ analysis.created_at|uz_date }}</p>
                     </div>
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-3 flex-wrap justify-end">
                         {% if analysis.ai_result.readiness is not None %}
                         {% with r=analysis.ai_result.readiness %}
                         <div class="flex items-center gap-1.5">
@@ -302,10 +302,15 @@
                             {{ T.details_btn }}
                         </a>
                         <a href="{% url 'roadmap' analysis.pk %}"
-                            class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
+                            class="border border-gray-300 text-gray-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
                             {{ T.view_roadmap }}
                         </a>
                         {% if analysis.pk not in project_analysis_ids %}
+                        <a href="{% url 'project_list' %}?standard={{ analysis.target_standard.code }}"
+                            class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            Mutaxassis toping
+                        </a>
                         <form method="POST" action="{% url 'analysis_delete' analysis.pk %}"
                             onsubmit="return confirm('{{ T.delete_btn }}?')">
                             {% csrf_token %}

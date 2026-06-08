@@ -66,6 +66,17 @@ def days_left(dt):
     return (dt - now).days
 
 
+@register.filter(name='uz_date')
+def uz_date(dt):
+    """{{ analysis.created_at|uz_date }} → '8 iyun 2026' (o'zbek tilida sana)."""
+    if not dt:
+        return ''
+    _MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
+               'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr']
+    d = dt.date() if hasattr(dt, 'date') else dt
+    return f'{d.day} {_MONTHS[d.month - 1]} {d.year}'
+
+
 @register.filter(name='render_md')
 def render_md(value):
     """AI markdown matnini xavfsiz HTML ga o'tkazadi.

@@ -29,6 +29,34 @@
         </div>
     </div>
 
+    <!-- Haftalik daromad mini-widget -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-bold text-gray-900">💰 Daromad statistikasi</h2>
+            <a href="{% url 'earnings_dashboard' %}" class="text-sm text-blue-600 hover:underline">Batafsil →</a>
+        </div>
+        <div class="grid grid-cols-3 gap-4">
+            <div class="text-center">
+                <p class="text-xs text-gray-500 mb-1">Bu hafta</p>
+                <p class="text-2xl font-bold text-blue-600">${{ week_earnings|floatformat:0 }}</p>
+                {% if last_week_earnings > 0 %}
+                <p class="text-xs mt-1 {% if week_earnings >= last_week_earnings %}text-green-600{% else %}text-red-500{% endif %}">
+                    {% if week_earnings >= last_week_earnings %}▲{% else %}▼{% endif %}
+                    o'tgan haftaga nisbatan
+                </p>
+                {% endif %}
+            </div>
+            <div class="text-center border-x border-gray-100">
+                <p class="text-xs text-gray-500 mb-1">Bu oy</p>
+                <p class="text-2xl font-bold text-green-600">${{ month_earnings|floatformat:0 }}</p>
+            </div>
+            <div class="text-center">
+                <p class="text-xs text-gray-500 mb-1">Jami</p>
+                <p class="text-2xl font-bold text-gray-900">${{ earnings|floatformat:0 }}</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Expert daraja (tier) -->
     {% with tier=request.user.expert_profile.tier_info %}
     {% if tier %}

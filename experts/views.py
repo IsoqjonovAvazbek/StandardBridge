@@ -45,9 +45,22 @@ def expert_dashboard(request):
         wallet = Wallet.objects.create(user=request.user)
 
     from django.db.models import Sum
+    from datetime import timedelta
     completed_qs = projects.filter(status='completed')
     earnings = Payment.objects.filter(
         project__in=completed_qs, status='released'
+    ).aggregate(s=Sum('expert_amount'))['s'] or 0
+
+    now = timezone.now()
+    week_start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+    last_week_start = week_start - timedelta(days=7)
+    payments_qs = Payment.objects.filter(project__expert=request.user, status='released')
+    week_earnings = payments_qs.filter(paid_at__gte=week_start).aggregate(s=Sum('expert_amount'))['s'] or 0
+    last_week_earnings = payments_qs.filter(
+        paid_at__gte=last_week_start, paid_at__lt=week_start
+    ).aggregate(s=Sum('expert_amount'))['s'] or 0
+    month_earnings = payments_qs.filter(
+        paid_at__year=now.year, paid_at__month=now.month
     ).aggregate(s=Sum('expert_amount'))['s'] or 0
 
     context = {
@@ -59,6 +72,9 @@ def expert_dashboard(request):
         'in_progress': projects.filter(status='in_progress').count(),
         'completed': completed_qs.count(),
         'earnings': earnings,
+        'week_earnings': week_earnings,
+        'last_week_earnings': last_week_earnings,
+        'month_earnings': month_earnings,
     }
     return render(request, 'experts/expert_dashboard.html', context)
 
@@ -1100,9 +1116,15 @@ def wallet(request):
 @login_required
 def notifications(request):
     from django.core.paginator import Paginator
+    filter_unread = request.GET.get('filter') == 'unread'
     notifs_qs = Notification.objects.filter(user=request.user)
-    notifs_qs.filter(is_read=False).update(is_read=True)
-    paginator = Paginator(notifs_qs, 20)
+    unread_count = notifs_qs.filter(is_read=False).count()
+    if filter_unread:
+        display_qs = notifs_qs.filter(is_read=False)
+    else:
+        notifs_qs.filter(is_read=False).update(is_read=True)
+        display_qs = notifs_qs
+    paginator = Paginator(display_qs, 20)
     page_obj = paginator.get_page(request.GET.get('page'))
 
     try:
@@ -1114,6 +1136,8 @@ def notifications(request):
         'notifications': page_obj,
         'page_obj': page_obj,
         'wallet': wallet,
+        'filter_unread': filter_unread,
+        'unread_count': unread_count,
     })
 @login_required
 def expert_profile(request):

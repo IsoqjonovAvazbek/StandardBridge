@@ -461,7 +461,7 @@ def admin_panel(request):
 
 @login_required
 def referral_view(request):
-    from django.db.models import Sum
+    from django.db.models import Sum, Count
     from django.core.paginator import Paginator
     user = request.user
     referrals_qs = CustomUser.objects.filter(referred_by=user).order_by('-created_at')
@@ -476,6 +476,13 @@ def referral_view(request):
         ).aggregate(total=Sum('amount'))['total'] or 0
     except Exception:
         pass
+    # Top-5 tavsiyachilar (ommaviy, faqat ism va son)
+    top_referrers = (
+        CustomUser.objects
+        .annotate(ref_count=Count('referrals'))
+        .filter(ref_count__gt=0)
+        .order_by('-ref_count')[:5]
+    )
     return render(request, 'accounts/referral.html', {
         'referral_code': user.referral_code,
         'referral_link': referral_link,
@@ -483,6 +490,7 @@ def referral_view(request):
         'page_obj': page_obj,
         'total_referrals': referrals_qs.count(),
         'total_bonus': total_bonus,
+        'top_referrers': top_referrers,
     })
 
 

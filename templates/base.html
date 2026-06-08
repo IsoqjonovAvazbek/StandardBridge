@@ -364,11 +364,15 @@
     </div>
 
     {% if user.is_authenticated and not user.is_email_verified %}
-    <div id="email-banner" class="lg:ml-64 bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-center justify-between gap-3 text-sm">
-        <span class="text-amber-800">📧 {% if current_lang == 'ru' %}Ваш email не подтверждён.{% elif current_lang == 'en' %}Your email is not verified.{% else %}Email manzilingiz tasdiqlanmagan.{% endif %}
-            <a href="{% url 'resend_verification' %}" class="underline font-medium ml-1">{% if current_lang == 'ru' %}Отправить повторно{% elif current_lang == 'en' %}Resend{% else %}Qayta yuborish{% endif %}</a>
-        </span>
-        <button onclick="document.getElementById('email-banner').remove()" class="text-amber-400 hover:text-amber-600 text-lg leading-none flex-shrink-0">✕</button>
+    <div id="email-banner" class="lg:ml-64 bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2.5 flex items-center justify-between gap-3 text-sm shadow-sm">
+        <div class="flex items-center gap-2 text-white">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            <span>{% if current_lang == 'ru' %}Ваш email не подтверждён — часть функций ограничена.{% elif current_lang == 'en' %}Email not verified — some features are limited.{% else %}Email tasdiqlanmagan — ba'zi imkoniyatlar cheklangan.{% endif %}</span>
+            <a href="{% url 'resend_verification' %}" class="underline font-semibold ml-1 hover:no-underline bg-white/20 px-2 py-0.5 rounded">{% if current_lang == 'ru' %}Отправить{% elif current_lang == 'en' %}Verify now{% else %}Tasdiqlash{% endif %}</a>
+        </div>
+        <button onclick="document.getElementById('email-banner').remove()" class="text-white/70 hover:text-white text-lg leading-none flex-shrink-0">✕</button>
     </div>
     {% endif %}
 

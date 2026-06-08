@@ -501,11 +501,11 @@
                 {% endif %}
 
                 <!-- Jarayon xabarlari -->
-                <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                    <div class="p-5 border-b border-gray-100">
+                <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden flex flex-col" style="max-height:520px">
+                    <div class="p-5 border-b border-gray-100 flex-shrink-0">
                         <h2 class="font-bold text-gray-900">{{ T.process_section }}</h2>
                     </div>
-                    <div class="p-5 space-y-4 max-h-80 overflow-y-auto" id="chat-messages"
+                    <div class="flex-1 p-5 space-y-4 overflow-y-auto" id="chat-messages"
                          data-last-id="{% if updates %}{{ updates.last.id }}{% else %}0{% endif %}"
                          data-me-id="{{ request.user.id }}">
                         {% for update in updates %}
@@ -542,7 +542,7 @@
                     </div>
 
                     {% if project.status == 'in_progress' or project.status == 'review' %}
-                    <div class="p-4 border-t border-gray-100 space-y-3">
+                    <div class="p-4 border-t border-gray-100 space-y-3 flex-shrink-0 bg-white">
                         <form method="POST" action="{% url 'project_update' project.pk %}" class="space-y-2" id="chat-form" enctype="multipart/form-data">
                             {% csrf_token %}
                             <input type="hidden" name="action" value="message">
