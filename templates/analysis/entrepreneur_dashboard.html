@@ -230,7 +230,7 @@
                 {% if last_update %}
                 <div class="bg-gray-50 rounded-xl p-3 mb-4">
                     <p class="text-xs text-gray-500 mb-1">{{ T.last_updates }}:</p>
-                    <p class="text-gray-700 text-sm">{{ last_update.message|truncatechars:100 }}</p>
+                    <p class="text-gray-700 text-sm" title="{{ last_update.message }}">{{ last_update.message|truncatechars:100 }}</p>
                 </div>
                 {% endif %}
                 {% endwith %}

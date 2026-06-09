@@ -214,10 +214,10 @@
                                 </span>
                             </span>
                             <span class="text-xs
-                                {% if project.sla_status == 'breached' %}text-red-500
+                                {% if project.sla_status == 'breached' %}text-red-600 font-semibold
                                 {% elif project.sla_status == 'warning' %}text-yellow-500
                                 {% else %}text-blue-400{% endif %}">
-                                — {{ T.sla_respond_hint }}
+                                — {% if project.sla_status == 'breached' %}{{ T.sla_breached_hint }}{% else %}{{ T.sla_respond_hint }}{% endif %}
                             </span>
                         </div>
                         {% endif %}
@@ -338,6 +338,10 @@
 
     updateCountdowns();
     setInterval(updateCountdowns, 30000);
+    // Tab qaytganda darhol yangilash
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) updateCountdowns();
+    });
 })();
 </script>
 {% endblock %}

@@ -195,6 +195,7 @@ TRANSLATIONS = {
         'sla_on_time': 'Vaqtida',
         'sla_deadline': 'SLA muddati',
         'sla_respond_hint': 'Ushbu vaqt ichida narx belgilashingiz kerak',
+        'sla_breached_hint': 'Narx belgilang yoki loyihani rad eting',
 
         # === DISCLAIMER ===
         'disclaimer_title': 'Muhim huquqiy eslatma',
@@ -1267,6 +1268,7 @@ TRANSLATIONS = {
         'sla_on_time': 'В срок',
         'sla_deadline': 'Дедлайн SLA',
         'sla_respond_hint': 'Вы должны установить цену в течение этого времени',
+        'sla_breached_hint': 'Установите цену или откажитесь от проекта',
 
         # === DISCLAIMER ===
         'disclaimer_title': 'Важное правовое уведомление',
@@ -2660,6 +2662,7 @@ TRANSLATIONS = {
         'sla_on_time': 'On time',
         'sla_deadline': 'SLA deadline',
         'sla_respond_hint': 'You must set a price within this time',
+        'sla_breached_hint': 'Set a price or decline this project',
 
         # === DISCLAIMER ===
         'disclaimer_title': 'Important legal notice',

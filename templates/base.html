@@ -541,6 +541,18 @@ document.addEventListener('click', function (e) {
     inp.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             document.getElementById('gsearch-dropdown').classList.add('hidden');
+            return;
+        }
+        // Arrow key navigatsiya
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            var items = resultBox.querySelectorAll('a');
+            if (!items.length) return;
+            var focused = resultBox.querySelector('a:focus');
+            var idx = Array.from(items).indexOf(focused);
+            if (e.key === 'ArrowDown') idx = (idx + 1) % items.length;
+            else idx = (idx - 1 + items.length) % items.length;
+            items[idx].focus();
         }
     });
 })();

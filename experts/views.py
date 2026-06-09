@@ -45,11 +45,18 @@ def expert_dashboard(request):
     except Wallet.DoesNotExist:
         wallet = Wallet.objects.create(user=request.user)
 
-    from django.db.models import Sum
+    from django.db.models import Sum, Count, Q
     from datetime import timedelta
-    completed_qs = projects.filter(status='completed')
+
+    # Bir aggregate bilan 3 ta count (avval 3 ta alohida query edi)
+    counts = projects.aggregate(
+        total=Count('pk'),
+        in_progress=Count('pk', filter=Q(status='in_progress')),
+        completed=Count('pk', filter=Q(status='completed')),
+    )
+
     earnings = Payment.objects.filter(
-        project__in=completed_qs, status='released'
+        project__expert=request.user, status='released'
     ).aggregate(s=Sum('expert_amount'))['s'] or 0
 
     now = timezone.now()
@@ -69,9 +76,9 @@ def expert_dashboard(request):
         'new_projects': new_projects,
         'notifications': notifications,
         'wallet': wallet,
-        'total': projects.count(),
-        'in_progress': projects.filter(status='in_progress').count(),
-        'completed': completed_qs.count(),
+        'total': counts['total'],
+        'in_progress': counts['in_progress'],
+        'completed': counts['completed'],
         'earnings': earnings,
         'week_earnings': week_earnings,
         'last_week_earnings': last_week_earnings,
