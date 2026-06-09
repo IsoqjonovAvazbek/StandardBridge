@@ -55,6 +55,17 @@ def time_ago(dt):
     return f'{yr} yil oldin'
 
 
+@register.filter(name='hours_since')
+def hours_since(dt):
+    """{{ project.created_at|hours_since }} → 51.3  (soatlar soni, float)."""
+    if not dt:
+        return 0
+    now = timezone.now()
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt)
+    return (now - dt).total_seconds() / 3600
+
+
 @register.filter(name='days_left')
 def days_left(dt):
     """{{ project.work_deadline|days_left }} → 5  (musbat = qolgan kunlar, manfiy = o'tgan)."""

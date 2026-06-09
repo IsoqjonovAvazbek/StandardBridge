@@ -34,10 +34,11 @@
                     <div class="space-y-3">
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">{{ T.withdraw_amount_lbl }}</label>
-                            <input type="number" name="amount" step="0.01" min="10"
+                            <input type="number" name="amount" id="withdrawAmount" step="0.01" min="10" max="{{ wallet.balance }}"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                                placeholder="50.00">
-                            <p class="text-xs text-gray-400 mt-1">{{ T.withdraw_min_hint }} · {{ T.current_balance }}: ${{ wallet.balance }}</p>
+                                placeholder="50.00"
+                                oninput="checkWithdraw(this)">
+                            <p class="text-xs text-gray-400 mt-1" id="withdrawHint">{{ T.withdraw_min_hint }} · {{ T.current_balance }}: ${{ wallet.balance }}</p>
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">{{ T.withdraw_card_lbl }}</label>
@@ -58,7 +59,7 @@
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
                         <button type="submit" id="withdrawBtn"
-                            class="w-full gradient-bg text-white py-2 rounded-lg text-sm font-medium hover:opacity-90 transition">
+                            class="w-full gradient-bg text-white py-2 rounded-lg text-sm font-medium hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed">
                             {{ T.withdraw_btn }}
                         </button>
                     </div>
@@ -228,6 +229,35 @@
     </div>
 </div>
 <script>
+var _walletBalance = parseFloat('{{ wallet.balance }}') || 0;
+function checkWithdraw(inp) {
+    var hint = document.getElementById('withdrawHint');
+    var btn = document.getElementById('withdrawBtn');
+    var val = parseFloat(inp.value);
+    if (isNaN(val) || val <= 0) {
+        inp.classList.remove('border-red-500', 'border-green-500');
+        hint.textContent = '{{ T.withdraw_min_hint }} · {{ T.current_balance }}: ${{ wallet.balance }}';
+        hint.style.color = '#9ca3af';
+        btn.disabled = false;
+        return;
+    }
+    if (val > _walletBalance) {
+        inp.classList.add('border-red-500'); inp.classList.remove('border-green-500');
+        hint.textContent = '⚠ Maksimal: $' + _walletBalance.toFixed(2);
+        hint.style.color = '#ef4444';
+        btn.disabled = true;
+    } else if (val < 10) {
+        inp.classList.add('border-red-500'); inp.classList.remove('border-green-500');
+        hint.textContent = '⚠ Minimal: $10';
+        hint.style.color = '#ef4444';
+        btn.disabled = true;
+    } else {
+        inp.classList.add('border-green-500'); inp.classList.remove('border-red-500');
+        hint.textContent = '✓ Yechilishi mumkin';
+        hint.style.color = '#22c55e';
+        btn.disabled = false;
+    }
+}
 var wForm = document.querySelector('form [name=withdraw_card]');
 if (wForm) {
     wForm.closest('form').addEventListener('submit', function(e) {

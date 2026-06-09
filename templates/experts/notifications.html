@@ -57,7 +57,22 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
             </svg>
-            <p class="text-gray-400 text-lg">{{ T.no_notifications }}</p>
+            <p class="text-gray-400 text-lg mb-2">{{ T.no_notifications }}</p>
+            <p class="text-gray-400 text-sm mb-6">Loyiha boshlagach yoki expertdan javob kelganda xabar olasiz</p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                {% if request.user.role == 'entrepreneur' %}
+                <a href="{% url 'select_industry' %}" class="gradient-bg text-white px-5 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
+                    🔍 Gap tahlil boshlash
+                </a>
+                {% endif %}
+                {% if request.user.telegram_chat_id %}
+                <span class="text-xs text-green-600 bg-green-50 px-3 py-1.5 rounded-lg">✓ Telegram ulangan</span>
+                {% else %}
+                <a href="{% url 'telegram_connect' %}" class="text-sm text-blue-600 border border-blue-200 px-4 py-2 rounded-xl hover:bg-blue-50 transition">
+                    📲 Telegram bildirishnomalarini yoqish
+                </a>
+                {% endif %}
+            </div>
         </div>
         {% endfor %}
     </div>

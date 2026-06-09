@@ -174,21 +174,25 @@
 </div>
 
 <script>
+function syncCheckbox(checkbox) {
+    const card = checkbox.nextElementSibling;
+    if (!card) return;
+    const checkBox = card.querySelector('.check-box');
+    const checkIcon = card.querySelector('.check-icon');
+    if (!checkBox || !checkIcon) return;
+    if (checkbox.checked) {
+        checkBox.classList.add('bg-blue-600', 'border-blue-600');
+        checkBox.classList.remove('border-gray-300');
+        checkIcon.classList.remove('hidden');
+    } else {
+        checkBox.classList.remove('bg-blue-600', 'border-blue-600');
+        checkBox.classList.add('border-gray-300');
+        checkIcon.classList.add('hidden');
+    }
+}
 document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-        const card = this.nextElementSibling;
-        const checkBox = card.querySelector('.check-box');
-        const checkIcon = card.querySelector('.check-icon');
-        if (this.checked) {
-            checkBox.classList.add('bg-blue-600', 'border-blue-600');
-            checkBox.classList.remove('border-gray-300');
-            checkIcon.classList.remove('hidden');
-        } else {
-            checkBox.classList.remove('bg-blue-600', 'border-blue-600');
-            checkBox.classList.add('border-gray-300');
-            checkIcon.classList.add('hidden');
-        }
-    });
+    syncCheckbox(checkbox);
+    checkbox.addEventListener('change', function() { syncCheckbox(this); });
 });
 
 document.getElementById('standardsForm').addEventListener('submit', function() {

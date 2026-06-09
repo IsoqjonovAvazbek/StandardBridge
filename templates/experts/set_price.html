@@ -127,11 +127,17 @@
 
 <script>
 document.querySelector('input[name="price"]').addEventListener('input', function() {
-    var price = parseFloat(this.value) || 0;
+    var price = parseFloat(this.value);
+    if (!this.value || isNaN(price) || price <= 0) {
+        document.getElementById('total-price').textContent = '—';
+        document.getElementById('platform-fee').textContent = '—';
+        document.getElementById('your-amount').textContent = '—';
+        return;
+    }
     var platform = price * 0.20;
     var yours = price * 0.80;
     document.getElementById('total-price').textContent = '$' + price.toFixed(0);
-    document.getElementById('platform-fee').textContent = '$' + platform.toFixed(0);
+    document.getElementById('platform-fee').textContent = '-$' + platform.toFixed(0);
     document.getElementById('your-amount').textContent = '$' + yours.toFixed(0);
 });
 </script>

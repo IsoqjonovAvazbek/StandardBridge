@@ -5,8 +5,12 @@
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-8">
-        <a href="{% url 'project_list' %}" class="text-blue-600 hover:underline text-sm">← {{ T.experts_title }}</a>
-        <h1 class="text-3xl font-bold text-gray-900 mt-2">{{ T.expert_profile_title }}</h1>
+        <nav class="flex items-center gap-1.5 text-sm text-gray-400 mb-3">
+            <a href="{% url 'project_list' %}" class="hover:text-blue-600 transition">{{ T.experts_title }}</a>
+            <span>›</span>
+            <span class="text-gray-700 font-medium">{{ expert_user.get_full_name }}</span>
+        </nav>
+        <h1 class="text-3xl font-bold text-gray-900">{{ T.expert_profile_title }}</h1>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

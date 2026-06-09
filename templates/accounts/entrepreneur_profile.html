@@ -147,8 +147,9 @@
         </div>
 
         <div class="flex gap-3">
-            <button type="submit"
-                class="gradient-bg text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition">
+            <button type="submit" id="profileSaveBtn"
+                onclick="this.disabled=true; this.textContent='{{ T.saving }}...'; this.closest('form').submit();"
+                class="gradient-bg text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition disabled:opacity-60">
                 {{ T.save }}
             </button>
             <a href="{% url 'entrepreneur_dashboard' %}"

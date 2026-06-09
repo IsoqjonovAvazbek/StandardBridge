@@ -159,8 +159,8 @@
         {% if click_service_id %}
         <!-- Click -->
         <a href="https://my.click.uz/services/pay?service_id={{ click_service_id }}&merchant_id={{ click_merchant_id }}&amount={{ project.expert_price }}&transaction_param={{ payment.pk }}&return_url={{ click_return_url }}"
-            class="w-full flex items-center justify-center gap-3 bg-[#00ADEF] hover:bg-[#009ed8] text-white py-4 rounded-xl font-bold text-lg transition">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="w-full flex items-center justify-center gap-3 bg-[#00ADEF] hover:bg-[#009ed8] active:bg-[#0087c0] text-white py-4 min-h-[52px] rounded-xl font-bold text-lg transition">
+            <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
             </svg>
             Click orqali — ${{ project.expert_price }}

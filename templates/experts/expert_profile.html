@@ -114,7 +114,7 @@
             <!-- Ishlaydigan standartlar -->
             {% if profile.standard_tags %}
             <div class="bg-white rounded-2xl p-6 border border-gray-100">
-                <h3 class="font-bold text-gray-900 mb-3">Ishlaydigan standartlar</h3>
+                <h3 class="font-bold text-gray-900 mb-3">{{ T.working_standards_title }}</h3>
                 <div class="flex flex-wrap gap-2">
                     {% for tag in profile.standard_tags %}
                     <span class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-sm font-semibold">{{ tag }}</span>

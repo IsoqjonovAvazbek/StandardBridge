@@ -45,6 +45,7 @@ TRANSLATIONS = {
         'company_name': 'Kompaniya nomi',
         'phone': 'Telefon',
         'save': 'Saqlash',
+        'saving': 'Saqlanmoqda',
         'delete_btn': "O'chirish",
         'cancel': 'Bekor qilish',
         'referral_code_label': 'Referral kod',
@@ -196,6 +197,8 @@ TRANSLATIONS = {
         'sla_deadline': 'SLA muddati',
         'sla_respond_hint': 'Ushbu vaqt ichida narx belgilashingiz kerak',
         'sla_breached_hint': 'Narx belgilang yoki loyihani rad eting',
+        'working_standards_title': 'Ishlaydigan standartlar',
+        'blog_view_all': 'Barchasini ko\'rish',
 
         # === DISCLAIMER ===
         'disclaimer_title': 'Muhim huquqiy eslatma',
@@ -1120,6 +1123,7 @@ TRANSLATIONS = {
         'company_name': 'Название компании',
         'phone': 'Телефон',
         'save': 'Сохранить',
+        'saving': 'Сохранение',
         'delete_btn': 'Удалить',
         'cancel': 'Отмена',
         'referral_code_label': 'Реферальный код',
@@ -1269,6 +1273,8 @@ TRANSLATIONS = {
         'sla_deadline': 'Дедлайн SLA',
         'sla_respond_hint': 'Вы должны установить цену в течение этого времени',
         'sla_breached_hint': 'Установите цену или откажитесь от проекта',
+        'working_standards_title': 'Рабочие стандарты',
+        'blog_view_all': 'Посмотреть все',
 
         # === DISCLAIMER ===
         'disclaimer_title': 'Важное правовое уведомление',
@@ -2159,6 +2165,7 @@ TRANSLATIONS = {
         'company_name': 'Company name',
         'phone': 'Phone',
         'save': 'Save',
+        'saving': 'Saving',
         'delete_btn': 'Delete',
         'cancel': 'Cancel',
         'referral_code_label': 'Referral code',
@@ -2663,6 +2670,8 @@ TRANSLATIONS = {
         'sla_deadline': 'SLA deadline',
         'sla_respond_hint': 'You must set a price within this time',
         'sla_breached_hint': 'Set a price or decline this project',
+        'working_standards_title': 'Working standards',
+        'blog_view_all': 'View all posts',
 
         # === DISCLAIMER ===
         'disclaimer_title': 'Important legal notice',
