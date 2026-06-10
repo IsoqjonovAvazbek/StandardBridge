@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load labels %}
 {% block title %}{{ T.qms_risk_title }} — StandartBridge{% endblock %}
 
 {% block content %}
@@ -158,7 +159,7 @@
                                 {% elif risk.status == 'mitigated' %}bg-blue-100 text-blue-700
                                 {% elif risk.status == 'accepted' %}bg-gray-100 text-gray-600
                                 {% else %}bg-green-100 text-green-700{% endif %}">
-                                {{ risk.get_status_display }}
+                                {% label risk.status %}
                             </span>
                         </td>
                         <td class="px-3 py-3 text-center">

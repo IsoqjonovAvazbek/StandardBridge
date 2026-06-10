@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% load labels %}<!DOCTYPE html>
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
@@ -47,7 +47,7 @@
   <div class="meta">
     <span>Shartnoma raqami: <strong>#{{ project.pk }}</strong></span>
     <span>Tuzilgan sana: <strong>{{ project.created_at|date:"d.m.Y" }}</strong></span>
-    <span>Status: <strong>{{ project.get_status_display }}</strong></span>
+    <span>Status: <strong>{% label project.status %}</strong></span>
   </div>
 
   <!-- Tomonlar -->

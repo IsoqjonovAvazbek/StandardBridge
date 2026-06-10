@@ -209,7 +209,7 @@
                             <span class="px-2 py-1 rounded-full text-xs font-medium
                                 {% if usr.role == 'expert' %}bg-blue-100 text-blue-700
                                 {% else %}bg-green-100 text-green-700{% endif %}">
-                                {{ usr.get_role_display }}
+                                {% label usr.role %}
                             </span>
                         </td>
                         <td class="px-5 py-3 text-gray-500">{{ usr.created_at|date:"d.m.Y H:i" }}</td>

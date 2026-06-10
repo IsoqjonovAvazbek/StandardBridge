@@ -229,14 +229,14 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="accept">
                                     <button type="submit" class="w-full bg-green-500 text-white py-2 rounded-xl font-semibold text-sm hover:bg-green-600 transition">
-                                        ✓ Qabul qilish
+                                        ✓ {{ T.accept_btn }}
                                     </button>
                                 </form>
                                 <form method="POST" action="{% url 'project_respond_counter' project.pk %}" class="flex-1">
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="reject">
                                     <button type="submit" class="w-full border border-red-300 text-red-600 py-2 rounded-xl font-semibold text-sm hover:bg-red-50 transition">
-                                        ✗ Rad etish
+                                        ✗ {{ T.reject_btn }}
                                     </button>
                                 </form>
                             </div>
@@ -278,14 +278,14 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="accept">
                                 <button type="submit" class="w-full bg-green-500 text-white py-2 rounded-xl font-semibold text-sm hover:bg-green-600 transition">
-                                    ✓ Qabul qilish
+                                    ✓ {{ T.accept_btn }}
                                 </button>
                             </form>
                             <form method="POST" action="{% url 'scope_request_respond' project.pk pending_scope_request.pk %}" class="flex-1">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="reject">
                                 <button type="submit" class="w-full border border-red-300 text-red-600 py-2 rounded-xl font-semibold text-sm hover:bg-red-50 transition">
-                                    ✗ Rad etish
+                                    ✗ {{ T.reject_btn }}
                                 </button>
                             </form>
                         </div>
@@ -644,9 +644,7 @@
                                 {% if sr.status == 'pending' %}bg-yellow-100 text-yellow-700
                                 {% elif sr.status == 'accepted' %}bg-green-100 text-green-700
                                 {% else %}bg-red-100 text-red-700{% endif %}">
-                                {% if sr.status == 'pending' %}Kutilmoqda
-                                {% elif sr.status == 'accepted' %}Qabul
-                                {% else %}Rad{% endif %}
+                                {% label sr.status %}
                             </span>
                         </div>
                         {% endfor %}

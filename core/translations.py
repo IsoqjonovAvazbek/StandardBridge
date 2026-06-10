@@ -598,6 +598,7 @@ TRANSLATIONS = {
         'days_word': 'Kun',
         'track_project': 'Loyihani kuzatish →',
         'accept_btn': 'Qabul qilish',
+        'reject_btn': 'Rad etish',
         'no_negotiating': "Kelishilayotgan loyiha yo'q",
         'no_active': "Jarayondagi loyiha yo'q",
         'no_completed': "Tugallangan loyiha yo'q",
@@ -1714,6 +1715,7 @@ TRANSLATIONS = {
         'days_word': 'Дней',
         'track_project': 'Следить за проектом →',
         'accept_btn': 'Принять',
+        'reject_btn': 'Отклонить',
         'no_negotiating': 'Нет проектов на согласовании',
         'no_active': 'Нет активных проектов',
         'no_completed': 'Нет завершённых проектов',
@@ -2563,6 +2565,7 @@ TRANSLATIONS = {
         'days_word': 'Days',
         'track_project': 'Track project →',
         'accept_btn': 'Accept',
+        'reject_btn': 'Reject',
         'no_negotiating': 'No projects under negotiation',
         'no_active': 'No active projects',
         'no_completed': 'No completed projects',
@@ -3355,8 +3358,9 @@ CHOICE_LABELS = {
         'critical': 'Kritik', 'high': 'Yuqori', 'medium': "O'rta", 'low': 'Past',
         # NC severity (qms.NonConformity)
         'minor': 'Kichik', 'major': 'Katta',
-        # NC statusi
-        'open': 'Ochiq', 'closed': 'Yopilgan',
+        # NC/risk/dispute statusi
+        'open': 'Ochiq', 'closed': 'Yopilgan', 'in_review': "Ko'rib chiqilmoqda",
+        'resolved': 'Hal qilindi', 'mitigated': 'Kamaytarilgan',
         # Audit turi (qms.AuditSchedule)
         'internal': 'Ichki audit', 'external': 'Tashqi audit',
         'certification': 'Sertifikatsiya auditi', 'surveillance': 'Nazorat auditi',
@@ -3365,6 +3369,17 @@ CHOICE_LABELS = {
         # Hujjat turi (qms.QMSDocument)
         'policy': 'Siyosat', 'procedure': 'Protsedura', 'instruction': "Ko'rsatma",
         'record': 'Yozuv', 'certificate': 'Sertifikat',
+        # Hamyon tranzaksiya turi (experts.WalletTransaction)
+        'income': 'Kirim', 'withdrawal': 'Chiqim', 'refund': 'Qaytarish',
+        # Yechib olish / scope so'rov statusi
+        'approved': 'Tasdiqlandi', 'rejected': 'Rad etildi',
+        # Checklist javobi (qms.ChecklistResponse)
+        'compliant': 'Mos', 'partial': 'Qisman',
+        'non_compliant': 'Mos emas', 'not_checked': 'Tekshirilmagan',
+        # Foydalanuvchi roli
+        'entrepreneur': 'Tadbirkor', 'expert': 'Mutaxassis', 'admin': 'Admin',
+        # SLA statusi
+        'on_time': 'Vaqtida', 'warning': 'Ogohlantirish', 'breached': "Muddat o'tdi",
     },
     'ru': {
         'pending': 'Ожидается', 'negotiating': 'Согласование', 'accepted': 'Принято',
@@ -3373,12 +3388,19 @@ CHOICE_LABELS = {
         'held': 'В эскроу', 'released': 'Переведено', 'refunded': 'Возвращено',
         'critical': 'Критический', 'high': 'Высокий', 'medium': 'Средний', 'low': 'Низкий',
         'minor': 'Малое', 'major': 'Большое',
-        'open': 'Открыто', 'closed': 'Закрыто',
+        'open': 'Открыто', 'closed': 'Закрыто', 'in_review': 'На рассмотрении',
+        'resolved': 'Решено', 'mitigated': 'Снижено',
         'internal': 'Внутренний аудит', 'external': 'Внешний аудит',
         'certification': 'Сертификационный аудит', 'surveillance': 'Надзорный аудит',
         'planned': 'Запланировано',
         'policy': 'Политика', 'procedure': 'Процедура', 'instruction': 'Инструкция',
         'record': 'Запись', 'certificate': 'Сертификат',
+        'income': 'Пополнение', 'withdrawal': 'Вывод', 'refund': 'Возврат',
+        'approved': 'Одобрено', 'rejected': 'Отклонено',
+        'compliant': 'Соответствует', 'partial': 'Частично',
+        'non_compliant': 'Не соответствует', 'not_checked': 'Не проверено',
+        'entrepreneur': 'Предприниматель', 'expert': 'Эксперт', 'admin': 'Администратор',
+        'on_time': 'В срок', 'warning': 'Предупреждение', 'breached': 'Просрочено',
     },
     'en': {
         'pending': 'Pending', 'negotiating': 'Negotiating', 'accepted': 'Accepted',
@@ -3387,12 +3409,19 @@ CHOICE_LABELS = {
         'held': 'In escrow', 'released': 'Released', 'refunded': 'Refunded',
         'critical': 'Critical', 'high': 'High', 'medium': 'Medium', 'low': 'Low',
         'minor': 'Minor', 'major': 'Major',
-        'open': 'Open', 'closed': 'Closed',
+        'open': 'Open', 'closed': 'Closed', 'in_review': 'In review',
+        'resolved': 'Resolved', 'mitigated': 'Mitigated',
         'internal': 'Internal audit', 'external': 'External audit',
         'certification': 'Certification audit', 'surveillance': 'Surveillance audit',
         'planned': 'Planned',
         'policy': 'Policy', 'procedure': 'Procedure', 'instruction': 'Instruction',
         'record': 'Record', 'certificate': 'Certificate',
+        'income': 'Income', 'withdrawal': 'Withdrawal', 'refund': 'Refund',
+        'approved': 'Approved', 'rejected': 'Rejected',
+        'compliant': 'Compliant', 'partial': 'Partial',
+        'non_compliant': 'Non-compliant', 'not_checked': 'Not checked',
+        'entrepreneur': 'Entrepreneur', 'expert': 'Expert', 'admin': 'Admin',
+        'on_time': 'On time', 'warning': 'Warning', 'breached': 'Breached',
     },
 }
 

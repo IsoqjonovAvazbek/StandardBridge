@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load labels %}
 {% block title %}{{ T.wallet_title }} — StandartBridge{% endblock %}
 
 {% block content %}
@@ -200,7 +201,7 @@
                                 {% else %}text-blue-600{% endif %}">
                                 {% if tx.transaction_type == 'income' %}+{% elif tx.transaction_type == 'withdrawal' %}-{% endif %}${{ tx.amount }}
                             </p>
-                            <p class="text-gray-400 text-xs">{{ tx.get_transaction_type_display }}</p>
+                            <p class="text-gray-400 text-xs">{% label tx.transaction_type %}</p>
                         </div>
                     </div>
                     {% empty %}
