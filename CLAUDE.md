@@ -46,9 +46,9 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 ## Ko'p til tizimi
 - Session-based: `request.session['lang']` = 'uz'|'ru'|'en'
 - `core/context_processors.py`: `language_context` → `T` dict, `current_lang`, `langs`
-- `core/translations.py`: TRANSLATIONS dict 200+ kalit (UZ/RU/EN to'liq)
+- `core/translations.py`: TRANSLATIONS dict 280+ kalit (UZ/RU/EN to'liq)
 - Templatelarda: `{{ T.dashboard }}`, `{{ T.login }}` etc.
-- **TO'LIQ BAJARILGAN** — barcha sahifalar (landing, login, register, dashboardlar, analysis, roadmap, experts, blog, referral, wallet, notifications, profile) T.* ishlatadi
+- **TO'LIQ BAJARILGAN** — barcha sahifalar T.* ishlatadi; DB-stored content (Industry/Standard/Question) ham ko'p tillidir (name_ru/name_en/text_ru/text_en maydonlari + get_name/get_text metodlari, views display_* attribut qo'shadi)
 
 ## Bajarilgan features
 ### Priority 1 (ZARUR)
@@ -231,6 +231,22 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - [x] Audit PDF Hisobot: audit_print.html (professional: score boxes, asosiy topilmalar, to'liq checklist jadval, imzo joylari), audit_detail.html ga "PDF Hisobot" tugma
 - [x] Dashboard yangilandi: yangi 3-quick action (taklifnomalar/vaqt/daromad), bugungi CRM follow-up alert bloki, month_hours/month_earnings context vars
 - [x] migration 0002 (Proposal, TimeLog)
+
+### Tahlil bo'limi to'liq tarjimasi (2026-06-10, commit 3e7da03)
+- [x] Industry modeli: name_ru/name_en/description_ru/description_en maydonlari qo'shildi + get_name(lang)/get_description(lang) metodlari
+- [x] Standard modeli: name_ru/name_en/description_ru/description_en maydonlari qo'shildi + get_name(lang)/get_description(lang) metodlari
+- [x] Question modeli: text_ru/text_en/help_text_ru/help_text_en maydonlari qo'shildi + get_text(lang)/get_help(lang) metodlari
+- [x] migration 0009_multilingual_fields
+- [x] seed_data.py: barcha 11 soha va 8 standart uchun RU/EN tarjimaslar qo'shildi; mavjud yozuvlar ham yangilaydi (idempotent)
+- [x] seed_questions.py: barcha 300+ savol uchun RU/EN tarjimaslar qo'shildi (ISO 9001/22000/14001/45001/27001/50001/13485/17025)
+- [x] views.py: select_industry/select_standards/answer_questions — display_name/display_description/display_text/display_help attributlari session lang bo'yicha
+- [x] select_industry.html: industry.name→display_name, industry.description→display_description
+- [x] select_standards.html: std.name→display_name, std.description→display_description, industry.name→display_name
+- [x] answer_questions.html: barcha hardcoded o'zbekcha satrlar T.* ga o'tkazildi (breadcrumb, progress steps, answer buttons, counter, hint)
+- [x] translations.py: progress_questions/answer_hint/answer_yes/answer_partial/answer_no/answered_count_lbl (UZ/RU/EN)
+- [x] Expert Tools templatelarida barcha tarjima kamchiliklari tuzatildi (expert_tools, dashboardlar, print templatelar)
+- [x] Landing page scroll effects: custom cursor (lerp), parallax, split-text entrance animation
+- [x] 81/81 test OK
 
 ## PENDING (bajarilmagan)
 - [x] Auditor mobile checklist tool — /audit/<pk>/mobile/ (kartadan karta, AJAX auto-save, real-time foiz)
