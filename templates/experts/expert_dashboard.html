@@ -29,32 +29,19 @@
         </div>
     </div>
 
-    <!-- Haftalik daromad mini-widget -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-8">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="font-bold text-gray-900">💰 Daromad statistikasi</h2>
-            <a href="{% url 'earnings_dashboard' %}" class="text-sm text-blue-600 hover:underline">Batafsil →</a>
-        </div>
-        <div class="grid grid-cols-3 gap-4">
-            <div class="text-center">
-                <p class="text-xs text-gray-500 mb-1">Bu hafta</p>
-                <p class="text-2xl font-bold text-blue-600">${{ week_earnings|floatformat:0 }}</p>
-                {% if last_week_earnings > 0 %}
-                <p class="text-xs mt-1 {% if week_earnings >= last_week_earnings %}text-green-600{% else %}text-red-500{% endif %}">
-                    {% if week_earnings >= last_week_earnings %}▲{% else %}▼{% endif %}
-                    o'tgan haftaga nisbatan
-                </p>
-                {% endif %}
+    <!-- Daromad qisqacha + havola -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-4 mb-8 flex items-center justify-between gap-4 flex-wrap">
+        <div class="flex items-center gap-6">
+            <div>
+                <p class="text-xs text-gray-500">{{ T.this_week }}</p>
+                <p class="text-xl font-bold text-blue-600">${{ week_earnings|floatformat:0 }}</p>
             </div>
-            <div class="text-center border-x border-gray-100">
-                <p class="text-xs text-gray-500 mb-1">Bu oy</p>
-                <p class="text-2xl font-bold text-green-600">${{ month_earnings|floatformat:0 }}</p>
-            </div>
-            <div class="text-center">
-                <p class="text-xs text-gray-500 mb-1">Jami</p>
-                <p class="text-2xl font-bold text-gray-900">${{ earnings|floatformat:0 }}</p>
+            <div class="border-l border-gray-100 pl-6">
+                <p class="text-xs text-gray-500">{{ T.this_month }}</p>
+                <p class="text-xl font-bold text-green-600">${{ month_earnings|floatformat:0 }}</p>
             </div>
         </div>
+        <a href="{% url 'earnings_dashboard' %}" class="text-sm text-blue-600 hover:underline flex-shrink-0">{{ T.earnings_stats }} →</a>
     </div>
 
     <!-- Expert daraja (tier) -->
@@ -73,15 +60,15 @@
                 {% else %}🆕{% endif %}
             </div>
             <div>
-                <p class="font-bold text-gray-900">{{ tier.label }} daraja</p>
-                <p class="text-sm text-gray-500">Komissiya: {{ tier.commission }}% · Bajarilgan: {{ request.user.expert_profile.total_projects }} loyiha</p>
+                <p class="font-bold text-gray-900">{{ tier.label }}</p>
+                <p class="text-sm text-gray-500">{{ T.commission_lbl }}: {{ tier.commission }}% · {{ T.completed }}: {{ request.user.expert_profile.total_projects }} {{ T.projects }}</p>
             </div>
         </div>
         {% if tier.to_next %}
         <div class="flex-1 min-w-0">
             <div class="flex justify-between text-xs text-gray-500 mb-1">
-                <span>Keyingi darajaga</span>
-                <span>{{ tier.to_next }} loyiha qoldi</span>
+                <span>{{ T.next_tier }}</span>
+                <span>{{ tier.to_next }} {{ T.projects_left_lbl }}</span>
             </div>
             <div class="w-full bg-gray-100 rounded-full h-2">
                 <div class="h-2 rounded-full
@@ -92,7 +79,7 @@
             </div>
         </div>
         {% else %}
-        <span class="text-yellow-600 font-semibold text-sm">🏆 Eng yuqori daraja!</span>
+        <span class="text-yellow-600 font-semibold text-sm">{{ T.top_tier_lbl }}</span>
         {% endif %}
     </div>
     {% endif %}
@@ -104,10 +91,10 @@
     <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-2xl p-4 flex items-center gap-4">
         <span class="text-2xl flex-shrink-0">⏳</span>
         <div class="flex-1">
-            <p class="font-semibold text-yellow-800 text-sm">Profilingiz hali admin tomonidan tasdiqlanmagan</p>
-            <p class="text-yellow-600 text-xs mt-0.5">Tasdiqlangandan so'ng tadbirkorlar loyiha yuborishi mumkin bo'ladi.</p>
+            <p class="font-semibold text-yellow-800 text-sm">{{ T.profile_not_verified }}</p>
+            <p class="text-yellow-600 text-xs mt-0.5">{{ T.profile_verify_hint }}</p>
         </div>
-        <a href="{% url 'expert_profile_edit' %}" class="flex-shrink-0 text-xs border border-yellow-400 text-yellow-700 px-3 py-1.5 rounded-lg hover:bg-yellow-100 transition">Profilni ko'rish</a>
+        <a href="{% url 'expert_profile_edit' %}" class="flex-shrink-0 text-xs border border-yellow-400 text-yellow-700 px-3 py-1.5 rounded-lg hover:bg-yellow-100 transition">{{ T.view_profile_btn }}</a>
     </div>
     {% endif %}
     {% endwith %}

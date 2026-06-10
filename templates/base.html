@@ -706,12 +706,12 @@ function sbInstallApp(){
         <div class="flex items-center gap-3 min-w-0">
             <img src="/static/icons/icon-72.png" alt="SB" class="w-10 h-10 rounded-xl flex-shrink-0">
             <div class="min-w-0">
-                <p class="text-white font-semibold text-sm leading-tight">StandartBridge ilovasini o'rnatish</p>
-                <p class="text-blue-200 text-xs truncate">Qulay kirish uchun telefonga qo'shing</p>
+                <p class="text-white font-semibold text-sm leading-tight">{{ T.pwa_install_title }}</p>
+                <p class="text-blue-200 text-xs truncate">{{ T.pwa_install_sub }}</p>
             </div>
         </div>
         <div class="flex items-center gap-2 flex-shrink-0">
-            <button onclick="sbInstallApp()" class="bg-white text-blue-700 text-sm font-semibold px-4 py-2 rounded-xl hover:bg-blue-50 transition">O'rnatish</button>
+            <button onclick="sbInstallApp()" class="bg-white text-blue-700 text-sm font-semibold px-4 py-2 rounded-xl hover:bg-blue-50 transition">{{ T.pwa_install_btn }}</button>
             <button onclick="document.getElementById('pwa-install-banner').classList.add('hidden')" class="text-blue-200 hover:text-white text-xl leading-none px-1">✕</button>
         </div>
     </div>
@@ -720,8 +720,8 @@ function sbInstallApp(){
 <!-- ── SW update banner ── -->
 <div id="sw-update-banner" class="hidden fixed top-20 left-0 right-0 z-50 flex justify-center pointer-events-none">
     <div class="pointer-events-auto bg-blue-700 text-white text-sm px-5 py-3 rounded-2xl shadow-lg flex items-center gap-3 mx-4">
-        <span>Yangi versiya mavjud!</span>
-        <button onclick="window.location.reload()" class="bg-white text-blue-700 text-xs font-bold px-3 py-1 rounded-lg">Yangilash</button>
+        <span>{{ T.pwa_update_available }}</span>
+        <button onclick="window.location.reload()" class="bg-white text-blue-700 text-xs font-bold px-3 py-1 rounded-lg">{{ T.pwa_update_btn }}</button>
     </div>
 </div>
 

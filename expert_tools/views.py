@@ -783,7 +783,7 @@ def time_logs(request):
     # This month totals
     month_start = today.replace(day=1)
     month_logs = logs.filter(date__gte=month_start)
-    month_total = sum(l.hours for l in month_logs) or Decimal('0')
+    month_total = sum((l.hours for l in month_logs), Decimal('0'))
 
     # Recent 20 entries
     recent_logs = logs[:20]

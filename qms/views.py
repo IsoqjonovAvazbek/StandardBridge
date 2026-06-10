@@ -497,6 +497,7 @@ def add_audit(request):
             from datetime import date as _date
             if pd < _date.today():
                 messages.warning(request, 'Audit sanasi o\'tib ketgan. Kelajak sanasini kiriting.')
+                return redirect('audit_schedule')
             AuditSchedule.objects.create(
                 company=request.user,
                 audit_type=audit_type,
@@ -718,7 +719,7 @@ def update_risk(request, pk):
         except (ValueError, TypeError):
             pass
         due_raw = request.POST.get('due_date', '').strip()
-        risk.due_date = due_raw if due_raw else None
+        risk.due_date = _parse_date(due_raw) if due_raw else None
         risk.save()
         messages.success(request, 'Risk yangilandi.')
     return redirect('risk_register')

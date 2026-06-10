@@ -976,7 +976,7 @@ def roadmap_view(request, pk):
         'analysis': analysis,
         'roadmap': roadmap,
         'steps': steps,
-        'progress': int((steps.filter(is_completed=True).count() / steps.count() * 100)) if steps.count() > 0 else 0,
+        'progress': int(steps.filter(is_completed=True).count() / steps.count() * 100) if steps.exists() else 0,
     }
     return render(request, 'analysis/roadmap.html', context)
 @login_required

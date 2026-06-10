@@ -72,12 +72,12 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       <div class="role-opt sel" id="btn-entrepreneur" onclick="setRole('entrepreneur')">
         <div class="role-icon">🏭</div>
         <div class="role-name">{{ T.login_entrepreneur }}</div>
-        <div class="role-desc">ISO sertifikat olmoqchiman</div>
+        <div class="role-desc">{{ T.register_entrepreneur_desc }}</div>
       </div>
       <div class="role-opt" id="btn-expert" onclick="setRole('expert')">
         <div class="role-icon">👨‍💼</div>
         <div class="role-name">{{ T.login_expert }}</div>
-        <div class="role-desc">Mijozlarga yordam beraman</div>
+        <div class="role-desc">{{ T.register_expert_desc }}</div>
       </div>
     </div>
 
@@ -104,9 +104,9 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         </div>
         <div class="field-row">
           <div>
-            <label>Viloyat</label>
+            <label>{{ T.register_region_lbl }}</label>
             <select name="region" class="fi">
-              <option value="">Tanlang</option>
+              <option value="">{{ T.register_select_ph }}</option>
               <option>Toshkent</option><option>Farg'ona</option><option>Samarqand</option>
               <option>Buxoro</option><option>Andijon</option><option>Namangan</option>
               <option>Qashqadaryo</option><option>Surxondaryo</option><option>Xorazm</option>
@@ -115,9 +115,9 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
             </select>
           </div>
           <div>
-            <label>Soha</label>
+            <label>{{ T.register_industry_lbl }}</label>
             <select name="industry" class="fi">
-              <option value="">Tanlang</option>
+              <option value="">{{ T.register_select_ph }}</option>
               <option>To'qimachilik</option><option>Oziq-ovqat</option><option>Kimyo</option>
               <option>Mashinasozlik</option><option>Qurilish</option><option>Farmatsevtika</option>
               <option>Boshqa</option>
@@ -129,15 +129,15 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       <!-- Mutaxassis -->
       <div id="expert-fields" style="display:none">
         <div class="field">
-          <label>Ixtisoslik</label>
+          <label>{{ T.register_spec_lbl }}</label>
           <input class="fi" type="text" name="specializations" placeholder="ISO9001 ISO22000 ISO14001">
-          <p class="hint">Bo'sh joy bilan ajrating</p>
+          <p class="hint">{{ T.register_spec_hint }}</p>
         </div>
         <div class="field-row">
           <div>
-            <label>Viloyat</label>
+            <label>{{ T.register_region_lbl }}</label>
             <select name="expert_region" class="fi">
-              <option value="">Tanlang</option>
+              <option value="">{{ T.register_select_ph }}</option>
               <option value="toshkent">Toshkent</option><option value="fargona">Farg'ona</option>
               <option value="samarqand">Samarqand</option><option value="buxoro">Buxoro</option>
               <option value="andijon">Andijon</option><option value="namangan">Namangan</option>
@@ -148,7 +148,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
             </select>
           </div>
           <div>
-            <label>Tajriba (yil)</label>
+            <label>{{ T.register_exp_lbl }}</label>
             <input class="fi" type="number" name="experience_years" min="0" max="50" placeholder="5">
           </div>
         </div>
@@ -193,7 +193,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       <a href="{% url 'login' %}">{{ T.register_login_link }}</a>
     </p>
     <p style="text-align:center;margin-top:12px">
-      <a href="{% url 'landing' %}" style="font-size:13px;color:#9ca3af;text-decoration:none">← Bosh sahifa</a>
+      <a href="{% url 'landing' %}" style="font-size:13px;color:#9ca3af;text-decoration:none">{{ T.back_home }}</a>
     </p>
   </div>
 </div>

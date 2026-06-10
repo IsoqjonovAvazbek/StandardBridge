@@ -361,7 +361,7 @@ def project_step_toggle(request, pk, step_pk):
             Notification.objects.create(
                 user=project.entrepreneur,
                 title="Barcha bosqichlar bajarildi!",
-                message=f"Mutaxassis '{project.analysis.local_standard.code} → {project.analysis.target_standard.code}' loyihasidagi barcha bosqichlarni bajarib bo'ldi."
+                message=f"Mutaxassis '{getattr(project.analysis.local_standard, 'code', '?')} → {getattr(project.analysis.target_standard, 'code', '?')}' loyihasidagi barcha bosqichlarni bajarib bo'ldi."
             )
 
         return JsonResponse({

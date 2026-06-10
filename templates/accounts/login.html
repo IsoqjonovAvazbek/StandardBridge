@@ -69,7 +69,7 @@
       <div class="field">
         <label>{{ T.login_password }}</label>
         <input class="fi" type="password" name="password" required placeholder="••••••••">
-        <a href="{% url 'password_reset' %}" class="forgot">Parolni unutdingizmi?</a>
+        <a href="{% url 'password_reset' %}" class="forgot">{{ T.login_forgot_password }}</a>
       </div>
       <button type="submit" class="submit">{{ T.login_btn }}</button>
     </form>
@@ -79,7 +79,7 @@
       <a href="{% url 'register' %}">{{ T.login_register_link }}</a>
     </p>
     <p style="text-align:center;margin-top:12px">
-      <a href="{% url 'landing' %}" style="font-size:13px;color:#9ca3af;text-decoration:none">← Bosh sahifa</a>
+      <a href="{% url 'landing' %}" style="font-size:13px;color:#9ca3af;text-decoration:none">{{ T.back_home }}</a>
     </p>
   </div>
 </div>
