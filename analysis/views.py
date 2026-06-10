@@ -131,7 +131,7 @@ def get_ai_analysis(local_standards, target_standards, industry_name,
             db_roadmap_steps = list(steps)
             break
 
-    has_db_roadmap = len(db_roadmap_steps) > 0
+    has_db_roadmap = len(db_roadmap_steps) > 0 and language == 'uz'
 
     # ── 3. AI PROMPTI — FAQAT IZOH VA SUMMARY ────────────────────────────────
     if structured_gaps:
