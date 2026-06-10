@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% block no_dark_override %}<script>document.documentElement.classList.remove('dark');</script>{% endblock %}
-{% block title %}StandartBridge — ISO, CE, EN Sertifikatsiya Platformasi{% endblock %}
-{% block meta_description %}O'zbekistonda ISO 9001, ISO 14001, ISO 22000 va CE sertifikatsiyasiga AI gap tahlil va tasdiqlangan mutaxassislar bilan.{% endblock %}
-{% block og_title %}StandartBridge — ISO Sertifikatsiya Platformasi{% endblock %}
-{% block og_description %}AI gap tahlil 30-60 soniyada. Tasdiqlangan mutaxassislar. Escrow to'lov. Bepul boshlang!{% endblock %}
+{% block title %}{{ T.landing_page_title }}{% endblock %}
+{% block meta_description %}{{ T.landing_meta_desc }}{% endblock %}
+{% block og_title %}{{ T.landing_page_title }}{% endblock %}
+{% block og_description %}{{ T.landing_meta_desc }}{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -367,8 +367,8 @@
           </div>
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.15);border-radius:12px;padding:10px 14px">
             <div style="width:7px;height:7px;background:#4ade80;border-radius:50%;flex-shrink:0;animation:ripple 2s infinite"></div>
-            <span style="font-size:12px;font-weight:700;color:#4ade80;letter-spacing:.5px">ISO 9001:2015 · AI Tahlil</span>
-            <span style="margin-left:auto;font-size:12px;font-weight:600;color:rgba(255,255,255,.4)">89% tayyor</span>
+            <span style="font-size:12px;font-weight:700;color:#4ade80;letter-spacing:.5px">ISO 9001:2015 · {{ T.landing_ai_label }}</span>
+            <span style="margin-left:auto;font-size:12px;font-weight:600;color:rgba(255,255,255,.4)">89% {{ T.landing_ready_word }}</span>
           </div>
           <div class="hc-gap critical">
             <div class="hc-gap-row">
@@ -392,7 +392,7 @@
             <div class="hc-gap-desc">{{ T.ai_gap3_desc }}</div>
           </div>
           <div class="hc-footer">
-            <div class="hc-stat"><div class="hc-stat-num" style="color:#60a5fa">89%</div><div class="hc-stat-label">Tayyorlik</div></div>
+            <div class="hc-stat"><div class="hc-stat-num" style="color:#60a5fa">89%</div><div class="hc-stat-label">{{ T.readiness_label }}</div></div>
             <div class="hc-stat"><div class="hc-stat-num" style="color:#a78bfa">8 oy</div><div class="hc-stat-label">{{ T.ai_est_time }}</div></div>
             <div class="hc-stat"><div class="hc-stat-num" style="color:#34d399">$1.5K</div><div class="hc-stat-label">{{ T.ai_est_cost }}</div></div>
           </div>
@@ -412,40 +412,40 @@
   <div class="cin-bot-fade"></div>
   <div class="cin-content">
     <div class="cin-text sr-l">
-      <h2>ISO Sertifikatsiya —<br>Endi <em>Oson</em></h2>
-      <p>AI texnologiyasi bilan gap tahlildan sertifikatgacha bir platformada</p>
+      <h2>{{ T.cin_h2 }}</h2>
+      <p>{{ T.cin_p }}</p>
       <div class="cin-steps">
-        <div class="cin-step"><div class="cin-step-n">1</div>Hujjatlarni yuklang → AI tahlil qiladi</div>
-        <div class="cin-step"><div class="cin-step-n">2</div>Gap hisobotini ko'ring, prioritet aniqlang</div>
-        <div class="cin-step"><div class="cin-step-n">3</div>Mutaxassis tanlang, escrow orqali to'lang</div>
+        <div class="cin-step"><div class="cin-step-n">1</div>{{ T.cin_step1 }}</div>
+        <div class="cin-step"><div class="cin-step-n">2</div>{{ T.cin_step2 }}</div>
+        <div class="cin-step"><div class="cin-step-n">3</div>{{ T.cin_step3 }}</div>
       </div>
     </div>
     <!-- Live AI demo card -->
     <div class="cin-card sr-r">
-      <div class="cin-card-title">AI Gap Tahlil · Natija</div>
+      <div class="cin-card-title">{{ T.cin_card_title }}</div>
       <div class="cin-row">
-        <span class="cin-label">Hujjatlashtirish</span>
+        <span class="cin-label">{{ T.cin_bar1 }}</span>
         <div class="cin-bar-wrap"><div class="cin-bar" style="width:85%;background:linear-gradient(90deg,#ef4444,#f97316);animation-delay:0s"></div></div>
         <span class="cin-pct" style="color:#fca5a5">85%</span>
       </div>
       <div class="cin-row">
-        <span class="cin-label">Ichki audit</span>
+        <span class="cin-label">{{ T.cin_bar2 }}</span>
         <div class="cin-bar-wrap"><div class="cin-bar" style="width:62%;background:linear-gradient(90deg,#f97316,#eab308);animation-delay:.4s"></div></div>
         <span class="cin-pct" style="color:#fdba74">62%</span>
       </div>
       <div class="cin-row">
-        <span class="cin-label">Xodim malakasi</span>
+        <span class="cin-label">{{ T.cin_bar3 }}</span>
         <div class="cin-bar-wrap"><div class="cin-bar" style="width:91%;background:linear-gradient(90deg,#10b981,#06b6d4);animation-delay:.8s"></div></div>
         <span class="cin-pct" style="color:#6ee7b7">91%</span>
       </div>
       <div class="cin-row">
-        <span class="cin-label">Jarayonlar</span>
+        <span class="cin-label">{{ T.cin_bar4 }}</span>
         <div class="cin-bar-wrap"><div class="cin-bar" style="width:47%;background:linear-gradient(90deg,#eab308,#84cc16);animation-delay:1.2s"></div></div>
         <span class="cin-pct" style="color:#fde047">47%</span>
       </div>
       <div class="cin-result">
         <div class="cin-result-dot"></div>
-        <div class="cin-result-text">3 ta gap topildi · Tayyorlik: 89%</div>
+        <div class="cin-result-text">{{ T.cin_result }}</div>
       </div>
     </div>
   </div>
@@ -502,10 +502,10 @@
           <h3 class="step-card-h3">{{ T.step2_title }}</h3>
           <p class="step-card-p">{{ T.step2_desc }}</p>
           <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-            <span style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.2);color:#fca5a5;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800">Kritik</span>
-            <span style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.2);color:#fdba74;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800">Yuqori</span>
-            <span style="background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.2);color:#fde047;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800">O'rta</span>
-            <span style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.2);color:#86efac;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800">Past</span>
+            <span style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.2);color:#fca5a5;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800">{{ T.priority_critical }}</span>
+            <span style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.2);color:#fdba74;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800">{{ T.priority_high }}</span>
+            <span style="background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.2);color:#fde047;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800">{{ T.priority_medium }}</span>
+            <span style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.2);color:#86efac;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:800">{{ T.priority_low }}</span>
           </div>
         </div>
 
@@ -543,11 +543,11 @@
           <h3 class="step-card-h3">{{ T.step4_title }}</h3>
           <p class="step-card-p">{{ T.step4_desc }}</p>
           <div class="flow">
-            <div class="flow-node">Tadbirkor</div>
+            <div class="flow-node">{{ T.flow_entrepreneur }}</div>
             <div class="flow-arrow">→</div>
             <div class="flow-node active">Escrow</div>
             <div class="flow-arrow">→</div>
-            <div class="flow-node">Mutaxassis</div>
+            <div class="flow-node">{{ T.flow_expert }}</div>
           </div>
         </div>
 
@@ -581,7 +581,7 @@
       <div class="sr" style="transition-delay:.3s;text-align:center;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:24px;padding:36px 20px;transition:.3s" onmouseenter="this.style.transform='translateY(-6px)'" onmouseleave="this.style.transform=''">
         <div style="font-size:36px;margin-bottom:12px">💰</div>
         <div style="font-size:56px;font-weight:900;letter-spacing:-2px;line-height:1;background:linear-gradient(135deg,#34d399,#84cc16);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">40%</div>
-        <div style="color:rgba(255,255,255,.4);font-size:14px;margin-top:8px">Xarajat tejamiyat</div>
+        <div style="color:rgba(255,255,255,.4);font-size:14px;margin-top:8px">{{ T.stat_cost_savings }}</div>
       </div>
     </div>
   </div>
@@ -753,7 +753,7 @@
         </div>
         <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:100px;padding:6px 16px;display:inline-flex;align-items:center;gap:8px">
           <div style="width:7px;height:7px;border-radius:50%;background:#4ade80;animation:ripple 2s infinite"></div>
-          <span style="color:rgba(255,255,255,.6);font-size:13px;font-weight:600">{{ user_count|default:350 }}+ korxona allaqachon ro'yxatdan o'tgan</span>
+          <span style="color:rgba(255,255,255,.6);font-size:13px;font-weight:600">{{ user_count|default:350 }}+ {{ T.cta_social_proof }}</span>
         </div>
       </div>
 
@@ -774,15 +774,15 @@
       <div class="sr" style="display:flex;flex-wrap:wrap;gap:16px;margin-top:40px">
         <div style="display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.35);font-size:13px">
           <svg width="16" height="16" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-          Ro'yxatdan o'tish bepul
+          {{ T.trust_free }}
         </div>
         <div style="display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.35);font-size:13px">
           <svg width="16" height="16" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-          Kredit karta talab qilinmaydi
+          {{ T.trust_no_card }}
         </div>
         <div style="display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.35);font-size:13px">
           <svg width="16" height="16" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-          AI gap tahlil — bepul, cheksiz
+          {{ T.trust_ai_free }}
         </div>
       </div>
     </div>
@@ -821,7 +821,7 @@
         <ul class="footer-links">
           <li><a href="mailto:isoqjonovavazbek@gmail.com">isoqjonovavazbek@gmail.com</a></li>
           <li><a href="tel:+998779701017">+998 77 970 10 17</a></li>
-          <li><span style="color:rgba(255,255,255,.25)">Toshkent, O'zbekiston</span></li>
+          <li><span style="color:rgba(255,255,255,.25)">{{ T.footer_address }}</span></li>
         </ul>
       </div>
     </div>
