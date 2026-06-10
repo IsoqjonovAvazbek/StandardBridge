@@ -238,7 +238,7 @@
             <h2 class="text-xl font-bold text-gray-900">{{ T.active_projects_label }}
                 {% if in_progress > 0 %}<span class="ml-2 bg-orange-100 text-orange-700 text-sm font-semibold px-2.5 py-0.5 rounded-full">{{ in_progress }}</span>{% endif %}
             </h2>
-            {% if projects %}<a href="{% url 'project_list' %}" class="text-sm text-blue-600 hover:underline">Barchasi →</a>{% endif %}
+            {% if projects %}<a href="{% url 'project_list' %}" class="text-sm text-blue-600 hover:underline">{{ T.view_all_btn }}</a>{% endif %}
         </div>
         <div class="space-y-4">
             {% for project in projects %}
@@ -256,7 +256,7 @@
                             {% if d <= 0 %}bg-red-100 text-red-700
                             {% elif d <= 3 %}bg-orange-100 text-orange-700
                             {% else %}bg-gray-100 text-gray-500{% endif %}">
-                            ⏰ {% if d <= 0 %}Muddat o'tdi!{% else %}{{ d }} kun qoldi{% endif %}
+                            ⏰ {% if d <= 0 %}{{ T.deadline_passed }}!{% else %}{{ d }}{{ T.days_left_suf }}{% endif %}
                         </span>
                         {% endwith %}
                         {% endif %}
@@ -287,8 +287,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
                 </div>
-                <p class="text-gray-500 font-medium mb-1">Hozircha faol loyiha yo'q</p>
-                <p class="text-gray-400 text-sm">Yangi takliflar kelganda bu yerda ko'rinadi</p>
+                <p class="text-gray-500 font-medium mb-1">{{ T.no_active_projects }}</p>
+                <p class="text-gray-400 text-sm">{{ T.new_offers_appear }}</p>
             </div>
             {% endif %}
         </div>

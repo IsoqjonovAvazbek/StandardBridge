@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import BlogPost, Category, BlogComment, BlogLike
+from core.translations import notif_text as _nl
 
 
 def post_list(request):
@@ -101,8 +102,11 @@ def toggle_like(request, slug):
             from experts.models import Notification
             Notification.objects.create(
                 user=post.author,
-                title='Maqolangizga like bosildi',
-                message=f'{request.user.get_full_name()} "{post.title[:60]}" maqolangizni yoqtirdi.',
+                title=_nl(post.author, 'Maqolangizga like bosildi', 'Вашей статье поставили лайк', 'Your article was liked'),
+                message=_nl(post.author,
+                    f'{request.user.get_full_name()} "{post.title[:60]}" maqolangizni yoqtirdi.',
+                    f'{request.user.get_full_name()} понравилась ваша статья "{post.title[:60]}".',
+                    f'{request.user.get_full_name()} liked your article "{post.title[:60]}".'),
                 link=f'/blog/{post.slug}/',
             )
     return JsonResponse({'liked': liked, 'count': post.likes.count()})

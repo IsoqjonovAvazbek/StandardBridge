@@ -19,6 +19,7 @@ from django.utils import timezone
 from qms.models import QMSDocument
 from experts.models import Notification
 from experts.emails import _send
+from core.translations import notif_text as _nl
 
 
 class Command(BaseCommand):
@@ -49,11 +50,23 @@ class Command(BaseCommand):
         for doc in docs:
             left = (doc.expiry_date - today).days
             if left < 0:
-                title = 'QMS hujjat muddati tugagan'
-                msg = f'"{doc.title}" (v{doc.version}) hujjatining amal qilish muddati {abs(left)} kun oldin tugagan. Yangilang.'
+                title = _nl(doc.company,
+                    'QMS hujjat muddati tugagan',
+                    'Срок действия документа QMS истёк',
+                    'QMS document expired')
+                msg = _nl(doc.company,
+                    f'"{doc.title}" (v{doc.version}) hujjatining amal qilish muddati {abs(left)} kun oldin tugagan. Yangilang.',
+                    f'Срок действия документа "{doc.title}" (v{doc.version}) истёк {abs(left)} дней назад. Обновите его.',
+                    f'Document "{doc.title}" (v{doc.version}) expired {abs(left)} days ago. Please renew.')
             else:
-                title = 'QMS hujjat muddati tugayapti'
-                msg = f'"{doc.title}" (v{doc.version}) hujjatining muddati {left} kundan keyin tugaydi ({doc.expiry_date:%d.%m.%Y}).'
+                title = _nl(doc.company,
+                    'QMS hujjat muddati tugayapti',
+                    'Срок действия документа QMS истекает',
+                    'QMS document expiry approaching')
+                msg = _nl(doc.company,
+                    f'"{doc.title}" (v{doc.version}) hujjatining muddati {left} kundan keyin tugaydi ({doc.expiry_date:%d.%m.%Y}).',
+                    f'Срок действия документа "{doc.title}" (v{doc.version}) истекает через {left} дней ({doc.expiry_date:%d.%m.%Y}).',
+                    f'Document "{doc.title}" (v{doc.version}) expires in {left} days ({doc.expiry_date:%d.%m.%Y}).')
 
             Notification.objects.create(user=doc.company, title=title, message=msg)
 

@@ -16,6 +16,21 @@
 /* ── Scroll progress bar ── */
 #prog{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,#3b82f6,#8b5cf6,#06b6d4);z-index:10000;transition:width .1s linear}
 
+/* ── Custom cursor ── */
+#sb-cursor-ring{position:fixed;pointer-events:none;z-index:99998;width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(96,165,250,.5);transform:translate(-50%,-50%);transition:width .25s,height .25s,border-color .25s,opacity .3s;mix-blend-mode:screen;will-change:left,top}
+#sb-cursor-dot{position:fixed;pointer-events:none;z-index:99999;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle,#93c5fd,#60a5fa);transform:translate(-50%,-50%);transition:opacity .3s;will-change:left,top}
+#sb-cursor-ring.hovering{width:56px;height:56px;border-color:rgba(139,92,246,.7);background:rgba(139,92,246,.06)}
+#sb-cursor-ring.clicking{width:28px;height:28px;border-color:rgba(52,211,153,.9)}
+
+/* ── Parallax scrolling layers ── */
+.parallax-slow{will-change:transform}
+.parallax-mid{will-change:transform}
+.parallax-fast{will-change:transform}
+
+/* ── Split text entrance ── */
+@keyframes letterUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+.split-text-done .letter{display:inline-block;animation:letterUp .55s cubic-bezier(.16,1,.3,1) both}
+
 /* ── Navbar ── */
 #lnav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;transition:background .3s,backdrop-filter .3s}
 #lnav.scrolled{background:rgba(5,10,20,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
@@ -973,6 +988,83 @@ window.addEventListener('scroll',function(){
     });
   },{threshold:.5});
   document.querySelectorAll('.counter').forEach(function(el){io.observe(el);});
+})();
+
+/* ── Custom glowing cursor ── */
+(function(){
+  if(window.matchMedia('(pointer:coarse)').matches)return;
+  var ring=document.createElement('div');ring.id='sb-cursor-ring';
+  var dot=document.createElement('div');dot.id='sb-cursor-dot';
+  document.body.appendChild(ring);document.body.appendChild(dot);
+  var mx=window.innerWidth/2,my=window.innerHeight/2;
+  var rx=mx,ry=my;
+  var raf;
+  document.addEventListener('mousemove',function(e){
+    mx=e.clientX;my=e.clientY;
+    dot.style.left=mx+'px';dot.style.top=my+'px';
+  });
+  document.addEventListener('mousedown',function(){ring.classList.add('clicking');});
+  document.addEventListener('mouseup',function(){ring.classList.remove('clicking');});
+  var interactors='a,button,[role="button"]';
+  document.addEventListener('mouseover',function(e){
+    if(e.target.closest(interactors))ring.classList.add('hovering');
+  });
+  document.addEventListener('mouseout',function(e){
+    if(e.target.closest(interactors))ring.classList.remove('hovering');
+  });
+  function lerp(a,b,t){return a+(b-a)*t;}
+  function tick(){
+    rx=lerp(rx,mx,0.1);ry=lerp(ry,my,0.1);
+    ring.style.left=rx+'px';ring.style.top=ry+'px';
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* ── Multi-layer parallax on scroll ── */
+(function(){
+  var layers=[
+    {sel:'.cin-orb-a',speed:0.12},
+    {sel:'.cin-orb-b',speed:-0.08},
+    {sel:'.cin-orb-c',speed:0.06},
+    {sel:'.hero-glow-3',speed:0.07}
+  ];
+  var els=layers.map(function(l){return{el:document.querySelector(l.sel),speed:l.speed};});
+  var ticking=false;
+  function update(){
+    var y=window.scrollY;
+    els.forEach(function(item){
+      if(!item.el)return;
+      var base=item.el._baseTransform||'';
+      item.el.style.transform=base+' translateY('+Math.round(y*item.speed)+'px)';
+    });
+    ticking=false;
+  }
+  window.addEventListener('scroll',function(){
+    if(!ticking){requestAnimationFrame(update);ticking=true;}
+  },{passive:true});
+})();
+
+/* ── Split-text on section headings ── */
+(function(){
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting)return;
+      var h=e.target;
+      var text=h.textContent;
+      var html='';
+      var delay=0;
+      for(var i=0;i<text.length;i++){
+        var ch=text[i]===' '?' ':text[i];
+        html+='<span class="letter" style="animation-delay:'+(delay)+'ms">'+(text[i]===' '?'&nbsp;':text[i])+'</span>';
+        if(text[i]!==' ')delay+=18;
+      }
+      h.innerHTML=html;
+      h.classList.add('split-text-done');
+      io.unobserve(h);
+    });
+  },{threshold:0.4});
+  document.querySelectorAll('.section-h2').forEach(function(h){io.observe(h);});
 })();
 
 /* ── FAQ ── */

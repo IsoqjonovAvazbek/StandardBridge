@@ -6,7 +6,7 @@
 
   <div class="mb-8">
     <h1 class="text-2xl font-bold text-gray-900">{{ T.et_proj_templates }}</h1>
-    <p class="text-sm text-gray-500 mt-1">ISO sertifikatsiya loyihalari uchun tayyor rejalar</p>
+    <p class="text-sm text-gray-500 mt-1">{{ T.et_templates_sub }}</p>
   </div>
 
   {% if templates %}
@@ -73,7 +73,7 @@
           </div>
         </form>
         {% else %}
-        <p class="text-xs text-gray-400 text-center py-2">Faol loyihalar yo'q</p>
+        <p class="text-xs text-gray-400 text-center py-2">{{ T.et_no_active_projects_et }}</p>
         {% endif %}
       </div>
     </div>
@@ -92,7 +92,7 @@
      style="background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
     <h3 class="font-bold text-gray-900 mb-2">{{ T.et_apply_template }}</h3>
-    <p class="text-sm text-gray-500 mb-6" id="applyModalText">Shablonni loyihaga qo'llash?</p>
+    <p class="text-sm text-gray-500 mb-6" id="applyModalText">{{ T.et_apply_confirm_text }}</p>
     <form method="post" id="applyModalForm">
       {% csrf_token %}
       <div class="flex gap-3">

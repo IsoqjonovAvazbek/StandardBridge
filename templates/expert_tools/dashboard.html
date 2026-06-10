@@ -96,8 +96,8 @@
         <span class="text-xl">📄</span>
       </div>
       <div>
-        <p class="text-xs font-semibold text-gray-700">Taklifnomalar</p>
-        <p class="text-xs text-gray-400">{{ proposals_count }} ta</p>
+        <p class="text-xs font-semibold text-gray-700">{{ T.et_proposals }}</p>
+        <p class="text-xs text-gray-400">{{ proposals_count }}{{ T.et_count_suffix }}</p>
       </div>
     </a>
     <a href="{% url 'time_logs' %}"
@@ -106,8 +106,8 @@
         <span class="text-xl">⏱️</span>
       </div>
       <div>
-        <p class="text-xs font-semibold text-gray-700">Vaqt hisoblagich</p>
-        <p class="text-xs text-gray-400">Bu oy: {{ month_hours }}h</p>
+        <p class="text-xs font-semibold text-gray-700">{{ T.et_time_tracker }}</p>
+        <p class="text-xs text-gray-400">{{ T.et_this_month_prefix }}{{ month_hours }}h</p>
       </div>
     </a>
     <a href="{% url 'earnings_dashboard' %}"
@@ -116,8 +116,8 @@
         <span class="text-xl">💰</span>
       </div>
       <div>
-        <p class="text-xs font-semibold text-gray-700">Daromad</p>
-        <p class="text-xs text-gray-400">Bu oy: ${{ month_earnings|floatformat:0 }}</p>
+        <p class="text-xs font-semibold text-gray-700">{{ T.earnings }}</p>
+        <p class="text-xs text-gray-400">{{ T.et_this_month_prefix }}${{ month_earnings|floatformat:0 }}</p>
       </div>
     </a>
   </div>
@@ -127,7 +127,7 @@
   <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
     <div class="flex items-center gap-2 mb-3">
       <span class="text-lg">📞</span>
-      <p class="font-semibold text-amber-800 text-sm">Bugun {{ today_followups|length }} ta follow-up!</p>
+      <p class="font-semibold text-amber-800 text-sm">{{ T.et_today_followups_pre }}{{ today_followups|length }}{{ T.et_today_followups_suf }}</p>
     </div>
     <div class="space-y-2">
       {% for client in today_followups %}
@@ -139,7 +139,7 @@
           <p class="text-sm font-medium text-gray-900">{{ client.company_name }}</p>
           <p class="text-xs text-gray-500">{{ client.contact_person }} · {{ client.target_standard }}</p>
         </div>
-        <span class="text-xs text-amber-600 font-medium">Qo'ng'iroq →</span>
+        <span class="text-xs text-amber-600 font-medium">{{ T.et_call_btn }}</span>
       </a>
       {% endfor %}
     </div>

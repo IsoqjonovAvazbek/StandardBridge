@@ -7,7 +7,7 @@
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
     <div>
       <h1 class="text-2xl font-bold text-gray-900">{{ T.et_audit_checklist }}</h1>
-      <p class="text-sm text-gray-500 mt-1">ISO standartlari bo'yicha audit nazorat ro'yxatlari</p>
+      <p class="text-sm text-gray-500 mt-1">{{ T.et_audit_list_sub }}</p>
     </div>
     <button onclick="document.getElementById('newAuditModal').classList.remove('hidden')"
             class="gradient-bg text-white px-5 py-2.5 rounded-xl font-medium text-sm shadow-sm hover:opacity-90 transition">
@@ -88,7 +88,7 @@
         {% endif %}
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ T.et_audit_company }}</label>
-          <input type="text" name="company_name" required placeholder="Kompaniya nomi..."
+          <input type="text" name="company_name" required placeholder="{{ T.company_name }}..."
                  class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
         <div>
@@ -108,7 +108,7 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ T.et_audit_notes }}</label>
-          <textarea name="notes" rows="3" placeholder="Izohlar..."
+          <textarea name="notes" rows="3" placeholder="{{ T.et_audit_notes }}..."
                     class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
         </div>
       </div>

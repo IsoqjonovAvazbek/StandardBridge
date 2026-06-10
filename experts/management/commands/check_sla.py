@@ -17,6 +17,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 from experts.models import Project, Payment, Notification
+from core.translations import notif_text as _nl
 
 
 class Command(BaseCommand):
@@ -50,12 +51,14 @@ class Command(BaseCommand):
                 # Notify entrepreneur
                 self._notify(
                     user=project.entrepreneur,
-                    title=f'SLA ogohlantirish — Loyiha #{project.pk}',
-                    message=(
-                        f'Loyiha #{project.pk} uchun mutaxassis '
-                        f'{hours_left:.0f} soat ichida javob bermasa, '
-                        f'loyiha bekor qilinadi va to\'lov qaytariladi.'
-                    ),
+                    title=_nl(project.entrepreneur,
+                        f'SLA ogohlantirish — Loyiha #{project.pk}',
+                        f'Предупреждение SLA — Проект #{project.pk}',
+                        f'SLA warning — Project #{project.pk}'),
+                    message=_nl(project.entrepreneur,
+                        f'Loyiha #{project.pk} uchun mutaxassis {hours_left:.0f} soat ichida javob bermasa, loyiha bekor qilinadi va to\'lov qaytariladi.',
+                        f'Если эксперт не ответит на проект #{project.pk} в течение {hours_left:.0f} ч., проект будет отменён и оплата возвращена.',
+                        f'If the expert does not respond to project #{project.pk} within {hours_left:.0f} hours, it will be cancelled and payment refunded.'),
                 )
                 self._send_email(
                     to=project.entrepreneur.email,
@@ -100,11 +103,14 @@ class Command(BaseCommand):
                 # Notify entrepreneur
                 self._notify(
                     user=project.entrepreneur,
-                    title=f'Loyiha #{project.pk} bekor qilindi',
-                    message=(
-                        f'Mutaxassis belgilangan muddat ichida javob bermadi. '
-                        f'Loyiha bekor qilindi. To\'lov qaytariladi.'
-                    ),
+                    title=_nl(project.entrepreneur,
+                        f'Loyiha #{project.pk} bekor qilindi',
+                        f'Проект #{project.pk} отменён',
+                        f'Project #{project.pk} cancelled'),
+                    message=_nl(project.entrepreneur,
+                        f'Mutaxassis belgilangan muddat ichida javob bermadi. Loyiha bekor qilindi. To\'lov qaytariladi.',
+                        f'Эксперт не ответил в установленный срок. Проект отменён. Оплата будет возвращена.',
+                        f'The expert did not respond in time. Project cancelled. Payment will be refunded.'),
                 )
                 self._send_email(
                     to=project.entrepreneur.email,
@@ -127,11 +133,14 @@ class Command(BaseCommand):
                 if project.expert:
                     self._notify(
                         user=project.expert,
-                        title=f'Loyiha #{project.pk} SLA muddati o\'tdi',
-                        message=(
-                            f'SLA muddati o\'tganligi sababli loyiha bekor qilindi. '
-                            f'Keyingi safar vaqtida javob bering.'
-                        ),
+                        title=_nl(project.expert,
+                            f'Loyiha #{project.pk} SLA muddati o\'tdi',
+                            f'По проекту #{project.pk} истёк срок SLA',
+                            f'Project #{project.pk} SLA deadline breached'),
+                        message=_nl(project.expert,
+                            f'SLA muddati o\'tganligi sababli loyiha bekor qilindi. Keyingi safar vaqtida javob bering.',
+                            f'Проект отменён в связи с нарушением срока SLA. В следующий раз отвечайте вовремя.',
+                            f'Project cancelled due to SLA breach. Please respond on time in the future.'),
                     )
 
         # ── F-5: in_progress loyihalarda work_deadline o'tdi ────────────────
@@ -150,12 +159,14 @@ class Command(BaseCommand):
             if not already:
                 self._notify(
                     user=project.entrepreneur,
-                    title=notif_title,
-                    message=(
-                        f'Loyiha #{project.pk} uchun ish muddati '
-                        f'({project.work_deadline.strftime("%d.%m.%Y")}) o\'tib ketdi. '
-                        f'Mutaxassis bilan bog\'laning yoki nizo oching.'
-                    ),
+                    title=_nl(project.entrepreneur,
+                        f'Ish muddati o\'tdi — Loyiha #{project.pk}',
+                        f'Срок работы истёк — Проект #{project.pk}',
+                        f'Work deadline overdue — Project #{project.pk}'),
+                    message=_nl(project.entrepreneur,
+                        f'Loyiha #{project.pk} uchun ish muddati ({project.work_deadline.strftime("%d.%m.%Y")}) o\'tib ketdi. Mutaxassis bilan bog\'laning yoki nizo oching.',
+                        f'Срок работы по проекту #{project.pk} ({project.work_deadline.strftime("%d.%m.%Y")}) истёк. Свяжитесь с экспертом или откройте спор.',
+                        f'Work deadline for project #{project.pk} ({project.work_deadline.strftime("%d.%m.%Y")}) has passed. Contact the expert or open a dispute.'),
                 )
                 self.stdout.write(
                     self.style.WARNING(f'  [WORK OVERDUE] Loyiha #{project.pk}')
@@ -177,12 +188,14 @@ class Command(BaseCommand):
                 if not already:
                     self._notify(
                         user=project.entrepreneur,
-                        title=notif_title,
-                        message=(
-                            f'Mutaxassis ishni {review_ts.strftime("%d.%m.%Y")} da '
-                            f'tekshiruvga topshirdi. Ishni ko\'rib chiqing va qabul qiling yoki '
-                            f'qayta ishlashni so\'rang.'
-                        ),
+                        title=_nl(project.entrepreneur,
+                            f'Ishni qabul qilmadingiz — Loyiha #{project.pk}',
+                            f'Вы не приняли работу — Проект #{project.pk}',
+                            f'Work not accepted — Project #{project.pk}'),
+                        message=_nl(project.entrepreneur,
+                            f'Mutaxassis ishni {review_ts.strftime("%d.%m.%Y")} da tekshiruvga topshirdi. Ishni ko\'rib chiqing va qabul qiling yoki qayta ishlashni so\'rang.',
+                            f'Эксперт передал работу на проверку {review_ts.strftime("%d.%m.%Y")}. Проверьте и примите или запросите доработку.',
+                            f'Expert submitted work for review on {review_ts.strftime("%d.%m.%Y")}. Check and accept it or request revision.'),
                     )
                     self.stdout.write(
                         self.style.WARNING(f'  [REVIEW STALE] Loyiha #{project.pk}')

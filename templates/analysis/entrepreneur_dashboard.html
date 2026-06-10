@@ -62,7 +62,7 @@
         <span class="text-3xl">📈</span>
         <div>
             <p class="font-semibold text-blue-800">{{ T.readiness_trend_title }}</p>
-            <p class="text-sm text-blue-600">Taqqoslash grafigi uchun kamida 2 ta tahlil kerak. Hozir: {{ analyses|length }} ta.</p>
+            <p class="text-sm text-blue-600">{{ T.trend_hint_pre }}{{ analyses|length }}{{ T.trend_hint_suf }}</p>
         </div>
     </div>
     {% endif %}
@@ -71,27 +71,27 @@
     {% if not analyses and not pending_projects and not negotiating_projects and not active_projects and not completed_projects %}
     <div class="mb-8 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-8 text-center">
         <div class="text-5xl mb-4">🚀</div>
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Platformaga xush kelibsiz!</h2>
-        <p class="text-gray-500 mb-6 max-w-md mx-auto">Sertifikatlashtirish jarayonini boshlash uchun quyidagi 3 qadamni bajaring:</p>
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ T.welcome_platform }}</h2>
+        <p class="text-gray-500 mb-6 max-w-md mx-auto">{{ T.onboarding_steps_hint }}</p>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-left max-w-2xl mx-auto">
             <div class="bg-white rounded-xl p-4 border border-blue-100">
                 <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm mb-3">1</div>
-                <p class="font-semibold text-gray-900 mb-1">Gap tahlil</p>
-                <p class="text-xs text-gray-500">AI korxonangizni standartga qanchalik tayyor ekanini 30-90 soniyada aniqlaydi</p>
+                <p class="font-semibold text-gray-900 mb-1">{{ T.onboarding_step1_title }}</p>
+                <p class="text-xs text-gray-500">{{ T.onboarding_step1_desc }}</p>
             </div>
             <div class="bg-white rounded-xl p-4 border border-blue-100">
                 <div class="w-8 h-8 rounded-full bg-blue-400 text-white font-bold flex items-center justify-center text-sm mb-3">2</div>
-                <p class="font-semibold text-gray-900 mb-1">Mutaxassis toping</p>
-                <p class="text-xs text-gray-500">Tasdiqlangan mutaxassislardan taklif oling va narx kelishing</p>
+                <p class="font-semibold text-gray-900 mb-1">{{ T.onboarding_step2_title }}</p>
+                <p class="text-xs text-gray-500">{{ T.onboarding_step2_desc }}</p>
             </div>
             <div class="bg-white rounded-xl p-4 border border-blue-100">
                 <div class="w-8 h-8 rounded-full bg-gray-300 text-white font-bold flex items-center justify-center text-sm mb-3">3</div>
-                <p class="font-semibold text-gray-900 mb-1">To'lov va kuzatish</p>
-                <p class="text-xs text-gray-500">Escrow to'lov himoyasi bilan ish bajarilishini kuzating</p>
+                <p class="font-semibold text-gray-900 mb-1">{{ T.onboarding_step3_title }}</p>
+                <p class="text-xs text-gray-500">{{ T.onboarding_step3_desc }}</p>
             </div>
         </div>
         <a href="{% url 'select_industry' %}" class="inline-block gradient-bg text-white px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition">
-            🔍 Birinchi gap tahlilni boshlash
+            {{ T.start_first_analysis_btn }}
         </a>
     </div>
     {% endif %}
@@ -117,7 +117,7 @@
                                 {{ T.expert_lbl }} {% if project.expert %}{{ project.expert.get_full_name }}{% else %}—{% endif %}
                                 <span class="ml-2 text-gray-400">• {{ project.created_at|time_ago }}</span>
                                 {% if waiting_hours > 48 %}
-                                <span class="ml-2 text-red-600 font-semibold">⚠ Javob kelmadi (48s+)</span>
+                                <span class="ml-2 text-red-600 font-semibold">{{ T.no_reply_48h }}</span>
                                 {% endif %}
                             </p>
                         </div>
@@ -125,7 +125,7 @@
                     <div class="flex items-center gap-3 flex-wrap">
                         <a href="{% url 'project_detail' project.pk %}" class="text-xs text-blue-600 hover:underline">{{ T.et_view }}</a>
                         {% if waiting_hours > 48 %}
-                        <a href="{% url 'project_list' %}" class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition">Boshqa expert →</a>
+                        <a href="{% url 'project_list' %}" class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition">{{ T.find_another_expert_btn }}</a>
                         {% endif %}
                         <form method="post" action="{% url 'project_cancel' project.pk %}" class="inline">
                             {% csrf_token %}
@@ -230,7 +230,7 @@
                             {% if d <= 0 %}bg-red-100 text-red-700
                             {% elif d <= 3 %}bg-orange-100 text-orange-700
                             {% else %}bg-gray-100 text-gray-600{% endif %}">
-                            {% if d <= 0 %}Muddat o'tdi{% else %}{{ d }} kun qoldi{% endif %}
+                            {% if d <= 0 %}{{ T.deadline_passed }}{% else %}{{ d }}{{ T.days_left_suf }}{% endif %}
                         </span>
                         {% endwith %}
                         {% endif %}
@@ -305,7 +305,7 @@
                         {% endwith %}
                         {% endif %}
                         <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
-                            {{ analysis.gaps.count }} gap
+                            {{ analysis.gaps.count }} {{ T.gap_word }}
                         </span>
                         <a href="{% url 'analysis_detail' analysis.pk %}"
                             class="border border-blue-600 text-blue-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-50 transition">
@@ -319,7 +319,7 @@
                         <a href="{% url 'project_list' %}?standard={{ analysis.target_standard.code }}"
                             class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition flex items-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            Mutaxassis toping
+                            {{ T.find_expert_btn }}
                         </a>
                         <form method="POST" action="{% url 'analysis_delete' analysis.pk %}"
                             onsubmit="return confirm('{{ T.delete_btn }}?')">

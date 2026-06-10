@@ -7,6 +7,7 @@ from django.conf import settings
 from django.db.models import Sum, Q
 from .models import GapAnalysis, Standard, GapItem, Roadmap, RoadmapStep, Industry, Question, QuestionAnswer, DisclaimerAcceptance
 from experts.models import Project, Notification, Payment
+from core.translations import notif_text as _nl
 from decimal import Decimal
 import json
 import os
@@ -350,33 +351,43 @@ def entrepreneur_dashboard(request):
     return render(request, 'analysis/entrepreneur_dashboard.html', context)
 @login_required
 def select_industry(request):
-    industries = Industry.objects.filter(is_active=True)
+    lang = request.session.get('lang', 'uz')
+    industries = list(Industry.objects.filter(is_active=True))
+    for ind in industries:
+        ind.display_name = ind.get_name(lang)
+        ind.display_description = ind.get_description(lang)
     return render(request, 'analysis/select_industry.html', {'industries': industries})
 
 
 @login_required
 def select_standards(request, industry_id):
     from django.db.models import Q
+    lang = request.session.get('lang', 'uz')
     industry = get_object_or_404(Industry, pk=industry_id)
+    industry.display_name = industry.get_name(lang)
+
     # Universal ("Ko'p soha") standartlarni ham qo'shish
     universal = Industry.objects.filter(name__icontains='universal').first()
     local_q = Q(type='local', is_active=True, industry=industry)
     if universal and universal != industry:
         local_q |= Q(type='local', is_active=True, industry=universal)
-    local_standards = Standard.objects.filter(local_q).order_by('code')
+    local_standards = list(Standard.objects.filter(local_q).order_by('code'))
 
     intl_q = Q(type='international', is_active=True, industry=industry)
     if universal and universal != industry:
         intl_q |= Q(type='international', is_active=True, industry=universal)
-    target_standards = Standard.objects.filter(intl_q).order_by('code')
+    target_standards = list(Standard.objects.filter(intl_q).order_by('code'))
+
+    for std in local_standards + target_standards:
+        std.display_name = std.get_name(lang)
+        std.display_description = std.get_description(lang)
 
     if request.method == 'POST':
         local_ids = request.POST.getlist('local_standards')
         target_ids = request.POST.getlist('target_standards')
 
-        # Validate: only IDs from available standards
-        valid_local_pks = set(local_standards.values_list('pk', flat=True))
-        valid_target_pks = set(target_standards.values_list('pk', flat=True))
+        valid_local_pks = set(s.pk for s in local_standards)
+        valid_target_pks = set(s.pk for s in target_standards)
         local_ids = [i for i in local_ids if i.isdigit() and int(i) in valid_local_pks]
         target_ids = [i for i in target_ids if i.isdigit() and int(i) in valid_target_pks]
 
@@ -401,14 +412,16 @@ def select_standards(request, industry_id):
 
 @login_required
 def answer_questions(request, industry_id):
+    lang = request.session.get('lang', 'uz')
     industry = get_object_or_404(Industry, pk=industry_id)
+    industry.display_name = industry.get_name(lang)
     target_ids = request.session.get('target_ids', [])
 
-    target_standards = Standard.objects.filter(pk__in=target_ids)
-    questions = Question.objects.filter(
+    target_standards = list(Standard.objects.filter(pk__in=target_ids))
+    questions = list(Question.objects.filter(
         standard__in=target_standards,
         is_active=True
-    ).select_related('standard')
+    ).select_related('standard'))
 
     # UzDST/GOST standartlar uchun fallback: ISO kalit raqamiga qarab tegishli ISO savollarni olish
     if not questions:
@@ -426,12 +439,18 @@ def answer_questions(request, industry_id):
                     if iso_std:
                         fallback_codes.append(iso_std.pk)
         if fallback_codes:
-            questions = Question.objects.filter(
+            questions = list(Question.objects.filter(
                 standard__pk__in=fallback_codes, is_active=True
-            ).select_related('standard')
+            ).select_related('standard'))
 
     if not questions:
         return redirect('run_analysis', industry_id=industry_id)
+
+    for std in target_standards:
+        std.display_name = std.get_name(lang)
+    for q in questions:
+        q.display_text = q.get_text(lang)
+        q.display_help = q.get_help(lang)
 
     if request.method == 'POST':
         answers = {
@@ -556,8 +575,11 @@ def _ai_background_task(analysis_id, local_ids, target_ids, industry_name, weak_
             from experts.models import Notification
             Notification.objects.create(
                 user=analysis.entrepreneur,
-                title='AI tahlil xatosi',
-                message=f'Tahlil #{analysis.pk} ishlov berishda xatolik yuz berdi. Sahifaga kirib qayta urining.',
+                title=_nl(analysis.entrepreneur, 'AI tahlil xatosi', 'Ошибка AI анализа', 'AI analysis error'),
+                message=_nl(analysis.entrepreneur,
+                    f'Tahlil #{analysis.pk} ishlov berishda xatolik yuz berdi. Sahifaga kirib qayta urining.',
+                    f'При обработке анализа #{analysis.pk} произошла ошибка. Попробуйте снова.',
+                    f'Analysis #{analysis.pk} encountered an error. Please retry.'),
                 link=f'/analysis/{analysis.pk}/processing/',
             )
         except Exception:

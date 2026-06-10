@@ -110,12 +110,12 @@
   {% if not audit.is_completed %}
   <div class="sm:hidden bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-4 flex items-center justify-between mt-4">
       <div>
-          <p class="text-sm font-semibold text-blue-800">📱 Mobil rejim</p>
-          <p class="text-xs text-blue-600">Sahada tezroq to'ldiring</p>
+          <p class="text-sm font-semibold text-blue-800">{{ T.et_mobile_mode }}</p>
+          <p class="text-xs text-blue-600">{{ T.et_mobile_mode_sub }}</p>
       </div>
       <a href="{% url 'audit_mobile' audit.pk %}"
          class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
-          Ochish
+          {{ T.et_open_btn }}
       </a>
   </div>
   {% endif %}
@@ -132,7 +132,7 @@
       </a>
       <a href="{% url 'audit_mobile' audit.pk %}"
          class="hidden sm:flex items-center gap-2 border border-blue-300 text-blue-600 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-50 transition">
-        📱 Mobil rejim
+        {{ T.et_mobile_mode }}
       </a>
       <button type="submit"
               class="flex-1 gradient-bg text-white py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition">
@@ -148,7 +148,7 @@
     </a>
     <a href="{% url 'audit_print' audit.pk %}" target="_blank"
        class="flex-1 text-center bg-gray-800 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
-      🖨️ PDF Hisobot
+      {{ T.et_pdf_report }}
     </a>
   </div>
   {% endif %}

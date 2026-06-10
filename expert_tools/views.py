@@ -14,6 +14,7 @@ from .models import (
     Proposal, TimeLog,
 )
 from experts.models import Project, Payment, ProjectUpdate
+from core.translations import get_translation
 import os
 import json
 import logging
@@ -732,10 +733,12 @@ def proposal_detail(request, pk):
 @expert_required
 def proposal_print(request, pk):
     proposal = get_object_or_404(Proposal, pk=pk, expert=request.user)
+    T = get_translation(request.session.get('lang', 'uz'))
     return render(request, 'expert_tools/proposal_print.html', {
         'proposal': proposal,
         'today': timezone.now().date(),
         'expert': request.user,
+        'T': T,
     })
 
 
@@ -918,6 +921,7 @@ def audit_print(request, pk):
     non_compliant = items.filter(status='non_compliant').count()
     score = int(compliant / total * 100) if total else 0
     findings = items.exclude(finding='').order_by('order')
+    T = get_translation(request.session.get('lang', 'uz'))
     return render(request, 'expert_tools/audit_print.html', {
         'audit': audit,
         'items': items,
@@ -929,4 +933,5 @@ def audit_print(request, pk):
         'findings': findings,
         'today': timezone.now().date(),
         'expert': request.user,
+        'T': T,
     })

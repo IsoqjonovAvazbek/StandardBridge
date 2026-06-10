@@ -39,7 +39,7 @@
         {% if chart_data != "[0, 0, 0, 0, 0, 0]" %}
         <canvas id="earningsChart" height="80"></canvas>
         {% else %}
-        <div class="py-8 text-center text-gray-400 text-sm">Hali to'lov amalga oshmagan</div>
+        <div class="py-8 text-center text-gray-400 text-sm">{{ T.et_no_payments }}</div>
         {% endif %}
     </div>
 
@@ -110,7 +110,7 @@ if (document.getElementById('earningsChart')) {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Daromad ($)',
+                label: '{{ T.et_earnings }} ($)',
                 data: data,
                 backgroundColor: 'rgba(37, 99, 235, 0.15)',
                 borderColor: '#2563eb',

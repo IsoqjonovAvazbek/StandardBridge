@@ -32,7 +32,7 @@
     </div>
     <div class="flex items-center gap-2 shrink-0">
       <button onclick="copyRaw()" class="border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-sm hover:bg-gray-50 transition">
-        📋 Nusxalash
+        {{ T.et_copy_btn }}
       </button>
       <a href="{% url 'edit_document' doc.pk %}"
          class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
@@ -71,7 +71,7 @@
 
   {% if doc.project %}
   <p class="text-center text-xs text-gray-400 mt-4">
-    Loyiha: <a href="{% url 'project_detail' doc.project.pk %}" class="text-blue-600 hover:underline">{{ doc.project.entrepreneur.company_name }}</a>
+    {{ T.et_time_project }}: <a href="{% url 'project_detail' doc.project.pk %}" class="text-blue-600 hover:underline">{{ doc.project.entrepreneur.company_name }}</a>
   </p>
   {% endif %}
 </div>
@@ -114,7 +114,7 @@ document.getElementById('docContent').innerHTML = marked.parse(raw);
 
 function copyRaw() {
   navigator.clipboard.writeText(document.getElementById('docRaw').value)
-    .then(() => { alert('Nusxalandi!'); });
+    .then(() => { alert('{{ T.et_copied_msg }}'); });
 }
 </script>
 {% endblock %}

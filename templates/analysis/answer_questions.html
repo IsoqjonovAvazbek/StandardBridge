@@ -1,21 +1,21 @@
 {% extends 'base.html' %}
-{% block title %}Savollar — StandartBridge{% endblock %}
+{% block title %}{{ T.progress_questions }} — StandartBridge{% endblock %}
 
 {% block content %}
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-8">
         <div class="flex items-center gap-2 text-sm text-gray-400 mb-3">
-            <a href="{% url 'select_industry' %}" class="hover:text-blue-600 transition">Soha</a>
+            <a href="{% url 'select_industry' %}" class="hover:text-blue-600 transition">{{ T.progress_industry }}</a>
             <span>›</span>
-            <a href="{% url 'select_standards' industry.pk %}" class="hover:text-blue-600 transition">Standartlar</a>
+            <a href="{% url 'select_standards' industry.pk %}" class="hover:text-blue-600 transition">{{ T.progress_standards }}</a>
             <span>›</span>
-            <span class="text-gray-700 font-medium">Savollar</span>
+            <span class="text-gray-700 font-medium">{{ T.progress_questions }}</span>
         </div>
         <span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 text-sm font-semibold px-3 py-1 rounded-full border border-blue-200 mb-2">
-            {{ industry.name }}
+            {{ industry.display_name }}
         </span>
         <h1 class="text-3xl font-bold text-gray-900 mt-2">{{ T.ctx_company_context|default:"Korxonangiz holati" }}</h1>
-        <p class="text-gray-600 mt-1">Har bir savolga halol javob bering — natija shuncha aniq bo'ladi</p>
+        <p class="text-gray-600 mt-1">{{ T.answer_hint }}</p>
     </div>
 
     <!-- Progress -->
@@ -26,7 +26,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
             </div>
-            <span class="text-sm font-medium text-green-600">Soha</span>
+            <span class="text-sm font-medium text-green-600">{{ T.progress_industry }}</span>
         </div>
         <div class="flex-1 h-0.5 bg-green-500"></div>
         <div class="flex items-center gap-2">
@@ -35,21 +35,21 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
             </div>
-            <span class="text-sm font-medium text-green-600">Standartlar</span>
+            <span class="text-sm font-medium text-green-600">{{ T.progress_standards }}</span>
         </div>
         <div class="flex-1 h-0.5 bg-blue-500"></div>
         <div class="flex items-center gap-2">
             <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center">
                 <span class="text-white text-sm font-bold">3</span>
             </div>
-            <span class="text-sm font-medium text-blue-600">Holat</span>
+            <span class="text-sm font-medium text-blue-600">{{ T.progress_questions }}</span>
         </div>
         <div class="flex-1 h-0.5 bg-gray-200"></div>
         <div class="flex items-center gap-2">
             <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                 <span class="text-gray-500 text-sm font-bold">4</span>
             </div>
-            <span class="text-sm text-gray-400">Natija</span>
+            <span class="text-sm text-gray-400">{{ T.progress_result }}</span>
         </div>
     </div>
 
@@ -63,7 +63,7 @@
         </div>
         <div>
             <span class="font-bold text-blue-900">{{ std.code }}</span>
-            <span class="text-blue-700 text-sm ml-2">— {{ std.name }}</span>
+            <span class="text-blue-700 text-sm ml-2">— {{ std.display_name }}</span>
         </div>
     </div>
     {% endfor %}
@@ -71,7 +71,7 @@
     <form method="POST" id="questionsForm">
         {% csrf_token %}
 
-        <!-- Korxona konteksti (AI tahlilini aniqroq qiladi) -->
+        <!-- Korxona konteksti -->
         <div class="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-6">
             <div class="flex items-center gap-2 mb-1">
                 <span class="text-lg">🏢</span>
@@ -110,9 +110,9 @@
                         <span class="text-gray-600 text-sm font-bold">{{ forloop.counter }}</span>
                     </div>
                     <div class="flex-1">
-                        <p class="font-medium text-gray-900 mb-1">{{ question.text }}</p>
-                        {% if question.help_text %}
-                        <p class="text-gray-500 text-sm mb-4">{{ question.help_text }}</p>
+                        <p class="font-medium text-gray-900 mb-1">{{ question.display_text }}</p>
+                        {% if question.display_help %}
+                        <p class="text-gray-500 text-sm mb-4">{{ question.display_help }}</p>
                         {% endif %}
 
                         <!-- Javob tugmalari -->
@@ -120,21 +120,21 @@
                             <label class="cursor-pointer flex-1">
                                 <input type="radio" name="question_{{ question.pk }}" value="yes" class="hidden peer" required>
                                 <div class="peer-checked:bg-green-500 peer-checked:text-white peer-checked:border-green-500 border-2 border-gray-200 rounded-xl py-3 text-center text-sm font-medium text-gray-600 hover:border-green-300 transition-all">
-                                    ✓ Ha
+                                    {{ T.answer_yes }}
                                 </div>
                             </label>
                             {% if question.answer_type == 'yes_partial_no' %}
                             <label class="cursor-pointer flex-1">
                                 <input type="radio" name="question_{{ question.pk }}" value="partial" class="hidden peer">
                                 <div class="peer-checked:bg-yellow-400 peer-checked:text-white peer-checked:border-yellow-400 border-2 border-gray-200 rounded-xl py-3 text-center text-sm font-medium text-gray-600 hover:border-yellow-300 transition-all">
-                                    ~ Qisman
+                                    {{ T.answer_partial }}
                                 </div>
                             </label>
                             {% endif %}
                             <label class="cursor-pointer flex-1">
                                 <input type="radio" name="question_{{ question.pk }}" value="no" class="hidden peer">
                                 <div class="peer-checked:bg-red-500 peer-checked:text-white peer-checked:border-red-500 border-2 border-gray-200 rounded-xl py-3 text-center text-sm font-medium text-gray-600 hover:border-red-300 transition-all">
-                                    ✗ Yo'q
+                                    {{ T.answer_no }}
                                 </div>
                             </label>
                         </div>
@@ -148,7 +148,7 @@
         <div class="sticky bottom-4 mt-6">
             <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-lg flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500">Javob berildi</p>
+                    <p class="text-sm text-gray-500">{{ T.answered_count_lbl }}</p>
                     <p class="font-bold text-gray-900"><span id="answered">0</span> / {{ questions|length }}</p>
                 </div>
                 <button type="submit" id="submitBtn"
@@ -157,7 +157,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
-                    AI tahlilni boshlash
+                    {{ T.start_ai_btn }}
                 </button>
             </div>
         </div>
@@ -170,7 +170,6 @@ const submitBtn = document.getElementById('submitBtn');
 const answeredSpan = document.getElementById('answered');
 
 function updateProgress() {
-    const answered = document.querySelectorAll('input[type="radio"]:checked').length;
     const unique = new Set(
         Array.from(document.querySelectorAll('input[type="radio"]:checked'))
             .map(r => r.name)
@@ -195,7 +194,7 @@ document.getElementById('questionsForm').addEventListener('submit', function() {
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
         </svg>
-        AI tahlil qilmoqda...
+        {{ T.ai_analyzing }}
     `;
     submitBtn.disabled = true;
 });

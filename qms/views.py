@@ -8,6 +8,7 @@ from django.db.models import Count, F, ExpressionWrapper, IntegerField
 from datetime import timedelta
 from django_ratelimit.decorators import ratelimit
 from .models import ChecklistItem, ChecklistResponse, QMSDocument, QMSDocumentVersion, NonConformity, AuditSchedule, RiskItem, TrainingRecord
+from core.translations import notif_text as _nl
 import json
 import csv
 import os
@@ -389,8 +390,11 @@ def add_nonconformity(request):
             from experts.models import Notification
             Notification.objects.create(
                 user=request.user,
-                title=f'Yangi nomuvofiqlik: {nc.code}',
-                message=f'"{title[:80]}" nomuvofiqlik QMS tizimiga qo\'shildi. Holat: Ochiq.',
+                title=_nl(request.user, f'Yangi nomuvofiqlik: {nc.code}', f'Новое несоответствие: {nc.code}', f'New nonconformity: {nc.code}'),
+                message=_nl(request.user,
+                    f'"{title[:80]}" nomuvofiqlik QMS tizimiga qo\'shildi. Holat: Ochiq.',
+                    f'Несоответствие "{title[:80]}" добавлено в QMS. Статус: Открытое.',
+                    f'Nonconformity "{title[:80]}" added to QMS. Status: Open.'),
                 link='/qms/nc/',
             )
             messages.success(request, 'Nomuvofiqlik qo\'shildi.')

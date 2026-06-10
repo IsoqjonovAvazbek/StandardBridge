@@ -15,7 +15,11 @@ class Industry(models.Model):
     ]
 
     name = models.CharField(max_length=200)
+    name_ru = models.CharField(max_length=200, blank=True)
+    name_en = models.CharField(max_length=200, blank=True)
     description = models.CharField(max_length=500, blank=True)
+    description_ru = models.CharField(max_length=500, blank=True)
+    description_en = models.CharField(max_length=500, blank=True)
     icon = models.CharField(max_length=50, default='box')
     is_active = models.BooleanField(default=True)
     order = models.IntegerField(default=0)
@@ -26,6 +30,20 @@ class Industry(models.Model):
     def __str__(self):
         return self.name
 
+    def get_name(self, lang):
+        if lang == 'ru' and self.name_ru:
+            return self.name_ru
+        if lang == 'en' and self.name_en:
+            return self.name_en
+        return self.name
+
+    def get_description(self, lang):
+        if lang == 'ru' and self.description_ru:
+            return self.description_ru
+        if lang == 'en' and self.description_en:
+            return self.description_en
+        return self.description
+
 
 class Standard(models.Model):
     TYPE_CHOICES = [
@@ -35,8 +53,12 @@ class Standard(models.Model):
 
     code = models.CharField(max_length=100, unique=True)
     name = models.CharField(max_length=500)
+    name_ru = models.CharField(max_length=500, blank=True)
+    name_en = models.CharField(max_length=500, blank=True)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     description = models.TextField(blank=True)
+    description_ru = models.TextField(blank=True)
+    description_en = models.TextField(blank=True)
     industry = models.ForeignKey(Industry, on_delete=models.SET_NULL, null=True, blank=True, related_name='standards')
     version = models.CharField(max_length=50, blank=True)
     is_active = models.BooleanField(default=True)
@@ -44,6 +66,20 @@ class Standard(models.Model):
 
     def __str__(self):
         return f"{self.code} — {self.name}"
+
+    def get_name(self, lang):
+        if lang == 'ru' and self.name_ru:
+            return self.name_ru
+        if lang == 'en' and self.name_en:
+            return self.name_en
+        return self.name
+
+    def get_description(self, lang):
+        if lang == 'ru' and self.description_ru:
+            return self.description_ru
+        if lang == 'en' and self.description_en:
+            return self.description_en
+        return self.description
 
 
 class StandardRoadmapStep(models.Model):
@@ -151,7 +187,11 @@ class Question(models.Model):
 
     standard = models.ForeignKey(Standard, on_delete=models.CASCADE, related_name='questions')
     text = models.CharField(max_length=500)
+    text_ru = models.CharField(max_length=500, blank=True)
+    text_en = models.CharField(max_length=500, blank=True)
     help_text = models.CharField(max_length=500, blank=True)
+    help_text_ru = models.CharField(max_length=500, blank=True)
+    help_text_en = models.CharField(max_length=500, blank=True)
     answer_type = models.CharField(max_length=20, choices=ANSWER_TYPE_CHOICES, default='yes_partial_no')
     order = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
@@ -161,6 +201,20 @@ class Question(models.Model):
 
     def __str__(self):
         return f"{self.standard.code} — {self.text[:50]}"
+
+    def get_text(self, lang):
+        if lang == 'ru' and self.text_ru:
+            return self.text_ru
+        if lang == 'en' and self.text_en:
+            return self.text_en
+        return self.text
+
+    def get_help(self, lang):
+        if lang == 'ru' and self.help_text_ru:
+            return self.help_text_ru
+        if lang == 'en' and self.help_text_en:
+            return self.help_text_en
+        return self.help_text
 
 
 class QuestionAnswer(models.Model):

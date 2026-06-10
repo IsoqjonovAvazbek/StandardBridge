@@ -41,7 +41,7 @@
             <textarea name="content" rows="20"
                 class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-y font-mono text-xs"
                 >{{ proposal.content }}</textarea>
-            <p class="text-xs text-gray-400 mt-1">**qalin**, ## sarlavha, - ro'yxat</p>
+            <p class="text-xs text-gray-400 mt-1">{{ T.et_markdown_hint }}</p>
         </div>
         <div class="flex gap-3">
             <a href="{% url 'proposal_detail' proposal.pk %}"

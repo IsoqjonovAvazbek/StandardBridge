@@ -11,6 +11,7 @@ from datetime import timedelta
 import logging
 
 logger = logging.getLogger('standardbridge')
+from core.translations import notif_text as _nl
 from .models import CustomUser, ExpertProfile, EntrepreneurProfile
 from experts.emails import send_welcome_email, send_expert_verified
 
@@ -630,8 +631,11 @@ def admin_process_withdrawal(request, pk):
             wr_locked.save()
         Notification.objects.create(
             user=wr.wallet.user,
-            title='Pul yechish tasdiqlandi!',
-            message=f'${wr.amount} kartangizga o\'tkazildi. *{wr.card_number_plain[-4:]}',
+            title=_nl(wr.wallet.user, 'Pul yechish tasdiqlandi!', 'Вывод средств подтверждён!', 'Withdrawal approved!'),
+            message=_nl(wr.wallet.user,
+                f'${wr.amount} kartangizga o\'tkazildi. *{wr.card_number_plain[-4:]}',
+                f'${wr.amount} переведено на вашу карту. *{wr.card_number_plain[-4:]}',
+                f'${wr.amount} transferred to your card. *{wr.card_number_plain[-4:]}'),
         )
         send_withdrawal_approved(wr)
         messages.success(request, f'${wr.amount} yechish so\'rovi tasdiqlandi!')
@@ -652,8 +656,11 @@ def admin_process_withdrawal(request, pk):
             wr_locked.save()
         Notification.objects.create(
             user=wr.wallet.user,
-            title='Pul yechish rad etildi',
-            message=f'${wr.amount} hamyoningizga qaytarildi. Sabab: {admin_note or "Ko\'rsatilmadi"}',
+            title=_nl(wr.wallet.user, 'Pul yechish rad etildi', 'Вывод средств отклонён', 'Withdrawal rejected'),
+            message=_nl(wr.wallet.user,
+                f'${wr.amount} hamyoningizga qaytarildi. Sabab: {admin_note or "Ko\'rsatilmadi"}',
+                f'${wr.amount} возвращено на кошелёк. Причина: {admin_note or "Не указана"}',
+                f'${wr.amount} returned to wallet. Reason: {admin_note or "Not specified"}'),
         )
         send_withdrawal_rejected(wr)
         messages.warning(request, f'Yechish so\'rovi rad etildi, ${wr.amount} qaytarildi.')
@@ -727,14 +734,20 @@ def admin_resolve_dispute(request, pk):
 
     Notification.objects.create(
         user=dispute.opened_by,
-        title='Nizo ko\'rib chiqildi!',
-        message=f'Loyiha #{dispute.project_id} bo\'yicha nizo hal qilindi. Admin qarori: {decision[:100]}',
+        title=_nl(dispute.opened_by, 'Nizo ko\'rib chiqildi!', 'Спор рассмотрен!', 'Dispute resolved!'),
+        message=_nl(dispute.opened_by,
+            f'Loyiha #{dispute.project_id} bo\'yicha nizo hal qilindi. Admin qarori: {decision[:100]}',
+            f'Спор по проекту #{dispute.project_id} рассмотрен. Решение администратора: {decision[:100]}',
+            f'Dispute on project #{dispute.project_id} resolved. Admin decision: {decision[:100]}'),
     )
     if dispute.project.expert:
         Notification.objects.create(
             user=dispute.project.expert,
-            title='Nizo ko\'rib chiqildi!',
-            message=f'Loyiha #{dispute.project_id} bo\'yicha nizo hal qilindi.',
+            title=_nl(dispute.project.expert, 'Nizo ko\'rib chiqildi!', 'Спор рассмотрен!', 'Dispute resolved!'),
+            message=_nl(dispute.project.expert,
+                f'Loyiha #{dispute.project_id} bo\'yicha nizo hal qilindi.',
+                f'Спор по проекту #{dispute.project_id} рассмотрен.',
+                f'Dispute on project #{dispute.project_id} resolved.'),
         )
     send_dispute_resolved(dispute, decision)
     messages.success(request, f'Nizo #{pk} hal qilindi!')

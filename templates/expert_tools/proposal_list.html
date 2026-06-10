@@ -40,7 +40,7 @@
                 <p class="text-gray-500 text-sm">{{ p.standard }} · {{ p.created_at|date:"d.m.Y" }}</p>
                 {% if p.price_min or p.price_max %}
                 <p class="text-xs text-gray-400 mt-0.5">
-                    ${{ p.price_min|floatformat:0 }} – ${{ p.price_max|floatformat:0 }} · {{ p.duration_days }} kun
+                    ${{ p.price_min|floatformat:0 }} – ${{ p.price_max|floatformat:0 }} · {{ p.duration_days }} {{ T.et_step_days }}
                 </p>
                 {% endif %}
             </div>
@@ -53,7 +53,7 @@
                     {% if p.status == 'accepted' %}{{ T.et_proposal_accepted }}{% elif p.status == 'rejected' %}{{ T.et_proposal_rejected }}{% elif p.status == 'sent' %}{{ T.et_proposal_sent }}{% else %}{{ T.et_proposal_draft }}{% endif %}
                 </span>
                 {% if p.is_expired and p.status in 'draft sent' %}
-                <span class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-medium">Muddati o'tgan</span>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-medium">{{ T.et_proposal_expired }}</span>
                 {% endif %}
                 <a href="{% url 'proposal_detail' p.pk %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">{{ T.et_view }}</a>
                 <a href="{% url 'proposal_print' p.pk %}" target="_blank" class="text-gray-500 hover:text-gray-700 text-sm">PDF</a>
@@ -79,7 +79,7 @@
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <div>
                 <h3 class="font-bold text-gray-900">{{ T.et_new_proposal }}</h3>
-                <p class="text-xs text-gray-400">AI matn tayyorlaydi, siz tahrirlaysiz</p>
+                <p class="text-xs text-gray-400">{{ T.et_proposal_ai_hint }}</p>
             </div>
             <button onclick="document.getElementById('createModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">✕</button>
         </div>
@@ -88,24 +88,24 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_proposal_company }} <span class="text-red-500">*</span></label>
-                    <input type="text" name="company_name" required placeholder="Mijoz korxona nomi"
+                    <input type="text" name="company_name" required placeholder="{{ T.et_proposal_company }}"
                         class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_proposal_contact }}</label>
-                    <input type="text" name="contact_person" placeholder="Ism Familiya"
+                    <input type="text" name="contact_person" placeholder="{{ T.first_name }} {{ T.last_name }}"
                         class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_industry_lbl }}</label>
-                    <input type="text" name="industry" placeholder="Oziq-ovqat, Qurilish..."
+                    <input type="text" name="industry" placeholder="{{ T.et_industry_lbl }}..."
                         class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_proposal_standard }} <span class="text-red-500">*</span></label>
                 <select name="standard" required class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    <option value="">Tanlang...</option>
+                    <option value="">{{ T.et_select_option }}</option>
                     <option value="ISO 9001">ISO 9001 (Sifat menejmenti)</option>
                     <option value="ISO 14001">ISO 14001 (Atrof-muhit)</option>
                     <option value="ISO 45001">ISO 45001 (Mehnat xavfsizligi)</option>
@@ -116,7 +116,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_proposal_scope }}</label>
-                <textarea name="scope" rows="2" placeholder="Nima qilamiz? Qaysi jarayonlar..."
+                <textarea name="scope" rows="2" placeholder="{{ T.ph_scope }}"
                     class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
             </div>
             <div class="grid grid-cols-3 gap-3">
@@ -138,9 +138,9 @@
             </div>
             {% if projects %}
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Loyiha bilan bog'lash (ixtiyoriy)</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.et_link_project_lbl }}</label>
                 <select name="project_id" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    <option value="">Bog'lamaslik</option>
+                    <option value="">{{ T.et_no_link_option }}</option>
                     {% for pr in projects %}
                     <option value="{{ pr.pk }}">{{ pr.entrepreneur.company_name|default:pr.entrepreneur.username }} — {{ pr.target_standard }}</option>
                     {% endfor %}

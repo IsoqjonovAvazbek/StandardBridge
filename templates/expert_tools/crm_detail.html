@@ -14,9 +14,9 @@
     <form method="post" action="{% url 'crm_delete' client.pk %}">
       {% csrf_token %}
       <button type="submit"
-        onclick="return confirm('{{ client.company_name }} ni CRM\'dan o\'chirasizmi? Bu amal qaytarib bo\'lmaydi.')"
+        onclick="return confirm('{{ client.company_name }} {{ T.et_crm_delete_confirm }}')"
         class="text-xs text-red-400 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg transition">
-        🗑 O'chirish
+        🗑 {{ T.delete_btn }}
       </button>
     </form>
   </div>
