@@ -71,33 +71,36 @@
     <form method="POST" id="questionsForm">
         {% csrf_token %}
 
-        <!-- Korxona konteksti -->
-        <div class="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-6">
-            <div class="flex items-center gap-2 mb-1">
-                <span class="text-lg">🏢</span>
-                <h2 class="text-lg font-bold text-gray-800">{{ T.ctx_title }}</h2>
-            </div>
-            <p class="text-sm text-gray-500 mb-4">{{ T.ctx_sub }}</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.ctx_employees }}</label>
-                    <input type="number" name="employee_count" min="1" placeholder="50"
-                           class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.ctx_export }}</label>
-                    <input type="text" name="export_markets" placeholder="{{ T.ctx_export_ph }}"
-                           class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                </div>
-                <div class="sm:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.ctx_certs }}</label>
-                    <input type="text" name="existing_certs" placeholder="{{ T.ctx_certs_ph }}"
-                           class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                </div>
-                <div class="sm:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ T.ctx_state }}</label>
-                    <textarea name="current_state" rows="2" placeholder="{{ T.ctx_state_ph }}"
-                              class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none"></textarea>
+        <!-- Korxona konteksti (ixtiyoriy, yashirin) -->
+        <div class="mb-6">
+            <button type="button" onclick="toggleCtx()" id="ctx-toggle"
+                class="flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition mb-0">
+                <span id="ctx-arrow" class="text-xs">▶</span>
+                <span>{{ T.ctx_title }} <span class="text-gray-400 font-normal">({{ T.referral_code_optional }})</span></span>
+            </button>
+            <div id="ctx-box" style="display:none" class="mt-3 bg-blue-50 border border-blue-100 rounded-2xl p-4">
+                <p class="text-xs text-gray-500 mb-3">{{ T.ctx_sub }}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">{{ T.ctx_employees }}</label>
+                        <input type="number" name="employee_count" min="1" placeholder="50"
+                               class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">{{ T.ctx_export }}</label>
+                        <input type="text" name="export_markets" placeholder="{{ T.ctx_export_ph }}"
+                               class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none bg-white">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">{{ T.ctx_certs }}</label>
+                        <input type="text" name="existing_certs" placeholder="{{ T.ctx_certs_ph }}"
+                               class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none bg-white">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">{{ T.ctx_state }}</label>
+                        <textarea name="current_state" rows="2" placeholder="{{ T.ctx_state_ph }}"
+                                  class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none bg-white"></textarea>
+                    </div>
                 </div>
             </div>
         </div>
@@ -165,6 +168,18 @@
 </div>
 
 <script>
+function toggleCtx() {
+    var box = document.getElementById('ctx-box');
+    var arrow = document.getElementById('ctx-arrow');
+    if (box.style.display === 'none') {
+        box.style.display = '';
+        arrow.textContent = '▼';
+    } else {
+        box.style.display = 'none';
+        arrow.textContent = '▶';
+    }
+}
+
 const totalQuestions = {{ questions|length }};
 const submitBtn = document.getElementById('submitBtn');
 const answeredSpan = document.getElementById('answered');

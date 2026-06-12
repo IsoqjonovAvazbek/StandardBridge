@@ -127,16 +127,9 @@
         </div>
 
         <!-- Login ma'lumotlari (readonly) -->
-        <div class="bg-gray-50 rounded-2xl px-5 py-4 mb-8 flex flex-col sm:flex-row sm:items-center gap-4">
-            <div class="flex-1 min-w-0">
-                <p class="text-xs text-gray-400 mb-0.5">{{ T.username }}</p>
-                <p class="text-sm font-medium text-gray-700 truncate">{{ user.username }}</p>
-            </div>
-            <div class="hidden sm:block w-px h-8 bg-gray-200"></div>
-            <div class="flex-1 min-w-0">
-                <p class="text-xs text-gray-400 mb-0.5">{{ T.email }}</p>
-                <p class="text-sm font-medium text-gray-700 truncate">{{ user.email }}</p>
-            </div>
+        <div class="bg-gray-50 rounded-2xl px-5 py-4 mb-8">
+            <p class="text-xs text-gray-400 mb-0.5">{{ T.email }}</p>
+            <p class="text-sm font-medium text-gray-700">{{ user.email }}</p>
         </div>
 
         <!-- Tugmalar -->
