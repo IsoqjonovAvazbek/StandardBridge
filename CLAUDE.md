@@ -22,9 +22,9 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - `CustomUser`: role, company_name, phone, region, industry, referral_code, referred_by, telegram_chat_id, is_email_verified
 - `ExpertProfile`: bio, specializations, rating, is_verified, is_available, project_price, cert_number/issuing_body/cert_expiry
 - `EntrepreneurProfile`: company_description, employee_count, export_experience
-- `Industry`: name/name_ru/name_en, description/description_ru/description_en, icon, order — `get_name(lang)`, `get_description(lang)`
-- `Standard`: code, name/name_ru/name_en, type (local/international), description/description_ru/description_en, industry FK — `get_name(lang)`, `get_description(lang)`
-- `Question`: standard FK, text/text_ru/text_en, help_text/help_text_ru/help_text_en, answer_type — `get_text(lang)`, `get_help(lang)`
+- `Industry`: name/name_ru/name_en, description/description_ru/description_en, icon, order
+- `Standard`: code, name/name_ru/name_en, type (local/international), description, industry FK
+- `Question`: standard FK, text/text_ru/text_en, help_text, answer_type
 - `GapAnalysis`: entrepreneur, local_standard, target_standard, industry, ai_result (JSON), status, language
 - `GapItem`: analysis, title, priority (critical/high/medium/low), estimated_days, is_resolved, clause
 - `Roadmap` + `RoadmapStep`: is_completed toggle (AJAX), deliverables (JSONField)
@@ -47,7 +47,7 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 ## Key URLs
 - `/` — landing
 - `/register/` — ro'yxatdan o'tish (referral_code qabul qiladi)
-- `/accounts/login/` — kirish (tizim rolni o'zi aniqlab yo'naltiradi)
+- `/accounts/login/` — kirish
 - `/analysis/` — entrepreneur dashboard
 - `/analysis/select-industry/` → `/analysis/<id>/standards/` → `/analysis/<id>/questions/` → `/analysis/<id>/run/`
 - `/analysis/<pk>/` — tahlil natijasi
@@ -67,20 +67,24 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - `core/context_processors.py`: `language_context` → `T` dict, `current_lang`, `langs`
 - `core/translations.py`: TRANSLATIONS dict 280+ kalit (UZ/RU/EN to'liq)
 - Templatelarda: `{{ T.key }}` pattern
-- **DB content tarjimasi**: `Industry`/`Standard`/`Question` modellarida `*_ru`/`*_en` maydonlar bor. Views sessiondan `lang` o'qib har bir obyektga `display_name`, `display_description`, `display_text`, `display_help` attribut qo'shadi. Template: `{{ industry.display_name }}`, `{{ question.display_text }}`
+- **DB content tarjimasi**: `Industry`/`Standard`/`Question` modellarida `*_ru`/`*_en` maydonlar bor. Views sessiondan `lang` o'qib har bir obyektga `display_name`, `display_description`, `display_text`, `display_help` attribut qo'shadi.
 - Standalone print templatelar (`audit_print.html`, `proposal_print.html`): `base.html` extend qilmaydi → `T` ni view'dan explicit uzatish kerak (`get_translation(lang)` import qilib)
 - Model choices tarjimasi: `CHOICE_LABELS` dict + `get_choice_label()` + `{% label code %}` template tag (`accounts/templatetags/labels.py`)
 
+## Ro'yxatdan o'tish (oxirgi holat)
+- **username maydoni yo'q** — emaildan avtomatik hosil qilinadi (collision'da raqam qo'shiladi)
+- Tadbirkor: faqat ism + email + parol
+- Mutaxassis: ism + email + telefon + parol
+- Region/sanoat/kompaniya nomi → profil sahifasida to'ldiriladi
+- Referral kod: URL `?ref=` bo'lsa ko'rinadi, aks holda yashirin toggle
+
 ## Migrations holati
 - `analysis`: 0009_multilingual_fields (oxirgi)
-- `accounts`: 0010 (telegram), 0011 (counter_rounds) (oxirgi)
-- `experts`: tegishli migrationlar
-- `qms`: 0005 (risk, training) (oxirgi)
-- `expert_tools`: 0002 (Proposal, TimeLog) (oxirgi)
-- `blog`: 0005 (indexes) (oxirgi)
+- `accounts`: 0010 (telegram), hech qanday yangi migration kerak emas
+- `experts`, `qms`, `expert_tools`, `blog`: tegishli oxirgi migrationlar
 
 ## Testlar
-- Jami: **81 ta test**, hammasi OK
+- Jami: **83 ta test**, hammasi OK
 - `python manage.py test` — hammasi
 - `python manage.py test accounts` — bitta app
 
@@ -88,12 +92,11 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - GitHub: https://github.com/Avazbek-1/StandardBridge (private), branch=main
 - Railway auto-deploy: main ga push → avtomatik deploy
 - `start.sh`: migrate → collectstatic → seed_data → seed_standards → seed_questions → load_checklist → load_expert_templates → seed_experts → seed_roadmap_steps → seed_blog_posts → create_admin → setup_telegram_webhook → gunicorn
-- Credentials: Windows Credential Manager da saqlangan
 
 ## .env fayli
 ```
-GROQ_API_KEY=gsk_02O2Ulf...
-SECRET_KEY=django-insecure-standartbridge-secret-key-2026
+GROQ_API_KEY=gsk_02O2Ulf...   ⚠️ YANGILASH KERAK
+SECRET_KEY=django-insecure-standartbridge-secret-key-2026   ⚠️ YANGILASH KERAK
 EMAIL_HOST_USER=your_email@gmail.com
 EMAIL_HOST_PASSWORD=your_app_password
 CLICK_SERVICE_ID= (bo'sh)
@@ -103,26 +106,24 @@ CLICK_RETURN_URL=http://127.0.0.1:8000
 ```
 
 ## Muhim texnik eslatmalar
-- Django template `{% for x in "a b c" %}` — string ni BOSh JOY bo'yicha emas, BELGI bo'yicha iteratsiya qiladi. Progress bar widthlarini statik yozing
 - Email jo'natish `threading.Thread` da — SMTP bloklanishi yo'q
 - `templates/landing.html` 800+ qator — o'qishdan oldin `limit` bering
 - AI timeout: `settings.AI_TIMEOUT` (default 45s, `.env` dan sozlanadi)
-- `python manage.py check --deploy` — 0 ogohlantirish (DEBUG=False, kuchli SECRET_KEY bilan)
 - Click webhook: IP whitelist `_CLICK_ALLOWED_IPS`, `sign_time` timestamp tekshiruvi (1 soat)
 - QMS health score: checklist 40% + NC yopish 30% + hujjat validligi 20% + audit jadval 10%
-- Readiness: yes=1.0 / partial=0.5 / no=0.0, `_compute_readiness()`
 - AI roadmap: DB `StandardRoadmapStep` dan yuklash prioriteti (163 qadam ISO 9001/14001/45001/22000 uchun)
-- ⚠️ GROQ_API_KEY avval oshkor bo'lgan — console.groq.com da yangilash kerak
+- Gap Analysis savollar sahifasida "Korxona konteksti" yashirin (ixtiyoriy toggle) — AI prompta qo'shiladi agar to'ldirilsa
 
-## Bajarilgan features (xulosa)
-Barcha asosiy feature'lar to'liq ishlatilmoqda:
+## Bajarilgan features
 - Entrepreneur: soha tanlash → standart → savollar (UZ/RU/EN) → AI gap tahlil → roadmap → expert topish → loyiha → to'lov (escrow) → sertifikat
 - Expert: dashboard → loyihalar → taklifnoma → audit → CRM → vaqt hisobi → daromad
 - QMS: checklist → hujjatlar → NC → audit jadval → risk register → training records → health score
 - Blog: maqolalar → like/komment → SEO
 - Admin: foydalanuvchilar → expertlar tasdiqlash → to'lovlar → nizolar → statistika
 - To'liq UZ/RU/EN (barcha template + DB content)
-- Railway production online, 81/81 test OK
+- Ro'yxatdan o'tish soddalashtirish: username olib tashlandi, maydonlar minimallashtirildi
+- Entrepreneur dashboard soddalashtirish: trend grafigi olib tashlandi, ikkilanma onboarding tuzatildi, kompakt ko'rinish
+- Railway production online, 83/83 test OK
 
 ---
 
@@ -138,15 +139,14 @@ Barcha asosiy feature'lar to'liq ishlatilmoqda:
 2. **Click.uz real integratsiya**
    - CLICK_SERVICE_ID/MERCHANT_ID/SECRET_KEY hali bo'sh
    - `payment_confirm` MOCK transaction yaratadi — production da ishlamaydi
-   - Click.uz da biznes ro'yxatdan o'tish kerak (1-2 kun)
+   - Click.uz da biznes ro'yxatdan o'tish kerak
 
 3. **Payme integratsiya**
-   - Hali amalga oshirilmagan (Click bor, Payme yo'q)
+   - Hali amalga oshirilmagan
 
 ---
 
 ## Context window tugaganda davom etish
 1. `/compact` buyrug'ini ishlatish
 2. Yangi sessiyada: "CLAUDE.md ni o'qi va [qaysi task] dan davom et"
-3. Yoki: "PENDING bo'limidagi birinchi taskdan boshlаgin"
-4. Har bir muhim o'zgarishdan keyin CLAUDE.md yangilansin
+3. Har bir muhim o'zgarishdan keyin CLAUDE.md yangilansin
