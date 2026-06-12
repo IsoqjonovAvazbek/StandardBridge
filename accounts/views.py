@@ -188,48 +188,29 @@ def landing(request):
 def register_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
-    
+
     if request.method == 'POST':
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
         email = request.POST.get('email', '').strip()
-        username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
         password2 = request.POST.get('password2', '')
         role = request.POST.get('role', '')
-        company_name = request.POST.get('company_name', '').strip()
         phone = request.POST.get('phone', '').strip()
-        region = request.POST.get('region', '').strip()
-        industry = request.POST.get('industry', '').strip()
-        # Expert-specific fields
-        specializations = request.POST.get('specializations', '').strip()
-        expert_region = request.POST.get('expert_region', '').strip()
-        experience_years_raw = request.POST.get('experience_years', '0').strip()
-        try:
-            experience_years = max(0, min(50, int(experience_years_raw)))
-        except (ValueError, TypeError):
-            experience_years = 0
-
         referral_code = request.POST.get('referral_code', '').strip().upper()
 
-        # Preserve entered values so the form is not wiped on error
         form_data = {
             'first_name': first_name, 'last_name': last_name, 'email': email,
-            'username': username, 'role': role, 'company_name': company_name,
-            'phone': phone, 'region': region, 'industry': industry,
-            'referral_code': referral_code,
+            'role': role, 'phone': phone, 'referral_code': referral_code,
         }
 
         def fail(msg):
             messages.error(request, msg)
             return render(request, 'accounts/register.html', {'form_data': form_data})
 
-        # --- Validation ---
         import re as _re
         if not first_name or not last_name:
             return fail('Ism va familiyani kiriting!')
-        if not username:
-            return fail('Foydalanuvchi nomini kiriting!')
         if not email:
             return fail('Email manzilni kiriting!')
         if not _re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email):
@@ -243,11 +224,16 @@ def register_view(request):
         if password != password2:
             return fail('Parollar mos kelmadi!')
 
-        if CustomUser.objects.filter(username=username).exists():
-            return fail('Bu username allaqachon mavjud!')
-
         if CustomUser.objects.filter(email__iexact=email).exists():
             return fail('Bu email allaqachon ro\'yxatdan o\'tgan!')
+
+        # Auto-generate unique username from email
+        base = _re.sub(r'[^a-zA-Z0-9_]', '', email.split('@')[0])[:15] or 'user'
+        username = base
+        _counter = 1
+        while CustomUser.objects.filter(username=username).exists():
+            username = f'{base}{_counter}'
+            _counter += 1
 
         referred_by = None
         if referral_code:
@@ -263,21 +249,12 @@ def register_view(request):
             first_name=first_name,
             last_name=last_name,
             role=role,
-            company_name=company_name,
             phone=phone,
-            region=region,
-            industry=industry,
             referred_by=referred_by,
         )
 
         if role == 'expert':
-            ExpertProfile.objects.create(
-                user=user,
-                specializations=specializations,
-                region=expert_region or region,
-                experience_years=experience_years,
-                phone=phone,
-            )
+            ExpertProfile.objects.create(user=user, phone=phone)
         else:
             EntrepreneurProfile.objects.create(user=user)
 

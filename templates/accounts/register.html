@@ -4,30 +4,27 @@
 {% block extra_head %}
 <style>
 #auth-wrap{min-height:100svh;background:#f8fafc;display:flex;align-items:flex-start;justify-content:center;padding:80px 16px 60px;font-family:'Inter',sans-serif}
-.auth-card{width:100%;max-width:480px;background:#fff;border-radius:20px;padding:40px 36px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 32px rgba(0,0,0,.06)}
-.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px}
+.auth-card{width:100%;max-width:440px;background:#fff;border-radius:20px;padding:40px 36px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 32px rgba(0,0,0,.06)}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:0}
 .auth-logo img{width:32px;height:32px;border-radius:8px}
 .auth-logo-name{font-size:16px;font-weight:800;color:#111;letter-spacing:-.3px}
 .auth-title{font-size:24px;font-weight:800;color:#111;letter-spacing:-.5px;margin-bottom:6px}
 .auth-sub{color:#6b7280;font-size:14px;margin-bottom:24px}
-/* Role selector */
-.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
-.role-opt{border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:.2s;user-select:none}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.role-opt{border:1.5px solid #e5e7eb;border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:.2s;user-select:none}
 .role-opt:hover{border-color:#93c5fd}
 .role-opt.sel{border-color:#2563eb;background:#eff6ff}
-.role-icon{font-size:22px;margin-bottom:6px}
+.role-icon{font-size:22px;margin-bottom:4px}
 .role-name{font-size:13px;font-weight:700;color:#111}
 .role-desc{font-size:11px;color:#9ca3af;margin-top:2px}
-/* Fields */
-.field{margin-bottom:16px}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.field{margin-bottom:14px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
 .field label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px}
-.fi{width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 14px;color:#111;font-size:14px;outline:none;transition:.2s;font-family:'Inter',sans-serif;-webkit-appearance:none}
+.fi{width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 14px;color:#111;font-size:14px;outline:none;transition:.2s;font-family:'Inter',sans-serif;-webkit-appearance:none;box-sizing:border-box}
 .fi:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
 .fi::placeholder{color:#9ca3af}
-select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px;padding-right:36px}
 .hint{font-size:11px;color:#9ca3af;margin-top:4px}
-.sep{border:none;border-top:1px solid #f3f4f6;margin:20px 0}
+.sep{border:none;border-top:1px solid #f3f4f6;margin:18px 0}
 .submit{width:100%;background:#111;color:#fff;font-weight:700;font-size:15px;padding:13px;border-radius:10px;border:none;cursor:pointer;transition:.2s;margin-top:4px;font-family:'Inter',sans-serif}
 .submit:hover{background:#1d4ed8}
 .err-msg{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:16px}
@@ -38,6 +35,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .lb{font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;border:1.5px solid #e5e7eb;cursor:pointer;background:#fff;color:#6b7280;transition:.15s}
 .lb.on{background:#111;color:#fff;border-color:#111}
 .lb:hover:not(.on){border-color:#2563eb;color:#2563eb}
+.ref-toggle{font-size:12px;color:#9ca3af;cursor:pointer;text-align:center;margin-top:8px;display:block;text-decoration:underline;text-underline-offset:2px}
 </style>
 {% endblock %}
 
@@ -45,7 +43,7 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <div id="auth-wrap">
   <div class="auth-card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px">
-      <div class="auth-logo" style="margin-bottom:0">
+      <div class="auth-logo">
         <img src="/static/icons/icon-96.png" alt="SB">
         <span class="auth-logo-name">StandartBridge</span>
       </div>
@@ -66,7 +64,6 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="err-msg">{{ message }}</div>
     {% endfor %}{% endif %}
 
-    <!-- Role selector -->
     <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:8px">{{ T.login_role_label }}</label>
     <div class="role-grid">
       <div class="role-opt sel" id="btn-entrepreneur" onclick="setRole('entrepreneur')">
@@ -96,96 +93,44 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         </div>
       </div>
 
-      <!-- Tadbirkor -->
-      <div id="entrepreneur-fields">
-        <div class="field">
-          <label>{{ T.company_name }}</label>
-          <input class="fi" type="text" name="company_name" placeholder="Karimov Textile LLC">
-        </div>
-        <div class="field-row">
-          <div>
-            <label>{{ T.register_region_lbl }}</label>
-            <select name="region" class="fi">
-              <option value="">{{ T.register_select_ph }}</option>
-              <option>Toshkent</option><option>Farg'ona</option><option>Samarqand</option>
-              <option>Buxoro</option><option>Andijon</option><option>Namangan</option>
-              <option>Qashqadaryo</option><option>Surxondaryo</option><option>Xorazm</option>
-              <option>Navoiy</option><option>Jizzax</option><option>Sirdaryo</option>
-              <option>Qoraqalpog'iston</option>
-            </select>
-          </div>
-          <div>
-            <label>{{ T.register_industry_lbl }}</label>
-            <select name="industry" class="fi">
-              <option value="">{{ T.register_select_ph }}</option>
-              <option>To'qimachilik</option><option>Oziq-ovqat</option><option>Kimyo</option>
-              <option>Mashinasozlik</option><option>Qurilish</option><option>Farmatsevtika</option>
-              <option>Boshqa</option>
-            </select>
-          </div>
-        </div>
+      <div class="field">
+        <label>{{ T.email }}</label>
+        <input class="fi" type="email" name="email" required value="{{ form_data.email }}" placeholder="sardor@company.uz">
       </div>
 
-      <!-- Mutaxassis -->
-      <div id="expert-fields" style="display:none">
-        <div class="field">
-          <label>{{ T.register_spec_lbl }}</label>
-          <input class="fi" type="text" name="specializations" placeholder="ISO9001 ISO22000 ISO14001">
-          <p class="hint">{{ T.register_spec_hint }}</p>
-        </div>
-        <div class="field-row">
-          <div>
-            <label>{{ T.register_region_lbl }}</label>
-            <select name="expert_region" class="fi">
-              <option value="">{{ T.register_select_ph }}</option>
-              <option value="toshkent">Toshkent</option><option value="fargona">Farg'ona</option>
-              <option value="samarqand">Samarqand</option><option value="buxoro">Buxoro</option>
-              <option value="andijon">Andijon</option><option value="namangan">Namangan</option>
-              <option value="qashqadaryo">Qashqadaryo</option><option value="surxondaryo">Surxondaryo</option>
-              <option value="xorazm">Xorazm</option><option value="navoiy">Navoiy</option>
-              <option value="jizzax">Jizzax</option><option value="sirdaryo">Sirdaryo</option>
-              <option value="qoraqalpogiston">Qoraqalpog'iston</option>
-            </select>
-          </div>
-          <div>
-            <label>{{ T.register_exp_lbl }}</label>
-            <input class="fi" type="number" name="experience_years" min="0" max="50" placeholder="5">
-          </div>
-        </div>
+      <!-- Expert uchun telefon (ixtiyoriy) -->
+      <div id="expert-phone" style="display:none">
         <div class="field">
           <label>{{ T.phone }}</label>
-          <input class="fi" type="text" name="phone" placeholder="+998901234567">
+          <input class="fi" type="text" name="phone" value="{{ form_data.phone }}" placeholder="+998901234567">
         </div>
       </div>
 
       <hr class="sep">
 
       <div class="field">
-        <label>{{ T.email }}</label>
-        <input class="fi" type="email" name="email" required value="{{ form_data.email }}" placeholder="sardor@company.uz">
-      </div>
-      <div class="field-row">
-        <div>
-          <label>{{ T.username }}</label>
-          <input class="fi" type="text" name="username" required value="{{ form_data.username }}" placeholder="sardor123">
-        </div>
-        <div>
-          <label>{{ T.password }}</label>
-          <input class="fi" type="password" name="password" id="pw1" required minlength="8" placeholder="••••••••" oninput="checkPw()">
-          <p class="hint" id="pw1-hint">{{ T.password_hint }}</p>
-        </div>
+        <label>{{ T.password }}</label>
+        <input class="fi" type="password" name="password" id="pw1" required minlength="8" placeholder="••••••••" oninput="checkPw()">
+        <p class="hint" id="pw1-hint">{{ T.password_hint }}</p>
       </div>
       <div class="field">
         <label>{{ T.password_confirm }}</label>
         <input class="fi" type="password" name="password2" id="pw2" required placeholder="••••••••" oninput="checkPw()">
         <p class="hint" id="pw2-hint" style="display:none"></p>
       </div>
-      <div class="field">
-        <label>{{ T.referral_code_label }} <span style="color:#9ca3af;font-weight:400">{{ T.referral_code_optional }}</span></label>
-        <input class="fi" type="text" name="referral_code" value="{% if request.GET.ref %}{{ request.GET.ref }}{% endif %}" placeholder="AB12CD34" maxlength="12" style="text-transform:uppercase">
-      </div>
 
-      <button type="submit" class="submit">{{ T.register_btn }}</button>
+      <!-- Referral kod: URL da ref= bo'lsa ko'rinadi, aks holda yashirin -->
+      <div id="ref-box" style="{% if not request.GET.ref %}display:none{% endif %}">
+        <div class="field">
+          <label>{{ T.referral_code_label }} <span style="color:#9ca3af;font-weight:400">{{ T.referral_code_optional }}</span></label>
+          <input class="fi" type="text" name="referral_code" id="refInput" value="{% if request.GET.ref %}{{ request.GET.ref }}{% elif form_data.referral_code %}{{ form_data.referral_code }}{% endif %}" placeholder="AB12CD34" maxlength="12" style="text-transform:uppercase">
+        </div>
+      </div>
+      {% if not request.GET.ref %}
+      <a class="ref-toggle" onclick="document.getElementById('ref-box').style.display='';this.style.display='none'">{{ T.referral_code_label }}?</a>
+      {% endif %}
+
+      <button type="submit" class="submit" style="margin-top:16px">{{ T.register_btn }}</button>
     </form>
 
     <p class="auth-link-row">
@@ -203,14 +148,13 @@ function setRole(role) {
   document.getElementById('roleInput').value = role;
   var bE = document.getElementById('btn-entrepreneur');
   var bX = document.getElementById('btn-expert');
-  var fE = document.getElementById('entrepreneur-fields');
-  var fX = document.getElementById('expert-fields');
+  var fP = document.getElementById('expert-phone');
   if (role === 'entrepreneur') {
     bE.className = 'role-opt sel'; bX.className = 'role-opt';
-    fE.style.display = ''; fX.style.display = 'none';
+    fP.style.display = 'none';
   } else {
     bX.className = 'role-opt sel'; bE.className = 'role-opt';
-    fX.style.display = ''; fE.style.display = 'none';
+    fP.style.display = '';
   }
 }
 var savedRole = '{{ form_data.role|default:"entrepreneur" }}';
