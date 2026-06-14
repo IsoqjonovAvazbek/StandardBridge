@@ -76,7 +76,7 @@
     <!-- Narx kelishilayotgan loyihalar -->
     {% if negotiating_projects %}
     <div class="mb-6">
-        <h2 class="text-base font-bold text-gray-700 mb-3">🤝 {{ T.negotiating }}</h2>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{{ T.negotiating }}</h2>
         <div class="space-y-3">
             {% for project in negotiating_projects %}
             <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
@@ -123,7 +123,7 @@
     <!-- Narx belgilanishini kutayotgan -->
     {% if pending_projects %}
     <div class="mb-6">
-        <h2 class="text-base font-bold text-gray-700 mb-3">⏳ {{ T.pending_price_title }}</h2>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{{ T.pending_price_title }}</h2>
         <div class="space-y-2">
             {% for project in pending_projects %}
             {% with waiting_hours=project.created_at|hours_since %}
@@ -160,7 +160,7 @@
     <!-- Jarayondagi loyihalar -->
     {% if active_projects %}
     <div class="mb-6">
-        <h2 class="text-base font-bold text-gray-700 mb-3">⚡ {{ T.active }}</h2>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{{ T.active }}</h2>
         <div class="space-y-3">
             {% for project in active_projects %}
             <div class="bg-white rounded-2xl p-5 border border-gray-100">
@@ -230,7 +230,7 @@
     <!-- Tahlillar -->
     {% if analyses %}
     <div class="mb-6">
-        <h2 class="text-base font-bold text-gray-700 mb-3">📊 {{ T.recent_analyses }}</h2>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{{ T.recent_analyses }}</h2>
         <div class="space-y-3">
             {% for analysis in analyses %}
             <div class="bg-white rounded-2xl p-4 border border-gray-100">
@@ -295,7 +295,7 @@
     <!-- Tugallangan loyihalar -->
     {% if completed_projects %}
     <div>
-        <h2 class="text-base font-bold text-gray-700 mb-3">✅ {{ T.completed }}</h2>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{{ T.completed }}</h2>
         <div class="space-y-2">
             {% for project in completed_projects %}
             <div class="bg-white rounded-xl px-4 py-3 border border-gray-100 flex items-center justify-between">

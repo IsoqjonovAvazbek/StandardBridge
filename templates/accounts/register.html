@@ -11,12 +11,14 @@
 .auth-title{font-size:24px;font-weight:800;color:#111;letter-spacing:-.5px;margin-bottom:6px}
 .auth-sub{color:#6b7280;font-size:14px;margin-bottom:24px}
 .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
-.role-opt{border:1.5px solid #e5e7eb;border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:.2s;user-select:none}
-.role-opt:hover{border-color:#93c5fd}
-.role-opt.sel{border-color:#2563eb;background:#eff6ff}
-.role-icon{font-size:22px;margin-bottom:4px}
-.role-name{font-size:13px;font-weight:700;color:#111}
-.role-desc{font-size:11px;color:#9ca3af;margin-top:2px}
+.role-opt{border:1.5px solid #e5e7eb;border-radius:14px;padding:16px 14px;text-align:left;cursor:pointer;transition:.2s;user-select:none;position:relative}
+.role-opt:hover{border-color:#93c5fd;background:#f8faff}
+.role-opt.sel{border-color:#2563eb;background:#eff6ff;box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.role-check{width:20px;height:20px;border-radius:50%;background:#2563eb;display:none;align-items:center;justify-content:center;flex-shrink:0}
+.role-opt.sel .role-check{display:flex}
+.role-icon{font-size:24px;margin-bottom:8px}
+.role-name{font-size:13px;font-weight:700;color:#111;margin-bottom:3px}
+.role-desc{font-size:11.5px;color:#6b7280;line-height:1.4}
 .field{margin-bottom:14px}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
 .field label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px}
@@ -67,12 +69,22 @@
     <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:8px">{{ T.login_role_label }}</label>
     <div class="role-grid">
       <div class="role-opt sel" id="btn-entrepreneur" onclick="setRole('entrepreneur')">
-        <div class="role-icon">🏭</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <div class="role-icon" style="margin-bottom:0">🏭</div>
+          <div class="role-check" id="check-entrepreneur">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5.5l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
         <div class="role-name">{{ T.login_entrepreneur }}</div>
         <div class="role-desc">{{ T.register_entrepreneur_desc }}</div>
       </div>
       <div class="role-opt" id="btn-expert" onclick="setRole('expert')">
-        <div class="role-icon">👨‍💼</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <div class="role-icon" style="margin-bottom:0">👨‍💼</div>
+          <div class="role-check" id="check-expert" style="display:none">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5.5l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
         <div class="role-name">{{ T.login_expert }}</div>
         <div class="role-desc">{{ T.register_expert_desc }}</div>
       </div>
@@ -149,12 +161,16 @@ function setRole(role) {
   var bE = document.getElementById('btn-entrepreneur');
   var bX = document.getElementById('btn-expert');
   var fP = document.getElementById('expert-phone');
+  var ckE = document.getElementById('check-entrepreneur');
+  var ckX = document.getElementById('check-expert');
   if (role === 'entrepreneur') {
     bE.className = 'role-opt sel'; bX.className = 'role-opt';
     fP.style.display = 'none';
+    if (ckE) ckE.style.display = 'flex'; if (ckX) ckX.style.display = 'none';
   } else {
     bX.className = 'role-opt sel'; bE.className = 'role-opt';
     fP.style.display = '';
+    if (ckX) ckX.style.display = 'flex'; if (ckE) ckE.style.display = 'none';
   }
 }
 var savedRole = '{{ form_data.role|default:"entrepreneur" }}';

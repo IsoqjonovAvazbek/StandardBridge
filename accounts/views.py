@@ -296,18 +296,25 @@ def login_view(request):
         return redirect('dashboard')
 
     if request.method == 'POST':
-        username = request.POST.get('username')
+        username = request.POST.get('username', '').strip()
         password = request.POST.get('password')
+
+        # Email bilan login qilishni qo'llab-quvvatlash
+        if '@' in username:
+            try:
+                from accounts.models import CustomUser as _CU
+                user_obj = _CU.objects.get(email__iexact=username)
+                username = user_obj.username
+            except Exception:
+                pass
 
         user = authenticate(request, username=username, password=password)
 
         if user:
-            # Rol login'da tanlanmaydi — 'dashboard' view foydalanuvchi rolini
-            # aniqlab, to'g'ri sahifaga (entrepreneur/expert/admin) yo'naltiradi
             login(request, user)
             return redirect('dashboard')
         else:
-            messages.error(request, 'Username yoki parol noto\'g\'ri!')
+            messages.error(request, 'Email yoki parol noto\'g\'ri!')
 
     return render(request, 'accounts/login.html')
 
