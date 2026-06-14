@@ -206,16 +206,8 @@
         <p class="hint" id="pw2-hint" style="display:none"></p>
       </div>
 
-      <div id="ref-box" style="{% if not request.GET.ref %}display:none{% endif %}">
-        <div class="field">
-          <label>{{ T.referral_code_label }} <span style="color:#9ca3af;font-weight:400">{{ T.referral_code_optional }}</span></label>
-          <input class="fi" type="text" name="referral_code" id="refInput"
-                 value="{% if request.GET.ref %}{{ request.GET.ref }}{% elif form_data.referral_code %}{{ form_data.referral_code }}{% endif %}"
-                 placeholder="AB12CD34" maxlength="12" style="text-transform:uppercase">
-        </div>
-      </div>
-      {% if not request.GET.ref %}
-      <a class="ref-toggle" onclick="document.getElementById('ref-box').style.display='';this.style.display='none'">{{ T.referral_code_label }}?</a>
+      {% if request.GET.ref %}
+      <input type="hidden" name="referral_code" value="{{ request.GET.ref }}">
       {% endif %}
 
       <button type="submit" class="submit">{{ T.register_btn }}</button>
