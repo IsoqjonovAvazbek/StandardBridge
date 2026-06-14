@@ -21,7 +21,7 @@ TRANSLATIONS = {
         'login': 'Kirish',
         'login_title': 'Xush kelibsiz!',
         'login_subtitle': 'Hisobingizga kiring',
-        'login_role_label': 'Siz kimesiz?',
+        'login_role_label': 'Siz kimsiz?',
         'login_entrepreneur': 'Tadbirkor',
         'login_expert': 'Mutaxassis',
         'login_username': 'Username',

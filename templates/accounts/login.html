@@ -3,33 +3,111 @@
 {% block title %}{{ T.login }} — StandartBridge{% endblock %}
 {% block extra_head %}
 <style>
-#auth-wrap{min-height:100svh;background:#f8fafc;display:flex;align-items:center;justify-content:center;padding:80px 16px 40px;font-family:'Inter',sans-serif}
-.auth-card{width:100%;max-width:400px;background:#fff;border-radius:20px;padding:40px 36px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 32px rgba(0,0,0,.06)}
-.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px}
-.auth-logo img{width:32px;height:32px;border-radius:8px}
-.auth-logo-name{font-size:16px;font-weight:800;color:#111;letter-spacing:-.3px}
-.auth-title{font-size:24px;font-weight:800;color:#111;letter-spacing:-.5px;margin-bottom:6px}
-.auth-sub{color:#6b7280;font-size:14px;margin-bottom:28px}
-.field{margin-bottom:18px}
-.field label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px}
-.fi{width:100%;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 14px;color:#111;font-size:15px;outline:none;transition:.2s;font-family:'Inter',sans-serif}
+*{box-sizing:border-box}
+#auth-wrap{
+  min-height:100svh;
+  background:#f1f3f4;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px 16px;
+  font-family:'Inter',sans-serif;
+}
+.auth-card{
+  width:100%;
+  max-width:400px;
+  background:#fff;
+  border-radius:16px;
+  padding:40px 40px 36px;
+  box-shadow:0 2px 6px rgba(0,0,0,.06),0 12px 40px rgba(0,0,0,.08);
+}
+.auth-head{
+  text-align:center;
+  margin-bottom:28px;
+}
+.auth-head img{
+  width:52px;height:52px;
+  border-radius:14px;
+  display:block;
+  margin:0 auto 12px;
+}
+.auth-brand{
+  font-size:17px;font-weight:800;
+  color:#111;letter-spacing:-.3px;
+}
+.auth-title{
+  font-size:26px;font-weight:800;
+  color:#111;letter-spacing:-.5px;
+  text-align:center;
+  margin:0 0 6px;
+}
+.auth-sub{
+  color:#6b7280;font-size:14px;
+  text-align:center;
+  margin:0 0 28px;
+}
+.field{margin-bottom:16px}
+.field label{
+  display:block;font-size:13px;font-weight:600;
+  color:#374151;margin-bottom:6px;
+}
+.fi{
+  width:100%;background:#fff;
+  border:1.5px solid #e5e7eb;
+  border-radius:10px;
+  padding:12px 14px;
+  color:#111;font-size:15px;
+  outline:none;transition:.18s;
+  font-family:'Inter',sans-serif;
+}
 .fi:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
 .fi::placeholder{color:#9ca3af}
-.forgot{display:block;text-align:right;font-size:12px;color:#9ca3af;text-decoration:none;margin-top:6px;transition:.15s}
-.forgot:hover{color:#2563eb}
-.submit{width:100%;background:#111;color:#fff;font-weight:700;font-size:15px;padding:13px;border-radius:10px;border:none;cursor:pointer;transition:.2s;margin-top:4px;font-family:'Inter',sans-serif}
+.forgot{
+  display:block;text-align:right;
+  font-size:12px;color:#6b7280;
+  text-decoration:none;margin-top:6px;
+}
+.forgot:hover{color:#2563eb;text-decoration:underline}
+.submit{
+  width:100%;
+  background:#2563eb;color:#fff;
+  font-weight:700;font-size:15px;
+  padding:13px;border-radius:10px;
+  border:none;cursor:pointer;
+  transition:.18s;margin-top:8px;
+  font-family:'Inter',sans-serif;
+  letter-spacing:.01em;
+}
 .submit:hover{background:#1d4ed8}
-.divider{text-align:center;color:#d1d5db;font-size:13px;margin:20px 0;position:relative}
-.divider::before{content:'';position:absolute;left:0;top:50%;right:0;height:1px;background:#f3f4f6}
-.divider span{background:#fff;padding:0 10px;position:relative}
-.auth-link-row{text-align:center;color:#6b7280;font-size:14px;margin-top:20px}
+.submit:active{background:#1e40af}
+.err-msg{
+  background:#fef2f2;border:1px solid #fecaca;
+  color:#dc2626;border-radius:10px;
+  padding:10px 14px;font-size:13px;margin-bottom:16px;
+}
+.ok-msg{
+  background:#f0fdf4;border:1px solid #bbf7d0;
+  color:#16a34a;border-radius:10px;
+  padding:10px 14px;font-size:13px;margin-bottom:16px;
+}
+.auth-link-row{
+  text-align:center;color:#6b7280;
+  font-size:14px;margin-top:20px;
+}
 .auth-link-row a{color:#2563eb;font-weight:600;text-decoration:none}
 .auth-link-row a:hover{text-decoration:underline}
-.err-msg{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:16px}
-.ok-msg{background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:16px}
-.lang-row{display:flex;gap:4px;justify-content:flex-end;margin-bottom:24px}
-.lb{font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;border:1.5px solid #e5e7eb;cursor:pointer;background:#fff;color:#6b7280;transition:.15s}
-.lb.on{background:#111;color:#fff;border-color:#111}
+.lang-row{
+  display:flex;gap:4px;justify-content:flex-end;
+  margin-bottom:24px;
+}
+.lb{
+  font-size:11px;font-weight:700;
+  padding:4px 9px;border-radius:6px;
+  border:1.5px solid #e5e7eb;
+  cursor:pointer;background:#fff;
+  color:#6b7280;transition:.15s;
+}
+.lb.on{background:#2563eb;color:#fff;border-color:#2563eb}
 .lb:hover:not(.on){border-color:#2563eb;color:#2563eb}
 </style>
 {% endblock %}
@@ -37,41 +115,48 @@
 {% block content %}
 <div id="auth-wrap">
   <div class="auth-card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:32px">
-      <div class="auth-logo" style="margin-bottom:0">
-        <img src="/static/icons/icon-96.png" alt="SB">
-        <span class="auth-logo-name">StandartBridge</span>
-      </div>
-      <div class="lang-row" style="margin-bottom:0">
-        <form method="post" action="{% url 'set_language' %}" style="display:contents">
-          {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
-          {% for code, label in langs %}
-          <button type="submit" name="lang" value="{{ code }}" class="lb {% if current_lang == code %}on{% endif %}">{{ code|upper }}</button>
-          {% endfor %}
-        </form>
-      </div>
+
+    <!-- Til almashtiruvchi -->
+    <div class="lang-row">
+      <form method="post" action="{% url 'set_language' %}" style="display:contents">
+        {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+        {% for code, label in langs %}
+        <button type="submit" name="lang" value="{{ code }}" class="lb {% if current_lang == code %}on{% endif %}">{{ code|upper }}</button>
+        {% endfor %}
+      </form>
     </div>
 
+    <!-- Logo -->
+    <div class="auth-head">
+      <img src="/static/icons/icon-96.png" alt="SB">
+      <div class="auth-brand">StandartBridge</div>
+    </div>
+
+    <!-- Sarlavha -->
     <h1 class="auth-title">{{ T.login_title }}</h1>
     <p class="auth-sub">{{ T.login_subtitle }}</p>
 
+    <!-- Xatolar -->
     {% if error %}<div class="err-msg">{{ error }}</div>{% endif %}
     {% if messages %}{% for message in messages %}
     <div class="{% if message.tags == 'error' %}err-msg{% else %}ok-msg{% endif %}">{{ message }}</div>
     {% endfor %}{% endif %}
 
+    <!-- Forma -->
     <form method="POST">
       {% csrf_token %}
       <div class="field">
-        <label>{{ T.login_username }}</label>
-        <input class="fi" type="email" name="username" required autofocus placeholder="email@company.uz">
+        <label>Email</label>
+        <input class="fi" type="email" name="username" required autofocus
+               placeholder="email@company.uz" autocomplete="email">
       </div>
       <div class="field">
         <label>{{ T.login_password }}</label>
-        <input class="fi" type="password" name="password" required placeholder="••••••••">
+        <input class="fi" type="password" name="password" required
+               placeholder="••••••••" autocomplete="current-password">
         <a href="{% url 'password_reset' %}" class="forgot">{{ T.login_forgot_password }}</a>
       </div>
-      <button type="submit" class="submit">{{ T.login_btn }}</button>
+      <button type="submit" class="submit">{{ T.login_btn }} →</button>
     </form>
 
     <p class="auth-link-row">
@@ -81,6 +166,7 @@
     <p style="text-align:center;margin-top:12px">
       <a href="{% url 'landing' %}" style="font-size:13px;color:#9ca3af;text-decoration:none">{{ T.back_home }}</a>
     </p>
+
   </div>
 </div>
 {% endblock %}
