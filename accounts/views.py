@@ -260,23 +260,7 @@ def register_view(request):
 
         login(request, user)
         send_welcome_email(user)
-        # Email tasdiqlash xatini yuborish (fon threadida)
-        import secrets, threading as _th
-        _tok = secrets.token_urlsafe(48)
-        user.is_email_verified = False
-        user.email_verify_token = _tok
-        user.save(update_fields=['is_email_verified', 'email_verify_token'])
-        from experts.emails import _send as _esend
-        _lang = request.session.get('lang', 'uz')
-        _vurl = request.build_absolute_uri(f'/accounts/verify-email/{_tok}/')
-        _ESUBJ = {'uz': 'Email manzilingizni tasdiqlang', 'ru': 'Подтвердите вашу почту', 'en': 'Verify your email'}
-        _EBODY = {
-            'uz': f'StandartBridge ga xush kelibsiz!\n\nEmail manzilingizni tasdiqlash uchun:\n{_vurl}',
-            'ru': f'Добро пожаловать на StandartBridge!\n\nПодтвердите email:\n{_vurl}',
-            'en': f'Welcome to StandartBridge!\n\nVerify your email:\n{_vurl}',
-        }
-        _esend(_ESUBJ.get(_lang, _ESUBJ['uz']), _EBODY.get(_lang, _EBODY['uz']), user.email)
-        messages.success(request, 'Xush kelibsiz! Email manzilingizni tasdiqlang.')
+        messages.success(request, 'Xush kelibsiz!')
         return redirect('dashboard')
 
     return render(request, 'accounts/register.html')
