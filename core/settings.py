@@ -176,14 +176,25 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
-# Email
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Email — real credentials bo'lsa SMTP, aks holda console (dev/test uchun)
+_email_user = os.environ.get('EMAIL_HOST_USER', '').strip()
+_email_pass = os.environ.get('EMAIL_HOST_PASSWORD', '').strip()
+_email_configured = (
+    bool(_email_user) and bool(_email_pass)
+    and _email_user not in ('your_email@gmail.com', 'noreply@standartbridge.uz')
+    and _email_pass != 'your_app_password_here'
+)
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = f'StandartBridge <{os.environ.get("EMAIL_HOST_USER", "noreply@standartbridge.uz")}>'
+EMAIL_HOST_USER = _email_user
+EMAIL_HOST_PASSWORD = _email_pass
+DEFAULT_FROM_EMAIL = f'StandartBridge <{_email_user or "noreply@standartbridge.uz"}>'
+EMAIL_BACKEND = (
+    'django.core.mail.backends.smtp.EmailBackend'
+    if _email_configured else
+    'django.core.mail.backends.console.EmailBackend'
+)
 
 # AI (Groq)
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')

@@ -4,16 +4,47 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_http_methods
 from django.contrib import messages
 from django.db.models import Sum, Count, Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.conf import settings
+from django.contrib.auth.views import PasswordResetView as _DjangoPasswordResetView
 from datetime import timedelta
 import logging
+import threading
 
 logger = logging.getLogger('standardbridge')
 from core.translations import notif_text as _nl
 from .models import CustomUser, ExpertProfile, EntrepreneurProfile
 from experts.emails import send_welcome_email, send_expert_verified
+
+
+class PasswordResetView(_DjangoPasswordResetView):
+    """Parol tiklash emailini background threadda yuboradi — UI bloklanmaydi."""
+    template_name = 'accounts/password_reset.html'
+    email_template_name = 'accounts/password_reset_email.html'
+    subject_template_name = 'accounts/password_reset_subject.txt'
+    success_url = '/accounts/password-reset/done/'
+
+    def form_valid(self, form):
+        opts = {
+            'use_https': self.request.is_secure(),
+            'token_generator': self.token_generator,
+            'from_email': self.from_email,
+            'email_template_name': self.email_template_name,
+            'subject_template_name': self.subject_template_name,
+            'request': self.request,
+            'html_email_template_name': self.html_email_template_name,
+            'extra_email_context': self.extra_email_context,
+        }
+
+        def _send():
+            try:
+                form.save(**opts)
+            except Exception as exc:
+                logger.error('Parol tiklash emaili yuborilmadi: %s', exc)
+
+        threading.Thread(target=_send, daemon=True).start()
+        return HttpResponseRedirect(self.get_success_url())
 
 
 @require_POST

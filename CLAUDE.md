@@ -1,5 +1,13 @@
 # StandardBridge — Claude Code Memory
 
+## ASOSIY QOIDA (MAJBURIY)
+**Har bir bug, xatolik, mantiqiy xato yoki UX muammo topilganida:**
+1. **Tuzat** — kodni to'g'irla
+2. **Test qil** — `python manage.py test` ishga tushir, hammasi OK bo'lsin
+3. **Push qil** — `git commit && git push origin main`
+
+Ushbu tsikl har bir muammo uchun alohida bajarilsin. Yig'ib qo'yish yo'q.
+
 ## Loyiha haqida
 Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatlash uchun AI gap analiz + tasdiqlangan mutaxassislar + escrow to'lov platformasi.
 
