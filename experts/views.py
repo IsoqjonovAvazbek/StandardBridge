@@ -1066,7 +1066,7 @@ def wallet(request):
             # Validatsiyalar — hammasi oldin, o'zgartirish keyin
             errors = []
             if raw_card:
-                if len(raw_card) < 16:
+                if len(raw_card) < 16 or len(raw_card) > 19:
                     errors.append('Karta raqami 16 ta raqamdan iborat bo\'lishi kerak!')
                 elif not raw_card.isdigit():
                     errors.append('Karta raqami faqat raqamlardan iborat bo\'lishi kerak!')

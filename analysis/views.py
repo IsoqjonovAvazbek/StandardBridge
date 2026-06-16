@@ -554,8 +554,8 @@ def _ai_background_task(analysis_id, local_ids, target_ids, industry_name, weak_
                 duration_days=step_data.get('duration_days', 0) or 0,
             )
 
-        # Remove any orphaned expert-less projects for this analysis
-        Project.objects.filter(analysis=analysis, expert__isnull=True).delete()
+        # Remove pending (unassigned) projects — but NOT projects whose expert was later deleted
+        Project.objects.filter(analysis=analysis, expert__isnull=True, status='pending').delete()
 
         # Tahlil tayyor — tadbirkorga email yuborish
         try:
@@ -750,6 +750,9 @@ def analysis_retake(request, pk):
     request.session['target_ids'] = [old.target_standard.pk]
     if old.local_standard:
         request.session['local_ids'] = [old.local_standard.pk]
+    else:
+        request.session.pop('local_ids', None)  # eski sessiya qoldig'ini tozalash
+    request.session.pop('question_answers', None)
     request.session.modified = True
     return redirect('answer_questions', industry_id=old.industry.pk)
 

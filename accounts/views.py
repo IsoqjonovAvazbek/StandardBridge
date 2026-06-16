@@ -307,6 +307,8 @@ def register_view(request):
 
 
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
     from django_ratelimit.exceptions import Ratelimited
     from django_ratelimit.decorators import is_ratelimited
     if request.method == 'POST':
@@ -316,8 +318,6 @@ def login_view(request):
                 'error': 'Juda ko\'p urinish. 1 daqiqadan keyin qayta urining.',
                 'ratelimited': True,
             })
-    if request.user.is_authenticated:
-        return redirect('dashboard')
 
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()

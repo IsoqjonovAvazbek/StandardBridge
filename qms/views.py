@@ -852,7 +852,7 @@ def verify_nc_effectiveness(request, pk):
 # ---------------------------------------------------------------------------
 
 def _csv_response(filename):
-    resp = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    resp = HttpResponse(content_type='text/csv; charset=utf-8')
     resp['Content-Disposition'] = f'attachment; filename="{filename}"'
     resp.write('﻿')  # BOM so Excel reads UTF-8 correctly
     return resp
