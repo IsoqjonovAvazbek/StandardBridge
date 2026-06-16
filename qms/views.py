@@ -292,17 +292,20 @@ def upload_document(request):
         version = request.POST.get('version', '1.0').strip() or '1.0'
         expiry_raw = request.POST.get('expiry_date', '').strip()
 
+        import os as _os
         allowed_types = {'application/pdf', 'application/msword',
                          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                          'application/vnd.ms-excel',
                          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                          'image/jpeg', 'image/png'}
+        allowed_exts = {'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.jpg', '.jpeg', '.png'}
         max_size = 10 * 1024 * 1024  # 10 MB
+        file_ext = _os.path.splitext(file.name)[1].lower() if file else ''
         if not (title and doc_type and file):
             messages.error(request, 'Sarlavha, hujjat turi va faylni kiriting!')
         elif file.size > max_size:
             messages.error(request, 'Fayl hajmi 10 MB dan oshmasligi kerak!')
-        elif file.content_type not in allowed_types:
+        elif file.content_type not in allowed_types or file_ext not in allowed_exts:
             messages.error(request, 'Faqat PDF, Word, Excel, JPG yoki PNG formatlar ruxsat etiladi!')
         else:
             QMSDocument.objects.create(
@@ -404,13 +407,15 @@ def add_nonconformity(request):
 
 
 def _next_nc_code(company):
-    """Generate a per-company, per-year traceable NC code: NC-2026-001."""
+    """Generate unique NC code atomically to prevent duplicates under concurrent requests."""
+    from django.db import transaction
     year = timezone.now().year
     prefix = f'NC-{year}-'
-    count = NonConformity.objects.filter(
-        company=company, code__startswith=prefix
-    ).count()
-    return f'{prefix}{count + 1:03d}'
+    with transaction.atomic():
+        count = NonConformity.objects.select_for_update().filter(
+            company=company, code__startswith=prefix
+        ).count()
+        return f'{prefix}{count + 1:03d}'
 
 
 @_entrepreneur_required
@@ -524,7 +529,7 @@ def _qms_ai(prompt, max_tokens=900):
     """Call Groq once and return text, or (None, error_message)."""
     try:
         from groq import Groq
-        client = Groq(api_key=os.environ.get('GROQ_API_KEY'), timeout=settings.AI_TIMEOUT, max_retries=1)
+        client = Groq(api_key=settings.GROQ_API_KEY, timeout=settings.AI_TIMEOUT, max_retries=1)
         resp = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],

@@ -385,6 +385,8 @@ def project_step_toggle(request, pk, step_pk):
 
 @login_required
 def project_set_price(request, pk):
+    if not request.user.is_expert():
+        return redirect('dashboard')
     project = get_object_or_404(Project, pk=pk, expert=request.user)
 
     # Guard: narx faqat dastlabki bosqichlarda belgilanadi (to'lovdan keyin emas)
@@ -868,8 +870,8 @@ def payment_confirm(request, project_pk):
     if request.method != 'POST':
         return redirect('payment_page', project_pk=project_pk)
 
-    # MOCK to'lov faqat DEBUG rejimida yoki Click credentials yo'q bo'lganda ishlaydi
-    if not settings.DEBUG and settings.CLICK_SERVICE_ID:
+    # MOCK to'lov DEBUG yoki TEST rejimida ishlaydi. Production'da Click.uz majburiy.
+    if not (settings.DEBUG or getattr(settings, 'TESTING', False)):
         messages.error(request, 'To\'lov Click.uz orqali amalga oshiriladi.')
         return redirect('payment_page', project_pk=project_pk)
 
@@ -965,10 +967,7 @@ def payment_release(request, project_pk):
                 project.completed_at = timezone.now()
                 project.save()
 
-                try:
-                    wallet = Wallet.objects.select_for_update().get(user=project.expert)
-                except Wallet.DoesNotExist:
-                    wallet = Wallet.objects.create(user=project.expert)
+                wallet, _ = Wallet.objects.select_for_update().get_or_create(user=project.expert)
 
                 wallet.balance += payment.expert_amount
                 wallet.save()
@@ -1262,6 +1261,7 @@ def expert_profile_edit(request):
         return redirect('expert_profile')
 
     return render(request, 'experts/expert_profile_edit.html', {'profile': profile})
+@login_required
 def expert_detail(request, expert_pk):
     from accounts.models import CustomUser, ExpertProfile
     from analysis.models import GapAnalysis
@@ -1398,8 +1398,15 @@ _CLICK_ALLOWED_IPS = {
 
 
 def _click_ip_ok(request):
+    # Proxy (Railway) ortida ishlaganda REMOTE_ADDR proxy'ning o'z IP'si bo'ladi.
+    # X-Forwarded-For'ning eng oxirgi (o'ng) IP'si eng ishonchli — proxy tomonidan qo'shilgan.
+    # Birinchi (chap) IP esa foydalanuvchi tomonidan soxtalashtirish mumkin.
     forwarded = request.META.get('HTTP_X_FORWARDED_FOR', '')
-    client_ip = forwarded.split(',')[0].strip() if forwarded else request.META.get('REMOTE_ADDR', '')
+    if forwarded:
+        # Eng o'ng IP — proxy infratuzilmasi tomonidan qo'shilgan
+        client_ip = forwarded.split(',')[-1].strip()
+    else:
+        client_ip = request.META.get('REMOTE_ADDR', '')
     if not _CLICK_ALLOWED_IPS:
         return True
     return client_ip in _CLICK_ALLOWED_IPS

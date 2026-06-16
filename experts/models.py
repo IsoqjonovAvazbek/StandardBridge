@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
+from decimal import Decimal
 from accounts.models import CustomUser
 from analysis.models import GapAnalysis
 
@@ -60,8 +61,8 @@ class Project(models.Model):
 
     def save(self, *args, **kwargs):
         if self.expert_price:
-            self.platform_fee = self.expert_price * 20 / 100
-            self.expert_payment = self.expert_price * 80 / 100
+            self.platform_fee = self.expert_price * Decimal('0.20')
+            self.expert_payment = self.expert_price * Decimal('0.80')
         # Auto-set SLA deadline on first save (when created_at not yet set)
         if not self.pk and not self.sla_deadline:
             self.sla_deadline = timezone.now() + timedelta(hours=self.sla_hours)

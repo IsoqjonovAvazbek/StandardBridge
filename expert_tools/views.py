@@ -159,13 +159,17 @@ def generate_document(request):
     # AI generation
     try:
         from groq import Groq
-        client = Groq(api_key=os.environ.get('GROQ_API_KEY'), timeout=settings.AI_TIMEOUT, max_retries=1)
+        # Foydalanuvchi kiritgan matnni prompt injection dan himoya qilish
+        def _safe(text, max_len=200):
+            return str(text or '')[:max_len].replace('\n', ' ').replace('\r', ' ')
+
+        client = Groq(api_key=settings.GROQ_API_KEY, timeout=settings.AI_TIMEOUT, max_retries=1)
         prompt = (
             f"Sen ISO standartlari bo'yicha mutaxassisson.\n"
-            f"Quyidagi korxona uchun '{template.title}' hujjatini yoz. {lang_instruction}\n\n"
-            f"Korxona nomi: {company_name}\n"
-            f"Soha: {industry}\n"
-            f"Standart: {template.standard}\n\n"
+            f"Quyidagi korxona uchun '{_safe(template.title, 100)}' hujjatini yoz. {lang_instruction}\n\n"
+            f"Korxona nomi: {_safe(company_name)}\n"
+            f"Soha: {_safe(industry)}\n"
+            f"Standart: {_safe(template.standard, 50)}\n\n"
             f"{template.ai_prompt or template.template_content}\n\n"
             f"Professional, to'liq va tayyor hujjat yoz. Faqat hujjat matnini ber."
         )

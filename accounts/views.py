@@ -190,6 +190,15 @@ def register_view(request):
         return redirect('dashboard')
 
     if request.method == 'POST':
+        from django_ratelimit.decorators import is_ratelimited
+        # Email bo'yicha: spam/brute force prevention (har email 5/soat)
+        if is_ratelimited(request, group='reg_email', key='post:email', rate='5/h', method='POST', increment=True):
+            messages.error(request, 'Bu email bilan juda ko\'p urinish. Keyinroq qayta urining.')
+            return render(request, 'accounts/register.html')
+        # IP bo'yicha: ommaviy bot registration prevention (bir IP dan 50/soat)
+        if is_ratelimited(request, group='reg_ip', key='ip', rate='50/h', method='POST', increment=True):
+            messages.error(request, 'Juda ko\'p urinish. Keyinroq qayta urining.')
+            return render(request, 'accounts/register.html')
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
         email = request.POST.get('email', '').strip()
@@ -303,9 +312,9 @@ def login_view(request):
     return render(request, 'accounts/login.html')
 
 
+@require_POST
 def logout_view(request):
-    if request.method == 'POST':
-        logout(request)
+    logout(request)
     return redirect('landing')
 
 
@@ -902,6 +911,9 @@ def telegram_webhook_view(request):
         return JsonResponse({'ok': False}, status=405)
 
     expected_secret = settings.TELEGRAM_WEBHOOK_SECRET
+    if not expected_secret and not settings.DEBUG:
+        logger.warning('Telegram webhook: TELEGRAM_WEBHOOK_SECRET sozlanmagan, so\'rov rad etildi')
+        return JsonResponse({'ok': False}, status=403)
     if expected_secret:
         incoming = request.headers.get('X-Telegram-Bot-Api-Secret-Token', '')
         if incoming != expected_secret:

@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.db import models
 from django.http import JsonResponse, FileResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_control
@@ -25,22 +26,50 @@ def service_worker_view(request):
     sw_path = os.path.join(settings.BASE_DIR, 'static', 'sw.js')
     if not os.path.isfile(sw_path):
         raise Http404
-    response = FileResponse(open(sw_path, 'rb'), content_type='application/javascript')
+    f = open(sw_path, 'rb')
+    response = FileResponse(f, content_type='application/javascript')
     response['Service-Worker-Allowed'] = '/'
     return response
 
 
 @login_required
 def protected_media(request, path):
-    """Media fayllarni faqat login qilgan foydalanuvchilarga berish."""
+    """Authenticated foydalanuvchilarga media fayl berish. Path traversal himoyasi bor."""
     base = os.path.realpath(settings.MEDIA_ROOT)
     full = os.path.realpath(os.path.join(base, path))
-    # Path traversal himoyasi: MEDIA_ROOT ichida ekanini tekshir
+    # Path traversal: fayl MEDIA_ROOT ichida bo'lishi shart
     if not full.startswith(base + os.sep) and full != base:
         raise Http404
     if not os.path.isfile(full):
         raise Http404
+    # Avatar va public resurslar — barcha login qilganlarga ochiq
+    # Loyiha hujjatlari — faqat tegishli entrepreneur/expert ko'ra oladi
+    norm = path.replace('\\', '/')
+    if norm.startswith('documents/') or norm.startswith('qms/') or norm.startswith('chat/'):
+        _check_document_access(request, norm)
     return FileResponse(open(full, 'rb'))
+
+
+def _check_document_access(request, norm_path):
+    """Hujjat egasi yoki unga ulangan mutaxassis/tadbirkor emasni tekshir."""
+    from experts.models import Document, Project
+    from qms.models import QMSDocument
+    user = request.user
+    # Agar admin bo'lsa — to'liq ruxsat
+    if user.is_staff or user.is_admin():
+        return
+    # Loyiha hujjatlari (documents/)
+    if norm_path.startswith('documents/'):
+        allowed = Document.objects.filter(file=norm_path).filter(
+            models.Q(project__entrepreneur=user) | models.Q(project__expert=user)
+        ).exists()
+        if not allowed:
+            raise Http404
+    # QMS hujjatlari
+    elif norm_path.startswith('qms/'):
+        allowed = QMSDocument.objects.filter(file=norm_path, company=user).exists()
+        if not allowed:
+            raise Http404
 
 
 urlpatterns = [

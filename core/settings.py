@@ -6,17 +6,27 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-change-in-production')
+_secret_key = os.environ.get('SECRET_KEY', '').strip()
+if not _secret_key:
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured(
+        'SECRET_KEY muhit o\'zgaruvchisi o\'rnatilmagan. '
+        'python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())" '
+        'bilan yangisini oling va .env ga yozing.'
+    )
+SECRET_KEY = _secret_key
 
-# DEBUG defaults to True for local dev; set DEBUG=False in .env for production.
-DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
+# Production uchun DEBUG=False bo'lishi SHART. Lokal dev uchun .env da DEBUG=True qo'ying.
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
-# In production set ALLOWED_HOSTS in .env (comma-separated), e.g. "standartbridge.uz,www.standartbridge.uz"
+# Production uchun ALLOWED_HOSTS ni .env da ko'rsating (vergul bilan ajratilgan)
 _hosts = os.environ.get('ALLOWED_HOSTS', '').strip()
 if _hosts:
     ALLOWED_HOSTS = [h.strip() for h in _hosts.split(',') if h.strip()]
+elif DEBUG:
+    ALLOWED_HOSTS = ['*']  # Lokal dev va testlar uchun — production da DEBUG=False bo'lishi SHART
 else:
-    ALLOWED_HOSTS = ['*'] if DEBUG else []
+    ALLOWED_HOSTS = []
 
 # CSRF trusted origins — DEBUG holatidan qat'i nazar har doim qo'llanadi
 # (HTTPS proksisi orqasidagi hosting uchun zarur, masalan Railway/Render)
@@ -41,11 +51,17 @@ _CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME', '')
 
 GOOGLE_ANALYTICS_ID = os.environ.get('GOOGLE_ANALYTICS_ID', '')
 
+import sys as _sys
+_TESTING = 'test' in _sys.argv or ('pytest' in _sys.argv[0] if _sys.argv else False)
+TESTING = _TESTING  # Views uchun ochiq flag
+
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'standardbridge',
-    }
+    'default': (
+        # Test paytida DummyCache — rate limit testlar orasida saqlanmaydi
+        {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}
+        if _TESTING else
+        {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'standardbridge'}
+    )
 }
 
 INSTALLED_APPS = [
