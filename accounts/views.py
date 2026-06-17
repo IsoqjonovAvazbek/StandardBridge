@@ -637,15 +637,22 @@ def admin_process_withdrawal(request, pk):
             wr_locked.admin_note = admin_note
             wr_locked.processed_at = timezone.now()
             wr_locked.save()
+        try:
+            _card_suffix = wr.card_number_plain[-4:] or '****'
+        except Exception:
+            _card_suffix = '****'
         Notification.objects.create(
             user=wr.wallet.user,
             title=_nl(wr.wallet.user, 'Pul yechish tasdiqlandi!', 'Вывод средств подтверждён!', 'Withdrawal approved!'),
             message=_nl(wr.wallet.user,
-                f'${wr.amount} kartangizga o\'tkazildi. *{wr.card_number_plain[-4:]}',
-                f'${wr.amount} переведено на вашу карту. *{wr.card_number_plain[-4:]}',
-                f'${wr.amount} transferred to your card. *{wr.card_number_plain[-4:]}'),
+                f'${wr.amount} kartangizga o\'tkazildi. *{_card_suffix}',
+                f'${wr.amount} переведено на вашу карту. *{_card_suffix}',
+                f'${wr.amount} transferred to your card. *{_card_suffix}'),
         )
-        send_withdrawal_approved(wr)
+        try:
+            send_withdrawal_approved(wr)
+        except Exception as _exc:
+            logger.error('send_withdrawal_approved xatosi (wr=%s): %s', wr.pk, _exc)
         messages.success(request, f'${wr.amount} yechish so\'rovi tasdiqlandi!')
     elif action == 'reject':
         from django.db import transaction as _tx
@@ -835,6 +842,9 @@ def api_notification_count(request):
 
 @login_required
 def global_search_api(request):
+    from django_ratelimit.decorators import is_ratelimited
+    if is_ratelimited(request, group='search', key='user', rate='30/m', method='GET', increment=True):
+        return JsonResponse({'results': []})
     q = request.GET.get('q', '').strip()
     if len(q) < 2:
         return JsonResponse({'results': []})

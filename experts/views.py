@@ -801,12 +801,17 @@ def project_request_revision(request, pk):
         project.status = 'in_progress'
         project.save()
 
-        # Roadmap qadamlarini reset — guard o'z maqsadini bajarmaydi aks holda
+        # Roadmap qadamlarini reset — faqat bu loyiha uchun (boshqa loyihalar shu
+        # analysis dan foydalanayotgan bo'lsa, ularning qadamlarini o'zgartirmaymiz)
         from analysis.models import RoadmapStep
         try:
-            RoadmapStep.objects.filter(
-                roadmap=project.analysis.roadmap
-            ).update(is_completed=False, completed_at=None)
+            other_active = Project.objects.filter(
+                analysis=project.analysis
+            ).exclude(pk=project.pk).exclude(status__in=['cancelled', 'completed']).exists()
+            if not other_active:
+                RoadmapStep.objects.filter(
+                    roadmap=project.analysis.roadmap
+                ).update(is_completed=False, completed_at=None)
         except Exception as _e:
             logger.warning('Roadmap reset qilinmadi (project_pk=%s): %s', pk, _e)
 
@@ -967,7 +972,8 @@ def payment_release(request, project_pk):
                 project.completed_at = timezone.now()
                 project.save()
 
-                wallet, _ = Wallet.objects.select_for_update().get_or_create(user=project.expert)
+                Wallet.objects.get_or_create(user=project.expert)
+                wallet = Wallet.objects.select_for_update().get(user=project.expert)
 
                 wallet.balance += payment.expert_amount
                 wallet.save()

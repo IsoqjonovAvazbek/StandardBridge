@@ -115,6 +115,9 @@ def toggle_like(request, slug):
 @login_required
 @require_POST
 def add_comment(request, slug):
+    from django_ratelimit.decorators import is_ratelimited
+    if is_ratelimited(request, group='comment', key='user', rate='10/m', method='POST', increment=True):
+        return JsonResponse({'error': 'Juda ko\'p izoh. Biroz kuting.'}, status=429)
     post = get_object_or_404(BlogPost, slug=slug, is_published=True)
     content = request.POST.get('content', '').strip()
     if not content or len(content) < 2:
