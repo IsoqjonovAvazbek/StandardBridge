@@ -656,7 +656,7 @@ def admin_process_withdrawal(request, pk):
         messages.success(request, f'${wr.amount} yechish so\'rovi tasdiqlandi!')
     elif action == 'reject':
         from django.db import transaction as _tx
-        from experts.models import Wallet as _Wallet
+        from experts.models import Wallet as _Wallet, WalletTransaction as _WT
         with _tx.atomic():
             wr_locked = WithdrawalRequest.objects.select_for_update().get(pk=wr.pk)
             if wr_locked.status != 'pending':
@@ -665,6 +665,12 @@ def admin_process_withdrawal(request, pk):
             wallet = _Wallet.objects.select_for_update().get(pk=wr_locked.wallet_id)
             wallet.balance += wr_locked.amount
             wallet.save(update_fields=['balance'])
+            _WT.objects.create(
+                wallet=wallet,
+                amount=wr_locked.amount,
+                transaction_type='refund',
+                description=f'Yechish rad etildi — qaytarildi (so\'rov #{wr_locked.pk})',
+            )
             wr_locked.status = 'rejected'
             wr_locked.admin_note = admin_note
             wr_locked.processed_at = timezone.now()
@@ -741,11 +747,22 @@ def admin_resolve_dispute(request, pk):
                     project=project,
                 )
             elif favor == 'entrepreneur':
-                # Tadbirkor foydasiga: to'lov qaytarilgan deb belgilanadi
+                # Tadbirkor foydasiga: pul hamyoniga qaytariladi
                 payment.status = 'refunded'
-                payment.save()
+                payment.save(update_fields=['status'])
                 project.status = 'cancelled'
                 project.save()
+                ent_wallet, _ = Wallet.objects.get_or_create(user=project.entrepreneur)
+                ent_wallet = Wallet.objects.select_for_update().get(pk=ent_wallet.pk)
+                ent_wallet.balance += payment.amount
+                ent_wallet.save(update_fields=['balance'])
+                WalletTransaction.objects.create(
+                    wallet=ent_wallet,
+                    amount=payment.amount,
+                    transaction_type='refund',
+                    description=f'Loyiha #{project.pk} — nizo hal qilindi (tadbirkor foydasiga)',
+                    project=project,
+                )
 
     Notification.objects.create(
         user=dispute.opened_by,

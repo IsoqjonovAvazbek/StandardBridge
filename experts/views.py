@@ -1011,15 +1011,18 @@ def payment_release(request, project_pk):
 
                 # F-12: Referral bonus — faqat birinchi loyihada
                 referrer = project.entrepreneur.referred_by
-                is_first = not Project.objects.filter(
-                    entrepreneur=project.entrepreneur, status='completed'
-                ).exclude(pk=project.pk).exists()
-                if referrer and is_first:
+                if referrer:
                     from decimal import Decimal as _D
+                    from django.db.models import F as _F
+                    ref_wallet, _ = Wallet.objects.get_or_create(user=referrer)
+                    # Referrer walletni lock qilib is_first tekshiramiz — race condition oldini olish
+                    ref_wallet = Wallet.objects.select_for_update().get(pk=ref_wallet.pk)
+                    is_first = not Project.objects.filter(
+                        entrepreneur=project.entrepreneur, status='completed'
+                    ).exclude(pk=project.pk).exists()
+                if referrer and is_first:
                     bonus = (payment.platform_fee * _D('0.10')).quantize(_D('0.01'))
                     if bonus > 0:
-                        from django.db.models import F as _F
-                        ref_wallet, _ = Wallet.objects.get_or_create(user=referrer)
                         Wallet.objects.filter(pk=ref_wallet.pk).update(
                             balance=_F('balance') + bonus
                         )
@@ -1553,6 +1556,10 @@ def click_complete(request):
         return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
                              'merchant_confirm_id': None, 'error': -6, 'error_note': 'Transaction not found'})
 
+    if Decimal(str(amount)) != payment.amount:
+        return JsonResponse({'click_trans_id': click_trans_id, 'merchant_trans_id': merchant_trans_id,
+                             'merchant_confirm_id': payment.pk, 'error': -2, 'error_note': 'Incorrect amount'})
+
     if error < 0:
         with transaction.atomic():
             p = Payment.objects.select_for_update().get(pk=payment.pk)
@@ -1841,9 +1848,21 @@ def scope_request_respond(request, pk, sr_pk):
         messages.error(request, "Noto'g'ri amal.")
         return redirect('project_detail', pk=pk)
 
-    sr.status = 'accepted' if action == 'accept' else 'rejected'
-    sr.responded_at = timezone.now()
-    sr.save(update_fields=['status', 'responded_at'])
+    from django.db import transaction as _tx
+    with _tx.atomic():
+        sr.status = 'accepted' if action == 'accept' else 'rejected'
+        sr.responded_at = timezone.now()
+        sr.save(update_fields=['status', 'responded_at'])
+
+        if action == 'accept':
+            # Payment summasini yangilaymiz — release da expert to'liq summa oladi
+            try:
+                _pay = Payment.objects.select_for_update().get(project=project)
+                if _pay.status == 'held':
+                    _pay.amount += sr.extra_price
+                    _pay.save()  # triggers Payment.save() fee recomputation
+            except Payment.DoesNotExist:
+                pass
 
     if action == 'accept':
         Notification.objects.create(
@@ -1858,7 +1877,7 @@ def scope_request_respond(request, pk, sr_pk):
                 f"Entrepreneur accepted your +${sr.extra_price} request."),
             link=f"/experts/projects/{project.pk}/",
         )
-        messages.success(request, f"So'rov qabul qilindi. Tadbirkor +${sr.extra_price} to'lov qiladi.")
+        messages.success(request, f"So'rov qabul qilindi. Qo'shimcha ${sr.extra_price} to'lov hisobga olindi.")
     else:
         Notification.objects.create(
             user=project.expert,
