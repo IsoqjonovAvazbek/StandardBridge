@@ -1009,39 +1009,6 @@ def payment_release(request, project_pk):
                             project.expert.email
                         )
 
-                # F-12: Referral bonus — faqat birinchi loyihada
-                referrer = project.entrepreneur.referred_by
-                if referrer:
-                    from decimal import Decimal as _D
-                    from django.db.models import F as _F
-                    ref_wallet, _ = Wallet.objects.get_or_create(user=referrer)
-                    # Referrer walletni lock qilib is_first tekshiramiz — race condition oldini olish
-                    ref_wallet = Wallet.objects.select_for_update().get(pk=ref_wallet.pk)
-                    is_first = not Project.objects.filter(
-                        entrepreneur=project.entrepreneur, status='completed'
-                    ).exclude(pk=project.pk).exists()
-                if referrer and is_first:
-                    bonus = (payment.platform_fee * _D('0.10')).quantize(_D('0.01'))
-                    if bonus > 0:
-                        Wallet.objects.filter(pk=ref_wallet.pk).update(
-                            balance=_F('balance') + bonus
-                        )
-                        ref_wallet.refresh_from_db(fields=['balance'])
-                        WalletTransaction.objects.create(
-                            wallet=ref_wallet,
-                            amount=bonus,
-                            transaction_type='income',
-                            description=f'Referral bonus — {project.entrepreneur.get_full_name()} birinchi loyiha',
-                        )
-                        Notification.objects.create(
-                            user=referrer,
-                            title=_nl(referrer, 'Referral bonus!', 'Реферальный бонус!', 'Referral bonus!'),
-                            message=_nl(referrer,
-                                f'Taklif qilganingiz {project.entrepreneur.get_full_name()} birinchi loyihasini yakunladi. ${bonus} bonus hamyoningizga tushdi!',
-                                f'Приглашённый вами {project.entrepreneur.get_full_name()} завершил первый проект. ${bonus} бонус поступил на кошелёк!',
-                                f'Your referral {project.entrepreneur.get_full_name()} completed their first project. ${bonus} bonus added to your wallet!'),
-                        )
-
                 messages.success(request, f'Loyiha yakunlandi! ${payment.expert_amount} mutaxassisga o\'tkazildi.')
             else:
                 messages.warning(request, 'To\'lov allaqachon amalga oshirilgan.')
