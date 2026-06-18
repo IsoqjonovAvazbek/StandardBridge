@@ -700,11 +700,7 @@ def admin_resolve_dispute(request, pk):
     from experts.emails import send_dispute_resolved
     from django.utils import timezone
 
-    dispute = get_object_or_404(Dispute, pk=pk)
-
-    if dispute.status in ('resolved', 'closed'):
-        messages.warning(request, 'Bu nizo allaqachon hal qilingan!')
-        return redirect('admin_panel')
+    get_object_or_404(Dispute, pk=pk)  # 404 check before atomic
 
     decision = request.POST.get('decision', '').strip()
     new_status = request.POST.get('status', 'resolved')
@@ -715,6 +711,11 @@ def admin_resolve_dispute(request, pk):
     from django.db import transaction as _tx
 
     with _tx.atomic():
+        # select_for_update — bir vaqtda ikki admin bir nizoni hal qila olmasin
+        dispute = Dispute.objects.select_for_update().get(pk=pk)
+        if dispute.status in ('resolved', 'closed'):
+            messages.warning(request, 'Bu nizo allaqachon hal qilingan!')
+            return redirect('admin_panel')
         dispute.admin_decision = decision
         dispute.status = new_status
         dispute.resolved_at = timezone.now()
@@ -907,6 +908,10 @@ def global_search_api(request):
 
 @login_required
 def resend_verification(request):
+    from django_ratelimit.decorators import is_ratelimited
+    if is_ratelimited(request, group='resend_verify', key='user', rate='3/h', method='ALL', increment=True):
+        messages.error(request, 'Juda ko\'p urinish. 1 soatdan keyin qayta urining.')
+        return redirect('dashboard')
     if request.user.is_email_verified:
         return redirect('dashboard')
     import secrets

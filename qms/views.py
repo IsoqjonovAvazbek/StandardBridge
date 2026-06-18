@@ -407,12 +407,15 @@ def add_nonconformity(request):
 
 
 def _next_nc_code(company):
-    """Generate unique NC code atomically to prevent duplicates under concurrent requests."""
+    """Generate unique NC code atomically. Locks the company row to serialize
+    concurrent requests — COUNT alone doesn't lock on PostgreSQL."""
     from django.db import transaction
+    from accounts.models import CustomUser as _CU
     year = timezone.now().year
     prefix = f'NC-{year}-'
     with transaction.atomic():
-        count = NonConformity.objects.select_for_update().filter(
+        _CU.objects.select_for_update().filter(pk=company.pk).get()
+        count = NonConformity.objects.filter(
             company=company, code__startswith=prefix
         ).count()
         return f'{prefix}{count + 1:03d}'

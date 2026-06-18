@@ -107,10 +107,11 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <script>
 marked.setOptions({ breaks: true, gfm: true });
 const raw = document.getElementById('docRaw').value;
-document.getElementById('docContent').innerHTML = marked.parse(raw);
+document.getElementById('docContent').innerHTML = DOMPurify.sanitize(marked.parse(raw));
 
 function copyRaw() {
   navigator.clipboard.writeText(document.getElementById('docRaw').value)

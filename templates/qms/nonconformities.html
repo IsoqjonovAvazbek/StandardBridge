@@ -283,7 +283,7 @@ function aiSuggest(pk) {
   })
   .then(r => r.json())
   .then(d => {
-    if (d.success) { content.innerHTML = typeof marked !== 'undefined' ? marked.parse(d.suggestion) : d.suggestion.replace(/\n/g,'<br>'); }
+    if (d.success) { content.innerHTML = typeof marked !== 'undefined' ? DOMPurify.sanitize(marked.parse(d.suggestion)) : d.suggestion.replace(/\n/g,'<br>'); }
     else { content.textContent = '{{ T.qms_ai_error }}: ' + (d.error || ''); }
   })
   .catch(e => { content.textContent = '{{ T.qms_ai_error }}'; })
@@ -291,4 +291,5 @@ function aiSuggest(pk) {
 }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js" defer></script>
 {% endblock %}

@@ -130,9 +130,10 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <script>
 marked.setOptions({ breaks: true, gfm: true });
-document.getElementById('proposalContent').innerHTML = marked.parse(document.getElementById('docRaw').value);
+document.getElementById('proposalContent').innerHTML = DOMPurify.sanitize(marked.parse(document.getElementById('docRaw').value));
 
 function copyRaw() {
   navigator.clipboard.writeText(document.getElementById('docRaw').value)
