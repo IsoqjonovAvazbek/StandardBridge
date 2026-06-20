@@ -96,6 +96,66 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - `python manage.py test` — hammasi
 - `python manage.py test accounts` — bitta app
 
+## Xavfsizlik — bajarilgan (2026-06 sessiya)
+Commit tarixida: 603732d → e98ace7 → a4e7948
+
+### Auth va kirish
+- `logout`: `@require_POST` (GET logout hujumidan himoya)
+- `login_view`: `is_authenticated` tekshiruvi rate-limitdan OLDIN
+- `register`: rate-limit (5/h email, 50/h IP)
+- `resend_verification`: rate-limit (3/h user)
+- `telegram_webhook`: production da SECRET majburiy
+
+### To'lov va hamyon
+- `payment_confirm`: MOCK faqat DEBUG=True yoki TESTING=True da
+- `click_complete`: summa `payment.amount` ga teng bo'lishi tekshiriladi
+- `payment_release`: wallet `get_or_create` keyin `select_for_update().get()` (race-safe)
+- `scope_request_respond` accept: `Payment.amount += extra_price` atomik yangilanadi
+- `admin_resolve_dispute` entrepreneur foydasiga: hamyonga qayt + WalletTransaction
+- `admin_resolve_dispute`: `select_for_update()` ichida dispute re-fetch (ikki admin race)
+- `withdrawal` reject: `WalletTransaction('refund')` yaratiladi (ledger to'liq)
+- `project_request_revision`: roadmap faqat bu loyiha yagona bo'lsa resetlanadi
+
+### Ma'lumot xavfsizligi
+- `protected_media`: hujjat egasi tekshiriladi (IDOR)
+- `project_set_price`: faqat expert roli
+- `expert_detail`: `@login_required`
+- `admin_process_withdrawal`: `card_number_plain` decrypt xatosi try/except
+- `admin_resolve_dispute`: `select_for_update()` ichida re-fetch
+- `scope_request_send`: faqat loyiha egasi
+
+### Kod sifati
+- `SECRET_KEY`: bo'sh bo'lsa `ImproperlyConfigured` (fallback yo'q)
+- `DEBUG`: default `False` (`.env`da yoqilsin)
+- `ALLOWED_HOSTS`: production da bo'sh, DEBUG=True da `['*']`
+- `TESTING` flag: test paytida `DummyCache` (rate-limit testlar orasida saqlanmaydi)
+- `GROQ_API_KEY`: `settings.GROQ_API_KEY` orqali (os.environ emas)
+- `FERNET_KEY`: production da majburiy
+- `EMAIL_BACKEND`: credentials sozlanmagan bo'lsa console backend (SMTP block yo'q)
+- `PasswordResetView`: email background threadda yuboriladi
+
+### Fayl va input
+- `upload_document`: kontent-tur + kengaytma ikkalasi tekshiriladi
+- `_next_nc_code`: company row `select_for_update()` bilan lock (duplikat NC oldini olish)
+- `card_number`: 16-19 raqam (yuqori chegara qo'shildi)
+- AI prompt: `_safe()` helper (injection oldini olish)
+- `marked.parse → innerHTML`: DOMPurify.sanitize() bilan 5 ta templateda
+
+### Rate-limiting
+- login: 5/min IP
+- register: 5/h email, 50/h IP  
+- global_search: 30/min user
+- add_comment: 10/min user
+- resend_verification: 3/h user
+
+### Ma'lumot yaxlitligi
+- `analysis` background thread: faqat `status='pending'` loyihalar o'chiriladi
+- `analysis_retake`: eski `local_ids`/`question_answers` sessiondan tozalanadi
+- CSV eksport: `charset=utf-8` + BOM (ikki marta emas)
+- `_click_ip_ok`: `X-Forwarded-For` ning oxirgi IP (proxy-safe)
+- `Project.save()`: `Decimal` arifmetikasi (float emas)
+- `Referral bonus bloki olib tashlandi` (referral tizimi o'chirildi)
+
 ## Git + Deploy
 - GitHub: https://github.com/Avazbek-1/StandardBridge (private), branch=main
 - Railway auto-deploy: main ga push → avtomatik deploy
@@ -137,20 +197,24 @@ CLICK_RETURN_URL=http://127.0.0.1:8000
 
 ## HALI BAJARILMAGAN (PENDING)
 
-### 🔴 KRITIK
+### 🔴 KRITIK (foydalanuvchi bajaradi)
 
-1. **Sirlar yangilash (foydalanuvchi bajaradi)**
-   - console.groq.com dan yangi GROQ_API_KEY olish
-   - Yangi SECRET_KEY: `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`
-   - `git rm --cached .env` — tarixdan o'chirish
+1. **Sirlar yangilash**
+   - Railway dashboard da yangilash:
+     - `GROQ_API_KEY` → console.groq.com dan yangi kalit
+     - `SECRET_KEY` → `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`
+     - `EMAIL_HOST_USER` + `EMAIL_HOST_PASSWORD` → Gmail App Password (myaccount.google.com → Security → 2-Step → App passwords)
+   - `.env` tarixdan o'chirish: `git rm --cached .env && echo ".env" >> .gitignore`
 
 2. **Click.uz real integratsiya**
-   - CLICK_SERVICE_ID/MERCHANT_ID/SECRET_KEY hali bo'sh
-   - `payment_confirm` MOCK transaction yaratadi — production da ishlamaydi
+   - `CLICK_SERVICE_ID` / `CLICK_MERCHANT_ID` / `CLICK_SECRET_KEY` bo'sh
    - Click.uz da biznes ro'yxatdan o'tish kerak
 
 3. **Payme integratsiya**
    - Hali amalga oshirilmagan
+
+### 🟡 KEYINGI SESSIYADA
+- Foydalanuvchi so'ragan chuqur pentest (professional pentest so'rov) — navbatdagi sessiyada davom etadi
 
 ---
 
