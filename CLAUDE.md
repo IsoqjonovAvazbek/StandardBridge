@@ -97,7 +97,7 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - `python manage.py test accounts` — bitta app
 
 ## Xavfsizlik — bajarilgan (2026-06 sessiya)
-Commit tarixida: 603732d → e98ace7 → a4e7948
+Commit tarixida: 603732d → e98ace7 → a4e7948 → 896a6b2 → dfe877f → cc1bb6e
 
 ### Auth va kirish
 - `logout`: `@require_POST` (GET logout hujumidan himoya)
@@ -122,6 +122,7 @@ Commit tarixida: 603732d → e98ace7 → a4e7948
 - `expert_detail`: `@login_required`
 - `admin_process_withdrawal`: `card_number_plain` decrypt xatosi try/except
 - `admin_resolve_dispute`: `select_for_update()` ichida re-fetch
+- `leave_review`: `project.expert` NULL bo'lsa IntegrityError → guard qo'shildi (cc1bb6e)
 - `scope_request_send`: faqat loyiha egasi
 
 ### Kod sifati
