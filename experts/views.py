@@ -1125,8 +1125,9 @@ def wallet(request):
     if request.GET.get('export') == 'csv':
         import csv
         from django.http import HttpResponse
-        resp = HttpResponse(content_type='text/csv')
+        resp = HttpResponse(content_type='text/csv; charset=utf-8')
         resp['Content-Disposition'] = 'attachment; filename="wallet_transactions.csv"'
+        resp.write('﻿')  # BOM — Excel UTF-8 to'g'ri o'qisin
         writer = csv.writer(resp)
         writer.writerow(['Sana', 'Turi', 'Miqdor ($)', 'Izoh'])
         for tx in tx_qs:

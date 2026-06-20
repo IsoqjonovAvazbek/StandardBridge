@@ -444,7 +444,8 @@ def answer_questions(request, industry_id):
             ).select_related('standard'))
 
     if not questions:
-        return redirect('run_analysis', industry_id=industry_id)
+        messages.warning(request, 'Bu standart uchun savollar hali tayyor emas. Boshqa standart tanlang yoki admin bilan bog\'laning.')
+        return redirect('select_industry')
 
     for std in target_standards:
         std.display_name = std.get_name(lang)

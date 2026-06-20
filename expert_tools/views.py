@@ -690,7 +690,7 @@ def create_proposal(request):
     content = ''
     try:
         from groq import Groq
-        client_ai = Groq(api_key=os.environ.get('GROQ_API_KEY'), timeout=settings.AI_TIMEOUT, max_retries=1)
+        client_ai = Groq(api_key=settings.GROQ_API_KEY, timeout=settings.AI_TIMEOUT, max_retries=1)
         resp = client_ai.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
