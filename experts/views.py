@@ -511,7 +511,7 @@ def project_counter_offer(request, pk):
             f"🔄 <b>Yangi qarshi taklif!</b>\n\n"
             f"Tadbirkor <b>{_e(request.user.get_full_name())}</b> loyiha #{project.pk} uchun "
             f"<b>${counter_price}</b> taklif qildi.\n\n"
-            f"Platforma: https://standardbridge.up.railway.app/experts/project/{project.pk}/"
+            f"Platforma: https://standardbridge.up.railway.app/experts/projects/{project.pk}/"
         ))
         messages.success(request, f'Qarshi taklif yuborildi: ${counter_price}. Mutaxassis javobini kuting.')
     return redirect('project_detail', pk=pk)
