@@ -1321,6 +1321,10 @@ def leave_review(request, pk):
         messages.warning(request, 'Siz allaqachon baho bergansiz!')
         return redirect('project_detail', pk=pk)
 
+    if not project.expert:
+        messages.error(request, 'Bu loyihaning mutaxassisi topilmadi.')
+        return redirect('project_detail', pk=pk)
+
     if request.method == 'POST':
         try:
             rating = int(request.POST.get('rating', 5))
