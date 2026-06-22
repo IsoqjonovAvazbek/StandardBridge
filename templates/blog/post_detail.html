@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load blog_tags %}
-{% block title %}{{ post.title }} — StandartBridge{% endblock %}
+{% block title %}{{ post.title }} — StandardBridge{% endblock %}
 {% block meta_description %}{% if post.excerpt %}{{ post.excerpt }}{% else %}{{ post.content|striptags|truncatechars:160 }}{% endif %}{% endblock %}
 {% block og_title %}{{ post.title }}{% endblock %}
 {% block og_description %}{% if post.excerpt %}{{ post.excerpt }}{% else %}{{ post.content|striptags|truncatechars:200 }}{% endif %}{% endblock %}
@@ -16,11 +16,11 @@
   "dateModified": "{{ post.updated_at|date:'c' }}",
   "author": {
     "@type": "Person",
-    "name": "{% if post.author %}{{ post.author.get_full_name|escapejs }}{% else %}StandartBridge{% endif %}"
+    "name": "{% if post.author %}{{ post.author.get_full_name|escapejs }}{% else %}StandardBridge{% endif %}"
   },
   "publisher": {
     "@type": "Organization",
-    "name": "StandartBridge",
+    "name": "StandardBridge",
     "url": "https://standardbridge.uz"
   },
   "url": "{{ request.build_absolute_uri|escapejs }}",

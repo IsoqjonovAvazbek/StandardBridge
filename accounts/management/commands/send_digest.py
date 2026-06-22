@@ -51,7 +51,7 @@ def _get_entrepreneur_digest(user):
     ).exclude(status='pending').exclude(status__in=['completed', 'cancelled']).select_related('expert')
 
     name = user.get_full_name() or user.username
-    subject = f"StandartBridge: Haftalik hisobot — {name}"
+    subject = f"StandardBridge: Haftalik hisobot — {name}"
 
     # Build project rows HTML
     project_rows = ''
@@ -91,7 +91,7 @@ def _get_entrepreneur_digest(user):
 <head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;padding:20px;">
 
-<h2 style="color:#1d4ed8;">StandartBridge — Haftalik Hisobot</h2>
+<h2 style="color:#1d4ed8;">StandardBridge — Haftalik Hisobot</h2>
 <p>Assalomu alaykum, <strong>{name}</strong>!</p>
 <p>Ushbu haftalik hisobot sizning faoliyatingiz bo'yicha qisqacha ma'lumot beradi.</p>
 
@@ -132,7 +132,7 @@ def _get_entrepreneur_digest(user):
 
 <hr style="border:none;border-top:1px solid #e5e7eb;margin:28px 0;">
 <p style="color:#9ca3af;font-size:12px;">
-  Ushbu xabar StandartBridge tomonidan avtomatik yuborildi.<br>
+  Ushbu xabar StandardBridge tomonidan avtomatik yuborildi.<br>
   Sayt: <a href="{SITE_URL}" style="color:#1d4ed8;">{SITE_URL}</a>
 </p>
 
@@ -161,7 +161,7 @@ def _get_expert_digest(user):
         balance = 0
 
     name = user.get_full_name() or user.username
-    subject = f"StandartBridge: Mutaxassis haftalik hisoboti — {name}"
+    subject = f"StandardBridge: Mutaxassis haftalik hisoboti — {name}"
 
     project_rows = ''
     for p in pending_projects:
@@ -186,7 +186,7 @@ def _get_expert_digest(user):
 <head><meta charset="utf-8"></head>
 <body style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;padding:20px;">
 
-<h2 style="color:#1d4ed8;">StandartBridge — Mutaxassis Haftalik Hisoboti</h2>
+<h2 style="color:#1d4ed8;">StandardBridge — Mutaxassis Haftalik Hisoboti</h2>
 <p>Assalomu alaykum, <strong>{name}</strong>!</p>
 
 <div style="display:flex;gap:16px;margin:20px 0;">
@@ -229,7 +229,7 @@ def _get_expert_digest(user):
 
 <hr style="border:none;border-top:1px solid #e5e7eb;margin:28px 0;">
 <p style="color:#9ca3af;font-size:12px;">
-  Ushbu xabar StandartBridge tomonidan avtomatik yuborildi.<br>
+  Ushbu xabar StandardBridge tomonidan avtomatik yuborildi.<br>
   Sayt: <a href="{SITE_URL}" style="color:#1d4ed8;">{SITE_URL}</a>
 </p>
 

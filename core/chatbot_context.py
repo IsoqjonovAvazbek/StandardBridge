@@ -1,5 +1,5 @@
 """
-StandartBridge chatbot bilim bazasi.
+StandardBridge chatbot bilim bazasi.
 
 Yangi feature qo'shganda shu faylni yangilang — views.py ga tegmang.
 """
@@ -191,7 +191,7 @@ def build_system_prompt(user, live_stats: dict, active_features: dict) -> str:
     features_str = "\n".join(features_lines)
 
     return (
-        f"Sen StandartBridge platformasining rasmiy AI yordamchisisisan.\n\n"
+        f"Sen StandardBridge platformasining rasmiy AI yordamchisisisan.\n\n"
         f"{_SECURITY_RULES}\n\n"
         f"{user_ctx}\n\n"
         f"=== PLATFORMA HOLATI ===\n"

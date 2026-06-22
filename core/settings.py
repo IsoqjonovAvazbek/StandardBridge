@@ -189,7 +189,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = _email_user
 EMAIL_HOST_PASSWORD = _email_pass
-DEFAULT_FROM_EMAIL = f'StandartBridge <{_email_user or "noreply@standardbridge.uz"}>'
+DEFAULT_FROM_EMAIL = f'StandardBridge <{_email_user or "noreply@standardbridge.uz"}>'
 EMAIL_BACKEND = (
     'django.core.mail.backends.smtp.EmailBackend'
     if _email_configured else

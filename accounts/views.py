@@ -923,9 +923,9 @@ def resend_verification(request):
     verify_url = request.build_absolute_uri(f'/accounts/verify-email/{token}/')
     _SUBJ = {'uz': 'Email manzilingizni tasdiqlang', 'ru': 'Подтвердите вашу почту', 'en': 'Verify your email'}
     _BODY = {
-        'uz': f'StandartBridge ga xush kelibsiz!\n\nEmail manzilingizni tasdiqlash uchun quyidagi havolani bosing:\n{verify_url}\n\nHavola 48 soat amal qiladi.',
-        'ru': f'Добро пожаловать на StandartBridge!\n\nПерейдите по ссылке для подтверждения email:\n{verify_url}\n\nСсылка действительна 48 часов.',
-        'en': f'Welcome to StandartBridge!\n\nClick the link below to verify your email:\n{verify_url}\n\nLink valid for 48 hours.',
+        'uz': f'StandardBridge ga xush kelibsiz!\n\nEmail manzilingizni tasdiqlash uchun quyidagi havolani bosing:\n{verify_url}\n\nHavola 48 soat amal qiladi.',
+        'ru': f'Добро пожаловать на StandardBridge!\n\nПерейдите по ссылке для подтверждения email:\n{verify_url}\n\nСсылка действительна 48 часов.',
+        'en': f'Welcome to StandardBridge!\n\nClick the link below to verify your email:\n{verify_url}\n\nLink valid for 48 hours.',
     }
     _send(_SUBJ.get(lang, _SUBJ['uz']), _BODY.get(lang, _BODY['uz']), request.user.email)
     messages.success(request, 'Tasdiqlash xati yuborildi!' if lang == 'uz' else ('Письмо отправлено!' if lang == 'ru' else 'Verification email sent!'))
@@ -1014,7 +1014,7 @@ def telegram_webhook_view(request):
             import html as _html
             send_telegram(chat_id, (
                 f"🎉 <b>Salom, {_html.escape(first_name)}!</b>\n\n"
-                f"StandartBridge bildirishnomalari endi Telegram orqali yuboriladi.\n\n"
+                f"StandardBridge bildirishnomalari endi Telegram orqali yuboriladi.\n\n"
                 f"Yangi loyiha, to'lov, tahlil tayyorligi kabi barcha muhim xabarlarni shu yerda olasiz.\n\n"
                 f"🔗 <a href='{settings.SITE_URL}'>Platformaga o'tish</a>"
             ))
@@ -1027,7 +1027,7 @@ def telegram_webhook_view(request):
         import html as _html
         send_telegram(chat_id, (
             f"Salom, {_html.escape(first_name)}! 👋\n\n"
-            "Bu StandartBridge rasmiy boti.\n"
+            "Bu StandardBridge rasmiy boti.\n"
             "Ulanish uchun platforma profil sahifasidagi havoladan foydalaning:\n"
             f"🔗 {settings.SITE_URL}"
         ))
@@ -1062,6 +1062,9 @@ def api_chatbot(request):
     from core.chatbot_context import (
         is_injection_attempt, build_system_prompt, get_live_stats, get_active_features,
     )
+    from django_ratelimit.decorators import is_ratelimited
+    if is_ratelimited(request, group='chatbot', key='user', rate='20/m', method='POST', increment=True):
+        return JsonResponse({'reply': "Juda ko'p so'rov. Biroz kuting."}, status=429)
 
     message = request.POST.get('message', '').strip()[:500]
     if not message:

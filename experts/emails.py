@@ -47,41 +47,41 @@ SITE_URL = getattr(_django_settings, 'SITE_URL', 'https://standardbridge.uz')
 _CONTENT = {
     'welcome': {
         'uz': {
-            'subject': "StandartBridge ga xush kelibsiz!",
+            'subject': "StandardBridge ga xush kelibsiz!",
             'role_expert': "Mutaxassis",
             'role_ent': "Tadbirkor",
             'next_expert': "Endi siz tahlillarni ko'rib, narx belgilab, loyihalarni boshqarishingiz mumkin.",
             'next_ent': "Endi siz gap-analiz o'tkazib, mutaxassislar bilan ishlashingiz mumkin.",
-            'body': "StandartBridge platformasiga {role} sifatida muvaffaqiyatli ro'yxatdan o'tdingiz.\n\n{next_step}\n\nPlatforma: {url}",
+            'body': "StandardBridge platformasiga {role} sifatida muvaffaqiyatli ro'yxatdan o'tdingiz.\n\n{next_step}\n\nPlatforma: {url}",
         },
         'ru': {
-            'subject': "Добро пожаловать на StandartBridge!",
+            'subject': "Добро пожаловать на StandardBridge!",
             'role_expert': "Эксперт",
             'role_ent': "Предприниматель",
             'next_expert': "Теперь вы можете просматривать анализы, устанавливать цены и управлять проектами.",
             'next_ent': "Теперь вы можете проводить гэп-анализ и работать с экспертами.",
-            'body': "Вы успешно зарегистрировались на платформе StandartBridge как {role}.\n\n{next_step}\n\nПлатформа: {url}",
+            'body': "Вы успешно зарегистрировались на платформе StandardBridge как {role}.\n\n{next_step}\n\nПлатформа: {url}",
         },
         'en': {
-            'subject': "Welcome to StandartBridge!",
+            'subject': "Welcome to StandardBridge!",
             'role_expert': "Expert",
             'role_ent': "Entrepreneur",
             'next_expert': "You can now review analyses, set prices, and manage projects.",
             'next_ent': "You can now run gap analyses and work with certified experts.",
-            'body': "You have successfully registered on StandartBridge as {role}.\n\n{next_step}\n\nPlatform: {url}",
+            'body': "You have successfully registered on StandardBridge as {role}.\n\n{next_step}\n\nPlatform: {url}",
         },
     },
     'project_to_expert': {
         'uz': {
-            'subject': "Yangi loyiha #{pk} — StandartBridge",
+            'subject': "Yangi loyiha #{pk} — StandardBridge",
             'body': "{entrepreneur} ({company}) sizga yangi tahlil yubordi.\n\nLoyiha: #{pk}\nSanoat: {industry}\nStandart: {standard}\n\nNarx belgilash uchun:\n{url}",
         },
         'ru': {
-            'subject': "Новый проект #{pk} — StandartBridge",
+            'subject': "Новый проект #{pk} — StandardBridge",
             'body': "{entrepreneur} ({company}) отправил вам новый анализ.\n\nПроект: #{pk}\nОтрасль: {industry}\nСтандарт: {standard}\n\nУстановить цену:\n{url}",
         },
         'en': {
-            'subject': "New project #{pk} — StandartBridge",
+            'subject': "New project #{pk} — StandardBridge",
             'body': "{entrepreneur} ({company}) sent you a new analysis.\n\nProject: #{pk}\nIndustry: {industry}\nStandard: {standard}\n\nSet your price:\n{url}",
         },
     },
@@ -129,57 +129,57 @@ _CONTENT = {
     },
     'expert_verified': {
         'uz': {
-            'subject': "Profilingiz tasdiqlandi — StandartBridge",
-            'body': "Profilingiz StandartBridge administrator tomonidan tasdiqlandi.\n\nEndi siz platformada ko'rinasiz va tadbirkorlardan loyihalar qabul qila olasiz.\n\nProfilingiz: {url}",
+            'subject': "Profilingiz tasdiqlandi — StandardBridge",
+            'body': "Profilingiz StandardBridge administrator tomonidan tasdiqlandi.\n\nEndi siz platformada ko'rinasiz va tadbirkorlardan loyihalar qabul qila olasiz.\n\nProfilingiz: {url}",
         },
         'ru': {
-            'subject': "Ваш профиль подтверждён — StandartBridge",
-            'body': "Ваш профиль был подтверждён администратором StandartBridge.\n\nТеперь вы отображаетесь на платформе и можете получать заявки от предпринимателей.\n\nВаш профиль: {url}",
+            'subject': "Ваш профиль подтверждён — StandardBridge",
+            'body': "Ваш профиль был подтверждён администратором StandardBridge.\n\nТеперь вы отображаетесь на платформе и можете получать заявки от предпринимателей.\n\nВаш профиль: {url}",
         },
         'en': {
-            'subject': "Your profile is verified — StandartBridge",
-            'body': "Your profile has been verified by a StandartBridge administrator.\n\nYou are now visible on the platform and can receive project requests.\n\nYour profile: {url}",
+            'subject': "Your profile is verified — StandardBridge",
+            'body': "Your profile has been verified by a StandardBridge administrator.\n\nYou are now visible on the platform and can receive project requests.\n\nYour profile: {url}",
         },
     },
     'withdrawal_approved': {
         'uz': {
-            'subject': "Pul yechish tasdiqlandi — StandartBridge",
+            'subject': "Pul yechish tasdiqlandi — StandardBridge",
             'body': "${amount} yechish so'rovingiz tasdiqlandi.\n\nKarta: {card}\n{note}\n\nMablag' 1-3 ish kuni ichida kartangizga o'tkaziladi.\n\nHamyon: {url}",
         },
         'ru': {
-            'subject': "Вывод средств подтверждён — StandartBridge",
+            'subject': "Вывод средств подтверждён — StandardBridge",
             'body': "Ваша заявка на вывод ${amount} подтверждена.\n\nКарта: {card}\n{note}\n\nСредства поступят на карту в течение 1-3 рабочих дней.\n\nКошелёк: {url}",
         },
         'en': {
-            'subject': "Withdrawal approved — StandartBridge",
+            'subject': "Withdrawal approved — StandardBridge",
             'body': "Your withdrawal request of ${amount} has been approved.\n\nCard: {card}\n{note}\n\nFunds will arrive within 1-3 business days.\n\nWallet: {url}",
         },
     },
     'withdrawal_rejected': {
         'uz': {
-            'subject': "Pul yechish rad etildi — StandartBridge",
+            'subject': "Pul yechish rad etildi — StandardBridge",
             'body': "${amount} yechish so'rovingiz rad etildi.\n\nSabab: {reason}\n\n${amount} hamyoningizga qaytarildi.\n\nHamyon: {url}",
         },
         'ru': {
-            'subject': "Вывод средств отклонён — StandartBridge",
+            'subject': "Вывод средств отклонён — StandardBridge",
             'body': "Ваша заявка на вывод ${amount} была отклонена.\n\nПричина: {reason}\n\n${amount} возвращены на ваш кошелёк.\n\nКошелёк: {url}",
         },
         'en': {
-            'subject': "Withdrawal rejected — StandartBridge",
+            'subject': "Withdrawal rejected — StandardBridge",
             'body': "Your withdrawal request of ${amount} was rejected.\n\nReason: {reason}\n\n${amount} has been returned to your wallet.\n\nWallet: {url}",
         },
     },
     'dispute_opened': {
         'uz': {
-            'subject': "Loyiha #{pk} bo'yicha nizo ochildi — StandartBridge",
+            'subject': "Loyiha #{pk} bo'yicha nizo ochildi — StandardBridge",
             'body': "Tadbirkor {opener} loyiha #{pk} bo'yicha nizo ochdi.\n\nSabab: {reason}\n\nAdministrator nizoni ko'rib chiqadi.\n\nLoyiha sahifasi:\n{url}",
         },
         'ru': {
-            'subject': "По проекту #{pk} открыт спор — StandartBridge",
+            'subject': "По проекту #{pk} открыт спор — StandardBridge",
             'body': "Предприниматель {opener} открыл спор по проекту #{pk}.\n\nПричина: {reason}\n\nАдминистратор рассмотрит спор.\n\nСтраница проекта:\n{url}",
         },
         'en': {
-            'subject': "Dispute opened for project #{pk} — StandartBridge",
+            'subject': "Dispute opened for project #{pk} — StandardBridge",
             'body': "Entrepreneur {opener} opened a dispute for project #{pk}.\n\nReason: {reason}\n\nAn administrator will review the dispute.\n\nProject page:\n{url}",
         },
     },
@@ -199,15 +199,15 @@ _CONTENT = {
     },
     'analysis_ready': {
         'uz': {
-            'subject': "Gap-tahlil tayyor — {std} | StandartBridge",
+            'subject': "Gap-tahlil tayyor — {std} | StandardBridge",
             'body': "{std} standarti bo'yicha gap-tahlilingiz tayyor.\n\nNatijalar:\n- Aniqlangan gaplar: {gaps} ta{time_line}\n\nTo'liq hisobot va yo'l-xaritani ko'rish uchun:\n{url}\n\nKeyingi qadam — mos mutaxassis topib, loyiha boshlash.",
         },
         'ru': {
-            'subject': "Гэп-анализ готов — {std} | StandartBridge",
+            'subject': "Гэп-анализ готов — {std} | StandardBridge",
             'body': "Ваш гэп-анализ по стандарту {std} готов.\n\nРезультаты:\n- Выявленных несоответствий: {gaps}{time_line}\n\nПолный отчёт и дорожная карта:\n{url}\n\nСледующий шаг — найти подходящего эксперта и начать проект.",
         },
         'en': {
-            'subject': "Gap analysis ready — {std} | StandartBridge",
+            'subject': "Gap analysis ready — {std} | StandardBridge",
             'body': "Your gap analysis for {std} is ready.\n\nResults:\n- Gaps identified: {gaps}{time_line}\n\nFull report and roadmap:\n{url}\n\nNext step — find a qualified expert and start the project.",
         },
     },
@@ -219,9 +219,9 @@ GREETING = {
     'en': "Hello, {name}!",
 }
 REGARDS = {
-    'uz': "Hurmat bilan,\nStandartBridge jamoasi",
-    'ru': "С уважением,\nКоманда StandartBridge",
-    'en': "Best regards,\nThe StandartBridge Team",
+    'uz': "Hurmat bilan,\nStandardBridge jamoasi",
+    'ru': "С уважением,\nКоманда StandardBridge",
+    'en': "Best regards,\nThe StandardBridge Team",
 }
 
 
@@ -361,7 +361,7 @@ def send_expert_verified(expert_user):
     _send(subject, body, expert_user.email)
     _tg(expert_user, (
         f"✅ <b>Profilingiz tasdiqlandi!</b>\n"
-        f"Endi siz StandartBridge platformasida ko'rinasiz va loyihalar qabul qila olasiz.\n"
+        f"Endi siz StandardBridge platformasida ko'rinasiz va loyihalar qabul qila olasiz.\n"
         f"🔗 {SITE_URL}/experts/profile/"
     ))
 
@@ -466,14 +466,14 @@ def send_counter_offer_to_expert(project):
     if not expert or not expert.email:
         return
     url = f"{SITE_URL}/experts/projects/{project.pk}/"
-    subject = f"StandartBridge: Loyiha #{project.pk} — qarshi taklif"
+    subject = f"StandardBridge: Loyiha #{project.pk} — qarshi taklif"
     body = (
         f"Salom {expert.get_full_name()},\n\n"
         f"Tadbirkor loyiha #{project.pk} uchun qarshi taklif yubordi:\n"
         f"  Yangi narx taklifi: ${project.counter_price}\n"
         f"  Izoh: {project.counter_message or '—'}\n\n"
         f"Qabul qilish yoki rad etish uchun:\n{url}\n\n"
-        "StandartBridge jamoasi"
+        "StandardBridge jamoasi"
     )
     _send(subject, body, expert.email)
     _tg(expert, (
@@ -491,7 +491,7 @@ def send_scope_request_to_entrepreneur(scope_req):
     if not ent or not ent.email:
         return
     url = f"{SITE_URL}/experts/projects/{project.pk}/"
-    subject = f"StandartBridge: Loyiha #{project.pk} — qo'shimcha ish so'rovi"
+    subject = f"StandardBridge: Loyiha #{project.pk} — qo'shimcha ish so'rovi"
     body = (
         f"Salom {ent.get_full_name()},\n\n"
         f"Mutaxassis {scope_req.expert.get_full_name()} loyiha #{project.pk} uchun "
@@ -499,7 +499,7 @@ def send_scope_request_to_entrepreneur(scope_req):
         f"  Qo'shimcha narx: +${scope_req.extra_price}\n"
         f"  Sabab: {scope_req.reason}\n\n"
         f"Qabul qilish yoki rad etish uchun:\n{url}\n\n"
-        "StandartBridge jamoasi"
+        "StandardBridge jamoasi"
     )
     _send(subject, body, ent.email)
     _tg(ent, (
@@ -523,13 +523,13 @@ def send_scope_request_response_to_expert(scope_req):
     else:
         status_text = "RAD ETILDI ✗"
         detail = "Dastlabki narx bo'yicha ishni davom ettiring."
-    subject = f"StandartBridge: Loyiha #{project.pk} — so'rovingizga javob"
+    subject = f"StandardBridge: Loyiha #{project.pk} — so'rovingizga javob"
     body = (
         f"Salom {expert.get_full_name()},\n\n"
         f"Loyiha #{project.pk} bo'yicha qo'shimcha ish so'rovingiz: {status_text}\n\n"
         f"{detail}\n\n"
         f"Loyiha sahifasi:\n{url}\n\n"
-        "StandartBridge jamoasi"
+        "StandardBridge jamoasi"
     )
     _send(subject, body, expert.email)
     if scope_req.status == 'accepted':

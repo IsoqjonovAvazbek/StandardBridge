@@ -444,15 +444,16 @@ def project_accept(request, pk):
         project.status = 'accepted'
         project.save()
 
-        Notification.objects.create(
-            user=project.expert,
-            title=_nl(project.expert, 'Mijoz narxni qabul qildi!', 'Клиент принял цену!', 'Client accepted the price!'),
-            message=_nl(project.expert,
-                f'{request.user.get_full_name()} narxni qabul qildi. To\'lov kutilmoqda.',
-                f'{request.user.get_full_name()} принял цену. Ожидается оплата.',
-                f'{request.user.get_full_name()} accepted the price. Awaiting payment.'),
-            link=reverse('project_detail', args=[project.pk]),
-        )
+        if project.expert:
+            Notification.objects.create(
+                user=project.expert,
+                title=_nl(project.expert, 'Mijoz narxni qabul qildi!', 'Клиент принял цену!', 'Client accepted the price!'),
+                message=_nl(project.expert,
+                    f'{request.user.get_full_name()} narxni qabul qildi. To\'lov kutilmoqda.',
+                    f'{request.user.get_full_name()} принял цену. Ожидается оплата.',
+                    f'{request.user.get_full_name()} accepted the price. Awaiting payment.'),
+                link=reverse('project_detail', args=[project.pk]),
+            )
 
         messages.success(request, 'Narx qabul qilindi! To\'lov sahifasiga o\'ting.')
         return redirect('payment_page', project_pk=pk)
@@ -498,14 +499,15 @@ def project_counter_offer(request, pk):
         project.counter_rounds = project.counter_rounds + 1
         project.save()
 
-        Notification.objects.create(
-            user=project.expert,
-            title=_nl(project.expert, 'Tadbirkor qarshi taklif yubordi!', 'Предприниматель предложил встречную цену!', 'Entrepreneur sent a counter-offer!'),
-            message=_nl(project.expert,
-                f'{request.user.get_full_name()} loyiha #{project.pk} uchun ${counter_price} taklif qildi.',
-                f'{request.user.get_full_name()} предложил ${counter_price} за проект #{project.pk}.',
-                f'{request.user.get_full_name()} offered ${counter_price} for project #{project.pk}.')
-        )
+        if project.expert:
+            Notification.objects.create(
+                user=project.expert,
+                title=_nl(project.expert, 'Tadbirkor qarshi taklif yubordi!', 'Предприниматель предложил встречную цену!', 'Entrepreneur sent a counter-offer!'),
+                message=_nl(project.expert,
+                    f'{request.user.get_full_name()} loyiha #{project.pk} uchun ${counter_price} taklif qildi.',
+                    f'{request.user.get_full_name()} предложил ${counter_price} за проект #{project.pk}.',
+                    f'{request.user.get_full_name()} offered ${counter_price} for project #{project.pk}.')
+            )
         send_counter_offer_to_expert(project)
         _tg(project.expert, (
             f"🔄 <b>Yangi qarshi taklif!</b>\n\n"
@@ -750,11 +752,11 @@ def project_decline(request, pk):
         from .emails import SITE_URL
         if project.entrepreneur.email:
             _send(
-                f"Loyiha #{project.pk} rad etildi — StandartBridge",
+                f"Loyiha #{project.pk} rad etildi — StandardBridge",
                 (f"Salom {project.entrepreneur.get_full_name()},\n\n"
                  f"Mutaxassis {request.user.get_full_name()} loyiha #{project.pk}ni rad etdi.\n\n"
                  f"Boshqa mutaxassis tanlash uchun:\n{SITE_URL}/dashboard/\n\n"
-                 "StandartBridge jamoasi"),
+                 "StandardBridge jamoasi"),
                 project.entrepreneur.email
             )
         messages.info(request, 'Loyiha rad etildi.')
@@ -1000,12 +1002,12 @@ def payment_release(request, project_pk):
                     from .emails import _send, SITE_URL
                     if project.expert.email:
                         _send(
-                            f"${payment.expert_amount} hamyoningizga tushdi — StandartBridge",
+                            f"${payment.expert_amount} hamyoningizga tushdi — StandardBridge",
                             (f"Salom {project.expert.get_full_name()},\n\n"
                              f"Loyiha #{project.pk} muvaffaqiyatli yakunlandi!\n\n"
                              f"  To'lov: ${payment.expert_amount} hamyoningizga o'tkazildi.\n\n"
                              f"Hamyon: {SITE_URL}/experts/wallet/\n\n"
-                             "StandartBridge jamoasi"),
+                             "StandardBridge jamoasi"),
                             project.expert.email
                         )
 
@@ -1837,32 +1839,34 @@ def scope_request_respond(request, pk, sr_pk):
                 pass
 
     if action == 'accept':
-        Notification.objects.create(
-            user=project.expert,
-            title=_nl(project.expert,
-                f"Loyiha #{project.pk} — so'rovingiz qabul qilindi",
-                f"Проект #{project.pk} — ваш запрос принят",
-                f"Project #{project.pk} — your request accepted"),
-            message=_nl(project.expert,
-                f"Tadbirkor +${sr.extra_price} so'rovingizni qabul qildi.",
-                f"Предприниматель принял ваш запрос на +${sr.extra_price}.",
-                f"Entrepreneur accepted your +${sr.extra_price} request."),
-            link=f"/experts/projects/{project.pk}/",
-        )
+        if project.expert:
+            Notification.objects.create(
+                user=project.expert,
+                title=_nl(project.expert,
+                    f"Loyiha #{project.pk} — so'rovingiz qabul qilindi",
+                    f"Проект #{project.pk} — ваш запрос принят",
+                    f"Project #{project.pk} — your request accepted"),
+                message=_nl(project.expert,
+                    f"Tadbirkor +${sr.extra_price} so'rovingizni qabul qildi.",
+                    f"Предприниматель принял ваш запрос на +${sr.extra_price}.",
+                    f"Entrepreneur accepted your +${sr.extra_price} request."),
+                link=f"/experts/projects/{project.pk}/",
+            )
         messages.success(request, f"So'rov qabul qilindi. Qo'shimcha ${sr.extra_price} to'lov hisobga olindi.")
     else:
-        Notification.objects.create(
-            user=project.expert,
-            title=_nl(project.expert,
-                f"Loyiha #{project.pk} — so'rovingiz rad etildi",
-                f"Проект #{project.pk} — ваш запрос отклонён",
-                f"Project #{project.pk} — your request rejected"),
-            message=_nl(project.expert,
-                "Tadbirkor qo'shimcha ish so'rovini rad etdi.",
-                "Предприниматель отклонил запрос на дополнительную работу.",
-                "Entrepreneur rejected the scope request."),
-            link=f"/experts/projects/{project.pk}/",
-        )
+        if project.expert:
+            Notification.objects.create(
+                user=project.expert,
+                title=_nl(project.expert,
+                    f"Loyiha #{project.pk} — so'rovingiz rad etildi",
+                    f"Проект #{project.pk} — ваш запрос отклонён",
+                    f"Project #{project.pk} — your request rejected"),
+                message=_nl(project.expert,
+                    "Tadbirkor qo'shimcha ish so'rovini rad etdi.",
+                    "Предприниматель отклонил запрос на дополнительную работу.",
+                    "Entrepreneur rejected the scope request."),
+                link=f"/experts/projects/{project.pk}/",
+            )
         messages.info(request, "So'rov rad etildi.")
 
     send_scope_request_response_to_expert(sr)

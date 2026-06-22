@@ -528,6 +528,10 @@ def add_audit(request):
 # AI yordamchi
 # ---------------------------------------------------------------------------
 
+def _safe(text, max_len=300):
+    return str(text or '')[:max_len].replace('\n', ' ').replace('\r', ' ')
+
+
 def _qms_ai(prompt, max_tokens=900):
     """Call Groq once and return text, or (None, error_message)."""
     try:
@@ -567,8 +571,8 @@ def ai_nc_suggestion(request, pk):
         f"{LANG_INSTRUCTION.get(lang, LANG_INSTRUCTION['uz'])}\n"
         f"Quyidagi nomuvofiqlik uchun tub sababni (root cause, 5-Whys yondashuvi) va "
         f"aniq tuzatuvchi chora-tadbirlarni (corrective action) taklif qil.\n\n"
-        f"Nomuvofiqlik: {nc.title}\n"
-        f"Tavsif: {nc.description}\n"
+        f"Nomuvofiqlik: {_safe(nc.title, 200)}\n"
+        f"Tavsif: {_safe(nc.description, 500)}\n"
         f"Jiddiylik: {nc.get_severity_display()}\n\n"
         "Javobni ikki qism qilib ber: '## Tub sabab' va '## Tuzatuvchi chora'. Qisqa va amaliy."
     )
@@ -589,12 +593,12 @@ def qms_generate_policy(request):
     if getattr(request, 'limited', False):
         messages.error(request, 'Juda ko\'p so\'rov. Biroz kuting.')
         return redirect('qms_documents')
-    standard = request.POST.get('standard', '').strip() or 'ISO 9001'
+    standard = _safe(request.POST.get('standard', '').strip() or 'ISO 9001', 50)
     doc_type = request.POST.get('doc_type', 'policy')
-    topic = request.POST.get('topic', '').strip()
+    topic = _safe(request.POST.get('topic', '').strip(), 200)
     lang = request.POST.get('language', request.session.get('lang', 'uz'))
-    company = request.user.company_name or 'Korxona'
-    industry = request.user.industry or 'Umumiy'
+    company = _safe(request.user.company_name or 'Korxona', 100)
+    industry = _safe(request.user.industry or 'Umumiy', 100)
 
     type_label = dict(QMSDocument.DOC_TYPE_CHOICES).get(doc_type, doc_type)
     title_topic = topic or type_label

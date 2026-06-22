@@ -30,6 +30,10 @@ def _parse_date(raw):
     except (ValueError, AttributeError):
         return None
 
+
+def _safe(text, max_len=300):
+    return str(text or '')[:max_len].replace('\n', ' ').replace('\r', ' ')
+
 logger = logging.getLogger('standardbridge')
 
 
@@ -159,10 +163,6 @@ def generate_document(request):
     # AI generation
     try:
         from groq import Groq
-        # Foydalanuvchi kiritgan matnni prompt injection dan himoya qilish
-        def _safe(text, max_len=200):
-            return str(text or '')[:max_len].replace('\n', ' ').replace('\r', ' ')
-
         client = Groq(api_key=settings.GROQ_API_KEY, timeout=settings.AI_TIMEOUT, max_retries=1)
         prompt = (
             f"Sen ISO standartlari bo'yicha mutaxassisson.\n"
@@ -664,16 +664,16 @@ def create_proposal(request):
         'ru': "Напиши на русском языке.",
         'en': "Write in English.",
     }
-    expert_name = request.user.get_full_name() or request.user.username
-    expert_company = request.user.company_name or 'StandartBridge orqali'
+    expert_name = _safe(request.user.get_full_name() or request.user.username, 100)
+    expert_company = _safe(request.user.company_name or 'StandardBridge orqali', 100)
 
     prompt = (
         f"Sen ISO sertifikatsiya bo'yicha tajribali konsultantsan. {lang_map.get(lang, lang_map['uz'])}\n\n"
         f"Quyidagi mijoz uchun professional taklifnoma (commercial proposal) tayyorla:\n\n"
-        f"Mijoz korxona: {company_name}\n"
-        f"Soha: {industry or 'Ko\'rsatilmagan'}\n"
-        f"Maqsad standart: {standard}\n"
-        f"Loyiha qamrovi: {scope or 'Standart bo\'yicha to\'liq sertifikatsiyaga tayyorlash'}\n"
+        f"Mijoz korxona: {_safe(company_name, 150)}\n"
+        f"Soha: {_safe(industry, 100) or 'Ko\'rsatilmagan'}\n"
+        f"Maqsad standart: {_safe(standard, 50)}\n"
+        f"Loyiha qamrovi: {_safe(scope, 300) or 'Standart bo\'yicha to\'liq sertifikatsiyaga tayyorlash'}\n"
         f"Narx oralig'i: ${price_min} – ${price_max}\n"
         f"Taxminiy muddat: {duration_days} kun\n"
         f"Konsultant: {expert_name} ({expert_company})\n\n"

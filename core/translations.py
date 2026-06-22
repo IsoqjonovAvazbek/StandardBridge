@@ -66,7 +66,7 @@ TRANSLATIONS = {
         'tg_step1': '1. Telegram\'da qidiruv orqali botni toping:',
         'tg_step2': '2. Botga <strong>/start</strong> yuboring',
         'tg_back_dashboard': '← Dashboard ga qaytish',
-        'pwa_install_title': 'StandartBridge ilovasini o\'rnatish',
+        'pwa_install_title': 'StandardBridge ilovasini o\'rnatish',
         'pwa_install_sub': 'Qulay kirish uchun telefonga qo\'shing',
         'pwa_install_btn': 'O\'rnatish',
         'pwa_update_available': 'Yangi versiya mavjud!',
@@ -206,7 +206,7 @@ TRANSLATIONS = {
         'cta_btn': 'Bepul ro\'yxatdan o\'tish →',
 
         # === LANDING — TARJIMA QILINMAGAN QISMLAR ===
-        'landing_page_title': 'StandartBridge — ISO, CE, EN Sertifikatsiya Platformasi',
+        'landing_page_title': 'StandardBridge — ISO, CE, EN Sertifikatsiya Platformasi',
         'landing_meta_desc': "O'zbekistonda ISO 9001, ISO 14001, ISO 22000 va CE sertifikatsiyasiga AI gap tahlil va tasdiqlangan mutaxassislar bilan.",
         'landing_ai_label': 'AI Tahlil',
         'landing_ready_word': 'tayyor',
@@ -235,7 +235,7 @@ TRANSLATIONS = {
         'footer_desc': 'O\'zbek tadbirkorlarini xalqaro standartlarga olib chiquvchi platforma.',
         'footer_platform': 'Platforma',
         'footer_contact': 'Aloqa',
-        'footer_copyright': '© 2026 StandartBridge. Barcha huquqlar himoyalangan.',
+        'footer_copyright': '© 2026 StandardBridge. Barcha huquqlar himoyalangan.',
         'footer_privacy': 'Maxfiylik siyosati',
         'footer_terms': 'Foydalanish shartlari',
 
@@ -1322,7 +1322,7 @@ TRANSLATIONS = {
         'tg_step1': '1. Найдите бота в поиске Telegram:',
         'tg_step2': '2. Отправьте <strong>/start</strong> боту',
         'tg_back_dashboard': '← Назад к дашборду',
-        'pwa_install_title': 'Установить приложение StandartBridge',
+        'pwa_install_title': 'Установить приложение StandardBridge',
         'pwa_install_sub': 'Добавьте на телефон для удобного доступа',
         'pwa_install_btn': 'Установить',
         'pwa_update_available': 'Доступна новая версия!',
@@ -1462,7 +1462,7 @@ TRANSLATIONS = {
         'cta_btn': 'Зарегистрироваться бесплатно →',
 
         # === LANDING — НЕТРОНУТЫЕ СТРОКИ ===
-        'landing_page_title': 'StandartBridge — Платформа ISO, CE, EN Сертификации',
+        'landing_page_title': 'StandardBridge — Платформа ISO, CE, EN Сертификации',
         'landing_meta_desc': "Сертификация ISO 9001, ISO 14001, ISO 22000 и CE в Узбекистане с AI gap-анализом и проверенными экспертами.",
         'landing_ai_label': 'AI Анализ',
         'landing_ready_word': 'готово',
@@ -1491,7 +1491,7 @@ TRANSLATIONS = {
         'footer_desc': 'Платформа, выводящая узбекских предпринимателей на международные стандарты.',
         'footer_platform': 'Платформа',
         'footer_contact': 'Контакты',
-        'footer_copyright': '© 2026 StandartBridge. Все права защищены.',
+        'footer_copyright': '© 2026 StandardBridge. Все права защищены.',
         'footer_privacy': 'Политика конфиденциальности',
         'footer_terms': 'Условия использования',
 
@@ -2542,7 +2542,7 @@ TRANSLATIONS = {
         'tg_step1': '1. Find the bot in Telegram search:',
         'tg_step2': '2. Send <strong>/start</strong> to the bot',
         'tg_back_dashboard': '← Back to dashboard',
-        'pwa_install_title': 'Install StandartBridge app',
+        'pwa_install_title': 'Install StandardBridge app',
         'pwa_install_sub': 'Add to your phone for easy access',
         'pwa_install_btn': 'Install',
         'pwa_update_available': 'New version available!',
@@ -2682,7 +2682,7 @@ TRANSLATIONS = {
         'cta_btn': 'Sign up for free →',
 
         # === LANDING — UNTRANSLATED STRINGS ===
-        'landing_page_title': 'StandartBridge — ISO, CE, EN Certification Platform',
+        'landing_page_title': 'StandardBridge — ISO, CE, EN Certification Platform',
         'landing_meta_desc': "ISO 9001, ISO 14001, ISO 22000 and CE certification in Uzbekistan with AI gap analysis and verified experts.",
         'landing_ai_label': 'AI Analysis',
         'landing_ready_word': 'ready',
@@ -2711,7 +2711,7 @@ TRANSLATIONS = {
         'footer_desc': 'The platform bringing Uzbek entrepreneurs to international standards.',
         'footer_platform': 'Platform',
         'footer_contact': 'Contact',
-        'footer_copyright': '© 2026 StandartBridge. All rights reserved.',
+        'footer_copyright': '© 2026 StandardBridge. All rights reserved.',
         'footer_privacy': 'Privacy Policy',
         'footer_terms': 'Terms of Use',
 

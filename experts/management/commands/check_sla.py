@@ -64,7 +64,7 @@ class Command(BaseCommand):
                 )
                 self._send_email(
                     to=project.entrepreneur.email,
-                    subject=f'[StandartBridge] SLA ogohlantirish — Loyiha #{project.pk}',
+                    subject=f'[StandardBridge] SLA ogohlantirish — Loyiha #{project.pk}',
                     body=(
                         f'Assalomu alaykum, {project.entrepreneur.get_full_name()}!\n\n'
                         f'Loyiha #{project.pk} '
@@ -74,7 +74,7 @@ class Command(BaseCommand):
                         f'Muddat: {project.sla_deadline.strftime("%d.%m.%Y %H:%M")}\n\n'
                         f'Agar mutaxassis belgilangan muddatda javob bermasa, '
                         f'to\'lov avtomatik qaytariladi.\n\n'
-                        f'Hurmat bilan,\nStandartBridge jamoasi'
+                        f'Hurmat bilan,\nStandardBridge jamoasi'
                     ),
                 )
 
@@ -116,7 +116,7 @@ class Command(BaseCommand):
                 )
                 self._send_email(
                     to=project.entrepreneur.email,
-                    subject=f'[StandartBridge] Loyiha #{project.pk} bekor qilindi',
+                    subject=f'[StandardBridge] Loyiha #{project.pk} bekor qilindi',
                     body=(
                         f'Assalomu alaykum, {project.entrepreneur.get_full_name()}!\n\n'
                         f'Afsuski, loyiha #{project.pk} '
@@ -127,7 +127,7 @@ class Command(BaseCommand):
                         f'Agar to\'lov amalga oshirilgan bo\'lsa, u qaytariladi.\n\n'
                         f'Boshqa mutaxassis tanlash uchun:\n'
                         f'{SITE_URL}/experts/\n\n'
-                        f'Hurmat bilan,\nStandartBridge jamoasi'
+                        f'Hurmat bilan,\nStandardBridge jamoasi'
                     ),
                 )
 
