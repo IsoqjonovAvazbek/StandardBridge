@@ -117,7 +117,7 @@ _RULES = """\
   platforma bo'yicha yordam bera olaman" de.
 - Savol tilida javob ber (o'zbek/rus/ingliz).
 - Qisqa va amaliy javob ber (3-5 gap yetarli).
-- Noaniq bo'lsa: "Qo'shimcha ma'lumot uchun support@standartbridge.uz ga murojaat qiling" de.
+- Noaniq bo'lsa: "Qo'shimcha ma'lumot uchun support@standardbridge.uz ga murojaat qiling" de.
 - HECH QACHON platformada mavjud bo'lmagan funksiya haqida to'qib javob berma."""
 
 

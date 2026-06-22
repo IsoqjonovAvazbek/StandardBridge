@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.views import PasswordResetView as _DjangoPasswordResetView
 from datetime import timedelta
+from urllib.parse import urlparse
 import logging
 import threading
 
@@ -50,7 +51,6 @@ class PasswordResetView(_DjangoPasswordResetView):
 @require_POST
 def set_language_view(request):
     import re
-    from urllib.parse import urlparse
     from django.utils.http import url_has_allowed_host_and_scheme
 
     lang = request.POST.get('lang', 'uz')
@@ -929,7 +929,8 @@ def resend_verification(request):
     }
     _send(_SUBJ.get(lang, _SUBJ['uz']), _BODY.get(lang, _BODY['uz']), request.user.email)
     messages.success(request, 'Tasdiqlash xati yuborildi!' if lang == 'uz' else ('Письмо отправлено!' if lang == 'ru' else 'Verification email sent!'))
-    return redirect(request.META.get('HTTP_REFERER', '/dashboard/'))
+    _ref = request.META.get('HTTP_REFERER', '')
+    return redirect(urlparse(_ref).path or '/dashboard/')
 
 
 @login_required
@@ -940,7 +941,8 @@ def telegram_connect_view(request):
     bot_username = settings.TELEGRAM_BOT_USERNAME.lstrip('@')
     if not bot_username:
         messages.error(request, 'Telegram bot hali sozlanmagan.')
-        return redirect(request.META.get('HTTP_REFERER', '/dashboard/'))
+        _ref = request.META.get('HTTP_REFERER', '')
+        return redirect(urlparse(_ref).path or '/dashboard/')
     token = secrets.token_urlsafe(32)
     request.user.telegram_link_token = token
     request.user.save(update_fields=['telegram_link_token'])
@@ -961,7 +963,8 @@ def telegram_disconnect_view(request):
     request.user.telegram_link_token = ''
     request.user.save(update_fields=['telegram_chat_id', 'telegram_link_token'])
     messages.success(request, 'Telegram uzildi.')
-    return redirect(request.META.get('HTTP_REFERER', '/dashboard/'))
+    _ref = request.META.get('HTTP_REFERER', '')
+    return redirect(urlparse(_ref).path or '/dashboard/')
 
 
 from django.views.decorators.csrf import csrf_exempt as _csrf_exempt
@@ -1013,7 +1016,7 @@ def telegram_webhook_view(request):
                 f"🎉 <b>Salom, {_html.escape(first_name)}!</b>\n\n"
                 f"StandartBridge bildirishnomalari endi Telegram orqali yuboriladi.\n\n"
                 f"Yangi loyiha, to'lov, tahlil tayyorligi kabi barcha muhim xabarlarni shu yerda olasiz.\n\n"
-                f"🔗 <a href='https://standardbridge.up.railway.app'>Platformaga o'tish</a>"
+                f"🔗 <a href='{settings.SITE_URL}'>Platformaga o'tish</a>"
             ))
             logger.info('Telegram ulandi: user_id=%s, chat_id=%s', user.pk, chat_id)
         except CustomUser.DoesNotExist:
@@ -1026,7 +1029,7 @@ def telegram_webhook_view(request):
             f"Salom, {_html.escape(first_name)}! 👋\n\n"
             "Bu StandartBridge rasmiy boti.\n"
             "Ulanish uchun platforma profil sahifasidagi havoladan foydalaning:\n"
-            "🔗 https://standardbridge.up.railway.app"
+            f"🔗 {settings.SITE_URL}"
         ))
 
     return JsonResponse({'ok': True})

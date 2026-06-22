@@ -40,7 +40,8 @@ def _tg(user, text: str) -> None:
     if chat_id:
         send_telegram(chat_id, text)
 
-SITE_URL = 'https://standardbridge.up.railway.app'
+from django.conf import settings as _django_settings
+SITE_URL = getattr(_django_settings, 'SITE_URL', 'https://standardbridge.uz')
 
 # Email content by language
 _CONTENT = {

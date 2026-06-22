@@ -31,7 +31,7 @@ from accounts.models import CustomUser
 
 logger = logging.getLogger('standardbridge')
 
-SITE_URL = 'http://standardbridge.up.railway.app'
+SITE_URL = settings.SITE_URL
 
 
 def _get_entrepreneur_digest(user):

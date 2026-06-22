@@ -181,7 +181,7 @@ _email_user = os.environ.get('EMAIL_HOST_USER', '').strip()
 _email_pass = os.environ.get('EMAIL_HOST_PASSWORD', '').strip()
 _email_configured = (
     bool(_email_user) and bool(_email_pass)
-    and _email_user not in ('your_email@gmail.com', 'noreply@standartbridge.uz')
+    and _email_user not in ('your_email@gmail.com', 'noreply@standardbridge.uz')
     and _email_pass != 'your_app_password_here'
 )
 EMAIL_HOST = 'smtp.gmail.com'
@@ -189,12 +189,15 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = _email_user
 EMAIL_HOST_PASSWORD = _email_pass
-DEFAULT_FROM_EMAIL = f'StandartBridge <{_email_user or "noreply@standartbridge.uz"}>'
+DEFAULT_FROM_EMAIL = f'StandartBridge <{_email_user or "noreply@standardbridge.uz"}>'
 EMAIL_BACKEND = (
     'django.core.mail.backends.smtp.EmailBackend'
     if _email_configured else
     'django.core.mail.backends.console.EmailBackend'
 )
+
+# Sayt URL — email/Telegram linklari uchun (Railway da SITE_URL env ni o'rnating)
+SITE_URL = os.environ.get('SITE_URL', 'https://standardbridge.uz')
 
 # AI (Groq)
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')

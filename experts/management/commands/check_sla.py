@@ -17,6 +17,8 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 from experts.models import Project, Payment, Notification
+
+SITE_URL = settings.SITE_URL if hasattr(settings, 'SITE_URL') else 'https://standardbridge.uz'
 from core.translations import notif_text as _nl
 
 
@@ -124,7 +126,7 @@ class Command(BaseCommand):
                         f'Loyiha avtomatik ravishda bekor qilindi.\n'
                         f'Agar to\'lov amalga oshirilgan bo\'lsa, u qaytariladi.\n\n'
                         f'Boshqa mutaxassis tanlash uchun:\n'
-                        f'https://standartbridge.uz/experts/\n\n'
+                        f'{SITE_URL}/experts/\n\n'
                         f'Hurmat bilan,\nStandartBridge jamoasi'
                     ),
                 )
