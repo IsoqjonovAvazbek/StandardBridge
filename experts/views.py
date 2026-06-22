@@ -1084,7 +1084,7 @@ def wallet(request):
                 amount = Decimal(str(amount_str)).quantize(Decimal('0.01'))
             except (InvalidOperation, ValueError):
                 amount = Decimal('0')
-            card_num = request.POST.get('withdraw_card', '').strip()
+            card_num = request.POST.get('withdraw_card', '').replace(' ', '').strip()
             card_holder = request.POST.get('withdraw_holder', '').strip()
             note = request.POST.get('withdraw_note', '').strip()
             if amount <= 0:
@@ -1093,6 +1093,8 @@ def wallet(request):
                 messages.error(request, f'Balans yetarli emas! Mavjud: ${user_wallet.balance}')
             elif not card_num:
                 messages.error(request, 'Karta raqamini kiriting!')
+            elif not card_num.isdigit() or not (16 <= len(card_num) <= 19):
+                messages.error(request, 'Karta raqami 16-19 ta raqamdan iborat bo\'lishi kerak!')
             else:
                 from .crypto import encrypt_card
                 with transaction.atomic():

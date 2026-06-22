@@ -97,7 +97,7 @@ Django 6.0.5 B2B startup — O'zbekistondagi korxonalarni ISO/CE/EN sertifikatla
 - `python manage.py test accounts` — bitta app
 
 ## Xavfsizlik — bajarilgan (2026-06 sessiya)
-Commit tarixida: 603732d → e98ace7 → a4e7948 → 896a6b2 → dfe877f → cc1bb6e → 511d09b
+Commit tarixida: 603732d → e98ace7 → a4e7948 → 896a6b2 → dfe877f → cc1bb6e → 511d09b → bb4148a
 
 ### Auth va kirish
 - `logout`: `@require_POST` (GET logout hujumidan himoya)
@@ -126,6 +126,10 @@ Commit tarixida: 603732d → e98ace7 → a4e7948 → 896a6b2 → dfe877f → cc1
 - `resend_verification`, `telegram_connect/disconnect`: HTTP_REFERER open redirect → urlparse().path (511d09b)
 - `SITE_URL`: settings.SITE_URL env var orqali (Railway da `SITE_URL=https://standardbridge.uz` qo'yish kerak)
 - `DEFAULT_FROM_EMAIL`: noreply@standardbridge.uz (to'g'rilandi)
+- `scope_request_respond`, `project_accept`, `project_counter_offer`: Notification user=project.expert null guard (bb4148a)
+- `api_chatbot`: rate limit 20/m qo'shildi (bb4148a)
+- Brand typo "StandartBridge" → "StandardBridge" (63 fayl, bb4148a)
+- QMS + expert_tools AI prompt injection: _safe() sanitizatsiya qo'shildi (bb4148a)
 - `scope_request_send`: faqat loyiha egasi
 
 ### Kod sifati

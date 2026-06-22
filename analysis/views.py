@@ -983,7 +983,7 @@ def accept_disclaimer(request):
         return _JR({'status': 'ok'})
 
     next_url = request.POST.get('next', '')
-    if next_url and next_url.startswith('/'):
+    if next_url and next_url.startswith('/') and not next_url.startswith('//'):
         return redirect(next_url)
     return redirect('entrepreneur_dashboard')
 
