@@ -298,7 +298,7 @@ def register_view(request):
         else:
             EntrepreneurProfile.objects.create(user=user)
 
-        login(request, user)
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
         send_welcome_email(user)
         messages.success(request, 'Xush kelibsiz!')
         return redirect('dashboard')
