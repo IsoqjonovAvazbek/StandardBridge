@@ -210,7 +210,9 @@ def edit_document(request, pk):
             messages.error(request, 'Hujjat matni bo\'sh bo\'lishi mumkin emas!')
             return render(request, 'expert_tools/edit_document.html', {'doc': doc})
         doc.content = content
-        doc.status = request.POST.get('status', doc.status)
+        new_doc_status = request.POST.get('status', doc.status)
+        if new_doc_status in {c[0] for c in GeneratedDocument.STATUS_CHOICES}:
+            doc.status = new_doc_status
         doc.save()
         messages.success(request, 'Hujjat saqlandi.')
         return redirect('expert_doc_detail', pk=pk)
@@ -578,7 +580,9 @@ def crm_detail(request, pk):
 def crm_update(request, pk):
     client = get_object_or_404(ClientCRM, pk=pk, expert=request.user)
     if request.method == 'POST':
-        client.status = request.POST.get('status', client.status)
+        new_status = request.POST.get('status', client.status)
+        if new_status in {c[0] for c in ClientCRM.STATUS_CHOICES}:
+            client.status = new_status
         client.next_followup = request.POST.get('next_followup') or None
         client.notes = request.POST.get('notes', client.notes or '').strip()
         client.save()
