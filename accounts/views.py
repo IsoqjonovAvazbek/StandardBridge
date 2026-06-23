@@ -232,7 +232,7 @@ def register_view(request):
             return render(request, 'accounts/register.html')
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
-        email = request.POST.get('email', '').strip()
+        email = request.POST.get('email', '').strip().lower()
         password = request.POST.get('password', '')
         password2 = request.POST.get('password2', '')
         role = request.POST.get('role', '')

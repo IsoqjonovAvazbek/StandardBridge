@@ -195,7 +195,8 @@ def send_to_expert(request, expert_pk, analysis_pk):
     from analysis.models import GapAnalysis
     from accounts.models import CustomUser
 
-    expert_user = get_object_or_404(CustomUser, pk=expert_pk, role='expert')
+    expert_user = get_object_or_404(CustomUser, pk=expert_pk, role='expert',
+                                    expert_profile__is_verified=True)
     analysis = get_object_or_404(GapAnalysis, pk=analysis_pk, entrepreneur=request.user)
 
     if request.method == 'POST':
@@ -506,7 +507,8 @@ def project_counter_offer(request, pk):
                 message=_nl(project.expert,
                     f'{request.user.get_full_name()} loyiha #{project.pk} uchun ${counter_price} taklif qildi.',
                     f'{request.user.get_full_name()} предложил ${counter_price} за проект #{project.pk}.',
-                    f'{request.user.get_full_name()} offered ${counter_price} for project #{project.pk}.')
+                    f'{request.user.get_full_name()} offered ${counter_price} for project #{project.pk}.'),
+                link=reverse('project_detail', args=[project.pk]),
             )
         send_counter_offer_to_expert(project)
         _tg(project.expert, (
@@ -647,7 +649,8 @@ def project_update(request, pk):
             Notification.objects.create(
                 user=project.entrepreneur,
                 title=_nl(project.entrepreneur, 'Yangi progress!', 'Новый прогресс!', 'New progress!'),
-                message=f'{request.user.get_full_name()}: {message_text[:100]}'
+                message=f'{request.user.get_full_name()}: {message_text[:100]}',
+                link=reverse('project_detail', args=[project.pk]),
             )
 
         elif action == 'upload' and request.FILES.get('file'):
@@ -896,6 +899,10 @@ def payment_confirm(request, project_pk):
 
     with transaction.atomic():
         project = Project.objects.select_for_update().get(pk=project_pk)
+        # Expert hali ham tayinlanganligini atomic ichida qayta tekshirish
+        if not project.expert:
+            messages.error(request, 'Mutaxassis hisobi topilmadi. Admin bilan bog\'laning.')
+            return redirect('project_detail', pk=project_pk)
         # Guard: prevent double payment
         existing_payment = Payment.objects.filter(project=project).first()
         if existing_payment:
@@ -1045,7 +1052,7 @@ def wallet(request):
             errors = []
             if raw_card:
                 if len(raw_card) < 16 or len(raw_card) > 19:
-                    errors.append('Karta raqami 16 ta raqamdan iborat bo\'lishi kerak!')
+                    errors.append('Karta raqami 16-19 ta raqamdan iborat bo\'lishi kerak!')
                 elif not raw_card.isdigit():
                     errors.append('Karta raqami faqat raqamlardan iborat bo\'lishi kerak!')
                 elif not card_holder:
@@ -1061,6 +1068,8 @@ def wallet(request):
                         exp_month, exp_year = int(card_expiry[:2]), int(card_expiry[3:]) + 2000
                         if not (1 <= exp_month <= 12):
                             errors.append('Oy 01-12 oralig\'ida bo\'lishi kerak!')
+                        elif exp_year > timezone.now().year + 25:
+                            errors.append('Karta muddati juda uzoq — qayta tekshiring!')
                         elif _date(exp_year, exp_month, 1) < timezone.now().date().replace(day=1):
                             errors.append('Kartaning amal qilish muddati o\'tib ketgan!')
                     except ValueError:
@@ -1360,7 +1369,8 @@ def leave_review(request, pk):
             message=_nl(project.expert,
                 f'{request.user.get_full_name()} sizga {rating}/5 baho berdi.',
                 f'{request.user.get_full_name()} поставил вам оценку {rating}/5.',
-                f'{request.user.get_full_name()} gave you a {rating}/5 rating.')
+                f'{request.user.get_full_name()} gave you a {rating}/5 rating.'),
+            link=reverse('project_detail', args=[project.pk]),
         )
 
         messages.success(request, 'Rahmat! Bahoyingiz qabul qilindi.')
@@ -1393,7 +1403,7 @@ def _click_ip_ok(request):
     else:
         client_ip = request.META.get('REMOTE_ADDR', '')
     if not _CLICK_ALLOWED_IPS:
-        return True
+        return False
     return client_ip in _CLICK_ALLOWED_IPS
 
 
@@ -1782,16 +1792,18 @@ def scope_request_send(request, pk):
         messages.error(request, 'Sabab kiritish majburiy.')
         return redirect('project_detail', pk=pk)
 
-    if project.scope_requests.filter(status='pending').exists():
-        messages.error(request, "Allaqachon javob kutilayotgan so'rov bor.")
-        return redirect('project_detail', pk=pk)
-
-    sr = ScopeRequest.objects.create(
-        project=project,
-        expert=request.user,
-        reason=reason,
-        extra_price=extra_price,
-    )
+    from django.db import transaction as _stx
+    with _stx.atomic():
+        locked_project = Project.objects.select_for_update().get(pk=pk)
+        if locked_project.scope_requests.filter(status='pending').exists():
+            messages.error(request, "Allaqachon javob kutilayotgan so'rov bor.")
+            return redirect('project_detail', pk=pk)
+        sr = ScopeRequest.objects.create(
+            project=project,
+            expert=request.user,
+            reason=reason,
+            extra_price=extra_price,
+        )
     Notification.objects.create(
         user=project.entrepreneur,
         title=_nl(project.entrepreneur,
@@ -1826,6 +1838,11 @@ def scope_request_respond(request, pk, sr_pk):
 
     from django.db import transaction as _tx
     with _tx.atomic():
+        # select_for_update — ikki bir vaqtda accept xabaridan himoya
+        sr = ScopeRequest.objects.select_for_update().get(pk=sr_pk, project=project)
+        if sr.status != 'pending':
+            messages.warning(request, "Bu so'rov allaqachon ko'rib chiqilgan.")
+            return redirect('project_detail', pk=pk)
         sr.status = 'accepted' if action == 'accept' else 'rejected'
         sr.responded_at = timezone.now()
         sr.save(update_fields=['status', 'responded_at'])

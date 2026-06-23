@@ -36,7 +36,7 @@ def post_list(request):
     featured = None
     page_number = request.GET.get('page', '1')
     if not category_slug and not search_q and page_number == '1':
-        featured = qs.filter(is_featured=True).first() or qs.first()
+        featured = qs.filter(is_featured=True).order_by('-created_at').first() or qs.first()
 
     paginator = Paginator(qs, 9)
     page_obj = paginator.get_page(page_number)
