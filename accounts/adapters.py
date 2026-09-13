@@ -11,7 +11,6 @@ class AccountAdapter(DefaultAccountAdapter):
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
         """Google orqali kirgan foydalanuvchini tizimga ulash yoki yangi yaratish."""
-        # Agar email bo'yicha mavjud foydalanuvchi topilsa — uning hisobiyla kir
         if sociallogin.is_existing:
             return
         email = sociallogin.account.extra_data.get('email', '')
@@ -24,9 +23,35 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         except CustomUser.DoesNotExist:
             pass
 
+    def _generate_unique_username(self, email):
+        """Email asosida takrorlanmas username yaratadi."""
+        from accounts.models import CustomUser
+        import uuid
+
+        base = (email.split('@')[0] if email else 'user')
+        base = ''.join(ch for ch in base if ch.isalnum() or ch in ('_', '.', '-')) or 'user'
+
+        username = base
+        counter = 1
+        while CustomUser.objects.filter(username=username).exists():
+            username = f"{base}{counter}"
+            counter += 1
+            if counter > 1000:
+                username = f"{base}{uuid.uuid4().hex[:8]}"
+                break
+        return username
+
     def save_user(self, request, sociallogin, form=None):
-        """Yangi Google foydalanuvchisi: role=entrepreneur, email tasdiqlangan."""
+        """Yangi Google foydalanuvchisi: unique username, role=entrepreneur, email tasdiqlangan."""
+        user = sociallogin.user
+
+        # Username bo'sh bo'lsa, avtomatik unique username generatsiya qilamiz
+        if not user.username:
+            email = sociallogin.account.extra_data.get('email', '') or user.email
+            user.username = self._generate_unique_username(email)
+
         user = super().save_user(request, sociallogin, form)
+
         update_fields = []
         if not user.role:
             user.role = 'entrepreneur'
